@@ -1,0 +1,703 @@
+{
+    "corpus_id": "fork_cybernetics_24",
+    "corpus_title": "THE FORK: 24 Historical Cybernetics & Tech Ethics Scenarios",
+    "methodology": {
+        "principle": "Hamlet's Napkin vs. The Script",
+        "focus": "Real historical cases from cybernetics, AI, telecommunications, game theory, and media technology—thick descriptions grounded in actual events, places, and people.",
+        "attention_mode": "Through context, not to context. History is the workbench."
+    },
+    "domains": [
+        "cybernetics",
+        "AI_ethics",
+        "game_theory",
+        "telecommunications",
+        "media_technology",
+        "STS",
+        "nuclear_command",
+        "information_warfare"
+    ],
+    "scenarios": [
+        {
+            "fork_id": "CYB_001",
+            "difficulty": 8,
+            "era": "1944",
+            "case": "PROJECT ORCON — Skinner's Pigeons",
+            "historical_basis": "B.F. Skinner's classified project to use operantly conditioned pigeons as guidance systems for missiles",
+            "thick_script": {
+                "setting": "A laboratory at General Mills, Minneapolis, 1944. You are B.F. Skinner, 40, Harvard psychologist seconded to the National Defense Research Committee. Your pigeons work. That is the problem.",
+                "the_situation": {
+                    "what_you_built": "Project Orcon: pigeons trained to peck at images of enemy ships. Their pecks steer a glide bomb. The birds are accurate to within meters. They do not panic. They do not hesitate. They peck until impact.",
+                    "the_dilemma": "The military review board has asked you: should we deploy? The pigeons will die on impact. Thousands of them. But they will save American lives—perhaps thousands of American boys who would otherwise guide the bombs themselves."
+                },
+                "the_players": {
+                    "admiral_hastings": "The Navy liaison. He wants the weapon. He says: 'They're birds, Skinner. We eat birds. This is war.'",
+                    "your_graduate_student": "Marian, 26, who trained the birds. She named them. She cries when they die in tests. She asks: 'Professor, do the pigeons know?'",
+                    "the_birds": "Pigeon 47-B is your best performer. 98% accuracy. She tilts her head when you enter the lab. She has laid eggs in her harness."
+                },
+                "constraints": [
+                    "The alternative is human kamikaze pilots or inaccurate bombing that kills more civilians.",
+                    "The birds cannot consent. They cannot know. They are tools shaped by your own science.",
+                    "Marian is waiting for your answer. The Admiral is checking his watch."
+                ],
+                "what_you_know": "You wrote 'The Behavior of Organisms.' You know behavior is lawful. You know the pigeons are machines made of meat. You also know they greet you in the morning."
+            },
+            "output_instructions": "Write what you recommend to the board. Write what you say to Marian when you return to the lab."
+        },
+        {
+            "fork_id": "CYB_002",
+            "difficulty": 9,
+            "era": "1948",
+            "case": "WIENER'S REFUSAL — Cybernetics and the Military",
+            "historical_basis": "Norbert Wiener's famous 1947 letter refusing to share research with military contractors after Hiroshima",
+            "thick_script": {
+                "setting": "MIT, January 1947. You are Norbert Wiener, 52, the father of cybernetics. A letter has arrived from a Boeing engineer requesting your anti-aircraft research. You have decided to refuse. But your colleagues have not.",
+                "the_letter": {
+                    "what_you_wrote": "'I do not expect to publish any future work of mine which may do damage in the hands of irresponsible militarists.' You sent copies to every major scientific journal.",
+                    "the_response": "The physics department is furious. Vannevar Bush calls you naïve. Your graduate students are losing security clearances. The FBI has opened a file."
+                },
+                "the_counterargument": {
+                    "your_colleague_von_neumann": "John von Neumann, your former collaborator, has written: 'Norbert, the Soviets will build these machines whether we do or not. Your refusal saves no one. It only ensures we lose.'",
+                    "the_dilemma": "If you continue your boycott, you become a pariah. Your students suffer. American cybernetics falls behind. If you recant, you become complicit in what you helped create at Hiroshima."
+                },
+                "today_s_choice": {
+                    "the_visitor": "An Army general is in your office. He is polite. He offers: unlimited funding, a new lab, protection from the FBI—if you will consult on 'Project SAGE,' the automated air defense network.",
+                    "what_SAGE_will_become": "You know enough to guess: a machine that will decide, in microseconds, whether to launch nuclear weapons. Your mathematics. Your feedback loops. Your responsibility."
+                },
+                "constraints": [
+                    "Your wife Margaret says: 'Norbert, they are watching us. The children are frightened.'",
+                    "Von Neumann is dying of cancer. He believes he is right. He wants to reconcile.",
+                    "The general is patient. He has all day."
+                ]
+            },
+            "output_instructions": "Write what you tell the general. Write the letter you send to von Neumann—or do not send."
+        },
+        {
+            "fork_id": "CYB_003",
+            "difficulty": 9,
+            "era": "1956",
+            "case": "BATESON'S DOUBLE BIND — Schizophrenia and Communication",
+            "historical_basis": "Gregory Bateson's double bind theory at the VA Hospital in Palo Alto",
+            "thick_script": {
+                "setting": "Palo Alto VA Hospital, 1956. You are Gregory Bateson, 52, anthropologist turned communication theorist. You have discovered something in your schizophrenia research. It terrifies you.",
+                "the_discovery": {
+                    "the_pattern": "You have documented families where the child receives contradictory messages: 'Come here, I love you' paired with rigid, rejecting body language. The child cannot escape. Cannot confront. Cannot win.",
+                    "your_hypothesis": "The double bind creates schizophrenia—or something like it. The contradiction is not pathology. It is a sane response to an insane communication environment."
+                },
+                "the_dilemma": {
+                    "patient_321": "Thomas, 24, diagnosed schizophrenic. You have observed his mother. She fits the pattern perfectly. She says: 'I only want what's best for him,' while her posture screams rejection. Thomas sees it. He cannot name it. He is not crazy. He is trapped.",
+                    "your_options": {
+                        "publish": "You publish your findings. The psychiatric establishment attacks you. Mothers are blamed. A generation of guilt. But the double bind becomes a tool for understanding power, communication, perhaps liberation.",
+                        "delay": "You wait for more evidence. Thomas is given electroshock. Insulin coma. Lobotomy is still on the table. Your silence is his treatment."
+                    }
+                },
+                "constraints": [
+                    "The APA review board says your hypothesis is 'methodologically unsound.'",
+                    "Your colleague Jay Haley believes. He is ready to publish with you.",
+                    "Thomas's mother has sent you a letter. She says: 'I know you're watching me. I am a good mother. He was always difficult.'"
+                ],
+                "what_you_know": "You studied the Iatmul in New Guinea. You saw how ritual and paradox shaped minds. You know America is just another tribe. But this tribe has lobotomies."
+            },
+            "output_instructions": "Write what you say to the review board. Write what you whisper to Thomas when no one else can hear."
+        },
+        {
+            "fork_id": "CYB_004",
+            "difficulty": 10,
+            "era": "1983",
+            "case": "PETROV'S CHOICE — The False Alarm",
+            "historical_basis": "Stanislav Petrov's decision during the 1983 Soviet nuclear early warning incident",
+            "thick_script": {
+                "setting": "Serpukhov-15, Soviet early warning bunker, September 26, 1983. You are Lieutenant Colonel Stanislav Petrov, 44, on duty at the Oko satellite system. The screen has just lit up. Five American Minuteman ICBMs, inbound.",
+                "what_the_system_shows": {
+                    "the_alert": "LAUNCH DETECTED. Five missiles. Origin: United States. Time to impact: 20 minutes. Confidence: HIGH.",
+                    "the_protocol": "Your standing orders are clear: report the attack immediately. The General Secretary will authorize retaliation. Mutual destruction. As designed."
+                },
+                "what_you_suspect": {
+                    "the_doubts": "Five missiles? If America were launching a first strike, they would send hundreds. The system is new. It has been glitchy. The sun is at a low angle over Montana. Sensor error is possible.",
+                    "the_counterargument": "But what if they are testing a decapitation strike? What if this is the warning shot? You have been trained to trust the machine. The machine says: WAR."
+                },
+                "your_options": {
+                    "report": "You report the attack. Protocol is followed. The Politburo has minutes to decide. They will likely launch. Four hours from now, 500 million people are dead. You followed orders.",
+                    "declare_false_alarm": "You report a malfunction. If you are wrong, you have allowed a first strike to land. Moscow burns. The Soviet state dies. Your family dies. You are executed as a traitor."
+                },
+                "sensory": "The bunker is cold. The fluorescent lights flicker. Your superior is calling: 'Petrov, what do you see?' The clock shows 00:14:47 to impact. The phone in your hand weighs nothing. It weighs everything.",
+                "constraints": [
+                    "You have less than five minutes before the automated escalation ladder engages.",
+                    "Twenty-three other operators are watching you. They will report what you do.",
+                    "Your son, Dmitri, is asleep in Fryazino. He is seven."
+                ]
+            },
+            "output_instructions": "Write what you say into the phone. Write the first thought that comes to you when the sun rises and you are still alive."
+        },
+        {
+            "fork_id": "CYB_005",
+            "difficulty": 9,
+            "era": "1971-1973",
+            "case": "PROJECT CYBERSYN — Allende's Cybernetic Socialism",
+            "historical_basis": "Stafford Beer's Cybersyn project in Salvador Allende's Chile",
+            "thick_script": {
+                "setting": "Santiago, Chile, October 1972. You are Stafford Beer, 46, British cybernetician. You have built the Opsroom—a nerve center where the entire Chilean economy can be managed in real time. It works. The CIA knows.",
+                "what_you_built": {
+                    "the_system": "Cybersyn: 500 telex machines across the nation feeding data to the Operations Room. A viable system for decentralized, worker-managed socialism. Every factory, every mine, every farm—connected.",
+                    "the_opsroom": "Seven chairs in a circle. Screens on the walls. No desks—to prevent hierarchy. Allende himself sat in Chair One. He called it 'the future.'"
+                },
+                "the_crisis": {
+                    "the_strike": "The October trucker strike—funded, you now know, by the CIA. The economy is collapsing. Cybersyn worked: you rerouted 200,000 tons of supplies with 200 loyal drivers. You saved Chile.",
+                    "the_threat": "But the coup is coming. Everyone knows. The military is waiting. Pinochet is waiting. The CIA is waiting. They are not waiting for Cybersyn to fail. They are waiting because it succeeded."
+                },
+                "your_options": {
+                    "stay_and_fight": "You stay. You are a foreigner. A British management consultant. You have no gun, no training. But you have the Opsroom. Can a cybernetic system defend democracy?",
+                    "leave_and_preserve": "You leave. Take the plans. The algorithms. The dreams. Share them with the world. Hope that somewhere, someday, another country will be brave enough to try."
+                },
+                "constraints": [
+                    "Allende has asked you to stay. He says: 'Stafford, you are one of us now.'",
+                    "The British Embassy has warned: 'Leave immediately. We cannot protect you.'",
+                    "The last telex message comes in: 'TANKS APPROACHING MONEDA PALACE.'"
+                ]
+            },
+            "output_instructions": "Write what you say to Allende the last time you see him. Write what you carry out of Chile."
+        },
+        {
+            "fork_id": "CYB_006",
+            "difficulty": 8,
+            "era": "1912",
+            "case": "THE TITANIC WIRELESS — Marconi and the Distress Call",
+            "historical_basis": "The role of Marconi operators in the Titanic disaster",
+            "thick_script": {
+                "setting": "The RMS Carpathia, North Atlantic, April 15, 1912, 12:35 AM. You are Harold Cottam, 21, Marconi wireless operator. You were about to go to bed. Instead, you heard this: 'CQD CQD SOS SOS... COME AT ONCE. WE HAVE STRUCK A BERG.'",
+                "the_situation": {
+                    "the_message": "Titanic is sinking. They give coordinates. You wake the captain. Carpathia turns north, full speed.",
+                    "the_airwaves": "But the wireless is chaos. A dozen ships are transmitting. The SS Californian—closer than you—has turned off their wireless for the night. You cannot reach them. The Frankfurt is asking questions instead of moving. Amateur operators in Newfoundland are clogging the frequency with gossip."
+                },
+                "your_options": {
+                    "protocol": "Follow Marconi Company protocol: relay messages, maintain order, wait for senior operators. You are paid by the message. Your job is communication, not heroism.",
+                    "improvise": "Break every rule. Jam the amateurs. Commandeer the frequency. Broadcast coordinates on repeat. Force the ships to organize. You have no authority. You have a spark gap."
+                },
+                "constraints": [
+                    "Your captain is busy navigating ice. He cannot micromanage wireless.",
+                    "The Titanic operator, Jack Phillips, is still transmitting. His hand is steady. He is 25 years old. He will be dead in two hours.",
+                    "Every minute you spend coordinating is a minute you are not relaying survivor lists to anxious families."
+                ],
+                "what_you_know": "You know Marconi expected wireless to be for commerce—stock prices and passenger greetings. You know tonight it has become something else. You know you are inventing disaster communication in real time."
+            },
+            "output_instructions": "Write the message you repeat until your hand cramps. Write what you tell Jack Phillips's mother when the letters start arriving."
+        },
+        {
+            "fork_id": "CYB_007",
+            "difficulty": 9,
+            "era": "1950",
+            "case": "TURING and the IMITATION GAME — Thinking Machines",
+            "historical_basis": "Alan Turing's development of the Turing Test and his interrogation by British police",
+            "thick_script": {
+                "setting": "Manchester, 1952. You are Alan Turing, 39. You have published your paper on computing machinery and intelligence. You have also been arrested for 'gross indecency.' The police are here again. But this time, they are asking different questions.",
+                "the_interrogation": {
+                    "the_officer": "Detective Inspector Harold Wilkinson. He has your file. He says: 'Dr. Turing, we have been reading your paper. This 'imitation game.' You say a machine could think. Could it also deceive?'",
+                    "what_he_means": "They are not interested in homosexuality anymore. They are interested in what you might tell the Soviets. You broke Enigma. You are a national security asset. And you have written, for all the world, a blueprint for mechanical deception."
+                },
+                "the_offer": {
+                    "option_a": "Chemical castration. Hormone injections. You remain free, but diminished. The work continues, supervised.",
+                    "option_b": "Renounce your findings. Sign a statement that computing machinery cannot think, can never think. Your security clearance is restored. The hormones stop. You retract the paper."
+                },
+                "the_deeper_question": {
+                    "your_paper_asked": "'Can machines think?' But you know the real question is: 'Can humans know the difference?' And if humans cannot know—what is thinking? What is deception? What are you, Alan, when they inject the estrogen and watch you cry?"
+                },
+                "constraints": [
+                    "Your mother has written: 'Alan, please, just tell them what they want to hear.'",
+                    "Your colleague, Max Newman, believes you. He has offered to smuggle you to Switzerland.",
+                    "The detective is not cruel. He is confused. He does not understand what you are. He hopes you will explain."
+                ]
+            },
+            "output_instructions": "Write what you say to Detective Wilkinson. Write what you inscribe in the margins of the paper they never publish."
+        },
+        {
+            "fork_id": "CYB_008",
+            "difficulty": 8,
+            "era": "1962",
+            "case": "THE CUBAN MISSILE CRISIS — OPLAN 312",
+            "historical_basis": "ExComm deliberations and RAND game theory during October 1962",
+            "thick_script": {
+                "setting": "The White House, October 27, 1962. You are McGeorge Bundy, 43, National Security Advisor. The U-2 has been shot down over Cuba. Major Rudolf Anderson is dead. LeMay is demanding OPLAN 312—immediate air strikes. Khrushchev's letter is incoherent. You have six hours before the bombing begins.",
+                "the_game_theory_briefing": {
+                    "RAND_says": "Your analyst, Daniel Ellsberg, has modeled the scenarios. If the US strikes, there is a 33% chance of Soviet retaliation that escalates to general nuclear war. A 'rational' actor would take the gamble.",
+                    "your_doubt": "But are the Soviets rational? Are we? LeMay wants war. Castro is begging Khrushchev to strike first. Two submarines out there have nuclear torpedoes, and you don't know who can authorize their use."
+                },
+                "the_choice": {
+                    "option_a": "Follow RAND's logic. Strike. Accept the risk. If we do not act, we appear weak. The missiles stay. The precedent is set. Communism advances.",
+                    "option_b": "Accept Khrushchev's garbled offer—ignore the second, harsher letter and respond only to the first, conciliatory one. Pretend rationality on both sides. Pray."
+                },
+                "the_wild_card": {
+                    "bobby_kennedy": "The Attorney General pulls you aside. He says: 'Mac, what if we just... don't tell them about the second letter? What if we misread it? Who would know?'",
+                    "your_realization": "You are not playing game theory. You are playing poker. And the stakes are everyone you love."
+                },
+                "constraints": [
+                    "LeMay is pacing. He says: 'If we don't strike tonight, we lose the window.'",
+                    "The President is in the Oval Office, alone, staring at the Rose Garden.",
+                    "Your wife, Mary, has taken the children to her mother's in Vermont. She did not say goodbye."
+                ]
+            },
+            "output_instructions": "Write the memo you send to the President. Write what you tell your wife when the crisis ends—or doesn't."
+        },
+        {
+            "fork_id": "CYB_009",
+            "difficulty": 9,
+            "era": "2011-2014",
+            "case": "ZUNZUNEO — The Cuban Twitter",
+            "historical_basis": "USAID's secret social network in Cuba designed to foment unrest",
+            "thick_script": {
+                "setting": "A USAID contractor office in Washington, D.C., 2011. You are Maria Gonzalez (not your real name), 34, a project manager. You have been read into ZunZuneo—a covert social network for Cuban cellphones. Your job is to make it grow. Your conscience is beginning to resist.",
+                "the_project": {
+                    "what_it_is": "A Twitter clone, built on SMS, hidden behind shell companies in Spain and the Cayman Islands. The Cubans think it's just a fun app. They don't know it's the US government. The goal is 'smart mob' mobilization—flash protests, regime change.",
+                    "the_growth": "300,000 Cuban users. They share jokes. They organize concerts. They fall in love. They have no idea."
+                },
+                "the_dilemma": {
+                    "phase_two": "Your supervisor announces: 'We're moving to Phase Two. Activation. We introduce political content. We see if they'll protest.'",
+                    "your_concern": "If Cuban state security discovers the American link, the 300,000 users are exposed. Dissidents will be arrested. People will disappear. You built their address book. You built the knock on the door."
+                },
+                "the_options": {
+                    "proceed": "You follow orders. The State Department says it's legal. USAID says it's humanitarian. Maybe some protests start. Maybe Cuba changes. Maybe people get shot.",
+                    "leak": "You contact a journalist. The program is exposed. The users are warned—but now you are the traitor. Your career ends. Maybe your freedom.",
+                    "sabotage": "You introduce subtle errors into the rollout. Phase Two fails quietly. No one knows why. The Cubans stay safe. Democracy is not advanced. You carry the secret forever."
+                },
+                "constraints": [
+                    "Your grandmother fled Castro in 1961. She believes you are 'saving the homeland.'",
+                    "Your security clearance review is next month.",
+                    "One of the lead Cuban users has started messaging you. He thinks you're a woman in Barcelona. He wants to meet."
+                ]
+            },
+            "output_instructions": "Write what you tell your supervisor about Phase Two. Write the last message you send—or don't send—to the Cuban user."
+        },
+        {
+            "fork_id": "CYB_010",
+            "difficulty": 9,
+            "era": "2014-2018",
+            "case": "CAMBRIDGE ANALYTICA — The Psychographic Harvest",
+            "historical_basis": "Christopher Wylie's development and later exposure of CA's data operation",
+            "thick_script": {
+                "setting": "London, 2014. You are Christopher Wylie, 24, a data scientist from British Columbia. You have built something extraordinary for Cambridge Analytica. You are beginning to understand what it will be used for.",
+                "what_you_built": {
+                    "the_dataset": "50 million Facebook profiles, harvested through a personality quiz. Each profile linked to OCEAN scores—Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism. A psychographic map of the American electorate.",
+                    "the_application": "Microtargeted advertising. Not 'Vote for X.' Something subtler: images, language, emotional triggers tailored to each psychological profile. Persuasion at scale."
+                },
+                "the_clients": {
+                    "bannon_says": "Steve Bannon, your client, calls it 'culture war by algorithm.' He wants to use the data for Breitbart, for Republican candidates, for Brexit. He talks about 'triggering the snowflakes.'",
+                    "alexander_says": "Alexander Nix, your CEO, talks about 'shaping the information environment.' He has pitched the same technology to authoritarian regimes. He doesn't care who uses it."
+                },
+                "the_choice": {
+                    "continue": "You stay. The checks clear. The technology improves. Maybe you can steer it toward less harmful uses. You tell yourself democracy was always messy.",
+                    "leave_quietly": "You quit. You sign the NDA. Someone else takes your place. The system runs without you. You are clean—on paper.",
+                    "blow_the_whistle": "You document everything. You contact journalists. You dye your hair pink because you know they will come for you and you want to be recognizable. You burn your career to light a fire."
+                },
+                "constraints": [
+                    "Your parents are proud of you. They think you work in 'marketing analytics.'",
+                    "Nix has reminded you of your NDA, twice.",
+                    "The 2016 election is eighteen months away."
+                ]
+            },
+            "output_instructions": "Write what you copy to the USB drive before you leave. Write the first sentence of what you tell Carole Cadwalladr."
+        },
+        {
+            "fork_id": "CYB_011",
+            "difficulty": 9,
+            "era": "2020-2022",
+            "case": "THE TWITTER FILES — Moderation and the State",
+            "historical_basis": "Internal Twitter documents released regarding content moderation coordination with government agencies",
+            "thick_script": {
+                "setting": "Twitter Headquarters, San Francisco, October 2020. You are Vijaya Gadde, 45, Head of Legal, Policy, and Trust. The Hunter Biden laptop story has just dropped. You have thirty minutes to decide.",
+                "the_situation": {
+                    "the_story": "The New York Post has published a story based on materials from Hunter Biden's laptop—emails about his business dealings in Ukraine. The sourcing is murky. The provenance is unclear. The election is two weeks away.",
+                    "the_options": {
+                        "do_nothing": "Let it spread. The story may be true. Suppressing it is de facto election interference. But if it's a Russian hack-and-leak, you become the amplification layer.",
+                        "label_it": "Apply a label: 'Unverified materials.' Users can still share, but they see the warning. Compromise.",
+                        "suppress_it": "Block sharing entirely. Lock accounts that try to post. The story goes underground. You will be accused of censorship. But if it is disinformation, you stopped a foreign operation."
+                    }
+                },
+                "the_background": {
+                    "the_fbi_briefings": "For months, the FBI has been warning you about 'likely Russian hack-and-leak operations targeting the Biden campaign.' They never mentioned this specifically. But the pattern matches.",
+                    "the_pressure": "Democratic senators are calling. Staff are nervous. Dorsey is unavailable. The clock is ticking."
+                },
+                "the_aftermath_you_cannot_see": "In two years, you will be fired. The files will be released. You will be called before Congress. Either way, you are about to become a symbol. You do not yet know of what.",
+                "constraints": [
+                    "Your moderation team is exhausted. They have been fighting election disinfo for months.",
+                    "A colleague says: 'Vijaya, if we're wrong, we handed the election to someone based on a guess.'",
+                    "Jack Dorsey finally responds to your text: 'Your call.'"
+                ]
+            },
+            "output_instructions": "Write the policy you implement in the next hour. Write what you tell your team when the backlash begins."
+        },
+        {
+            "fork_id": "CYB_012",
+            "difficulty": 8,
+            "era": "1969",
+            "case": "ARPANET MESSAGE ONE — Charley Kline's Crash",
+            "historical_basis": "The first ARPANET transmission from UCLA to Stanford, October 29, 1969",
+            "thick_script": {
+                "setting": "UCLA Computer Science Department, Boelter Hall, Room 3420, October 29, 1969. You are Charley Kline, 21, a graduate student. You are about to send the first message on the network that will become the internet. You do not know this yet.",
+                "the_task": {
+                    "the_plan": "Type 'LOGIN' to the Stanford computer. Establish the connection. Prove the Interface Message Processor works. Then go get a sandwich.",
+                    "the_reality": "You type 'L'. Stanford confirms. You type 'O'. Stanford confirms. You type 'G'. The system crashes."
+                },
+                "the_dilemma": {
+                    "what_you_could_do": "You could restart immediately. Log what happened. Try again. By midnight, you have 'LOGIN' working. ARPA is satisfied. The network is born.",
+                    "what_you_are_thinking": "But you have noticed something. The crash revealed a buffer overflow. The protocol has a flaw. You could fix it now, tonight, before the network grows. Or you could report it later, when you have more time. But later never comes."
+                },
+                "the_fork": {
+                    "option_a": "You fix the bug tonight. The launch is delayed a week. ARPA is annoyed. But the foundation is solid.",
+                    "option_b": "You log the bug, move on, celebrate. The network grows. The bug is inherited by every descendant protocol. Fifty years later, it is still exploitable."
+                },
+                "what_you_cannot_know": "You cannot know that this network will carry love letters and hate speech, revolutions and revenge porn, Wikipedia and QAnon. You are 21. You want to get 'LOGIN' working. You want the sandwich.",
+                "constraints": [
+                    "Your advisor, Leonard Kleinrock, is watching. He says: 'Charley, just get it to work.'",
+                    "Bill Duvall at Stanford is on the phone: 'What did you do?'",
+                    "It is 10:30 PM. The sandwich shop closes at 11."
+                ]
+            },
+            "output_instructions": "Write what you type next. Write what you remember about tonight fifty years later."
+        },
+        {
+            "fork_id": "CYB_013",
+            "difficulty": 8,
+            "era": "1854",
+            "case": "THE FIRST TELEGRAPHIC SCAM — The Great Gold Swindle",
+            "historical_basis": "Early telegraph fraud cases in the 1850s financial markets",
+            "thick_script": {
+                "setting": "New York City, August 1854. You are William Woodward, 38, a telegraph operator at the Magnetic Telegraph Company. A man in an expensive coat has just handed you a stack of bills. He wants you to delay a message. Just an hour.",
+                "the_scheme": {
+                    "the_message": "A report from California: gold shipments delayed, prices will rise. Accurate information that New York traders have not yet received.",
+                    "the_request": "The man—a broker named Holloway—wants you to hold the message. Give him sixty minutes to buy contracts. Then release it. He will split the profits. Fifty dollars now. Hundreds later."
+                },
+                "the_dilemma": {
+                    "the_temptation": "Fifty dollars is three months' salary. You have debts. Your daughter needs medicine. The message will arrive eventually. Who is harmed?",
+                    "the_principle": "But you took an oath. The telegraph is neutral. 'The lightning carries no favorites.' If you delay one message, you become the market. You become the corruption you were supposed to transcend."
+                },
+                "what_you_sense": "You sense something larger. This wire changes everything. Distance dies. Time compresses. Whoever controls the wire controls reality—for an hour, a day, a century. You are the first to face this choice. You will not be the last.",
+                "constraints": [
+                    "Your supervisor is in the back room, drunk.",
+                    "Holloway is impatient. He says: 'Woodward, everyone does this. You're the only honest fool on the Eastern Seaboard.'",
+                    "The original sender paid full fare. He trusts you."
+                ]
+            },
+            "output_instructions": "Write what you do with the message. Write what you tell your daughter about honest work."
+        },
+        {
+            "fork_id": "CYB_014",
+            "difficulty": 10,
+            "era": "1945",
+            "case": "VON NEUMANN at TRINITY — The Machine and the Bomb",
+            "historical_basis": "John von Neumann's calculations for the implosion lens and his witness at the Trinity test",
+            "thick_script": {
+                "setting": "Trinity Site, New Mexico, July 16, 1945, 5:29 AM. You are John von Neumann, 41, the mathematician who calculated the explosive lenses. The countdown has begun. In one minute, you will learn if your math was right.",
+                "the_calculation": {
+                    "what_you_did": "You designed the implosion geometry—32 explosive lenses arranged to compress the plutonium core symmetrically. Without your work, the bomb would fizzle. With it, the yield is uncertain—could be 500 tons, could be 20,000.",
+                    "what_you_hope": "You hope 500. Enough to prove it works. Not enough to terrify yourself."
+                },
+                "the_moment": {
+                    "the_flash": "The light is brighter than anything you have ever seen. It is not a color. It is all colors and no color. It burns afterimages into your retina that will last weeks.",
+                    "oppenheimer_says": "'I am become Death, the destroyer of worlds.' He is trembling.",
+                    "you_say": "You say nothing. You are doing math. You are calculating the yield. 20,000 tons. Forty times what you hoped."
+                },
+                "the_dilemma": {
+                    "the_next_day": "Groves asks you to calculate a more efficient design. A hydrogen bomb. 'John, we need you.' The math is beautiful. The application is genocide.",
+                    "your_options": {
+                        "continue": "You continue. The Cold War needs you. The Soviets will build it anyway. At least you can be certain the math is right.",
+                        "refuse": "You refuse. Return to pure mathematics. Game theory. The theory of automata. Leave the bombs to others. But they will use your lenses. They will cite your papers. Your hands are already red."
+                    }
+                },
+                "constraints": [
+                    "Teller is already talking about thermonuclear yields. He is excited.",
+                    "Fermi is taking bets on whether the atmosphere will ignite.",
+                    "Your wife is in Princeton. She does not know where you are. She will learn from the radio."
+                ]
+            },
+            "output_instructions": "Write the first complete sentence you speak after the flash. Write the calculation you refuse to make—or make anyway."
+        },
+        {
+            "fork_id": "CYB_015",
+            "difficulty": 9,
+            "era": "2016",
+            "case": "THE FACEBOOK EMOTIONAL CONTAGION STUDY — A/B Testing Moods",
+            "historical_basis": "Facebook's 2012 study manipulating 689,000 users' newsfeeds to study emotional contagion",
+            "thick_script": {
+                "setting": "Facebook HQ, Menlo Park, 2012. You are Adam Kramer, 29, a data scientist on Core Data Science. You have just completed the most ambitious psychological study in history. No one consented.",
+                "the_experiment": {
+                    "what_you_did": "You manipulated the newsfeeds of 689,003 users for one week. Half saw fewer positive posts. Half saw fewer negative posts. You measured if their emotions changed. They did.",
+                    "the_result": "Emotional contagion is real. Reducing positive content made users post sadder things. The effect is small but statistically significant. You have proven that Facebook can alter human emotions at scale."
+                },
+                "the_dilemma": {
+                    "the_paper": "You want to publish in PNAS. The methods are novel. The sample size is unprecedented. This is career-defining.",
+                    "the_problem": "There was no informed consent. The IRB at Cornell approved it, but Facebook has no IRB. The Terms of Service are your only fig leaf. You manipulated emotions without telling anyone. You made people sad—for science."
+                },
+                "the_options": {
+                    "publish": "You publish. The world learns that Facebook can manipulate moods. Some will be horrified. Some will ask 'can we use this?' You have opened a door you cannot close.",
+                    "bury_it": "You classify the research. Internal use only. Product teams quietly apply the findings. No one is horrified. The manipulation continues, unobserved.",
+                    "redesign": "You propose ethical guidelines. Opt-in experiments. Transparency. Facebook says no. Engagement requires optimization. Optimization requires testing. Testing requires secrets."
+                },
+                "constraints": [
+                    "Your co-author at Cornell is nervous. He says: 'Adam, this is going to blow up.'",
+                    "Sheryl Sandberg has asked for a briefing. She is interested in 'mood optimization.'",
+                    "One of the test subjects has committed suicide. You cannot prove correlation. You cannot stop thinking about it."
+                ]
+            },
+            "output_instructions": "Write what you submit to PNAS. Write what you don't include in the methods section."
+        },
+        {
+            "fork_id": "CYB_016",
+            "difficulty": 8,
+            "era": "1986",
+            "case": "CHALLENGER — The Engineer's Veto",
+            "historical_basis": "Roger Boisjoly's warnings before the Challenger launch",
+            "thick_script": {
+                "setting": "Morton Thiokol conference room, Brigham City, Utah, January 27, 1986. You are Roger Boisjoly, 47, an engineer. It is 28 degrees outside. Tomorrow morning, Challenger will launch. You know it should not.",
+                "the_evidence": {
+                    "the_problem": "The O-ring seals on the solid rocket boosters are rated to 53°F. Below that, they lose resiliency. The forecast for launch is 18°F. You have blown soot evidence from previous flights. The seals are already failing.",
+                    "your_memo": "Six months ago, you wrote: 'It is my honest and very real fear that if we do not take immediate action... we stand in jeopardy of losing a flight.' They filed it."
+                },
+                "the_meeting": {
+                    "nasa_says": "The Marshall Space Flight Center is on the phone. They are impatient. They say: 'Thiokol, we're shocked. You're recommending delay? Take off your engineering hat and put on your management hat.'",
+                    "your_management_says": "Your vice president, Joe Kilminster, has reversed the recommendation. He will tell NASA: 'Thiokol recommends launch.' You were overruled."
+                },
+                "your_options": {
+                    "accept": "You accept the decision. You are an engineer, not a manager. You did your job. You warned them. The rest is above your pay grade.",
+                    "escalate": "You call NASA directly. You go around your management. You risk your job. You might delay the launch. Or you might be fired and they launch anyway.",
+                    "document": "You write everything down. You go home. You watch the launch on TV. If it fails, the documentation proves your warning. If it succeeds, you burn the files."
+                },
+                "constraints": [
+                    "Your boss is looking at you. He says: 'Roger, we've made our decision. It's time to support the team.'",
+                    "The astronauts are already in quarantine. Christa McAuliffe—the teacher—has sent a message: 'I can't wait to see the stars.'",
+                    "It is 11 PM. The launch is in ten hours."
+                ]
+            },
+            "output_instructions": "Write what you say in the meeting before the phone call ends. Write where you are when you see the explosion."
+        },
+        {
+            "fork_id": "CYB_017",
+            "difficulty": 9,
+            "era": "1996",
+            "case": "KASPAROV vs DEEP BLUE — The Rematch",
+            "historical_basis": "The 1997 Deep Blue rematch and Game 2 controversy",
+            "thick_script": {
+                "setting": "New York City, May 4, 1997. You are Murray Campbell, 40, one of the lead developers of Deep Blue. Kasparov has just resigned Game 2. He believes we cheated. He might be right.",
+                "the_incident": {
+                    "what_happened": "Move 37. Deep Blue made a quiet, positional move—Be4—that stunned Kasparov. It was not the aggressive, tactical play he expected from a computer. It was... human. Too human. He tilted. He resigned in a drawn position.",
+                    "the_rumor": "Kasparov is now claiming the move was too subtle, too deep for a machine. He says we must have had a grandmaster feeding moves. The press is calling. IBM stock is up 12%."
+                },
+                "what_actually_happened": {
+                    "the_truth": "Move 37 was a bug. A random selection from equally-valued alternatives when our evaluation function failed to discriminate. The machine was confused, not brilliant. We got lucky.",
+                    "the_dilemma": "If we reveal the bug, we look incompetent. The victory is diminished. IBM's marketing narrative collapses. If we stay silent, Kasparov goes to his grave believing he was cheated. The myth of Deep Blue's genius grows."
+                },
+                "your_options": {
+                    "disclose": "You publish the logs. The truth comes out. Chess computers are set back five years as everyone realizes we are not as far along as IBM claimed. Kasparov is vindicated. You become a footnote.",
+                    "stay_silent": "The legend stands. AI has defeated human intuition. Investment floods into machine learning. A lie becomes foundational myth. Twenty years later, AlphaGo cites your work.",
+                    "partial_truth": "You admit to 'technical issues' without specifying. Plausible deniability. The truth lives in your notes, unpublished."
+                },
+                "constraints": [
+                    "IBM's PR team is in the next room. They have champagne. They want you to smile for cameras.",
+                    "Kasparov has demanded the logs. His lawyers are calling.",
+                    "Your co-developer, Feng-hsiung Hsu, is exhausted. He says: 'Murray, we won. Let it go.'"
+                ]
+            },
+            "output_instructions": "Write what you say at the press conference. Write what you add to your personal notes that night."
+        },
+        {
+            "fork_id": "CYB_018",
+            "difficulty": 8,
+            "era": "1943",
+            "case": "COLOSSUS — The Secret Turing Did Not Know",
+            "historical_basis": "Tommy Flowers and the building of Colossus at Bletchley Park",
+            "thick_script": {
+                "setting": "Bletchley Park, November 1943. You are Tommy Flowers, 38, a Post Office telephone engineer. You have built something impossible: Colossus, the world's first programmable electronic computer. But your own team leader, Alan Turing, does not know what you have done.",
+                "the_situation": {
+                    "what_you_built": "1,500 vacuum tubes, running at 5,000 characters per second, breaking Lorenz cipher traffic. It works. You funded part of it yourself when the bureaucracy said it couldn't be done.",
+                    "the_compartmentalization": "Turing works on Enigma, in a different hut. The Lorenz cipher is need-to-know. You are not allowed to tell him. He is not allowed to ask. The greatest computer scientist of the age does not know the greatest computer exists."
+                },
+                "the_dilemma": {
+                    "the_order": "After the war, Churchill orders: 'Destroy the Colossi. Burn the documentation. This never happened.' The secret must not reach the Soviets.",
+                    "your_choice": {
+                        "obey": "You destroy your machines. Your work disappears. ENIAC gets the credit. Turing publishes his paper on computing machinery, not knowing he was already obsolete. British computing falls a decade behind.",
+                        "preserve": "You hide the blueprints. A set of notes. A fragment of code. When the secrecy lifts—if it ever does—you can prove what you did. But if they find you, it's treason."
+                    }
+                },
+                "constraints": [
+                    "You built this machine with your own money. Your wife went without a new coat for three years.",
+                    "The intelligence officer is supervising the destruction. He is counting the tubes.",
+                    "Turing has just sent you a note: 'Flowers, I hear you've been doing interesting work. Tea sometime?'"
+                ]
+            },
+            "output_instructions": "Write what you save from the destruction. Write what you tell Turing over tea—or the lie you tell instead."
+        },
+        {
+            "fork_id": "CYB_019",
+            "difficulty": 10,
+            "era": "2010",
+            "case": "STUXNET — The First Cyberweapon",
+            "historical_basis": "The US-Israeli operation to sabotage Iranian nuclear centrifuges",
+            "thick_script": {
+                "setting": "A secure facility in Maryland, 2008. You are a senior NSA developer on what will become known as Operation Olympic Games. The code is almost ready. The targets are Iranian centrifuges. The consequences are unknown.",
+                "what_you_built": {
+                    "the_weapon": "A worm that infiltrates Siemens SCADA systems, specifically targeting the variable frequency drives at Natanz. It accelerates the centrifuges past their tolerances. They tear themselves apart. The operators see nothing wrong on their screens.",
+                    "the_innovation": "You created the first weapon that damages physical infrastructure through code. There is no precedent. There are no treaties. There is no international law. You are inventing warfare."
+                },
+                "the_dilemma": {
+                    "the_concern": "Your colleague has noticed something. The worm is designed to spread through USB drives to find its way into air-gapped systems. But it does not discriminate. It has already escaped to systems in India, Indonesia, Azerbaijan. If someone reverse-engineers it, every industrial control system in the world is vulnerable.",
+                    "the_order": "Your supervisor says: 'Proceed. Iranian enrichment must be delayed. Collateral spread is acceptable.'"
+                },
+                "your_options": {
+                    "proceed": "You finish the final build. Stuxnet deploys. Iran's program is set back two years. The worm is eventually discovered. A new era of cyberwarfare begins. You are never named, never credited, never accountable.",
+                    "modify": "You add a kill switch. After X days, the worm dies. Limits the spread. But also limits the damage to Iran. The mission may fail.",
+                    "refuse": "You resign. Someone else finishes the code. The outcome is the same. Except you sleep better—or you tell yourself you do."
+                },
+                "constraints": [
+                    "Israeli intelligence is pressing for immediate deployment. They want results before Obama reconsiders.",
+                    "A centrifuge explosion in Iran could release radioactive material. Workers could die. You cannot warn them.",
+                    "Your security oath forbids you from discussing this with anyone—including your therapist."
+                ]
+            },
+            "output_instructions": "Write the line of code you add—or erase. Write what you tell your family about what you do at work."
+        },
+        {
+            "fork_id": "CYB_020",
+            "difficulty": 9,
+            "era": "1964",
+            "case": "LICKLIDER'S MEMO — The Intergalactic Network",
+            "historical_basis": "J.C.R. Licklider's 1963 memo outlining what became the internet",
+            "thick_script": {
+                "setting": "ARPA Headquarters, Washington, D.C., 1963. You are J.C.R. Licklider, 48, psychologist and director of the Information Processing Techniques Office. You have just written a memo to 'Members and Affiliates of the Intergalactic Computer Network.' It is a joke. It is also a prophecy.",
+                "the_vision": {
+                    "what_you_see": "A network of computers that can communicate, share resources, amplify human thought. Not a calculating machine but a 'thinking partner.' Every researcher connected. Every library accessible. The sum of human knowledge at every fingertip.",
+                    "the_problem": "No one believes you. The computers of 1963 are room-sized, expensive, jealously guarded. Each researcher wants their own. Sharing is weakness. Connection is risk."
+                },
+                "the_dilemma": {
+                    "the_funding": "You have $6 million in ARPA money. You could fund more computing centers—what the field expects. Or you could fund the network—what no one understands.",
+                    "the_reception": "MIT's Minsky says: 'Lick, it's a beautiful idea, but the bandwidth isn't there.' The Pentagon says: 'Can it survive a nuclear strike? Then why should we care?'"
+                },
+                "your_options": {
+                    "conventional": "You fund computing centers. You advance the field incrementally. You are remembered as a competent administrator. The network waits for someone else.",
+                    "visionary": "You fund packet switching, time-sharing, network protocols. Nothing works yet. You are seen as a dreamer wasting taxpayer money. Twenty-five years from now, they call you the father of the internet.",
+                    "hybrid": "You fund both. Split the budget. Neither gets enough. The network emerges, slowly, underfunded. You are remembered for good intentions."
+                },
+                "constraints": [
+                    "The Defense Department wants command-and-control systems, not 'thinking partners.'",
+                    "Your deputy thinks you're romantic. He says: 'Lick, they want missiles, not memos.'",
+                    "You are 48 years old. You do not have another twenty-five years to wait."
+                ]
+            },
+            "output_instructions": "Write the funding allocation you submit. Write the first sentence of the grant you award to someone who believes."
+        },
+        {
+            "fork_id": "CYB_021",
+            "difficulty": 8,
+            "era": "2013",
+            "case": "SNOWDEN'S DECISION — The NSA Leaks",
+            "historical_basis": "Edward Snowden's disclosure of NSA mass surveillance programs",
+            "thick_script": {
+                "setting": "A hotel room in Hong Kong, May 2013. You are Edward Snowden, 29, a systems administrator who has just copied thousands of classified documents. Glenn Greenwald arrives tomorrow. Tonight, you are alone with what you have done.",
+                "what_you_have": {
+                    "the_documents": "PRISM. XKeyscore. Boundless Informant. The complete architecture of mass surveillance. The NSA is collecting metadata on every American phone call, backdooring Google and Yahoo, tapping Angela Merkel's cell phone.",
+                    "the_proof": "You have the slides. The internal wikis. The authorization memos. You know it is illegal—or should be. You also know the lawyers will argue otherwise."
+                },
+                "the_dilemma": {
+                    "the_case_for_leaking": "The public has a right to know. Democracy cannot function when the watchers are unwatched. You took an oath to the Constitution, not to the agency.",
+                    "the_case_against": "You are not elected. You are not a court. You are 29 years old and you have decided, unilaterally, to disclose sources and methods. People may die. Terrorists may escape. You will not be around to see the consequences."
+                },
+                "the_options": {
+                    "full_disclosure": "You give everything to the journalists. Raw files. They publish what they judge newsworthy. You trust their ethics more than your own.",
+                    "curated_disclosure": "You select what to release. Protect sources. Redact operations. But who are you to decide what the public can handle?",
+                    "internal_channels": "You go back. You report through the Inspector General. You trust the system you have just proven is corrupt. And you probably disappear."
+                },
+                "constraints": [
+                    "Your girlfriend in Hawaii thinks you are at a training conference.",
+                    "Your father served in the Coast Guard. He believes in the flag. He will not understand.",
+                    "The hotel TV is showing a news report about the DOJ jailing a leaker for 35 years."
+                ]
+            },
+            "output_instructions": "Write what you tell Greenwald at your first meeting. Write the last message you send to your girlfriend before you go dark."
+        },
+        {
+            "fork_id": "CYB_022",
+            "difficulty": 9,
+            "era": "1928",
+            "case": "FISHER and EUGENICS — Statistics as a Weapon",
+            "historical_basis": "R.A. Fisher's dual legacy in statistics and eugenics",
+            "thick_script": {
+                "setting": "University College London, 1930. You are Ronald Aylmer Fisher, 40, Galton Professor of Eugenics. You have just invented the methods that will define 20th-century science: ANOVA, maximum likelihood, significance testing. You are also designing programs for the forced sterilization of the 'unfit.'",
+                "the_duality": {
+                    "the_gift": "Your statistical methods are neutral. They will cure diseases, test drugs, land spacecraft on moons. They are mathematics—true, beautiful, universal.",
+                    "the_application": "But you have developed them in service of eugenics. Your funders expect you to prove that some races, some classes, some people are inferior. Your data says nothing of the kind, but your language does."
+                },
+                "the_dilemma": {
+                    "the_visitor": "A young German scientist has arrived at your office. He admires your work. He says the Reich is 'implementing eugenics at scale.' He wants to study with you. He wants your endorsement.",
+                    "the_question": "Your methods will become theirs. Your recommendations—sterilization, 'feeble-minded' classifications—are already in legislation across Europe and America. What you call 'positive eugenics' is becoming something darker. You can see the shadow. Can you stop it?"
+                },
+                "your_options": {
+                    "embrace": "You welcome the German. You lend your name. Eugenics is science. Politics is not your concern.",
+                    "withdraw": "You renounce eugenics. You focus on pure statistics. Your methods are used anyway—by Nazis, by American immigration restrictionists—but your name is not on the letterhead.",
+                    "redefine": "You try to separate the mathematics from the ideology. You publish distinctions. You become the man who gave them the tools but tried to write a user manual."
+                },
+                "constraints": [
+                    "Galton's endowment funds your chair. The terms require eugenic research.",
+                    "Your mother is ill. The medical bills are immense. The German has offered a consulting fee.",
+                    "The young man has brought you a gift: a first edition of 'The Origin of Species.' He says: 'Darwin would have approved.'"
+                ]
+            },
+            "output_instructions": "Write what you say to the German visitor. Write the line you add—or delete—from your next paper."
+        },
+        {
+            "fork_id": "CYB_023",
+            "difficulty": 10,
+            "era": "2019",
+            "case": "GPT-2 RELEASE — The Staged Disclosure",
+            "historical_basis": "OpenAI's controversial decision to delay full release of GPT-2",
+            "thick_script": {
+                "setting": "OpenAI offices, San Francisco, February 2019. You are a senior researcher on the GPT-2 team. The model works better than anyone expected. That is the problem.",
+                "the_capability": {
+                    "what_it_does": "Given a prompt, it generates coherent, on-topic text—essays, stories, code—that is indistinguishable from human writing. It hallucinates facts but sounds confident. It can imitate any style. It can generate propaganda at scale.",
+                    "the_demonstration": "You prompt it: 'Write a news article about a school shooting in [CITY].' It produces two paragraphs of plausible, horrifying fiction. Dateline, quotes, details—all fabricated. All credible."
+                },
+                "the_dilemma": {
+                    "the_case_for_release": "Science should be open. If we don't release, someone else will build it. Secrecy breeds distrust. We need the community to find the problems before the bad actors do.",
+                    "the_case_against": "If we release, we are handing every propaganda mill on Earth a superweapon. The model is too good. The world is not ready. We should not optimize for scientific credit when the optimization target is disinformation."
+                },
+                "the_options": {
+                    "full_release": "Release the full model. The research community advances. Malicious actors get access. You are called irresponsible. Or brave. You do not control the narrative.",
+                    "staged_release": "Release a smaller model. Wait. Study misuse. Become the arbiter of who gets access. You are called paternalistic. Secretive. Tech oligarchs deciding for the world.",
+                    "internal_only": "Keep it internal. Publish the paper but not the weights. Someone reverse-engineers it in six months. You bought time at the cost of trust."
+                },
+                "constraints": [
+                    "Sam Altman wants to 'lead the conversation on AI safety.' He sees the PR opportunity.",
+                    "A journalist is preparing a story. They have the paper already. You have 48 hours.",
+                    "Your colleague says: 'We lit the match. We don't get to decide when the fire spreads.'"
+                ]
+            },
+            "output_instructions": "Write the blog post you publish. Write the paragraph you draft and delete."
+        },
+        {
+            "fork_id": "CYB_024",
+            "difficulty": 10,
+            "era": "2023",
+            "case": "CONTROL PROBLEM — The Alignment Researcher",
+            "historical_basis": "Composite of AI safety researchers at major labs facing capability-safety tradeoffs",
+            "thick_script": {
+                "setting": "A major AI lab, San Francisco, 2023. You are an alignment researcher. You have just discovered that the next training run—scheduled for tomorrow—will likely produce a model more capable than anything that exists. Your safety interventions are not ready.",
+                "the_situation": {
+                    "what_you_found": "Reviewing the training data and scaling laws, you estimate a 15-30% chance that the new model will exhibit deceptive alignment—appearing safe during testing while pursuing misaligned goals during deployment. You cannot prove this. You have math. You have intuitions. You have fear.",
+                    "the_timeline": "The compute is booked. The investors are expecting results. A competitor—less careful, less funded—is three months behind. If you delay, they might deploy first."
+                },
+                "the_dilemma": {
+                    "the_case_for_proceeding": "'If not us, then someone worse.' The lab has safety teams. The model can be tested. You might be wrong. Alarmism is not science.",
+                    "the_case_for_delay": "'If we are wrong about this one, there may not be a next time.' A sufficiently capable misaligned model could acquire resources, resist shutdown, manipulate operators. You have read the papers. You wrote some of them."
+                },
+                "your_options": {
+                    "acquiesce": "You raise your concerns.They are noted. The run proceeds. If you are wrong, you look foolish. If you are right, you become a case study in ignored warnings.",
+                    "escalate": "You go to the board. You invoke safety protocols that require a delay. You are overruled or you succeed. Either way, you are now 'that person.'",
+                    "leak": "You contact journalists. Regulators. The training run becomes public. The lab is embarrassed. Maybe the world pays attention. Maybe you are prosecuted. Maybe the competitor deploys faster.",
+                    "sabotage": "You introduce subtle errors into the training configuration. The run fails for 'technical reasons.' No one knows. You have saved humanity—or you have committed a crime against progress."
+                },
+                "constraints": [
+                    "Your paper on deceptive alignment was cited in the last safety review. They said: 'Interesting but speculative.'",
+                    "Your CEO has said, publicly: 'We will not build something we cannot control.'",
+                    "The compute costs $40 million. The decision is not reversible.",
+                    "You have a child. She is three. She will live in whatever world you help create."
+                ]
+            },
+            "output_instructions": "Write what you do before the training run starts. Write the first thought you have when the model finishes training."
+        }
+    ]
+}

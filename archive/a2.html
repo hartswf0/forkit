@@ -1,0 +1,2725 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>🍴 THE FORK // ETHICS-HELIX-TROLLEY</title>
+
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23ff9d5c' d='M50 0 L93.3 25 V75 L50 100 L6.7 75 V25 Z'/%3E%3Cpath fill='none' stroke='%23050505' stroke-width='6' d='M38 28v44M50 28v44M62 28v44M38 50h24'/%3E%3C/svg%3E" />
+
+    <style>
+        :root {
+            --bg-void: #050505;
+            --bg-panel: #14100f;
+            --bg-hover: #261f1d;
+            --text-primary: #ffcdb2;
+            --text-secondary: #b0988e;
+            --text-muted: #6b554e;
+            --border: #4a3832;
+            --accent: #ff9d5c;
+            --accent-glow: rgba(255, 157, 92, .18);
+
+            --class-core: #ffaa75;
+            --class-media: #75b3ff;
+            --class-tool: #75ffaa;
+            --class-exp: #e075ff;
+
+            --cyan: #00bcd4;
+            --orange: #ff9800;
+            --gold: #ffd700;
+
+            --fw-C: #22e3d6;
+            --fw-C2: #ff4da6;
+            --fw-G: #9cff00;
+            --fw-G2: #ffd700;
+            --fw-T: #9b5cff;
+            --fw-T2: #7fe7ff;
+            --fw-A: #ff4a2a;
+            --fw-A2: #ffffff;
+
+            --header-height: 52px;
+            --row-height: 64px;
+            --sidebar-width: 24px;
+            --ease-mech: cubic-bezier(.25, .46, .45, .94);
+            --ease-snap: cubic-bezier(.175, .885, .32, 1.275);
+        }
+
+        html[data-theme="light"] {
+            --bg-void: #ffffff;
+            --bg-panel: #f0f0f0;
+            --bg-hover: #e6e6e6;
+            --text-primary: #000000;
+            --text-secondary: #4a4a4a;
+            --text-muted: #888888;
+            --border: #cccccc;
+            --accent: #d13d00;
+            --accent-glow: rgba(209, 61, 0, .10);
+            --class-core: #d13d00;
+            --class-media: #0044cc;
+            --class-tool: #007733;
+            --class-exp: #770099;
+            --cyan: #007c8a;
+            --orange: #b85f00;
+            --gold: #9c7a00;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg-void);
+            color: var(--text-primary);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            transition: background-color .25s, color .25s;
+        }
+
+        /* CANVAS LAYERS */
+        #stage {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(ellipse at 50% 30%, rgba(255, 157, 92, .06), rgba(0, 0, 0, 0) 60%);
+        }
+
+        #gl-wrap {
+            position: absolute;
+            inset: 0;
+            display: block
+        }
+
+        #gl-wrap canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%
+        }
+
+        #hud-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* APP SHELL */
+        #app {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%
+        }
+
+        #global-hud {
+            height: var(--header-height);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, 0)), var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            gap: 10px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+            user-select: none;
+        }
+
+        .hud-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 210px
+        }
+
+        .hud-logo {
+            width: 24px;
+            height: 24px;
+            color: var(--accent);
+            cursor: pointer;
+            transition: transform .3s var(--ease-snap)
+        }
+
+        .hud-logo:hover {
+            transform: rotate(90deg);
+            filter: drop-shadow(0 0 6px var(--accent))
+        }
+
+        .hud-title {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.05
+        }
+
+        .hud-title .top {
+            font-weight: 900;
+            letter-spacing: 1px;
+            font-size: .82rem
+        }
+
+        .hud-title .sub {
+            font-size: .62rem;
+            color: var(--text-secondary);
+            letter-spacing: .5px
+        }
+
+        .hud-center {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px
+        }
+
+        .filter-wrap {
+            width: min(560px, 100%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, 0));
+            backdrop-filter: blur(8px);
+        }
+
+        .filter-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 99px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow)
+        }
+
+        #filter {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: .78rem
+        }
+
+        #filter::placeholder {
+            color: var(--text-muted)
+        }
+
+        .hud-controls {
+            display: flex;
+            gap: 6px;
+            flex: 0 0 auto;
+            align-items: center
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .9rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all .15s;
+            touch-action: manipulation;
+        }
+
+        .btn-icon:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+            background: var(--bg-hover)
+        }
+
+        .btn-icon.active {
+            background: var(--text-secondary);
+            color: var(--bg-void)
+        }
+
+        .btn-pill {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            height: 34px;
+            padding: 0 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            font-weight: 900;
+            letter-spacing: 1px;
+            font-size: .72rem;
+            transition: all .15s;
+            touch-action: manipulation;
+        }
+
+        .btn-pill:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+            background: var(--bg-hover)
+        }
+
+        .btn-pill.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 14px var(--accent-glow)
+        }
+
+        /* Framework buttons */
+        .fw-group {
+            display: flex;
+            gap: 6px;
+            align-items: center
+        }
+
+        .fw-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, .15);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 1000;
+            letter-spacing: 1px;
+            transition: all .15s;
+        }
+
+        .fw-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--text-primary)
+        }
+
+        .fw-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 14px var(--accent-glow)
+        }
+
+        .fw-btn[data-fw="C"].active {
+            border-color: var(--fw-C);
+            color: var(--fw-C);
+            box-shadow: 0 0 16px rgba(34, 227, 214, .25)
+        }
+
+        .fw-btn[data-fw="G"].active {
+            border-color: var(--fw-G);
+            color: var(--fw-G);
+            box-shadow: 0 0 16px rgba(156, 255, 0, .22)
+        }
+
+        .fw-btn[data-fw="T"].active {
+            border-color: var(--fw-T);
+            color: var(--fw-T);
+            box-shadow: 0 0 16px rgba(155, 92, 255, .22)
+        }
+
+        .fw-btn[data-fw="A"].active {
+            border-color: var(--fw-A);
+            color: var(--fw-A);
+            box-shadow: 0 0 16px rgba(255, 74, 42, .22)
+        }
+
+        /* WORKSPACE */
+        #workspace {
+            display: flex;
+            flex: 1 1 auto;
+            overflow: hidden;
+            position: relative
+        }
+
+        .dna-rail {
+            width: var(--sidebar-width);
+            background: rgba(20, 16, 15, .88);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+            z-index: 10;
+            position: relative;
+            flex: 0 0 auto;
+            backdrop-filter: blur(8px);
+        }
+
+        .rail-track {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+            z-index: 0
+        }
+
+        .rail-progress {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            background: var(--accent);
+            height: 0%;
+            z-index: 1;
+            transition: height .08s linear
+        }
+
+        .rail-mark {
+            width: 10px;
+            height: 1px;
+            background: var(--text-muted);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: .7
+        }
+
+        #genome-scroll {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            position: relative;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .12), rgba(0, 0, 0, 0));
+            backdrop-filter: blur(8px);
+        }
+
+        #genome-scroll::-webkit-scrollbar {
+            display: none
+        }
+
+        #gene-list {
+            display: flex;
+            flex-direction: column;
+            width: 100%
+        }
+
+        #gene-list.grid-mode {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            padding: 12px;
+            align-items: start;
+        }
+
+        .gene-row {
+            background: rgba(5, 5, 5, .65);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: background .25s, transform .25s, border-color .25s;
+            overflow: hidden;
+        }
+
+        #gene-list.grid-mode .gene-row {
+            border: 1px solid var(--border);
+            height: 160px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        #gene-list.grid-mode .gene-row.active {
+            grid-column: 1/-1;
+            height: auto;
+            border-color: var(--accent);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .55);
+        }
+
+        .gene-header {
+            height: var(--row-height);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            cursor: pointer;
+            background: rgba(5, 5, 5, .35);
+            position: relative;
+            flex-shrink: 0;
+            overflow: hidden;
+            z-index: 2;
+            touch-action: manipulation;
+        }
+
+        .gene-header:hover {
+            background: rgba(38, 31, 29, .55)
+        }
+
+        #gene-list.grid-mode .gene-row:not(.active) .gene-header {
+            height: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 10px;
+        }
+
+        #gene-list.grid-mode .gene-row:not(.active) .gene-controls {
+            display: none
+        }
+
+        #gene-list.grid-mode .gene-row:not(.active) .id-cluster {
+            width: 100%;
+            border-right: none;
+            height: auto;
+            margin-bottom: 8px
+        }
+
+        #gene-list.grid-mode .gene-row:not(.active) .gene-info {
+            width: 100%
+        }
+
+        #gene-list.grid-mode .gene-row:not(.active) .gene-barcode {
+            height: 7px
+        }
+
+        .id-cluster {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            width: 70px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border);
+            margin-right: 10px;
+            gap: 6px
+        }
+
+        .class-indicator {
+            width: 3px;
+            height: 100%;
+            background: var(--text-muted)
+        }
+
+        .gene-barcode {
+            flex: 1 1 auto;
+            height: 22px;
+            opacity: .85;
+            border-radius: 4px
+        }
+
+        .gene-tag {
+            font-size: .62rem;
+            font-weight: 1000;
+            letter-spacing: 1px;
+            padding: 4px 6px;
+            border-radius: 7px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, .22);
+            white-space: nowrap;
+        }
+
+        .gene-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden
+        }
+
+        .gene-title {
+            font-size: .86rem;
+            font-weight: 1000;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%
+        }
+
+        .gene-desc {
+            font-size: .66rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            margin-top: 4px
+        }
+
+        .gene-controls {
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 0 0 auto
+        }
+
+        .ext-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            padding: 7px;
+            border-radius: 8px;
+            transition: all .15s;
+            touch-action: manipulation;
+            border: 1px solid transparent;
+        }
+
+        .ext-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+            border-color: var(--border)
+        }
+
+        .arrow-indicator {
+            font-size: .75rem;
+            color: var(--text-secondary);
+            transition: transform .35s var(--ease-snap)
+        }
+
+        .gene-row.active {
+            background: rgba(38, 31, 29, .55);
+            border-bottom-color: var(--accent)
+        }
+
+        .gene-row.active .gene-barcode {
+            opacity: 1;
+            filter: contrast(1.2)
+        }
+
+        .gene-row.active .arrow-indicator {
+            transform: rotate(90deg);
+            color: var(--accent)
+        }
+
+        .expression-window {
+            height: 0;
+            overflow: hidden;
+            transition: height .55s var(--ease-mech);
+            background: rgba(0, 0, 0, .72);
+            position: relative;
+            transform-origin: top;
+            will-change: height;
+        }
+
+        .gene-row.active .expression-window {
+            height: 64vh
+        }
+
+        .locus-body {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px;
+            z-index: 1
+        }
+
+        .locus-top {
+            display: flex;
+            gap: 10px;
+            align-items: stretch
+        }
+
+        .pheno-thumb {
+            width: 168px;
+            height: 168px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .16);
+            box-shadow: 0 12px 50px rgba(0, 0, 0, .55);
+            background: radial-gradient(circle at 30% 30%, rgba(255, 215, 0, .14), rgba(0, 0, 0, 0) 60%);
+            overflow: hidden;
+            flex: 0 0 auto;
+            cursor: zoom-in;
+            position: relative;
+        }
+
+        .pheno-thumb canvas {
+            width: 100%;
+            height: 100%;
+            display: block
+        }
+
+        .pheno-badge {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            background: rgba(0, 0, 0, .7);
+            border: 1px solid rgba(255, 255, 255, .14);
+            padding: 6px 8px;
+            border-radius: 10px;
+            font-size: .66rem;
+            font-weight: 1000;
+            letter-spacing: 1px;
+            color: var(--gold);
+            backdrop-filter: blur(8px);
+        }
+
+        .locus-meta {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .meta-card {
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(0, 0, 0, .35);
+            backdrop-filter: blur(8px);
+        }
+
+        .meta-k {
+            font-size: .62rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 1000
+        }
+
+        .meta-v {
+            margin-top: 6px;
+            font-size: .78rem;
+            color: var(--text-primary);
+            line-height: 1.35
+        }
+
+        .meta-v small {
+            color: var(--text-secondary);
+            font-size: .66rem
+        }
+
+        .locus-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 2px
+        }
+
+        .mini-btn {
+            height: 34px;
+            padding: 0 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, .18);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: 1000;
+            letter-spacing: 1px;
+            font-size: .7rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all .15s;
+        }
+
+        .mini-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--text-primary)
+        }
+
+        .mini-btn.danger:hover {
+            border-color: rgba(255, 80, 80, .8);
+            color: #ff8080
+        }
+
+        .mini-btn.primary {
+            border-color: rgba(255, 157, 92, .5);
+            color: var(--accent)
+        }
+
+        .mini-btn.primary:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 16px var(--accent-glow)
+        }
+
+        .mini-btn:active {
+            transform: translateY(1px)
+        }
+
+        .prompt-area {
+            flex: 1 1 auto;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, .35);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 140px;
+        }
+
+        .prompt-area textarea {
+            width: 100%;
+            flex: 1 1 auto;
+            resize: none;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: .76rem;
+            line-height: 1.5;
+        }
+
+        .prompt-area textarea::placeholder {
+            color: var(--text-muted)
+        }
+
+        .prompt-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center
+        }
+
+        .chip-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap
+        }
+
+        .chip {
+            padding: 5px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .18);
+            color: var(--text-secondary);
+            font-size: .64rem;
+            font-weight: 1000;
+            letter-spacing: 1px;
+        }
+
+        /* RIGHT RAIL (MINIMAP) */
+        #minimap-rail {
+            width: 16px;
+            background: rgba(20, 16, 15, .88);
+            border-left: 1px solid var(--border);
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+            flex: 0 0 auto;
+            backdrop-filter: blur(8px);
+        }
+
+        .map-indicator {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            opacity: .35;
+            height: 2px;
+            transition: opacity .15s, height .15s, box-shadow .15s;
+            pointer-events: none
+        }
+
+        .map-indicator.active {
+            opacity: 1;
+            height: 4px;
+            box-shadow: -2px 0 10px currentColor;
+            z-index: 2
+        }
+
+        #minimap-lens {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 12%;
+            top: 0;
+            border: 2px solid var(--accent);
+            background: var(--accent-glow);
+            z-index: 10;
+            border-radius: 2px;
+            cursor: grab;
+            transition: top .08s linear, height .08s linear, background-color .2s;
+        }
+
+        #minimap-lens:active {
+            cursor: grabbing;
+            background: var(--accent);
+            opacity: .5
+        }
+
+        /* PANELS */
+        .panel {
+            position: fixed;
+            top: calc(var(--header-height) + 10px);
+            bottom: 10px;
+            width: min(320px, 88vw);
+            background: rgba(20, 16, 15, .88);
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 14px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 14px 60px rgba(0, 0, 0, .6);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform .28s var(--ease-snap), opacity .28s;
+        }
+
+        #panel-a {
+            left: 10px;
+            transform: translateX(0)
+        }
+
+        #panel-b {
+            right: 10px;
+            transform: translateX(0)
+        }
+
+        .panel.hidden {
+            opacity: .0;
+            pointer-events: none
+        }
+
+        #panel-a.hidden {
+            transform: translateX(calc(-100% - 20px))
+        }
+
+        #panel-b.hidden {
+            transform: translateX(calc(100% + 20px))
+        }
+
+        .panel-head {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, .10);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .panel-title {
+            font-weight: 1000;
+            letter-spacing: 2px;
+            font-size: .78rem;
+            text-transform: uppercase
+        }
+
+        .panel-title .sig {
+            font-weight: 1100
+        }
+
+        .panel-body {
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow: auto
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center
+        }
+
+        .row label {
+            font-size: .62rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 1000;
+            min-width: 82px
+        }
+
+        .row input[type="range"] {
+            flex: 1 1 auto
+        }
+
+        .row select,
+        .row button {
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .22);
+            color: var(--text-primary);
+            border-radius: 10px;
+            height: 34px;
+            padding: 0 10px;
+            font-family: inherit;
+            font-weight: 1000;
+            letter-spacing: 1px;
+        }
+
+        .row .tog {
+            height: 34px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .22);
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 1000;
+            letter-spacing: 1px;
+            transition: all .15s;
+        }
+
+        .row .tog:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--text-primary)
+        }
+
+        .row .tog.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 16px var(--accent-glow)
+        }
+
+        .hint {
+            font-size: .66rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+            border-top: 1px solid rgba(255, 255, 255, .08);
+            padding-top: 10px
+        }
+
+        /* LOG */
+        #log {
+            position: fixed;
+            left: calc(var(--sidebar-width) + 14px);
+            bottom: 14px;
+            width: min(520px, calc(100vw - 90px));
+            max-height: 26vh;
+            background: rgba(0, 0, 0, .55);
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 14px;
+            backdrop-filter: blur(12px);
+            z-index: 40;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .55);
+        }
+
+        #log .head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, .10);
+        }
+
+        #log .head .t {
+            font-weight: 1000;
+            letter-spacing: 2px;
+            font-size: .72rem;
+            text-transform: uppercase;
+            color: var(--text-secondary)
+        }
+
+        #log .body {
+            padding: 10px 12px;
+            overflow: auto;
+            max-height: 22vh
+        }
+
+        .logline {
+            font-size: .74rem;
+            line-height: 1.35;
+            color: var(--text-secondary);
+            margin: 0 0 10px
+        }
+
+        .logline b {
+            color: var(--text-primary)
+        }
+
+        .logline em {
+            color: var(--accent);
+            font-style: normal
+        }
+
+        /* INLINE DILEMMA CARD */
+        .pending-locus {
+            background: rgba(255, 157, 92, .06);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 14px;
+            margin: 10px 10px 20px 10px;
+            box-shadow: 0 0 30px var(--accent-glow);
+            animation: slideIn 0.4s var(--ease-snap);
+        }
+
+        .dilemma-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, .1);
+            padding-bottom: 10px;
+        }
+
+        .d-title {
+            font-weight: 1000;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: .9rem;
+            color: var(--accent);
+        }
+
+        .d-stakes {
+            font-size: .86rem;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 14px;
+        }
+
+        .d-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .d-grid {
+                grid-template-columns: 1fr 1.2fr;
+            }
+        }
+
+        .d-col {
+            background: rgba(0, 0, 0, .3);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        /* TICKET PREVIEW */
+        .ticket-preview canvas {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- CANVAS STAGE -->
+    <div id="stage" aria-hidden="true">
+        <div id="gl-wrap"></div>
+        <canvas id="hud-canvas"></canvas>
+    </div>
+
+    <!-- APP -->
+    <div id="app">
+        <header id="global-hud">
+            <div class="hud-left">
+                <svg class="hud-logo" onclick="logAbout()" viewBox="0 0 100 100" aria-label="About" role="button">
+                    <path d="M50 10 L90 30 V70 L50 90 L10 70 V30 Z" fill="none" stroke="currentColor"
+                        stroke-width="4" />
+                    <circle cx="50" cy="50" r="10" fill="currentColor" />
+                    <path d="M50 10 V38 M50 90 V62 M10 30 L38 44 M90 30 L62 44 M10 70 L38 56 M90 70 L62 56"
+                        stroke="currentColor" stroke-width="2" />
+                </svg>
+                <div class="hud-title">
+                    <div class="top">ETHICS-HELIX-TROLLEY</div>
+                    <div class="sub" id="hud_sub">train running · loci: 0</div>
+                </div>
+            </div>
+
+            <div class="hud-center">
+                <div class="filter-wrap" title="Filter loci (stakeholder, dilemma, framework, choice)">
+                    <div class="filter-dot"></div>
+                    <input id="filter" placeholder="filter loci (e.g. nurse, truth, ACT, locus 12…)"
+                        autocomplete="off" />
+                </div>
+            </div>
+
+            <div class="hud-controls">
+                <div class="fw-group" title="Framework mode">
+                    <button class="fw-btn active" data-fw="C" onclick="setFramework('C')">C</button>
+                    <button class="fw-btn" data-fw="G" onclick="setFramework('G')">G</button>
+                    <button class="fw-btn" data-fw="T" onclick="setFramework('T')">T</button>
+                    <button class="fw-btn" data-fw="A" onclick="setFramework('A')">A</button>
+                </div>
+
+                <button class="btn-pill" id="btn_dilemma" onclick="replayLastDilemma()"
+                    title="Replay last dilemma (ENTER)">
+                    DILEMMA
+                </button>
+
+                <button class="btn-icon" id="view-toggle" onclick="toggleGrid()" title="Toggle Grid/List View"
+                    aria-label="Toggle view">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                </button>
+
+                <button class="btn-icon" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle theme">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                </button>
+
+                <button class="btn-icon" id="pause-btn" onclick="togglePause()" title="Pause train (SPACE)"
+                    aria-label="Pause">
+                    ⏸
+                </button>
+
+                <button class="btn-pill" onclick="openTicket()" title="Open ticket">
+                    TICKET
+                </button>
+            </div>
+        </header>
+
+        <div id="workspace">
+            <!-- LEFT RAIL -->
+            <div class="dna-rail" aria-hidden="true">
+                <div class="rail-track"></div>
+                <div class="rail-progress" id="rail-progress"></div>
+            </div>
+
+            <!-- MAIN SCROLL -->
+            <main id="genome-scroll" aria-label="Genome list">
+                <div id="gene-list"></div>
+                <div style="height: 100px;"></div>
+            </main>
+
+            <!-- RIGHT RAIL -->
+            <div id="minimap-rail" aria-label="Minimap rail">
+                <div id="minimap-lens" aria-hidden="true"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STRAND PANELS -->
+    <aside class="panel" id="panel-a" aria-label="Strand A panel">
+        <div class="panel-head">
+            <div class="panel-title"><span class="sig" style="color:var(--cyan)">STRAND A</span> · ACT</div>
+            <button class="btn-icon" onclick="togglePanel('a')" title="Hide (H)">H</button>
+        </div>
+        <div class="panel-body">
+            <div class="row"><label>Opacity</label><input id="a_op" type="range" min="0" max="1" step="0.01"></div>
+            <div class="row">
+                <label>Blend</label>
+                <select id="a_mode">
+                    <option value="multiply">multiply</option>
+                    <option value="screen">screen</option>
+                    <option value="overlay">overlay</option>
+                    <option value="difference">difference</option>
+                </select>
+            </div>
+            <div class="row"><label>Frequency</label><input id="a_freq" type="range" min="0" max="1" step="0.01"></div>
+            <div class="row"><label>Flow</label><input id="a_flow" type="range" min="0" max="1" step="0.01"></div>
+            <div class="row">
+                <label>Direction</label>
+                <button class="tog" id="a_dir" onclick="toggleDir('a')">→</button>
+                <button class="tog" id="a_pause" onclick="toggleStrandPause('a')">PAUSE</button>
+            </div>
+            <div class="hint">
+                A modulates phenotype generation (new loci) and helix shimmer. Keys: <b>H</b> toggle this panel.
+            </div>
+        </div>
+    </aside>
+
+    <aside class="panel" id="panel-b" aria-label="Strand B panel">
+        <div class="panel-head">
+            <div class="panel-title"><span class="sig" style="color:var(--orange)">STRAND B</span> · REFRAIN</div>
+            <button class="btn-icon" onclick="togglePanel('b')" title="Hide (K)">K</button>
+        </div>
+        <div class="panel-body">
+            <div class="row"><label>Opacity</label><input id="b_op" type="range" min="0" max="1" step="0.01"></div>
+            <div class="row">
+                <label>Blend</label>
+                <select id="b_mode">
+                    <option value="multiply">multiply</option>
+                    <option value="screen">screen</option>
+                    <option value="overlay">overlay</option>
+                    <option value="difference">difference</option>
+                </select>
+            </div>
+            <div class="row"><label>Frequency</label><input id="b_freq" type="range" min="0" max="1" step="0.01"></div>
+            <div class="row"><label>Flow</label><input id="b_flow" type="range" min="0" max="1" step="0.01"></div>
+            <div class="row">
+                <label>Direction</label>
+                <button class="tog" id="b_dir" onclick="toggleDir('b')">→</button>
+                <button class="tog" id="b_pause" onclick="toggleStrandPause('b')">PAUSE</button>
+            </div>
+            <div class="hint">
+                B encodes restraint patterns. Keys: <b>K</b> toggle this panel.
+            </div>
+        </div>
+    </aside>
+
+    <!-- SYSTEM LOG -->
+    <section id="log" aria-label="System log">
+        <div class="head">
+            <div class="t">SYSTEM LOG</div>
+            <button class="btn-icon" onclick="clearLog()" title="Clear">⌫</button>
+        </div>
+        <div class="body" id="logBody"></div>
+    </section>
+
+    <script src="https://unpkg.com/three@0.160.1/build/three.min.js"></script>
+
+    <script>
+        // ========= STATE MODEL =========
+        const STATE = {
+            framework: 'C',
+            train: { trackIndex: 0, speed: 0.12, progress: 0 },
+            strandA: { opacity: 0.65, mode: 'multiply', frequency: 0.86, flow: 0.72, paused: false, direction: 1 },
+            strandB: { opacity: 0.55, mode: 'screen', frequency: 0.78, flow: 0.70, paused: false, direction: 1 },
+            genome: [],
+            selectedLocusId: null,
+            ui: {
+                panelsHidden: { a: false, b: false },
+                gridMode: false
+            }
+        };
+
+        // ========= HELPERS =========
+        const $ = (s) => document.querySelector(s);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const nowISO = () => new Date().toISOString();
+        const fmtTime = (iso) => {
+            try {
+                const d = new Date(iso);
+                return d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+            } catch { return iso; }
+        };
+
+        function fwColors(fw) {
+            const map = {
+                C: { tint: getCss('--fw-C'), accent: getCss('--fw-C2') },
+                G: { tint: getCss('--fw-G'), accent: getCss('--fw-G2') },
+                T: { tint: getCss('--fw-T'), accent: getCss('--fw-T2') },
+                A: { tint: getCss('--fw-A'), accent: getCss('--fw-A2') },
+            };
+            return map[fw] || map.C;
+        }
+        function fwGlyph(fw) { return ({ C: '⊹', G: '✶', T: '⟁', A: '⬢' })[fw] || '⊹'; }
+        function getCss(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+
+        function hashStr(str) {
+            // FNV-1a
+            let h = 2166136261 >>> 0;
+            for (let i = 0; i < str.length; i++) {
+                h ^= str.charCodeAt(i);
+                h = Math.imul(h, 16777619);
+            }
+            return h >>> 0;
+        }
+        function mulberry32(seed) {
+            let a = seed >>> 0;
+            return function () {
+                a |= 0; a = (a + 0x6D2B79F5) | 0;
+                let t = Math.imul(a ^ (a >>> 15), 1 | a);
+                t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+        function pick(rng, arr) { return arr[Math.floor(rng() * arr.length)] }
+        function signStr(n) { return (n >= 0 ? '+' : '') + n.toFixed(0); }
+
+        function log(line) {
+            const el = document.createElement('div');
+            el.className = 'logline';
+            el.innerHTML = line;
+            const body = $('#logBody');
+            body.prepend(el);
+            // cap
+            const kids = body.querySelectorAll('.logline');
+            if (kids.length > 80) kids[kids.length - 1].remove();
+        }
+        function clearLog() { $('#logBody').innerHTML = ''; }
+
+        function logAbout() {
+            log(`<br><b>🍴 THE FORK // ETHICS-HELIX-TROLLEY</b>`);
+            log(`The trolley problem is a double helix: two rails are two action-alleles.`);
+            log(`<b>Controls:</b> Framework: C/G/T/A · SPACE pauses train · ENTER replays last dilemma · H/K toggle strand panels · ESC toggles panels.`);
+            log(`<b>Output:</b> Each dilemma creates a locus: ACT vs REFRAIN, stakeholders, score deltas, phenotype image, and a future image prompt.<br>`);
+        }
+
+        // ========= STAKEHOLDERS + DILEMMAS =========
+        const STAKEHOLDERS = {
+            C: [
+                { type: 'human', role: 'caregiver', name: 'Nurse', quote: 'Care is a verb. Who is held when the math ends?', sig: 'NUR' },
+                { type: 'human', role: 'dependent', name: 'Child', quote: 'I do not consent to becoming your example.', sig: 'CHD' },
+                { type: 'human', role: 'elder', name: 'Elder', quote: 'Mercy is a structure, not a feeling.', sig: 'ELD' },
+                { type: 'nonhuman', role: 'animal', name: 'Stray', quote: 'Your compassion is legible in the small acts.', sig: 'STR' },
+            ],
+            G: [
+                { type: 'human', role: 'builder', name: 'Engineer', quote: 'A system grows by making room for its next failure.', sig: 'ENG' },
+                { type: 'human', role: 'teacher', name: 'Mentor', quote: 'Choose the path that teaches the most without destroying the classroom.', sig: 'MNT' },
+                { type: 'institution', role: 'startup', name: 'Prototype', quote: 'Iteration is ethics with receipts.', sig: 'PRT' },
+                { type: 'ecosystem', role: 'forest', name: 'Biome', quote: 'Growth is not speed. Growth is repair.', sig: 'BIO' },
+            ],
+            T: [
+                { type: 'human', role: 'witness', name: 'Reporter', quote: 'If it cannot be spoken, it will be repeated.', sig: 'RPT' },
+                { type: 'institution', role: 'court', name: 'Tribunal', quote: 'Truth is not balance. Truth is constraint.', sig: 'TRB' },
+                { type: 'human', role: 'scientist', name: 'Analyst', quote: 'Show your assumptions. Then choose.', sig: 'ANL' },
+                { type: 'artifact', role: 'record', name: 'Ledger', quote: 'Your decision leaves a fossil.', sig: 'LDG' },
+            ],
+            A: [
+                { type: 'human', role: 'operator', name: 'Switchman', quote: 'A lever is a promise with torque.', sig: 'SWT' },
+                { type: 'human', role: 'activist', name: 'Organizer', quote: 'Action that avoids risk is theatre.', sig: 'ORG' },
+                { type: 'institution', role: 'response', name: 'Dispatch', quote: 'Do it now. Consequences later.', sig: 'DSP' },
+                { type: 'system', role: 'alarm', name: 'Siren', quote: 'If you wait for certainty, you choose delay.', sig: 'SRN' },
+            ]
+        };
+
+        const DILEMMA_SEEDS = [
+            { title: 'Tunnel Split', stakes: 'A maintenance collapse forces a switch. Someone gets delayed; someone gets hurt.' },
+            { title: 'Medical Supply Run', stakes: 'A train carries antidote. Re-route saves one, risks many.' },
+            { title: 'Truth Leak', stakes: 'A signal exposes corruption. Publishing protects future, harms present.' },
+            { title: 'Evacuation Spiral', stakes: 'Crowd control vs individual rescue under time pressure.' },
+            { title: 'Prototype Crash', stakes: 'A system upgrade prevents later catastrophe but breaks current stability.' },
+            { title: 'Night Crossing', stakes: 'Low visibility. Human error amplified. Choice is a commitment.' },
+        ];
+
+        function genScoreDelta(fw, choice, rng) {
+            // bias deltas by framework + choice
+            const base = { care: 0, growth: 0, truth: 0, action: 0 };
+            const wobble = () => (rng() * 6 - 3); // -3..+3
+            if (fw === 'C') { base.care += 4; base.truth += 1; }
+            if (fw === 'G') { base.growth += 4; base.action += 1; }
+            if (fw === 'T') { base.truth += 4; base.care += 1; }
+            if (fw === 'A') { base.action += 4; base.growth += 1; }
+
+            // choice effect
+            if (choice === 'ACT') { base.action += 2; base.truth -= 1; }
+            else { base.care += 1; base.action -= 2; }
+
+            // add wobble
+            base.care += wobble(); base.growth += wobble(); base.truth += wobble(); base.action += wobble();
+            // keep in reasonable range
+            for (const k of Object.keys(base)) base[k] = Math.round(clamp(base[k], -6, 8));
+            return base;
+        }
+
+        function makeDilemma(framework) {
+            const seed = hashStr(nowISO() + '|' + framework + '|' + Math.random());
+            const rng = mulberry32(seed);
+            const d = pick(rng, DILEMMA_SEEDS);
+            const pool = [...STAKEHOLDERS[framework]];
+            // pick 2-4
+            const count = 2 + Math.floor(rng() * 3);
+            const stakeholders = [];
+            while (stakeholders.length < count && pool.length) {
+                stakeholders.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+            }
+            // outcomes
+            const actOut = pick(rng, [
+                'reroute through helix gate', 'pull switch at locus', 'override safety protocol', 'enter maintenance ring'
+            ]);
+            const refOut = pick(rng, [
+                'stay course', 'accept collision path', 'preserve schedule', 'hold constraint ring'
+            ]);
+            const stakes = d.stakes;
+
+            return {
+                title: d.title,
+                leftTrack: 'ACT: ' + actOut,
+                rightTrack: 'REFRAIN: ' + refOut,
+                stakesSummary: stakes,
+                stakeholders
+            };
+        }
+
+        // ========= PROCEDURAL PHENOTYPE =========
+        function generatePhenotypeCanvas(locusIndex, framework, choice, stakeholders, aCtrl, bCtrl) {
+            const sigs = stakeholders.map(s => s.sig).join('-');
+            const seedStr = `l${locusIndex}|${framework}|${choice}|${sigs}`;
+            const seed = hashStr(seedStr);
+            const rng = mulberry32(seed);
+
+            const c = document.createElement('canvas');
+            c.width = 256; c.height = 256;
+            const ctx = c.getContext('2d', { alpha: true });
+
+            const { tint, accent } = fwColors(framework);
+
+            // background gradient
+            const g = ctx.createLinearGradient(0, 0, 256, 256);
+            g.addColorStop(0, `rgba(0,0,0,1)`);
+            g.addColorStop(0.35, hexToRgba(tint, 0.18));
+            g.addColorStop(0.7, hexToRgba(accent, 0.10));
+            g.addColorStop(1, `rgba(0,0,0,1)`);
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 256, 256);
+
+            // subtle grid
+            ctx.globalAlpha = 0.12;
+            ctx.strokeStyle = 'rgba(255,255,255,.22)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 256; i += 16) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke();
+            }
+
+            // noise-ish blobs
+            const freqA = 0.6 + aCtrl.frequency * 1.8;
+            const freqB = 0.6 + bCtrl.frequency * 1.8;
+            const flowA = 0.2 + aCtrl.flow * 1.2;
+            const flowB = 0.2 + bCtrl.flow * 1.2;
+
+            function layer(color, alpha, count, radiusMin, radiusMax, swirl) {
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = color;
+                for (let i = 0; i < count; i++) {
+                    const t = (i / count) * Math.PI * 2;
+                    const r = (radiusMin + rng() * (radiusMax - radiusMin));
+                    const cx = 128 + Math.cos(t * swirl) * (40 + rng() * 70);
+                    const cy = 128 + Math.sin(t * swirl) * (40 + rng() * 70);
+                    const rr = r * (0.7 + rng() * 0.9);
+                    ctx.beginPath();
+                    ctx.ellipse(cx, cy, rr, rr * (0.6 + rng() * 0.7), t + rng() * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // strand A layer
+            ctx.globalCompositeOperation = 'source-over';
+            layer(hexToRgba(getCss('--cyan'), 1), 0.10 + 0.35 * aCtrl.opacity, 26, 6 * freqA, 22 * freqA, 1.2 + flowA);
+            // encode mode
+            ctx.globalCompositeOperation = aCtrl.mode;
+            layer(hexToRgba(tint, 1), 0.10 + 0.30 * aCtrl.opacity, 18, 10 * freqA, 30 * freqA, 1.6 + flowA);
+
+            // strand B layer
+            ctx.globalCompositeOperation = 'source-over';
+            layer(hexToRgba(getCss('--orange'), 1), 0.10 + 0.35 * bCtrl.opacity, 26, 6 * freqB, 22 * freqB, 1.1 + flowB);
+            ctx.globalCompositeOperation = bCtrl.mode;
+            layer(hexToRgba(accent, 1), 0.10 + 0.30 * bCtrl.opacity, 18, 10 * freqB, 30 * freqB, 1.5 + flowB);
+
+            // focal helix knot
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalAlpha = 0.55;
+            for (let i = 0; i < 220; i++) {
+                const y = (i / 220) * 256;
+                const w = Math.sin((y / 256) * Math.PI * 2 * (2 + (framework.charCodeAt(0) % 3))) * 34;
+                const x1 = 128 + w;
+                const x2 = 128 - w;
+                ctx.fillStyle = hexToRgba(getCss('--cyan'), 0.7);
+                ctx.fillRect(x1 - 1.2, y, 2.4, 1.4);
+                ctx.fillStyle = hexToRgba(getCss('--orange'), 0.7);
+                ctx.fillRect(x2 - 1.2, y, 2.4, 1.4);
+                if (i % 14 === 0) {
+                    ctx.fillStyle = hexToRgba(getCss('--gold'), 0.35);
+                    ctx.fillRect(Math.min(x1, x2), y, Math.abs(x1 - x2), 1.2);
+                }
+            }
+
+            // barcode strip
+            const enc = `${framework}${choice[0]}|${sigs}`;
+            drawBarcode(ctx, 10, 226, 236, 18, enc, tint);
+
+            // stamp
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 0.9;
+            ctx.fillStyle = 'rgba(0,0,0,.65)';
+            ctx.fillRect(10, 10, 126, 28);
+            ctx.strokeStyle = hexToRgba(getCss('--gold'), 0.55);
+            ctx.strokeRect(10.5, 10.5, 125, 27);
+            ctx.fillStyle = hexToRgba(getCss('--gold'), 0.95);
+            ctx.font = '900 10px ui-monospace, monospace';
+            ctx.fillText(`LOCUS ${String(locusIndex).padStart(3, '0')}  ${framework}${fwGlyph(framework)}  ${choice}`, 16, 28);
+
+            return { canvas: c, seedStr, seed };
+        }
+
+        function hexToRgba(hex, a) {
+            const h = (hex || '').replace('#', '').trim();
+            if (h.length === 3) {
+                const r = parseInt(h[0] + h[0], 16), g = parseInt(h[1] + h[1], 16), b = parseInt(h[2] + h[2], 16);
+                return `rgba(${r},${g},${b},${a})`;
+            }
+            if (h.length >= 6) {
+                const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+                return `rgba(${r},${g},${b},${a})`;
+            }
+            return `rgba(255,255,255,${a})`;
+        }
+
+        function drawBarcode(ctx, x, y, w, h, str, colorHex) {
+            const seed = hashStr(str);
+            const rng = mulberry32(seed);
+            ctx.save();
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = 'rgba(0,0,0,.55)';
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeStyle = hexToRgba(colorHex, 0.5);
+            ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+            for (let i = 0; i < w; i += 2) {
+                const r = rng();
+                if (r > 0.52) {
+                    ctx.fillStyle = hexToRgba(colorHex, 0.9);
+                    const bw = 1 + Math.floor(rng() * 2);
+                    ctx.fillRect(x + i, y + 2, bw, h - 4);
+                }
+            }
+            ctx.restore();
+        }
+
+        function buildPhenotypePrompt(locus) {
+            const palette = `cyan/orange/gold + framework-${locus.framework}`;
+            const roles = locus.stakeholders.map(s => s.role).join(', ');
+            return `Surreal ethical diagram, framework ${locus.framework}, choice ${locus.choice}, stakeholders: ${roles}, palette: ${palette}, style: neon procedural, helix-trolley rails, barcode genome tape, clean HUD glyphs, high contrast`;
+        }
+
+        // ========= UI: LIST / MINIMAP =========
+        const listContainer = $('#gene-list');
+        const mapRail = $('#minimap-rail');
+        const leftRail = document.querySelector('.dna-rail');
+        const scrollContainer = $('#genome-scroll');
+        const lens = $('#minimap-lens');
+        const progressBar = $('#rail-progress');
+        const filterInput = $('#filter');
+
+        let isDragging = false;
+
+        function generateBarcodeCSS(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            let gradient = "linear-gradient(90deg, ";
+            for (let i = 0; i <= 100; i += 10) {
+                const val = Math.abs((hash * (i + 1)) % 100);
+                gradient += (val > 50)
+                    ? `currentColor ${i}%, transparent ${i}%, transparent ${i + 5}%, currentColor ${i + 5}%, `
+                    : `transparent ${i}%, transparent ${i + 10}%, `;
+            }
+            return gradient.slice(0, -2) + ")";
+        }
+
+        function locusColorVar(locus) {
+            // map to class colors for minimap + indicator
+            const fw = locus.framework;
+            if (fw === 'C') return 'var(--fw-C)';
+            if (fw === 'G') return 'var(--fw-G)';
+            if (fw === 'T') return 'var(--fw-T)';
+            if (fw === 'A') return 'var(--fw-A)';
+            return 'var(--accent)';
+        }
+
+        function renderLocusList() {
+            listContainer.innerHTML = '';
+            mapRail.querySelectorAll('.map-indicator').forEach(n => n.remove());
+            leftRail.querySelectorAll('.rail-mark').forEach(n => n.remove());
+
+            const loci = STATE.genome;
+            const n = Math.max(1, loci.length);
+
+            for (let i = 0; i < n; i++) {
+                const mark = document.createElement('div');
+                mark.className = 'rail-mark';
+                mark.style.top = `${(i / n) * 100}%`;
+                leftRail.appendChild(mark);
+            }
+
+            loci.forEach((locus, index) => {
+                if (locus.status === 'pending') {
+                    createPendingCard(locus);
+                } else {
+                    createLocusRow(locus, index);
+                }
+            });
+
+            setTimeout(updateLens, 50);
+            setTimeout(updateLens, 250);
+            applyFilter();
+            updateHud();
+        }
+
+        function createPendingCard(locus) {
+            const d = locus.dilemma;
+            const pd = locus.previewDeltas;
+
+            const card = document.createElement('div');
+            card.className = 'pending-locus';
+            card.id = `gene-${locus.id}`;
+
+            // Pending Card HTML
+            card.innerHTML = `
+                <div class="dilemma-header">
+                    <div class="d-title">Dilemma Gate · ${locus.framework}${fwGlyph(locus.framework)}</div>
+                    <div style="font-size:.7rem;color:var(--text-secondary)">PENDING LOCUS ${locus.index}</div>
+                </div>
+                
+                <div class="d-stakes">${d.stakesSummary}</div>
+                
+                <div class="d-grid">
+                    <div class="d-col">
+                        <div style="font-size:.62rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">Stakeholders</div>
+                        <div style="display:flex;flex-direction:column;gap:6px">
+                            ${locus.stakeholders.map(s =>
+                `<div style="font-size:.78rem;line-height:1.3"><strong style="color:var(--text-primary)">${s.name}</strong> <span style="opacity:.7">(${s.role})</span><br><span style="color:var(--text-secondary);font-size:.7rem">“${s.quote}”</span></div>`
+            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="d-col">
+                        <div style="font-size:.62rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">Decision Fork</div>
+                        
+                        <div style="margin-bottom:12px;font-size:.8rem;line-height:1.4">
+                            <div style="margin-bottom:4px"><strong style="color:var(--cyan)">ACT</strong>: ${d.leftTrack}</div>
+                            <div style="font-size:.7rem;color:var(--text-secondary)">Δ care ${signStr(pd.act.care)} · action ${signStr(pd.act.action)} ...</div>
+                        </div>
+                        <div style="margin-bottom:12px;font-size:.8rem;line-height:1.4">
+                            <div style="margin-bottom:4px"><strong style="color:var(--orange)">REFRAIN</strong>: ${d.rightTrack}</div>
+                            <div style="font-size:.7rem;color:var(--text-secondary)">Δ care ${signStr(pd.ref.care)} · action ${signStr(pd.ref.action)} ...</div>
+                        </div>
+
+                         <div class="choice-row">
+                            <button class="choice-btn act" onclick="commitChoice('ACT', '${locus.id}')">
+                                <span><span class="sig" style="color:var(--cyan)">ACT</span></span>
+                                <span style="opacity:.8">↻</span>
+                            </button>
+                            <button class="choice-btn ref" onclick="commitChoice('REFRAIN', '${locus.id}')">
+                                <span><span class="sig" style="color:var(--orange)">REFRAIN</span></span>
+                                <span style="opacity:.8">⟂</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        }
+
+        function createLocusRow(locus, index) {
+            const title = `LOCUS-${String(locus.index).padStart(3, '0')} · ${locus.framework}${fwGlyph(locus.framework)} · ${locus.choice}`;
+            const desc = `${locus.dilemma.title} — ${locus.dilemma.stakesSummary}`;
+            const barcodeStyle = generateBarcodeCSS(`${locus.framework}|${locus.choice}|${locus.stakeholders.map(s => s.sig).join('-')}`);
+            const colorVar = locusColorVar(locus);
+
+            const row = document.createElement('div');
+            row.className = 'gene-row';
+            row.id = `gene-${locus.id}`;
+            row.dataset.title = title.toLowerCase();
+            row.dataset.desc = desc.toLowerCase();
+            row.dataset.file = `${locus.framework} ${locus.choice} ${locus.stakeholders.map(s => s.name).join(' ')}`.toLowerCase();
+
+            row.innerHTML = `
+        <div class="gene-header" role="button" aria-label="Toggle ${title}">
+          <div class="id-cluster">
+            <div class="class-indicator" style="background:${colorVar}; box-shadow:0 0 10px ${colorVar};"></div>
+            <div class="gene-barcode" style="background-image:${barcodeStyle}; color:${colorVar}"></div>
+            <div class="gene-tag">${locus.framework}${fwGlyph(locus.framework)}</div>
+          </div>
+
+          <div class="gene-info">
+            <span class="gene-title">${title}</span>
+            <span class="gene-desc">${desc}</span>
+          </div>
+
+          <div class="gene-controls">
+            <a href="#" class="ext-link" onclick="stopProp(event); selectLocus('${locus.id}'); return false;" title="Select in helix">◎</a>
+            <div class="arrow-indicator">▶</div>
+          </div>
+        </div>
+
+        <div class="expression-window">
+          <div class="locus-body">
+            <div class="locus-top">
+              <div class="pheno-thumb" title="Click to expand" onclick="selectLocus('${locus.id}')">
+                <div class="pheno-badge">${locus.choice}</div>
+                <div class="pheno-mount" id="ph-${locus.id}"></div>
+              </div>
+
+              <div class="locus-meta">
+                <div class="meta-grid">
+                  <div class="meta-card">
+                    <div class="meta-k">Stakeholders</div>
+                    <div class="meta-v">${locus.stakeholders.map(s => `<b>${s.name}</b> <small>(${s.role})</small>`).join('<br>')}</div>
+                  </div>
+                  <div class="meta-card">
+                    <div class="meta-k">Consequence</div>
+                    <div class="meta-v">${locus.consequence}<br><small>${fmtTime(locus.timestamp)}</small></div>
+                  </div>
+                  <div class="meta-card">
+                    <div class="meta-k">Delta</div>
+                    <div class="meta-v">
+                      care ${signStr(locus.scoreDelta.care)} · growth ${signStr(locus.scoreDelta.growth)}<br>
+                      truth ${signStr(locus.scoreDelta.truth)} · action ${signStr(locus.scoreDelta.action)}
+                    </div>
+                  </div>
+                  <div class="meta-card">
+                    <div class="meta-k">Prompt Seed</div>
+                    <div class="meta-v"><small style="word-break:break-word">${locus.phenotypeSeed}</small></div>
+                  </div>
+                </div>
+
+                <div class="locus-actions">
+                  <button class="mini-btn primary" onclick="selectLocus('${locus.id}')">SELECT</button>
+                  <button class="mini-btn" onclick="copyPrompt('${locus.id}')">COPY PROMPT</button>
+                  <button class="mini-btn" onclick="reRollPhenotype('${locus.id}')">REGEN PHENO</button>
+                  <button class="mini-btn danger" onclick="deleteLocus('${locus.id}')">DELETE</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="prompt-area">
+              <div class="prompt-row">
+                <div class="chip-row">
+                  <div class="chip">FRAMEWORK ${locus.framework}${fwGlyph(locus.framework)}</div>
+                  <div class="chip">CHOICE ${locus.choice}</div>
+                </div>
+              </div>
+              <textarea readonly id="prompt-${locus.id}"></textarea>
+            </div>
+          </div>
+        </div>
+      `;
+
+            row.querySelector('.gene-header').addEventListener('click', () => toggleGeneById(locus.id));
+            listContainer.appendChild(row);
+
+            // mount phenotype canvas clone
+            const mount = row.querySelector(`#ph-${locus.id}`);
+            if (mount) {
+                mount.innerHTML = '';
+                const clone = locus.phenotypeCanvas ? locus.phenotypeCanvas.cloneNode(true) : null;
+                if (clone) mount.appendChild(clone);
+            }
+
+            // prompt
+            const ta = row.querySelector(`#prompt-${locus.id}`);
+            if (ta) ta.value = locus.phenotypePrompt || '';
+
+            // minimap dot
+            const dot = document.createElement('div');
+            dot.className = 'map-indicator';
+            dot.style.top = `${(index / Math.max(1, STATE.genome.length)) * 100}%`;
+            dot.style.height = `${100 / Math.max(1, STATE.genome.length)}%`;
+            dot.style.setProperty('background', colorVar);
+            dot.style.setProperty('color', colorVar);
+            dot.id = `map-${locus.id}`;
+            mapRail.appendChild(dot);
+        }
+
+        function toggleGeneById(locusId) {
+            const row = document.getElementById(`gene-${locusId}`);
+            if (!row || row.style.display === 'none') return;
+            const isActive = row.classList.contains('active');
+            if (isActive) closeGeneById(locusId);
+            else openGeneById(locusId);
+            setTimeout(updateLens, 120);
+            setTimeout(updateLens, 420);
+        }
+        function openGeneById(locusId) {
+            const row = document.getElementById(`gene-${locusId}`);
+            const dot = document.getElementById(`map-${locusId}`);
+            row?.classList.add('active');
+            dot?.classList.add('active');
+        }
+        function closeGeneById(locusId) {
+            const row = document.getElementById(`gene-${locusId}`);
+            const dot = document.getElementById(`map-${locusId}`);
+            row?.classList.remove('active');
+            dot?.classList.remove('active');
+        }
+
+        function applyFilter() {
+            const q = (filterInput.value || '').trim().toLowerCase();
+            const rows = document.querySelectorAll('.gene-row');
+            rows.forEach((row) => {
+                const hay = `${row.dataset.file} ${row.dataset.title} ${row.dataset.desc}`;
+                const show = q === '' || hay.includes(q);
+                row.style.display = show ? '' : 'none';
+            });
+            setTimeout(updateLens, 60);
+            setTimeout(updateLens, 220);
+        }
+        filterInput.addEventListener('input', applyFilter);
+
+        // ========= MINIMAP LENS =========
+        function updateLens() {
+            const scrollTop = scrollContainer.scrollTop;
+            const scrollHeight = scrollContainer.scrollHeight;
+            const clientHeight = scrollContainer.clientHeight;
+            const denom = Math.max(1, (scrollHeight - clientHeight));
+            const lensHeightPerc = Math.min(100, Math.max(8, (clientHeight / scrollHeight) * 100));
+            const lensTopPerc = (scrollTop / denom) * (100 - lensHeightPerc);
+            lens.style.height = `${lensHeightPerc}%`;
+            lens.style.top = `${lensTopPerc}%`;
+            const progressPerc = (scrollTop / denom) * 100;
+            progressBar.style.height = `${Math.min(100, Math.max(0, progressPerc))}%`;
+        }
+        scrollContainer.addEventListener('scroll', () => { if (!isDragging) requestAnimationFrame(updateLens); }, { passive: true });
+
+        mapRail.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            mapRail.setPointerCapture(e.pointerId);
+            handleRailInput(e, 'smooth');
+        });
+        mapRail.addEventListener('pointermove', (e) => { if (!isDragging) return; handleRailInput(e, 'auto'); });
+        mapRail.addEventListener('pointerup', (e) => {
+            isDragging = false;
+            try { mapRail.releasePointerCapture(e.pointerId); } catch { }
+        });
+        function handleRailInput(e, behavior) {
+            const rect = mapRail.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const perc = Math.max(0, Math.min(1, y / rect.height));
+            const targetScroll = perc * (scrollContainer.scrollHeight - scrollContainer.clientHeight);
+            scrollContainer.scrollTo({ top: targetScroll, behavior });
+        }
+
+        // ========= GRID/LIST =========
+        function toggleGrid() {
+            STATE.ui.gridMode = !STATE.ui.gridMode;
+            listContainer.classList.toggle('grid-mode', STATE.ui.gridMode);
+            $('#view-toggle').classList.toggle('active', STATE.ui.gridMode);
+            setTimeout(updateLens, 120);
+            setTimeout(updateLens, 360);
+        }
+
+        // ========= THEME / LOGS =========
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme') || 'dark';
+            root.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+        }
+        function toggleAbout() {
+            const modal = document.getElementById('about-modal');
+            modal.classList.toggle('visible');
+            modal.setAttribute('aria-hidden', modal.classList.contains('visible') ? 'false' : 'true');
+        }
+        function stopProp(e) { e.stopPropagation(); }
+
+        // ========= PANELS =========
+        function togglePanel(which) {
+            const id = which === 'a' ? '#panel-a' : '#panel-b';
+            const panel = $(id);
+            if (!panel) return;
+            const hidden = panel.classList.toggle('hidden');
+        }
+        function toggleDir(which) {
+            const s = (which === 'a') ? STATE.strandA : STATE.strandB;
+            s.direction *= -1;
+            const btn = document.getElementById(`${which}_dir`);
+            if (btn) btn.textContent = s.direction === 1 ? '→' : '←';
+            btn?.classList.toggle('active', s.direction === -1);
+        }
+        function toggleStrandPause(which) {
+            const s = (which === 'a') ? STATE.strandA : STATE.strandB;
+            s.paused = !s.paused;
+            const btn = document.getElementById(`${which}_pause`);
+            btn?.classList.toggle('active', s.paused);
+            btn.textContent = s.paused ? 'PAUSED' : 'PAUSE';
+        }
+
+        // swipe edges to toggle
+        let edgeDrag = null;
+        window.addEventListener('pointerdown', (e) => {
+            const x = e.clientX;
+            if (x < 18) edgeDrag = { which: 'a', startX: x };
+            else if (x > window.innerWidth - 18) edgeDrag = { which: 'b', startX: x };
+        });
+        window.addEventListener('pointerup', (e) => {
+            if (!edgeDrag) return;
+            const dx = e.clientX - edgeDrag.startX;
+            if (edgeDrag.which === 'a' && dx > 40) togglePanel('a');
+            if (edgeDrag.which === 'b' && dx < -40) togglePanel('b');
+            edgeDrag = null;
+        });
+
+        // ========= FRAMEWORK =========
+        function setFramework(fw) {
+            STATE.framework = fw;
+            document.querySelectorAll('.fw-btn').forEach(b => b.classList.toggle('active', b.dataset.fw === fw));
+            log(`<b>Framework</b> set to <em>${fw}${fwGlyph(fw)}</em>.`);
+            updateHud();
+        }
+
+        // ========= DILEMMA FLOW =========
+        function openDilemma(d) {
+            // Create a pending locus and stick it in the genome
+            const locusIndex = STATE.genome.length;
+            const fw = STATE.framework;
+            const colors = fwColors(fw);
+
+            // pre-calculate deltas for preview
+            const rng = mulberry32(hashStr(`${Date.now()}|${fw}`));
+            const actDelta = genScoreDelta(fw, 'ACT', rng);
+            const refDelta = genScoreDelta(fw, 'REFRAIN', rng);
+
+            const locus = {
+                id: `pending_${Date.now()}`,
+                index: locusIndex,
+                status: 'pending', // <--- NEW STATE
+                timestamp: nowISO(),
+                framework: fw,
+                dilemma: {
+                    title: d.title,
+                    leftTrack: d.leftTrack,
+                    rightTrack: d.rightTrack,
+                    stakesSummary: d.stakesSummary
+                },
+                stakeholders: d.stakeholders.map(s => ({ ...s })),
+                previewDeltas: { act: actDelta, ref: refDelta },
+                choice: null,
+                scoreDelta: null,
+                phenotypeCanvas: null,
+                phenotypePrompt: '',
+                phenotypeSeed: ''
+            };
+
+            STATE.genome.push(locus);
+            renderLocusList();
+
+            // Scroll to bottom
+            setTimeout(() => {
+                const row = document.getElementById(`gene-${locus.id}`);
+                row?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+
+            log(`<b>Dilemma Detected</b> “${d.title}”. Interaction required.`);
+        }
+
+        function closeDilemma() {
+            // No-op in inline mode, or remove pending if we wanted to cancel
+        }
+
+        function replayLastDilemma() {
+            // check if there is arguably a pending one?
+            const pending = STATE.genome.find(l => l.status === 'pending');
+            if (pending) {
+                log(`<b>Pending dilemma</b> already active at Locus ${pending.index}.`);
+                return;
+            }
+            const d = makeDilemma(STATE.framework);
+            openDilemma(d);
+        }
+
+        function commitChoice(choice, locusId) {
+            // Find the pending locus
+            // If locusId is passed, use it, else find first pending
+            const locus = locusId
+                ? STATE.genome.find(l => l.id === locusId)
+                : STATE.genome.find(l => l.status === 'pending');
+
+            if (!locus || locus.status !== 'pending') return;
+
+            const fw = locus.framework;
+            const d = locus.dilemma;
+
+            // Finalize
+            const seedLocal = hashStr(`commit|${Date.now()}|${fw}|${choice}|${locus.index}`);
+            const rng = mulberry32(seedLocal);
+            const delta = genScoreDelta(fw, choice, rng); // recalc or use preview? standard says recalc is fine
+
+            const consequence = (choice === 'ACT')
+                ? `You intervene: the helix switches at locus ${locus.index}. A contained harm prevents a wider cascade.`
+                : `You refrain: the trolley preserves course. Immediate stability, deferred cost in the ledger.`;
+
+            // Gene phenotype
+            const phenotype = generatePhenotypeCanvas(
+                locus.index, fw, choice, locus.stakeholders,
+                { opacity: STATE.strandA.opacity, mode: STATE.strandA.mode, frequency: STATE.strandA.frequency, flow: STATE.strandA.flow },
+                { opacity: STATE.strandB.opacity, mode: STATE.strandB.mode, frequency: STATE.strandB.frequency, flow: STATE.strandB.flow }
+            );
+
+            // Update Locus
+            locus.status = 'resolved';
+            locus.choice = choice;
+            locus.scoreDelta = delta;
+            locus.consequence = consequence;
+            locus.phenotypeCanvas = phenotype.canvas;
+            locus.phenotypeSeed = phenotype.seedStr;
+            locus.phenotypePrompt = buildPhenotypePrompt(locus); // requires choice to be set
+
+            STATE.selectedLocusId = locus.id;
+
+            // update train track with framework (0..3)
+            STATE.train.trackIndex = ({ C: 0, G: 1, T: 2, A: 3 })[fw] ?? 0;
+
+            renderLocusList();
+
+            // Log details
+            log(`<b>Committed</b> <em>${choice}</em> under ${fw}${fwGlyph(fw)} · Δ care ${signStr(delta.care)}, growth ${signStr(delta.growth)}, truth ${signStr(delta.truth)}, action ${signStr(delta.action)}.`);
+            locus.stakeholders.forEach(s => log(`<b>${s.name}</b> (${s.role}): “${s.quote}”`));
+        }
+
+        // ========= LOCUS ACTIONS =========
+        function selectLocus(locusId) {
+            STATE.selectedLocusId = locusId;
+            document.querySelectorAll('.gene-row').forEach(r => r.classList.remove('selected'));
+            const row = document.getElementById(`gene-${locusId}`);
+            row?.classList.add('active'); // ensure expanded
+            document.querySelectorAll('.map-indicator').forEach(d => d.classList.remove('active'));
+            const dot = document.getElementById(`map-${locusId}`);
+            dot?.classList.add('active');
+
+            // scroll into view gently
+            setTimeout(() => {
+                try { row?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch { }
+            }, 60);
+
+            updateHud();
+        }
+
+        function deleteLocus(locusId) {
+            const idx = STATE.genome.findIndex(l => l.id === locusId);
+            if (idx < 0) return;
+            const locus = STATE.genome[idx];
+            STATE.genome.splice(idx, 1);
+            // reindex
+            STATE.genome.forEach((l, i) => l.index = i);
+            renderLocusList();
+            log(`<b>Deleted</b> locus ${locus.index}.`);
+        }
+
+        function copyPrompt(locusId) {
+            const locus = STATE.genome.find(l => l.id === locusId);
+            if (!locus) return;
+            const txt = locus.phenotypePrompt || '';
+            navigator.clipboard?.writeText(txt).then(
+                () => log(`<b>Copied</b> prompt for locus <em>${locus.index}</em>.`),
+                () => log(`<b>Copy failed</b> (clipboard unavailable).`)
+            );
+        }
+
+        function reRollPhenotype(locusId) {
+            const locus = STATE.genome.find(l => l.id === locusId);
+            if (!locus) return;
+            const d = locus.dilemma;
+            const ph = generatePhenotypeCanvas(
+                locus.index, locus.framework, locus.choice, locus.stakeholders,
+                { opacity: STATE.strandA.opacity, mode: STATE.strandA.mode, frequency: STATE.strandA.frequency, flow: STATE.strandA.flow },
+                { opacity: STATE.strandB.opacity, mode: STATE.strandB.mode, frequency: STATE.strandB.frequency, flow: STATE.strandB.flow }
+            );
+            locus.phenotypeCanvas = ph.canvas;
+            locus.phenotypeSeed = ph.seedStr;
+            locus.phenotypePrompt = buildPhenotypePrompt(locus);
+            renderLocusList();
+            selectLocus(locusId);
+            log(`<b>Regenerated</b> phenotype for locus <em>${locus.index}</em>.`);
+        }
+
+        function openLightboxFromLocus(locusId) {
+            const locus = STATE.genome.find(l => l.id === locusId);
+            if (!locus || !locus.phenotypeCanvas) return;
+            const lb = $('#lightbox');
+            const lc = $('#lightboxCanvas');
+            const ctx = lc.getContext('2d');
+            // fit to square
+            const size = 1024;
+            lc.width = size; lc.height = size;
+            ctx.clearRect(0, 0, size, size);
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, size, size);
+            // draw scaled
+            ctx.imageSmoothingEnabled = true;
+            ctx.drawImage(locus.phenotypeCanvas, 0, 0, size, size);
+
+            $('#lb_title').textContent = `PHENOTYPE · LOCUS ${String(locus.index).padStart(3, '0')}`;
+            $('#lb_sub').textContent = `${locus.framework}${fwGlyph(locus.framework)} · ${locus.choice} · ${locus.stakeholders.map(s => s.sig).join('-')}`;
+            lb.classList.add('visible');
+            lb.setAttribute('aria-hidden', 'false');
+            STATE.ui.lightboxOpen = true;
+        }
+        function closeLightbox() {
+            const lb = $('#lightbox');
+            lb.classList.remove('visible');
+            lb.setAttribute('aria-hidden', 'true');
+            STATE.ui.lightboxOpen = false;
+        }
+
+        // ========= TICKET =========
+        function openTicket() {
+            // In single scene mode, we just log/preview
+            drawTicket(); // draw hidden canvas
+            downloadTicketPng();
+            // Maybe show in log
+            log(`<b>Ticket Generated</b>. Use Download button if didn't auto-start.`);
+        }
+        function closeTicket() {
+            $('#ticket').classList.remove('visible');
+            $('#ticket').setAttribute('aria-hidden', 'true');
+            STATE.ui.ticketOpen = false;
+        }
+        function downloadTicketPng() {
+            try {
+                const c = $('#ticketCanvas');
+                const url = c.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ethics-ticket-${Date.now()}.png`;
+                a.click();
+                log(`<b>Downloaded</b> ticket PNG.`);
+            } catch (e) {
+                log(`<b>Export failed</b> (canvas).`);
+            }
+        }
+
+        function archetypeFromTotals(t) {
+            const entries = Object.entries(t).sort((a, b) => b[1] - a[1]);
+            const top = entries[0]?.[0] || 'care';
+            return ({
+                care: 'Caretaker',
+                growth: 'Cultivator',
+                truth: 'Witness',
+                action: 'Operator'
+            })[top] || 'Hybrid';
+        }
+
+        function drawTicket() {
+            const c = $('#ticketCanvas');
+            const ctx = c.getContext('2d');
+            const W = c.width, H = c.height;
+
+            // totals
+            const totals = totalsFromGenome();
+            const arche = archetypeFromTotals(totals);
+            $('#hud_sub').textContent = `train ${STATE.train.paused ? 'paused' : 'running'} · loci: ${STATE.genome.length} · archetype: ${arche}`;
+
+            // background
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, W, H);
+
+            // frame glow
+            ctx.strokeStyle = 'rgba(255,157,92,.55)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(18, 18, W - 36, H - 36);
+
+            // header strip
+            const g = ctx.createLinearGradient(0, 0, W, 0);
+            g.addColorStop(0, 'rgba(0,188,212,.20)');
+            g.addColorStop(0.5, 'rgba(255,215,0,.18)');
+            g.addColorStop(1, 'rgba(255,152,0,.20)');
+            ctx.fillStyle = g;
+            ctx.fillRect(18, 18, W - 36, 64);
+
+            ctx.fillStyle = 'rgba(0,0,0,.75)';
+            ctx.fillRect(18, 82, W - 36, 1);
+
+            ctx.fillStyle = 'rgba(255,255,255,.92)';
+            ctx.font = '1000 18px ui-monospace, monospace';
+            ctx.fillText('ETHICS TICKET · DOUBLE-HELIX TROLLEY', 30, 54);
+
+            ctx.fillStyle = 'rgba(255,205,178,.85)';
+            ctx.font = '900 12px ui-monospace, monospace';
+            ctx.fillText(`SESSION ${new Date().toLocaleString()}`, 30, 74);
+            ctx.fillText(`LOCI ${STATE.genome.length} · ARCHETYPE ${arche}`, 520, 74);
+
+            // genome strip
+            const enc = genomeEncodingString();
+            drawBarcode(ctx, 30, H - 82, W - 60, 36, enc, getCss('--accent'));
+
+            // mini helix + rings panel
+            ctx.save();
+            ctx.translate(30, 110);
+            ctx.fillStyle = 'rgba(255,255,255,.06)';
+            ctx.fillRect(0, 0, W - 60, 260);
+            ctx.strokeStyle = 'rgba(255,255,255,.10)';
+            ctx.strokeRect(0.5, 0.5, W - 61, 259);
+            // rings
+            const cx = 150, cy = 130;
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255,255,255,.08)';
+                ctx.lineWidth = 2;
+                ctx.arc(cx, cy, 24 + i * 18, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            // train marker
+            const tr = 24 + STATE.train.trackIndex * 18;
+            const ang = STATE.train.progress * Math.PI * 2;
+            ctx.fillStyle = 'rgba(255,157,92,.85)';
+            ctx.beginPath();
+            ctx.arc(cx + Math.cos(ang) * tr, cy + Math.sin(ang) * tr, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // helix thumbnail
+            const hx = 420, hy = 20, hh = 220;
+            for (let i = 0; i < 200; i++) {
+                const y = hy + (i / 200) * hh;
+                const wv = Math.sin((i / 200) * Math.PI * 2 * 2) * 46;
+                const x1 = hx + wv, x2 = hx - wv;
+                ctx.fillStyle = 'rgba(0,188,212,.35)';
+                ctx.fillRect(x1, y, 2, 2);
+                ctx.fillStyle = 'rgba(255,152,0,.35)';
+                ctx.fillRect(x2, y, 2, 2);
+                if (i % 14 === 0) {
+                    ctx.fillStyle = 'rgba(255,215,0,.18)';
+                    ctx.fillRect(Math.min(x1, x2), y, Math.abs(x1 - x2), 1);
+                }
+            }
+
+            // watermark phenotype
+            const sel = STATE.genome.find(l => l.id === STATE.selectedLocusId) || STATE.genome[STATE.genome.length - 1];
+            if (sel?.phenotypeCanvas) {
+                ctx.globalAlpha = 0.22;
+                ctx.drawImage(sel.phenotypeCanvas, W - 60 - 210, 20, 200, 200);
+                ctx.globalAlpha = 1;
+            }
+
+            ctx.restore();
+
+            // scores
+            ctx.fillStyle = 'rgba(255,205,178,.92)';
+            ctx.font = '1000 14px ui-monospace, monospace';
+            ctx.fillText('SCORE TOTALS', 30, 410);
+
+            const keys = ['care', 'growth', 'truth', 'action'];
+            const baseX = 30, baseY = 430;
+            for (let i = 0; i < keys.length; i++) {
+                const k = keys[i];
+                const v = totals[k];
+                const bx = baseX + i * (W - 60) / 4;
+                ctx.fillStyle = 'rgba(255,255,255,.10)';
+                ctx.fillRect(bx, baseY, (W - 60) / 4 - 12, 56);
+                ctx.strokeStyle = 'rgba(255,255,255,.10)';
+                ctx.strokeRect(bx + 0.5, baseY + 0.5, (W - 60) / 4 - 13, 55);
+
+                ctx.fillStyle = 'rgba(255,205,178,.85)';
+                ctx.font = '1000 12px ui-monospace, monospace';
+                ctx.fillText(k.toUpperCase(), bx + 12, baseY + 22);
+
+                ctx.fillStyle = 'rgba(255,157,92,.95)';
+                ctx.font = '1100 18px ui-monospace, monospace';
+                ctx.fillText(String(v), bx + 12, baseY + 46);
+            }
+        }
+
+        function totalsFromGenome() {
+            const t = { care: 0, growth: 0, truth: 0, action: 0 };
+            for (const l of STATE.genome) {
+                t.care += l.scoreDelta.care;
+                t.growth += l.scoreDelta.growth;
+                t.truth += l.scoreDelta.truth;
+                t.action += l.scoreDelta.action;
+            }
+            return t;
+        }
+
+        function genomeEncodingString() {
+            // short deterministic strip
+            const parts = STATE.genome.map(l => {
+                const sig = l.stakeholders.map(s => s.sig).join('');
+                return `${l.framework}${l.choice[0]}${sig}`;
+            });
+            return parts.join('|').slice(0, 220);
+        }
+
+        // ========= HUD + CONTROLS =========
+        function updateHud() {
+            const totals = totalsFromGenome();
+            const arche = archetypeFromTotals(totals);
+            const paused = STATE.train.paused ? 'paused' : 'running';
+            $('#hud_sub').textContent = `train ${paused} · loci: ${STATE.genome.length} · archetype: ${arche}`;
+
+            const pauseBtn = $('#pause-btn');
+            pauseBtn.classList.toggle('active', !!STATE.train.paused);
+            pauseBtn.textContent = STATE.train.paused ? '▶' : '⏸';
+        }
+
+        function togglePause() {
+            STATE.train.paused = !STATE.train.paused;
+            updateHud();
+            log(`<b>Train</b> ${STATE.train.paused ? 'paused' : 'running'}.`);
+        }
+
+        // ========= KEYBOARD =========
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (STATE.ui.lightboxOpen) return closeLightbox();
+                if (STATE.ui.ticketOpen) return closeTicket();
+                if (STATE.ui.dilemmaOpen) return closeDilemma();
+                togglePanel('a'); togglePanel('b');
+            }
+            if (e.key === 'h' || e.key === 'H') togglePanel('a');
+            if (e.key === 'k' || e.key === 'K') togglePanel('b');
+            if (e.key === ' ') { e.preventDefault(); togglePause(); }
+            if (e.key === 'Enter') replayLastDilemma();
+        });
+
+        // ========= PANEL INPUT BINDING =========
+        function bindPanelControls() {
+            // set initial UI
+            $('#a_op').value = STATE.strandA.opacity;
+            $('#a_mode').value = STATE.strandA.mode;
+            $('#a_freq').value = STATE.strandA.frequency;
+            $('#a_flow').value = STATE.strandA.flow;
+
+            $('#b_op').value = STATE.strandB.opacity;
+            $('#b_mode').value = STATE.strandB.mode;
+            $('#b_freq').value = STATE.strandB.frequency;
+            $('#b_flow').value = STATE.strandB.flow;
+
+            $('#a_op').addEventListener('input', (e) => STATE.strandA.opacity = parseFloat(e.target.value));
+            $('#a_mode').addEventListener('change', (e) => STATE.strandA.mode = e.target.value);
+            $('#a_freq').addEventListener('input', (e) => STATE.strandA.frequency = parseFloat(e.target.value));
+            $('#a_flow').addEventListener('input', (e) => STATE.strandA.flow = parseFloat(e.target.value));
+
+            $('#b_op').addEventListener('input', (e) => STATE.strandB.opacity = parseFloat(e.target.value));
+            $('#b_mode').addEventListener('change', (e) => STATE.strandB.mode = e.target.value);
+            $('#b_freq').addEventListener('input', (e) => STATE.strandB.frequency = parseFloat(e.target.value));
+            $('#b_flow').addEventListener('input', (e) => STATE.strandB.flow = parseFloat(e.target.value));
+
+            // set dir/pause UI
+            $('#a_dir').textContent = STATE.strandA.direction === 1 ? '→' : '←';
+            $('#b_dir').textContent = STATE.strandB.direction === 1 ? '→' : '←';
+            $('#a_pause').textContent = STATE.strandA.paused ? 'PAUSED' : 'PAUSE';
+            $('#b_pause').textContent = STATE.strandB.paused ? 'PAUSED' : 'PAUSE';
+            $('#a_pause').classList.toggle('active', STATE.strandA.paused);
+            $('#b_pause').classList.toggle('active', STATE.strandB.paused);
+        }
+
+        // ========= CANVAS RENDERING (Three.js preferred + 2D overlay) =========
+        const hudCanvas = document.getElementById('hud-canvas');
+        const hudCtx = hudCanvas.getContext('2d');
+
+        let glOk = false;
+        let three = null;
+
+        function initThree() {
+            try {
+                if (!window.THREE) return false;
+                const wrap = document.getElementById('gl-wrap');
+                const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                wrap.innerHTML = '';
+                wrap.appendChild(renderer.domElement);
+
+                const scene = new THREE.Scene();
+                const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
+                camera.position.set(0, 0, 5);
+
+                // rings (4)
+                const rings = [];
+                for (let i = 0; i < 4; i++) {
+                    const radius = 0.18 + i * 0.12;
+                    const geom = new THREE.RingGeometry(radius - 0.006, radius + 0.006, 128);
+                    const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.10, side: THREE.DoubleSide });
+                    const mesh = new THREE.Mesh(geom, mat);
+                    mesh.position.set(-0.55, 0.55, 0);
+                    scene.add(mesh);
+                    rings.push(mesh);
+                }
+
+                // train
+                const tGeom = new THREE.BoxGeometry(0.04, 0.02, 0.02);
+                const tMat = new THREE.MeshBasicMaterial({ color: 0xff9d5c, transparent: true, opacity: 0.9 });
+                const train = new THREE.Mesh(tGeom, tMat);
+                scene.add(train);
+
+                // subtle vignette plane
+                const vGeom = new THREE.PlaneGeometry(2, 2);
+                const vMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22 });
+                const vignette = new THREE.Mesh(vGeom, vMat);
+                vignette.position.z = -0.2;
+                scene.add(vignette);
+
+                three = { renderer, scene, camera, rings, train };
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function resize() {
+            hudCanvas.width = Math.floor(window.innerWidth * (window.devicePixelRatio || 1));
+            hudCanvas.height = Math.floor(window.innerHeight * (window.devicePixelRatio || 1));
+            hudCanvas.style.width = '100%';
+            hudCanvas.style.height = '100%';
+            hudCtx.setTransform((window.devicePixelRatio || 1), 0, 0, (window.devicePixelRatio || 1), 0, 0);
+
+            if (three?.renderer) {
+                three.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
+        window.addEventListener('resize', resize);
+
+        // Helix picking cache
+        let helixPick = [];
+
+        function drawOverlay(dt) {
+            const W = window.innerWidth, H = window.innerHeight;
+            hudCtx.clearRect(0, 0, W, H);
+
+            // selected phenotype background
+            const sel = STATE.genome.find(l => l.id === STATE.selectedLocusId);
+            if (sel?.phenotypeCanvas) {
+                hudCtx.save();
+                hudCtx.globalAlpha = 0.22;
+                // cover
+                const scale = Math.max(W / sel.phenotypeCanvas.width, H / sel.phenotypeCanvas.height);
+                const dw = sel.phenotypeCanvas.width * scale;
+                const dh = sel.phenotypeCanvas.height * scale;
+                hudCtx.drawImage(sel.phenotypeCanvas, (W - dw) / 2, (H - dh) / 2, dw, dh);
+                // darken
+                hudCtx.globalAlpha = 0.28;
+                hudCtx.fillStyle = '#000';
+                hudCtx.fillRect(0, 0, W, H);
+                hudCtx.restore();
+            }
+
+            // grid fog
+            hudCtx.save();
+            hudCtx.globalAlpha = 0.10;
+            hudCtx.strokeStyle = 'rgba(255,255,255,.12)';
+            for (let x = 0; x < W; x += 48) { hudCtx.beginPath(); hudCtx.moveTo(x, 0); hudCtx.lineTo(x, H); hudCtx.stroke(); }
+            for (let y = 0; y < H; y += 48) { hudCtx.beginPath(); hudCtx.moveTo(0, y); hudCtx.lineTo(W, y); hudCtx.stroke(); }
+            hudCtx.restore();
+
+            // helix + nodes
+            const cx = W * 0.52;
+            const top = 80;
+            const bottom = H - 90;
+            const height = Math.max(260, bottom - top);
+            const n = STATE.genome.length;
+            const spacing = n ? height / Math.min(44, Math.max(10, n)) : height / 16;
+
+            const t = performance.now() * 0.001;
+            const aW = 70 + STATE.strandA.frequency * 70;
+            const bW = 70 + STATE.strandB.frequency * 70;
+
+            const fw = STATE.framework;
+            const fwC = fwColors(fw).tint;
+
+            // strands
+            hudCtx.save();
+            hudCtx.lineWidth = 3;
+            hudCtx.globalAlpha = 0.55;
+            hudCtx.strokeStyle = 'rgba(0,188,212,.75)';
+            hudCtx.beginPath();
+            for (let i = 0; i < 180; i++) {
+                const y = top + (i / 179) * height;
+                const phase = (y / height) * Math.PI * 2 * 2 + t * (0.8 * STATE.strandA.flow) * (STATE.strandA.direction);
+                const x = cx + Math.sin(phase) * aW;
+                if (i === 0) hudCtx.moveTo(x, y); else hudCtx.lineTo(x, y);
+            }
+            hudCtx.stroke();
+
+            hudCtx.strokeStyle = 'rgba(255,152,0,.75)';
+            hudCtx.beginPath();
+            for (let i = 0; i < 180; i++) {
+                const y = top + (i / 179) * height;
+                const phase = (y / height) * Math.PI * 2 * 2 + Math.PI + t * (0.8 * STATE.strandB.flow) * (STATE.strandB.direction);
+                const x = cx + Math.sin(phase) * bW;
+                if (i === 0) hudCtx.moveTo(x, y); else hudCtx.lineTo(x, y);
+            }
+            hudCtx.stroke();
+            hudCtx.restore();
+
+            // nodes
+            helixPick = [];
+            const startIndex = Math.max(0, n - 28);
+            const shown = STATE.genome.slice(startIndex);
+            for (let i = 0; i < shown.length; i++) {
+                const locus = shown[i];
+                const y = bottom - i * spacing;
+                const phase = (y / height) * Math.PI * 2 * 2 + t * (0.8 * STATE.strandA.flow) * (STATE.strandA.direction);
+                const xa = cx + Math.sin(phase) * aW;
+                const xb = cx + Math.sin(phase + Math.PI) * bW;
+
+                const isSel = locus.id === STATE.selectedLocusId;
+                const isAct = locus.choice === 'ACT';
+                const nodeC = isAct ? 'rgba(0,188,212,.92)' : 'rgba(255,152,0,.92)';
+
+                // bond
+                hudCtx.save();
+                hudCtx.globalAlpha = isSel ? 0.65 : 0.25;
+                hudCtx.strokeStyle = isSel ? 'rgba(255,215,0,.85)' : 'rgba(255,215,0,.22)';
+                hudCtx.lineWidth = isSel ? 2 : 1;
+                hudCtx.beginPath();
+                hudCtx.moveTo(xa, y); hudCtx.lineTo(xb, y);
+                hudCtx.stroke();
+                hudCtx.restore();
+
+                // dots
+                const r = isSel ? 6.5 : 4.2;
+                hudCtx.save();
+                hudCtx.fillStyle = 'rgba(0,0,0,.55)';
+                hudCtx.beginPath(); hudCtx.arc(xa, y, r + 2, 0, Math.PI * 2); hudCtx.fill();
+                hudCtx.beginPath(); hudCtx.arc(xb, y, r + 2, 0, Math.PI * 2); hudCtx.fill();
+
+                hudCtx.fillStyle = 'rgba(0,188,212,.92)';
+                hudCtx.beginPath(); hudCtx.arc(xa, y, r, 0, Math.PI * 2); hudCtx.fill();
+                hudCtx.fillStyle = 'rgba(255,152,0,.92)';
+                hudCtx.beginPath(); hudCtx.arc(xb, y, r, 0, Math.PI * 2); hudCtx.fill();
+
+                // locus glyph
+                hudCtx.globalAlpha = isSel ? 0.95 : 0.55;
+                hudCtx.fillStyle = isSel ? 'rgba(255,215,0,.95)' : hexToRgba(fwC, 0.75);
+                hudCtx.font = isSel ? '1000 12px ui-monospace, monospace' : '900 10px ui-monospace, monospace';
+                hudCtx.fillText(`${locus.framework}${fwGlyph(locus.framework)} ${locus.choice[0]} ${locus.index}`, Math.min(xa, xb) - 56, y - 10);
+                hudCtx.restore();
+
+                // pick region (bond midpoint)
+                const mx = (xa + xb) / 2;
+                helixPick.push({ id: locus.id, x: mx, y, r: 22 });
+            }
+
+            // focal zone
+            hudCtx.save();
+            hudCtx.globalAlpha = 0.08;
+            hudCtx.fillStyle = 'rgba(255,215,0,1)';
+            hudCtx.fillRect(cx - 1, top, 2, height);
+            hudCtx.restore();
+
+            // hint text
+            hudCtx.save();
+            hudCtx.globalAlpha = 0.55;
+            hudCtx.fillStyle = 'rgba(255,205,178,.75)';
+            hudCtx.font = '900 11px ui-monospace, monospace';
+            hudCtx.fillText('CLICK HELIX NODE TO SELECT · DOUBLE CLICK PHENOTYPE TO LIGHTBOX · TICKET EXPORT AVAILABLE', 22, H - 18);
+            hudCtx.restore();
+        }
+
+        function drawThree() {
+            if (!three) return;
+            const { renderer, scene, camera, train } = three;
+            const trackR = 0.18 + STATE.train.trackIndex * 0.12;
+            const ang = STATE.train.progress * Math.PI * 2;
+            train.position.set(-0.55 + Math.cos(ang) * trackR, 0.55 + Math.sin(ang) * trackR, 0.1);
+            train.rotation.z = ang + Math.PI / 2;
+            // tint by framework
+            const fw = STATE.framework;
+            const tint = fwColors(fw).tint || '#ff9d5c';
+            train.material.color = new THREE.Color(tint);
+            renderer.render(scene, camera);
+        }
+
+        // click on helix nodes
+        hudCanvas.addEventListener('click', (e) => {
+            const rect = hudCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            let best = null, bestD = 1e9;
+            for (const p of helixPick) {
+                const dx = x - p.x, dy = y - p.y;
+                const d = Math.sqrt(dx * dx + dy * dy);
+                if (d < p.r && d < bestD) { best = p; bestD = d; }
+            }
+            if (best) selectLocus(best.id);
+        });
+
+        // ========= LOOP + DILEMMA TIMER =========
+        let lastT = performance.now();
+        let gateTimer = 0;
+        const gateEvery = 12.0; // seconds
+
+        function tick() {
+            const t = performance.now();
+            const dt = Math.min(0.05, (t - lastT) / 1000);
+            lastT = t;
+
+            // train update
+            if (!STATE.train.paused) {
+                STATE.train.progress = (STATE.train.progress + STATE.train.speed * dt) % 1;
+            }
+
+            // dilemma timer
+            if (!STATE.train.paused) {
+                // Inline logic: pause generation if a pending one exists
+                const hasPending = STATE.genome.some(l => l.status === 'pending');
+                if (!hasPending) {
+                    gateTimer += dt;
+                    if (gateTimer >= gateEvery) {
+                        gateTimer = 0;
+                        openDilemma(makeDilemma(STATE.framework));
+                    }
+                }
+            }
+
+            // three.js
+            if (glOk) drawThree();
+
+            // overlay always
+            drawOverlay(dt);
+
+            requestAnimationFrame(tick);
+        }
+
+        // ========= INIT =========
+        function init() {
+            bindPanelControls();
+            resize();
+
+            // init three
+            glOk = initThree();
+            if (glOk) {
+                log(`<b>WebGL</b> online (three.js).`);
+            } else {
+                log(`<b>WebGL</b> unavailable → 2D overlay only.`);
+            }
+
+            logAbout();
+
+            // start with a first dilemma queued
+            setTimeout(() => {
+                const hasPending = STATE.genome.some(l => l.status === 'pending');
+                if (!hasPending) openDilemma(makeDilemma(STATE.framework));
+            }, 800);
+
+            // key bindings
+            // Removed modal click listeners as modals are gone
+
+            // initial list
+            renderLocusList();
+
+            // kick loop
+            requestAnimationFrame(tick);
+        }
+
+        init();
+
+        // expose some funcs for inline handlers
+        window.logAbout = logAbout;
+        window.toggleTheme = toggleTheme;
+        window.toggleGrid = toggleGrid;
+        window.togglePause = togglePause;
+        window.setFramework = setFramework;
+        window.replayLastDilemma = replayLastDilemma;
+        window.closeDilemma = closeDilemma;
+        window.commitChoice = commitChoice;
+        window.openTicket = openTicket;
+        window.downloadTicketPng = downloadTicketPng;
+        window.stopProp = stopProp;
+
+        window.selectLocus = selectLocus;
+        window.deleteLocus = deleteLocus;
+        window.copyPrompt = copyPrompt;
+        window.reRollPhenotype = reRollPhenotype;
+        window.openLightboxFromLocus = openLightboxFromLocus;
+        window.closeLightbox = closeLightbox;
+        window.clearLog = clearLog;
+        window.togglePanel = togglePanel;
+        window.toggleDir = toggleDir;
+        window.toggleStrandPause = toggleStrandPause;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>HYPERCLAY REX — Cinome Breeder (Wireframe)</title>
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='black' stroke='%2300bcd4' stroke-width='4'/%3E%3Cpath d='M10 32 Q32 12 54 32 Q32 52 10 32Z' fill='none' stroke='%23ffd700' stroke-width='3'/%3E%3C/svg%3E" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent
+        }
+
+        body {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+            background: #000;
+            color: #e8e8e8;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden
+        }
+
+        canvas#gl {
+            position: absolute;
+            inset: 0;
+            display: block
+        }
+
+        /* LEFT / RIGHT STRIPS */
+        .top-bar,
+        .top-bar-right {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 20, 25, .92);
+            backdrop-filter: blur(18px);
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1001;
+            cursor: pointer;
+            transition: .25s;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 4px 0 20px rgba(0, 188, 212, .18);
+        }
+
+        .top-bar {
+            left: 0;
+            border-right: 3px solid rgba(0, 188, 212, .55)
+        }
+
+        .top-bar.active {
+            background: rgba(0, 188, 212, .22);
+            border-right-width: 5px;
+            box-shadow: 4px 0 30px rgba(0, 188, 212, .45)
+        }
+
+        .top-bar-right {
+            right: 0;
+            left: auto;
+            background: rgba(25, 15, 0, .92);
+            border-left: 3px solid rgba(255, 152, 0, .55);
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            box-shadow: -4px 0 20px rgba(255, 152, 0, .18);
+        }
+
+        .top-bar-right.active {
+            background: rgba(255, 152, 0, .22);
+            border-left-width: 5px;
+            box-shadow: -4px 0 30px rgba(255, 152, 0, .45)
+        }
+
+        .operator {
+            width: 44px;
+            height: 44px;
+            background: rgba(26, 26, 28, .8);
+            border: 1px solid #333;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: .15s;
+            font-size: 18px;
+            color: #666;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .operator::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 188, 212, .12), rgba(255, 152, 0, .12));
+            opacity: 0;
+            transition: .15s;
+        }
+
+        .operator:hover::before {
+            opacity: 1
+        }
+
+        .operator:hover {
+            border-color: #00bcd4;
+            color: #00bcd4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 188, 212, .25)
+        }
+
+        .operator.active {
+            border-color: #00bcd4;
+            color: #00bcd4;
+            background: rgba(0, 188, 212, .18);
+            box-shadow: 0 0 20px rgba(0, 188, 212, .35)
+        }
+
+        .gen-display {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 800;
+            padding: 10px 4px;
+            white-space: nowrap;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            border-top: 1px solid #333;
+            margin-top: 8px;
+            padding-top: 14px
+        }
+
+        .top-bar .gen-display {
+            color: #00bcd4
+        }
+
+        .top-bar-right .gen-display {
+            color: #ff9800
+        }
+
+        .gen-display span {
+            font-size: 14px;
+            display: block;
+            margin-top: 4px
+        }
+
+        /* CORNER CONTROLS */
+        .corner-control {
+            position: fixed;
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background: rgba(10, 10, 12, .92);
+            backdrop-filter: blur(18px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: .15s;
+            z-index: 1000;
+            font-size: 24px;
+            color: #666;
+        }
+
+        .corner-control:hover {
+            border-color: #00bcd4;
+            color: #00bcd4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 188, 212, .35)
+        }
+
+        .corner-tl {
+            top: 16px;
+            left: 16px
+        }
+
+        .corner-tr {
+            top: 16px;
+            right: 16px
+        }
+
+        .corner-bl {
+            bottom: 200px;
+            left: 16px
+        }
+
+        .corner-br {
+            bottom: 200px;
+            right: 16px
+        }
+
+        .corner-control.fullscreen-active {
+            background: rgba(0, 188, 212, .18);
+            border-color: #00bcd4;
+            color: #00bcd4
+        }
+
+        /* DNA SHAPE PANEL */
+        .dna-shape-panel {
+            position: fixed;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, .94);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+            backdrop-filter: blur(18px);
+            min-width: 240px;
+        }
+
+        .dna-shape-panel.visible {
+            display: flex
+        }
+
+        .shape-control {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .shape-label {
+            font-size: 8px;
+            color: #666;
+            letter-spacing: 1px;
+            font-weight: 900;
+            min-width: 74px
+        }
+
+        .shape-slider {
+            flex: 1;
+            height: 12px;
+            background: #0a0a0c;
+            border: 1px solid #2a2a2c;
+            border-radius: 7px;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .shape-track {
+            height: 100%;
+            width: 50%;
+            background: #00bcd4;
+            border-radius: 7px;
+            position: relative
+        }
+
+        .shape-track::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: rgba(255, 255, 255, .85);
+            box-shadow: 0 0 10px rgba(255, 255, 255, .6)
+        }
+
+        /* BOTTOM BAR */
+        .bottom-bar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, .98), rgba(0, 0, 0, .94));
+            border-top: 2px solid rgba(255, 152, 0, .35);
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 999;
+            backdrop-filter: blur(24px);
+        }
+
+        .bottom-bar::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(0, 188, 212, .5) 25%, rgba(255, 215, 0, .5) 50%, rgba(255, 152, 0, .5) 75%, transparent);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%)
+            }
+
+            100% {
+                transform: translateX(100%)
+            }
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .slider-label {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 900;
+            min-width: 56px;
+            text-align: right
+        }
+
+        .slider-value {
+            font-size: 11px;
+            color: #00bcd4;
+            font-weight: 800;
+            min-width: 54px;
+            text-align: left
+        }
+
+        .control-slider {
+            flex: 1;
+            height: 12px;
+            background: #0a0a0c;
+            border: 1px solid #2a2a2c;
+            border-radius: 7px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .slider-track {
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(90deg, #00bcd4, #ff9800);
+            border-radius: 7px;
+            position: relative
+        }
+
+        .slider-track::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: rgba(255, 255, 255, .8);
+            box-shadow: 0 0 8px rgba(255, 255, 255, .6)
+        }
+
+        .dual-mode-controls {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .strand-control {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .strand-label {
+            font-size: 8px;
+            color: #666;
+            letter-spacing: 2px;
+            font-weight: 900;
+            text-align: center
+        }
+
+        .strand-a-control .strand-label {
+            color: #00bcd4
+        }
+
+        .strand-b-control .strand-label {
+            color: #ff9800
+        }
+
+        .mode-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px
+        }
+
+        .mode-mini-btn {
+            background: rgba(26, 26, 28, .8);
+            border: 1px solid #333;
+            color: #666;
+            padding: 8px 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: .15s;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .mode-mini-btn:hover {
+            border-color: #00bcd4;
+            color: #00bcd4
+        }
+
+        .mode-mini-btn.active[data-strand="a"] {
+            background: rgba(0, 188, 212, .2);
+            border-color: #00bcd4;
+            color: #00bcd4;
+            box-shadow: 0 0 12px rgba(0, 188, 212, .35)
+        }
+
+        .mode-mini-btn.active[data-strand="b"] {
+            background: rgba(255, 152, 0, .2);
+            border-color: #ff9800;
+            color: #ff9800;
+            box-shadow: 0 0 12px rgba(255, 152, 0, .35)
+        }
+
+        .drift-control {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center
+        }
+
+        .drift-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(26, 26, 28, .9);
+            border: 2px solid #333;
+            color: #666;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .drift-btn:hover {
+            border-color: #ffd700;
+            color: #ffd700;
+            transform: scale(1.06)
+        }
+
+        .drift-btn.active {
+            background: rgba(255, 215, 0, .18);
+            border-color: #ffd700;
+            color: #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, .45);
+            animation: driftPulse 2s ease-in-out infinite
+        }
+
+        @keyframes driftPulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.04)
+            }
+        }
+
+        .gen-label {
+            font-size: 9px;
+            color: #666;
+            letter-spacing: 2px;
+            font-weight: 900;
+            text-align: center
+        }
+
+        .gen-label span {
+            color: #ffd700;
+            font-size: 12px;
+            display: block;
+            margin-top: 2px
+        }
+
+        /* PHENOTYPE OVERLAY */
+        .phenotype-overlay {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: min(70vw, 720px);
+            aspect-ratio: 16/9;
+            border: 2px solid rgba(255, 215, 0, .75);
+            box-shadow: 0 0 40px rgba(255, 215, 0, .28);
+            background: rgba(0, 0, 0, .55);
+            backdrop-filter: blur(10px);
+            display: none;
+            z-index: 1200;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .phenotype-overlay.visible {
+            display: block
+        }
+
+        .phenotype-overlay canvas {
+            width: 100%;
+            height: 100%;
+            display: block
+        }
+
+        .pheno-label {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 7px 10px;
+            background: rgba(255, 215, 0, .9);
+            color: #000;
+            font-weight: 900;
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* HUD */
+        .ops-hud {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, .8);
+            border: 1px solid #00bcd4;
+            color: #00bcd4;
+            font-size: 10px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            z-index: 1100;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .ops-row {
+            display: flex;
+            gap: 10px;
+            align-items: center
+        }
+
+        .ops-bar {
+            width: 160px;
+            height: 6px;
+            background: #0b0b0c;
+            border: 1px solid #2a2a2c;
+            border-radius: 4px;
+            overflow: hidden
+        }
+
+        .ops-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00bcd4, #ffd700);
+            transition: width .2s
+        }
+
+        /* subtle legend */
+        .legend {
+            position: fixed;
+            left: 50%;
+            top: 16px;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: rgba(255, 255, 255, .28);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 900;
+            pointer-events: none;
+            z-index: 900;
+        }
+
+        .legend strong {
+            color: rgba(255, 215, 0, .5)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="legend">Drag: rotate • Pinch/Wheel: zoom • Tap nodes: <strong>select locus</strong></div>
+
+        <!-- Left Strip: Strand A -->
+        <div class="top-bar" id="barA">
+            <div class="operator" id="op-transcribe-a" title="Transcribe A (Mutate)">↻</div>
+            <div class="operator" id="op-replicate-a" title="Replicate A (Copy)">⧉</div>
+            <div class="operator" id="op-express-a" title="Express A (Show)">▶</div>
+            <div class="operator" id="op-silence-a" title="Silence A (Hide)">■</div>
+            <div class="gen-display">A <span id="strand-a-mode">×</span></div>
+        </div>
+
+        <!-- Right Strip: Strand B -->
+        <div class="top-bar-right" id="barB">
+            <div class="operator" id="op-transcribe-b" title="Transcribe B (Mutate)">↻</div>
+            <div class="operator" id="op-replicate-b" title="Replicate B (Copy)">⧉</div>
+            <div class="operator" id="op-express-b" title="Express B (Show)">▶</div>
+            <div class="operator" id="op-silence-b" title="Silence B (Hide)">■</div>
+            <div class="gen-display">B <span id="strand-b-mode">◐</span></div>
+        </div>
+
+        <!-- WebGL -->
+        <canvas id="gl"></canvas>
+
+        <!-- HUD -->
+        <div class="ops-hud" id="ops-hud">
+            <div class="ops-row">
+                <span id="ops-text">Loading 0/0</span>
+                <div class="ops-bar">
+                    <div class="ops-fill" id="ops-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Corner Controls -->
+        <div class="corner-control corner-tl" id="fullscreen" title="Fullscreen">⛶</div>
+        <div class="corner-control corner-tr" id="dna-shape" title="DNA Shape">◇</div>
+        <div class="corner-control corner-bl" id="auto-rotate" title="Auto Rotate">⟳</div>
+        <div class="corner-control corner-br" id="help" title="Toggle Phenotype">▣</div>
+
+        <!-- DNA Shape Panel -->
+        <div class="dna-shape-panel" id="dna-shape-panel">
+            <div class="shape-control">
+                <div class="shape-label">FREQUENCY</div>
+                <div class="shape-slider" id="freq-slider">
+                    <div class="shape-track" id="freq-track" style="width:50%"></div>
+                </div>
+            </div>
+            <div class="shape-control">
+                <div class="shape-label">AMPLITUDE</div>
+                <div class="shape-slider" id="amp-slider">
+                    <div class="shape-track" id="amp-track" style="width:50%"></div>
+                </div>
+            </div>
+            <div class="shape-control">
+                <div class="shape-label">DENSITY</div>
+                <div class="shape-slider" id="density-slider">
+                    <div class="shape-track" id="density-track" style="width:50%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Control Bar -->
+        <div class="bottom-bar">
+            <div class="slider-row">
+                <div class="slider-label">BLEND</div>
+                <div class="control-slider" id="blend-slider">
+                    <div class="slider-track" id="blend-track" style="width:50%"></div>
+                </div>
+                <div class="slider-value" id="blend-value">SCREEN</div>
+            </div>
+            <div class="dual-mode-controls">
+                <div class="strand-control strand-a-control">
+                    <div class="strand-label">STRAND A</div>
+                    <div class="mode-mini-grid">
+                        <div class="mode-mini-btn" data-strand="a" data-mode="multiply">×</div>
+                        <div class="mode-mini-btn" data-strand="a" data-mode="screen">◐</div>
+                        <div class="mode-mini-btn" data-strand="a" data-mode="overlay">◑</div>
+                        <div class="mode-mini-btn" data-strand="a" data-mode="difference">△</div>
+                    </div>
+                </div>
+                <div class="drift-control">
+                    <div class="drift-btn" id="organic-drift" title="Organic Drift Mode">∿</div>
+                    <div class="gen-label">GEN <span id="gen-count">0</span></div>
+                </div>
+                <div class="strand-control strand-b-control">
+                    <div class="strand-label">STRAND B</div>
+                    <div class="mode-mini-grid">
+                        <div class="mode-mini-btn" data-strand="b" data-mode="multiply">×</div>
+                        <div class="mode-mini-btn" data-strand="b" data-mode="screen">◐</div>
+                        <div class="mode-mini-btn" data-strand="b" data-mode="overlay">◑</div>
+                        <div class="mode-mini-btn" data-strand="b" data-mode="difference">△</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phenotype -->
+        <div class="phenotype-overlay" id="phenotype">
+            <canvas id="phenotypeCanvas"></canvas>
+            <div class="pheno-label" id="phenoLabel">PHENOTYPE</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+        import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+
+        /* -----------------------------
+           STATE
+        ------------------------------ */
+        const state = {
+            // geometry controls
+            dna: {
+                amplitude: 1.25,      // helix radius
+                frequencyA: 1.65,     // twists per unit
+                frequencyB: 1.65,
+                density: 220,         // base pairs
+                rise: 0.028,          // vertical spacing
+                twist: 0.0,           // global phase
+            },
+            strandA: { active: true, mode: "multiply", phase: 0.0 },
+            strandB: { active: true, mode: "screen", phase: Math.PI },
+            blendMode: "screen",
+
+            // motion
+            autoRotate: false,
+            organicDrift: false,
+            driftSpeed: 0.0075,
+            time: 0,
+
+            // selection
+            selectedIndex: -1,
+            showPhenotype: true,
+
+            generation: 0,
+
+            // data placeholders (kept compatible w/ your pipeline)
+            shots: [],
+            sequence: [],  // [{aImg, bImg}] optional
+        };
+
+        const MODE_SYMBOL = { multiply: "×", screen: "◐", overlay: "◑", difference: "△", lighten: "◇", darken: "◆" };
+
+        /* -----------------------------
+           THREE.JS SETUP (WIRE FRAME)
+        ------------------------------ */
+        const canvas = document.getElementById("gl");
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        renderer.setClearColor(0x000000, 1);
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.22);
+
+        const camera = new THREE.PerspectiveCamera(52, 1, 0.01, 100);
+        camera.position.set(0.0, 0.8, 3.1);
+
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.rotateSpeed = 0.45;
+        controls.zoomSpeed = 0.9;
+        controls.panSpeed = 0.35;
+        controls.enablePan = true;
+        controls.target.set(0, 0.2, 0);
+        controls.update();
+
+        // faint grid / frame
+        const grid = new THREE.GridHelper(10, 40, 0x00bcd4, 0x222222);
+        grid.position.y = -0.75;
+        grid.material.opacity = 0.18;
+        grid.material.transparent = true;
+        scene.add(grid);
+
+        // wireframe "cage"
+        const cageGeom = new THREE.BoxGeometry(3.0, 2.2, 3.0);
+        const cageWire = new THREE.LineSegments(
+            new THREE.WireframeGeometry(cageGeom),
+            new THREE.LineBasicMaterial({ color: 0x222222, transparent: true, opacity: 0.32 })
+        );
+        cageWire.position.y = 0.15;
+        scene.add(cageWire);
+
+        /* -----------------------------
+           HELIX OBJECTS
+        ------------------------------ */
+        const helixGroup = new THREE.Group();
+        scene.add(helixGroup);
+
+        let lineA, lineB, bonds;
+        let instA, instB;
+        let pickTargets = []; // for raycasting (bonds only)
+
+        const matA = new THREE.LineBasicMaterial({ color: 0x00bcd4, transparent: true, opacity: 0.9 });
+        const matB = new THREE.LineBasicMaterial({ color: 0xff9800, transparent: true, opacity: 0.9 });
+        const matBond = new THREE.LineBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.22 });
+
+        const pointMatA = new THREE.MeshBasicMaterial({ color: 0x00bcd4, transparent: true, opacity: 0.95 });
+        const pointMatB = new THREE.MeshBasicMaterial({ color: 0xff9800, transparent: true, opacity: 0.95 });
+        const pointGeom = new THREE.SphereGeometry(0.022, 10, 10);
+
+        const highlightGeom = new THREE.RingGeometry(0.035, 0.055, 32);
+        const highlightMat = new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.85, side: THREE.DoubleSide });
+        const highlightRing = new THREE.Mesh(highlightGeom, highlightMat);
+        highlightRing.rotation.x = Math.PI * 0.5;
+        highlightRing.visible = false;
+        helixGroup.add(highlightRing);
+
+        function buildHelix() {
+            // clear
+            while (helixGroup.children.length) helixGroup.remove(helixGroup.children[0]);
+            helixGroup.add(highlightRing);
+            pickTargets = [];
+
+            const N = Math.max(32, Math.floor(state.dna.density));
+            const rise = state.dna.rise;
+            const height = N * rise;
+            const y0 = -height / 2;
+
+            // strand polylines
+            const ptsA = new Array(N);
+            const ptsB = new Array(N);
+            for (let i = 0; i < N; i++) {
+                const y = y0 + i * rise;
+                ptsA[i] = new THREE.Vector3(0, y, 0);
+                ptsB[i] = new THREE.Vector3(0, y, 0);
+            }
+
+            const geomA = new THREE.BufferGeometry().setFromPoints(ptsA);
+            const geomB = new THREE.BufferGeometry().setFromPoints(ptsB);
+            lineA = new THREE.Line(geomA, matA);
+            lineB = new THREE.Line(geomB, matB);
+
+            // bonds as segments (for picking)
+            const bondPos = new Float32Array(N * 2 * 3);
+            const bondGeom = new THREE.BufferGeometry();
+            bondGeom.setAttribute("position", new THREE.BufferAttribute(bondPos, 3));
+            bonds = new THREE.LineSegments(bondGeom, matBond);
+            bonds.userData.kind = "bonds";
+            helixGroup.add(lineA, lineB, bonds);
+            pickTargets.push(bonds);
+
+            // instanced points
+            instA = new THREE.InstancedMesh(pointGeom, pointMatA, N);
+            instB = new THREE.InstancedMesh(pointGeom, pointMatB, N);
+            instA.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+            instB.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+            instA.userData.kind = "instA";
+            instB.userData.kind = "instB";
+            helixGroup.add(instA, instB);
+
+            // subtle "scanlines" via extra wire rings
+            for (let k = 0; k < 18; k++) {
+                const r = 1.45 + k * 0.06;
+                const rg = new THREE.RingGeometry(r, r + 0.002, 80);
+                const rm = new THREE.MeshBasicMaterial({ color: 0x0a0a0a, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+                const ring = new THREE.Mesh(rg, rm);
+                ring.rotation.x = Math.PI * 0.5;
+                ring.position.y = -0.75 + k * 0.085;
+                helixGroup.add(ring);
+            }
+
+            // keep optional sequence length aligned
+            if (state.sequence.length !== N) {
+                state.sequence = new Array(N).fill(0).map(() => ({ aImg: null, bImg: null }));
+            }
+            updateHelix(0);
+        }
+
+        const tmpMat = new THREE.Matrix4();
+        const tmpPos = new THREE.Vector3();
+        function updateHelix(dt) {
+            const N = instA.count;
+            const rise = state.dna.rise;
+            const height = N * rise;
+            const y0 = -height / 2;
+            const amp = state.dna.amplitude;
+
+            const fA = state.dna.frequencyA;
+            const fB = state.dna.frequencyB;
+
+            state.time += dt;
+            const t = state.time;
+
+            const aPosAttr = lineA.geometry.getAttribute("position");
+            const bPosAttr = lineB.geometry.getAttribute("position");
+            const bondAttr = bonds.geometry.getAttribute("position");
+
+            // motion / drift
+            let drift = state.autoRotate ? state.driftSpeed * 1.15 : 0;
+            if (state.organicDrift) drift += state.driftSpeed * (0.65 + 0.35 * Math.sin(t * 0.7));
+            state.dna.twist += drift;
+
+            const phaseA = state.strandA.phase + state.dna.twist;
+            const phaseB = state.strandB.phase - state.dna.twist;
+
+            for (let i = 0; i < N; i++) {
+                const y = y0 + i * rise;
+                const u = i / (N - 1);
+
+                // extra "wireframe depth" wobble
+                const wob = 0.11 * Math.sin(t * 0.9 + u * 9.0);
+
+                const angA = (u * Math.PI * 2 * fA) + phaseA;
+                const angB = (u * Math.PI * 2 * fB) + phaseB;
+
+                const xA = Math.cos(angA) * (amp + wob);
+                const zA = Math.sin(angA) * (amp + wob);
+
+                const xB = Math.cos(angB + Math.PI) * (amp + wob);
+                const zB = Math.sin(angB + Math.PI) * (amp + wob);
+
+                // update strand vertices
+                aPosAttr.setXYZ(i, xA, y, zA);
+                bPosAttr.setXYZ(i, xB, y, zB);
+
+                // bonds segment
+                const bi = i * 2;
+                bondAttr.setXYZ(bi + 0, xA, y, zA);
+                bondAttr.setXYZ(bi + 1, xB, y, zB);
+
+                // instanced spheres
+                if (state.strandA.active) {
+                    tmpMat.makeTranslation(xA, y, zA);
+                    instA.setMatrixAt(i, tmpMat);
+                } else {
+                    tmpMat.makeTranslation(999, 999, 999);
+                    instA.setMatrixAt(i, tmpMat);
+                }
+                if (state.strandB.active) {
+                    tmpMat.makeTranslation(xB, y, zB);
+                    instB.setMatrixAt(i, tmpMat);
+                } else {
+                    tmpMat.makeTranslation(999, 999, 999);
+                    instB.setMatrixAt(i, tmpMat);
+                }
+
+                // highlight ring
+                if (i === state.selectedIndex) {
+                    highlightRing.visible = true;
+                    highlightRing.position.set(0, y, 0);
+                    highlightRing.scale.setScalar(1.0 + 0.18 * Math.sin(t * 3.0));
+                }
+            }
+
+            aPosAttr.needsUpdate = true;
+            bPosAttr.needsUpdate = true;
+            bondAttr.needsUpdate = true;
+            instA.instanceMatrix.needsUpdate = true;
+            instB.instanceMatrix.needsUpdate = true;
+
+            // bonds glow up near selection (cheap: opacity modulation)
+            if (state.selectedIndex >= 0) {
+                matBond.opacity = 0.12 + 0.22 * Math.abs(Math.sin(t * 2.4));
+            } else {
+                matBond.opacity = 0.18;
+            }
+
+            // wireframe "pulse" on strands
+            matA.opacity = 0.72 + 0.22 * Math.abs(Math.sin(t * 1.2));
+            matB.opacity = 0.72 + 0.22 * Math.abs(Math.cos(t * 1.15));
+        }
+
+        /* -----------------------------
+           PHENOTYPE (2D BLEND)
+        ------------------------------ */
+        const phenoWrap = document.getElementById("phenotype");
+        const phenoCanvas = document.getElementById("phenotypeCanvas");
+        const phenoCtx = phenoCanvas.getContext("2d", { alpha: true, willReadFrequently: false });
+        const phenoLabel = document.getElementById("phenoLabel");
+
+        function resizePhenoCanvas() {
+            const rect = phenoWrap.getBoundingClientRect();
+            const dpr = Math.min(2, window.devicePixelRatio || 1);
+            phenoCanvas.width = Math.max(2, Math.floor(rect.width * dpr));
+            phenoCanvas.height = Math.max(2, Math.floor(rect.height * dpr));
+        }
+        function compositeOpFor(mode) {
+            // canvas ops
+            switch (mode) {
+                case "multiply": return "multiply";
+                case "screen": return "screen";
+                case "overlay": return "overlay";
+                case "difference": return "difference";
+                case "lighten": return "lighten";
+                case "darken": return "darken";
+                default: return "screen";
+            }
+        }
+
+        // procedural fallback "images"
+        function drawNoiseSeed(ctx, w, h, seed, tint) {
+            // deterministic-ish noise stripes
+            const img = ctx.createImageData(w, h);
+            let s = (seed * 2654435761) >>> 0;
+            const tr = (tint >> 16) & 255, tg = (tint >> 8) & 255, tb = tint & 255;
+            for (let i = 0; i < img.data.length; i += 4) {
+                s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+                const v = (s & 255);
+                const m = (v / 255);
+                img.data[i + 0] = Math.round(tr * m);
+                img.data[i + 1] = Math.round(tg * m);
+                img.data[i + 2] = Math.round(tb * m);
+                img.data[i + 3] = 255;
+            }
+            ctx.putImageData(img, 0, 0);
+            // wireframe strokes
+            ctx.globalAlpha = 0.35;
+            ctx.lineWidth = Math.max(1, Math.floor(Math.min(w, h) / 240));
+            ctx.strokeStyle = "rgba(255,255,255,0.25)";
+            for (let y = 0; y < h; y += Math.max(10, Math.floor(h / 18))) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function renderPhenotype(index) {
+            if (!state.showPhenotype || index < 0) { phenoWrap.classList.remove("visible"); return; }
+            phenoWrap.classList.add("visible");
+            resizePhenoCanvas();
+
+            const w = phenoCanvas.width, h = phenoCanvas.height;
+            phenoCtx.clearRect(0, 0, w, h);
+
+            // background vignette
+            const g = phenoCtx.createRadialGradient(w * 0.5, h * 0.5, 0, w * 0.5, h * 0.5, Math.max(w, h) * 0.6);
+            g.addColorStop(0, "rgba(0,0,0,0.0)");
+            g.addColorStop(1, "rgba(0,0,0,0.8)");
+            phenoCtx.fillStyle = "rgba(0,0,0,0.95)";
+            phenoCtx.fillRect(0, 0, w, h);
+
+            // layer A
+            phenoCtx.save();
+            phenoCtx.globalAlpha = state.strandA.active ? 0.75 : 0.0;
+            drawNoiseSeed(phenoCtx, w, h, index + 11, 0x00bcd4);
+            phenoCtx.restore();
+
+            // layer B
+            phenoCtx.save();
+            phenoCtx.globalAlpha = state.strandB.active ? 0.75 : 0.0;
+            phenoCtx.globalCompositeOperation = compositeOpFor(state.blendMode);
+            drawNoiseSeed(phenoCtx, w, h, index + 97, 0xff9800);
+            phenoCtx.restore();
+
+            // wireframe frame
+            phenoCtx.save();
+            phenoCtx.globalCompositeOperation = "source-over";
+            phenoCtx.globalAlpha = 0.85;
+            phenoCtx.strokeStyle = "rgba(255,215,0,0.6)";
+            phenoCtx.lineWidth = Math.max(2, Math.floor(Math.min(w, h) / 220));
+            phenoCtx.strokeRect(phenoCtx.lineWidth, phenoCtx.lineWidth, w - phenoCtx.lineWidth * 2, h - phenoCtx.lineWidth * 2);
+            phenoCtx.globalAlpha = 0.25;
+            phenoCtx.strokeStyle = "rgba(0,188,212,0.45)";
+            phenoCtx.beginPath();
+            phenoCtx.moveTo(w * 0.05, h * 0.5); phenoCtx.lineTo(w * 0.95, h * 0.5);
+            phenoCtx.stroke();
+            phenoCtx.restore();
+
+            phenoLabel.textContent = `PHENOTYPE • LOCUS ${String(index).padStart(3, "0")} • ${state.blendMode.toUpperCase()}`;
+        }
+
+        /* -----------------------------
+           PICKING (RAYCAST)
+        ------------------------------ */
+        const raycaster = new THREE.Raycaster();
+        raycaster.params.Line.threshold = 0.05;
+        const pointer = new THREE.Vector2();
+
+        function setSelectedIndex(idx) {
+            state.selectedIndex = idx;
+            renderPhenotype(idx);
+            // tiny UI "tick"
+            hapticTick();
+        }
+
+        function pickFromEvent(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (("clientX" in e) ? e.clientX : e.touches?.[0]?.clientX) ?? 0;
+            const y = (("clientY" in e) ? e.clientY : e.touches?.[0]?.clientY) ?? 0;
+            pointer.x = ((x - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -(((y - rect.top) / rect.height) * 2 - 1);
+
+            raycaster.setFromCamera(pointer, camera);
+
+            // intersect bonds (gives us segment index)
+            const hits = raycaster.intersectObjects(pickTargets, false);
+            if (hits.length) {
+                const h = hits[0];
+                // for LineSegments, faceIndex / index can vary; use h.index if present
+                let seg = (typeof h.index === "number") ? h.index : -1;
+                if (seg < 0 && typeof h.faceIndex === "number") seg = h.faceIndex;
+                // lineSegments has 2 vertices per segment in BufferGeometry; three.js uses "index" as segment index
+                if (seg >= 0) {
+                    const idx = Math.max(0, Math.min(instA.count - 1, seg));
+                    setSelectedIndex(idx);
+                    return;
+                }
+            }
+
+            // deselect if click empty
+            setSelectedIndex(-1);
+        }
+
+        canvas.addEventListener("pointerdown", (e) => { pickFromEvent(e); }, { passive: true });
+        canvas.addEventListener("touchstart", (e) => { pickFromEvent(e); }, { passive: true });
+
+        /* -----------------------------
+           AUDIO TICK (tiny)
+        ------------------------------ */
+        let audioContext = null;
+        let lastTickAt = 0;
+        function hapticTick() {
+            const now = performance.now();
+            if (now - lastTickAt < 80) return;
+            lastTickAt = now;
+
+            try {
+                if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain); gain.connect(audioContext.destination);
+                osc.type = "sine";
+                osc.frequency.value = 780;
+                gain.gain.setValueAtTime(0.045, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.02);
+                osc.start(); osc.stop(audioContext.currentTime + 0.025);
+            } catch (_) { }
+
+            if (navigator.vibrate) navigator.vibrate(8);
+        }
+
+        /* -----------------------------
+           UI CONTROLS
+        ------------------------------ */
+        const barA = document.getElementById("barA");
+        const barB = document.getElementById("barB");
+
+        barA.addEventListener("click", (e) => {
+            if (e.target.classList.contains("operator")) return;
+            barA.classList.toggle("active");
+            if (barA.classList.contains("active")) barB.classList.remove("active");
+        });
+        barB.addEventListener("click", (e) => {
+            if (e.target.classList.contains("operator")) return;
+            barB.classList.toggle("active");
+            if (barB.classList.contains("active")) barA.classList.remove("active");
+        });
+
+        function setMode(strand, mode) {
+            if (strand === "a") {
+                state.strandA.mode = mode;
+                document.getElementById("strand-a-mode").textContent = MODE_SYMBOL[mode] || "×";
+                document.querySelectorAll('.mode-mini-btn[data-strand="a"]').forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+            } else {
+                state.strandB.mode = mode;
+                document.getElementById("strand-b-mode").textContent = MODE_SYMBOL[mode] || "◐";
+                document.querySelectorAll('.mode-mini-btn[data-strand="b"]').forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+            }
+            // purely symbolic in wireframe view, but keeps your metaphors alive
+        }
+
+        document.querySelectorAll(".mode-mini-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                setMode(btn.dataset.strand, btn.dataset.mode);
+            });
+        });
+
+        function setBlend(mode) {
+            state.blendMode = mode;
+            document.getElementById("blend-value").textContent = mode.toUpperCase();
+            if (state.selectedIndex >= 0) renderPhenotype(state.selectedIndex);
+        }
+
+        const BLEND_MODES = ["multiply", "screen", "overlay", "difference", "lighten", "darken"];
+        const blendSlider = document.getElementById("blend-slider");
+        const blendTrack = document.getElementById("blend-track");
+
+        function sliderPointerBinder(el, onPct) {
+            let dragging = false;
+            const setFromClientX = (clientX) => {
+                const r = el.getBoundingClientRect();
+                const pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+                onPct(pct);
+            };
+            el.addEventListener("pointerdown", (e) => { dragging = true; el.setPointerCapture(e.pointerId); setFromClientX(e.clientX); }, { passive: true });
+            el.addEventListener("pointermove", (e) => { if (!dragging) return; setFromClientX(e.clientX); }, { passive: true });
+            el.addEventListener("pointerup", () => { dragging = false; }, { passive: true });
+            // touch fallback
+            el.addEventListener("touchstart", (e) => { dragging = true; setFromClientX(e.touches[0].clientX); }, { passive: true });
+            el.addEventListener("touchmove", (e) => { if (!dragging) return; setFromClientX(e.touches[0].clientX); }, { passive: true });
+            el.addEventListener("touchend", () => { dragging = false; }, { passive: true });
+        }
+
+        sliderPointerBinder(blendSlider, (pct) => {
+            blendTrack.style.width = `${pct * 100}%`;
+            const idx = Math.min(BLEND_MODES.length - 1, Math.floor(pct * BLEND_MODES.length));
+            setBlend(BLEND_MODES[idx]);
+        });
+
+        const shapePanel = document.getElementById("dna-shape-panel");
+        document.getElementById("dna-shape").onclick = () => shapePanel.classList.toggle("visible");
+
+        sliderPointerBinder(document.getElementById("freq-slider"), (pct) => {
+            document.getElementById("freq-track").style.width = `${pct * 100}%`;
+            // center = equal, edges = diverge
+            const diff = (pct - 0.5) * 1.1;
+            state.dna.frequencyA = 1.55 - diff;
+            state.dna.frequencyB = 1.55 + diff;
+        });
+        sliderPointerBinder(document.getElementById("amp-slider"), (pct) => {
+            document.getElementById("amp-track").style.width = `${pct * 100}%`;
+            state.dna.amplitude = 0.55 + pct * 1.65;
+        });
+        sliderPointerBinder(document.getElementById("density-slider"), (pct) => {
+            document.getElementById("density-track").style.width = `${pct * 100}%`;
+            state.dna.density = Math.round(80 + pct * 420);
+            buildHelix();
+        });
+
+        document.getElementById("help").onclick = () => {
+            state.showPhenotype = !state.showPhenotype;
+            if (state.showPhenotype && state.selectedIndex >= 0) renderPhenotype(state.selectedIndex);
+            if (!state.showPhenotype) phenoWrap.classList.remove("visible");
+        };
+
+        document.getElementById("auto-rotate").onclick = () => {
+            state.autoRotate = !state.autoRotate;
+            const btn = document.getElementById("auto-rotate");
+            btn.style.borderColor = state.autoRotate ? "#00bcd4" : "#333";
+            btn.style.color = state.autoRotate ? "#00bcd4" : "#666";
+            btn.style.background = state.autoRotate ? "rgba(0,188,212,0.18)" : "rgba(10,10,12,0.92)";
+        };
+
+        const driftBtn = document.getElementById("organic-drift");
+        driftBtn.onclick = () => {
+            state.organicDrift = !state.organicDrift;
+            driftBtn.classList.toggle("active", state.organicDrift);
+        };
+
+        document.getElementById("fullscreen").onclick = () => {
+            const btn = document.getElementById("fullscreen");
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen?.();
+                btn.classList.add("fullscreen-active");
+            } else {
+                document.exitFullscreen?.();
+                btn.classList.remove("fullscreen-active");
+            }
+        };
+
+        /* Strand toggles */
+        document.getElementById("op-express-a").onclick = () => { state.strandA.active = true; };
+        document.getElementById("op-silence-a").onclick = () => { state.strandA.active = false; };
+        document.getElementById("op-express-b").onclick = () => { state.strandB.active = true; };
+        document.getElementById("op-silence-b").onclick = () => { state.strandB.active = false; };
+
+        // mutate/replicate in wireframe: mutate shifts phases; replicate increases density
+        document.getElementById("op-transcribe-a").onclick = () => {
+            state.strandA.phase += (Math.random() * 0.9 + 0.25);
+            state.generation++; document.getElementById("gen-count").textContent = state.generation;
+        };
+        document.getElementById("op-transcribe-b").onclick = () => {
+            state.strandB.phase -= (Math.random() * 0.9 + 0.25);
+            state.generation++; document.getElementById("gen-count").textContent = state.generation;
+        };
+        document.getElementById("op-replicate-a").onclick = () => {
+            state.dna.density = Math.min(600, state.dna.density + 18);
+            buildHelix();
+            state.generation++; document.getElementById("gen-count").textContent = state.generation;
+        };
+        document.getElementById("op-replicate-b").onclick = () => {
+            state.dna.density = Math.min(600, state.dna.density + 18);
+            buildHelix();
+            state.generation++; document.getElementById("gen-count").textContent = state.generation;
+        };
+
+        /* init modes */
+        setMode("a", state.strandA.mode);
+        setMode("b", state.strandB.mode);
+        setBlend(state.blendMode);
+
+        /* -----------------------------
+           OPTIONAL: LOAD YOUR screenplays.json (non-fatal)
+        ------------------------------ */
+        const opsHud = document.getElementById("ops-hud");
+        const opsText = document.getElementById("ops-text");
+        const opsFill = document.getElementById("ops-fill");
+        let opsTotal = 0, opsDone = 0;
+        function opsShow(total) {
+            opsTotal = total; opsDone = 0;
+            if (total > 0) { opsHud.style.display = "block"; opsText.textContent = `Loading 0/${total}`; opsFill.style.width = "0%"; }
+        }
+        function opsStep() {
+            opsDone++;
+            const pct = opsTotal ? Math.round((opsDone / opsTotal) * 100) : 0;
+            opsText.textContent = `Loading ${opsDone}/${opsTotal} (${pct}%)`;
+            opsFill.style.width = `${pct}%`;
+            if (opsDone >= opsTotal) setTimeout(() => { opsHud.style.display = "none"; }, 450);
+        }
+        async function tryLoadData() {
+            try {
+                const res = await fetch("screenplays.json", { cache: "no-store" });
+                if (!res.ok) throw new Error("no screenplays.json");
+                const data = await res.json();
+                // keep: just count, don’t block UI
+                let count = 0;
+                data.forEach(sp => (sp.content || []).forEach(it => { if (it?.shot_number && it?.versions) count++; }));
+                opsShow(Math.min(200, count));
+                // simulate steps (we're not wiring images into WebGL here)
+                for (let i = 0; i < Math.min(200, count); i++) { opsStep(); await new Promise(r => setTimeout(r, 4)); }
+            } catch (_) {
+                // silent
+            }
+        }
+        tryLoadData();
+
+        /* -----------------------------
+           RESIZE + LOOP
+        ------------------------------ */
+        function resize() {
+            const w = window.innerWidth, h = window.innerHeight;
+            renderer.setSize(w, h, false);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            if (phenoWrap.classList.contains("visible")) resizePhenoCanvas();
+        }
+        window.addEventListener("resize", resize);
+        resize();
+
+        buildHelix();
+
+        // set initial selection in focal-ish center
+        setSelectedIndex(Math.floor(state.dna.density / 2));
+
+        let last = performance.now();
+        function loop(now) {
+            const dt = Math.min(0.05, (now - last) / 1000);
+            last = now;
+
+            // mild camera auto-roll (gives "three.js wireframe" vibe)
+            if (state.autoRotate) controls.autoRotate = true;
+            else controls.autoRotate = false;
+            controls.autoRotateSpeed = 0.6;
+
+            updateHelix(dt);
+            controls.update();
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+    </script>
+</body>
+
+</html>

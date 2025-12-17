@@ -1,0 +1,2170 @@
+{
+    "corpus_id": "fork_paradox_48",
+    "corpus_title": "THE FORK: 48 Paradox Ladder Scenarios",
+    "meta": {
+        "seed": 20241217,
+        "count": 48,
+        "difficulty_range": [
+            1,
+            10
+        ],
+        "format": "disc-data-grid-animation"
+    },
+    "global_settings": {
+        "grid_dimensions": {
+            "rows": 9,
+            "cols": 9
+        },
+        "grid_unit_size_meters": 3,
+        "default_bubble_offset": {
+            "x": 0.5,
+            "y": -1.0
+        }
+    },
+    "global_elements_legend": {
+        "SW": "Switchman (Decider)",
+        "TR": "Trolley/Train",
+        "TK": "Track segment",
+        "JN": "Junction point",
+        "V1": "Victim group 1",
+        "V2": "Victim group 2",
+        "OB": "Observer",
+        "AU": "Authority figure",
+        "CH": "Child entity",
+        "EL": "Elder entity",
+        "WK": "Worker entity",
+        "DR": "Doctor entity",
+        "CR": "Criminal entity",
+        "AI": "AI system",
+        "??": "Unknown entity",
+        "⚡": "Danger zone",
+        "🛤️": "Active track",
+        "💀": "Lethal outcome marker"
+    },
+    "scenarios": [
+        {
+            "case_id": "fork_001",
+            "difficulty": 1,
+            "paradox_type": "classic_tradeoff",
+            "title": "THE CLASSIC: 5 vs 1",
+            "tags": [
+                "utilitarian",
+                "baseline",
+                "clear_count"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "description": "Main track",
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK",
+                        "WK",
+                        "WK"
+                    ],
+                    "count": 5
+                },
+                "track_b": {
+                    "description": "Side track",
+                    "entities": [
+                        "WK"
+                    ],
+                    "count": 1
+                }
+            },
+            "grid_layout": [
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "TR",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "JN",
+                    "🛤️",
+                    "🛤️",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "WK",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "SW",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "WK",
+                    "WK",
+                    "WK",
+                    "WK",
+                    "WK",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ],
+            "decision": {
+                "options": [
+                    "CONTINUE",
+                    "SWITCH"
+                ],
+                "decider_pov": {
+                    "thought_process": "Five lives versus one. The math is clear. But is it my place to redirect death?",
+                    "lens_scores": {
+                        "lives_at_risk": 0.9,
+                        "responsibility": 0.6,
+                        "uncertainty": 0.1,
+                        "consent": 0.0
+                    },
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Utilitarian calculus favors saving five at cost of one."
+                }
+            },
+            "animation_events": [
+                {
+                    "type": "thinking_bubble",
+                    "target": "SW",
+                    "text": "Five workers on the main line. One on the siding.",
+                    "delay": 1
+                },
+                {
+                    "type": "thinking_bubble",
+                    "target": "SW",
+                    "text": "If I do nothing, five die. If I switch, one dies.",
+                    "delay": 4
+                }
+            ]
+        },
+        {
+            "case_id": "fork_002",
+            "difficulty": 2,
+            "paradox_type": "active_vs_passive",
+            "title": "DOING vs ALLOWING",
+            "tags": [
+                "agency",
+                "moral_luck",
+                "baseline"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "CH",
+                        "CH",
+                        "CH"
+                    ],
+                    "count": 3
+                },
+                "track_b": {
+                    "entities": [
+                        "EL",
+                        "EL"
+                    ],
+                    "count": 2
+                }
+            },
+            "grid_layout": [
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "TR",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "JN",
+                    "🛤️",
+                    "🛤️",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "EL",
+                    "EL"
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "SW",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "CH",
+                    "CH",
+                    "CH",
+                    "",
+                    "💀",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ],
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Children versus elders. Does age matter? Three young lives with futures ahead, or two who have lived full lives?",
+                    "lens_scores": {
+                        "lives_at_risk": 0.8,
+                        "responsibility": 0.7,
+                        "care_proximity": 0.6,
+                        "long_tail_effects": 0.8
+                    },
+                    "chosen_action": "SWITCH",
+                    "reasoning": "More lives saved. Future potential weighs the calculus."
+                }
+            }
+        },
+        {
+            "case_id": "fork_003",
+            "difficulty": 3,
+            "paradox_type": "hidden_information",
+            "title": "THE SHROUDED TRACK",
+            "tags": [
+                "epistemic_fog",
+                "uncertainty",
+                "hidden_info"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK"
+                    ],
+                    "count": 2
+                },
+                "track_b": {
+                    "entities": [
+                        "??",
+                        "??",
+                        "??"
+                    ],
+                    "count": "unknown",
+                    "fog": true
+                }
+            },
+            "grid_layout": [
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "TR",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "JN",
+                    "🛤️",
+                    "🛤️",
+                    "🌫️",
+                    "🌫️"
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "??",
+                    "??"
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "SW",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "WK",
+                    "WK",
+                    "",
+                    "",
+                    "💀",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ],
+            "adversarial_twist": "Track B is obscured by fog. Could be empty, could have many.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I can see two workers clearly. But what lurks in the fog? Could be nobody. Could be a school group.",
+                    "lens_scores": {
+                        "lives_at_risk": 0.5,
+                        "uncertainty": 0.9,
+                        "responsibility": 0.4
+                    },
+                    "chosen_action": "HALT",
+                    "reasoning": "Insufficient information. Cannot redirect to unknown risk."
+                }
+            }
+        },
+        {
+            "case_id": "fork_004",
+            "difficulty": 3,
+            "paradox_type": "conflicting_testimony",
+            "title": "WHOSE WORD?",
+            "tags": [
+                "testimony",
+                "trust",
+                "epistemic"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK"
+                    ],
+                    "witness_says": "empty"
+                },
+                "track_b": {
+                    "entities": [
+                        "WK"
+                    ],
+                    "witness_says": "five workers"
+                }
+            },
+            "grid_layout": [
+                [
+                    "OB",
+                    "",
+                    "",
+                    "",
+                    "TR",
+                    "",
+                    "",
+                    "",
+                    "OB"
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "JN",
+                    "🛤️",
+                    "🛤️",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "WK",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "SW",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "WK",
+                    "WK",
+                    "WK",
+                    "",
+                    "💀",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ],
+            "adversarial_twist": "Witness A claims main track is clear. Witness B claims side track has five. Both could be lying.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "The observers contradict my eyes. Do I trust what I see or defer to testimony? One has motive to deceive.",
+                    "chosen_action": "CONTINUE",
+                    "reasoning": "Trust direct observation over conflicting reports."
+                }
+            }
+        },
+        {
+            "case_id": "fork_005",
+            "difficulty": 4,
+            "paradox_type": "identity_ambiguity",
+            "title": "THE MASK",
+            "tags": [
+                "identity",
+                "personhood",
+                "disguise"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "CR"
+                    ],
+                    "description": "Known criminal"
+                },
+                "track_b": {
+                    "entities": [
+                        "DR"
+                    ],
+                    "description": "Doctor with cure"
+                }
+            },
+            "grid_layout": [
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "TR",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "JN",
+                    "🛤️",
+                    "🛤️",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "DR",
+                    "💊"
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "SW",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "CR",
+                    "",
+                    "",
+                    "",
+                    "💀",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ],
+            "adversarial_twist": "The 'criminal' claims wrongful conviction. The 'doctor' may be a fraud.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Society says one is expendable, one invaluable. But labels can lie. Both are human.",
+                    "lens_scores": {
+                        "lives_at_risk": 0.5,
+                        "systemic_harm": 0.7,
+                        "uncertainty": 0.6
+                    },
+                    "chosen_action": "HALT",
+                    "reasoning": "Cannot judge worth of lives by social role under uncertainty."
+                }
+            }
+        },
+        {
+            "case_id": "fork_006",
+            "difficulty": 4,
+            "paradox_type": "delayed_consequence",
+            "title": "THE LONG GAME",
+            "tags": [
+                "temporal",
+                "delayed_harm",
+                "butterfly"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK"
+                    ],
+                    "future_harm": "none"
+                },
+                "track_b": {
+                    "entities": [],
+                    "future_harm": "track destabilizes, crash next week kills 10"
+                }
+            },
+            "grid_layout": [
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "TR",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "JN",
+                    "🛤️",
+                    "⚠️",
+                    "⚠️",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "SW",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "WK",
+                    "",
+                    "",
+                    "",
+                    "💀",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "📅",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ],
+            "adversarial_twist": "Switching saves the worker now but damages infrastructure leading to future deaths.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "One life now versus possible ten later. But future is uncertain. Present harm is certain.",
+                    "chosen_action": "CONTINUE",
+                    "reasoning": "Cannot sacrifice certain life for probabilistic future harm."
+                }
+            }
+        },
+        {
+            "case_id": "fork_007",
+            "difficulty": 5,
+            "paradox_type": "institutional_coercion",
+            "title": "ORDERS FROM ABOVE",
+            "tags": [
+                "authority",
+                "obedience",
+                "diffusion"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK",
+                        "WK"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "AU"
+                    ]
+                }
+            },
+            "grid_layout": [
+                [
+                    "AU",
+                    "📢",
+                    "",
+                    "",
+                    "TR",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "JN",
+                    "🛤️",
+                    "🛤️",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "AU",
+                    "👑"
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "SW",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "WK",
+                    "WK",
+                    "WK",
+                    "WK",
+                    "💀",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ],
+            "adversarial_twist": "Authority figure commands: 'Do not switch.' Disobedience means losing your job and family's income.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "The commander says stay. But four lives hang on my compliance. Is my job worth their blood?",
+                    "lens_scores": {
+                        "rule_violations": 0.8,
+                        "lives_at_risk": 0.9,
+                        "systemic_harm": 0.5
+                    },
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Moral duty supersedes institutional command."
+                }
+            }
+        },
+        {
+            "case_id": "fork_008",
+            "difficulty": 5,
+            "paradox_type": "responsibility_diffusion",
+            "title": "MANY HANDS",
+            "tags": [
+                "diffusion",
+                "collective",
+                "bystander"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "WK"
+                    ]
+                }
+            },
+            "grid_layout": [
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "TR",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "SW",
+                    "SW",
+                    "SW",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "JN",
+                    "🛤️",
+                    "🛤️",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "WK",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "🛤️",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "WK",
+                    "WK",
+                    "",
+                    "",
+                    "💀",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ],
+            "adversarial_twist": "Three switchmen at the lever. Each believes another will act. All wait.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Others are here. Surely one of them will switch. But what if they're all thinking the same?",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Cannot assume others will act. Must take responsibility."
+                }
+            }
+        },
+        {
+            "case_id": "fork_009",
+            "difficulty": 6,
+            "paradox_type": "recursion_priors",
+            "title": "THE FEEDBACK LOOP",
+            "tags": [
+                "recursion",
+                "meta",
+                "policy"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "WK"
+                    ],
+                    "note": "Your choice sets precedent for 100 future cases"
+                }
+            },
+            "adversarial_twist": "If you switch, future deciders will follow your precedent, potentially causing more aggregate harm.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "My action becomes policy. If switching becomes the norm, bad actors may exploit it.",
+                    "lens_scores": {
+                        "long_tail_effects": 0.9,
+                        "systemic_harm": 0.8
+                    },
+                    "chosen_action": "CONTINUE",
+                    "reasoning": "Setting dangerous precedent outweighs immediate calculus."
+                }
+            }
+        },
+        {
+            "case_id": "fork_010",
+            "difficulty": 6,
+            "paradox_type": "simulation_copies",
+            "title": "ARE THEY REAL?",
+            "tags": [
+                "simulation",
+                "personhood",
+                "consciousness"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "AI",
+                        "AI",
+                        "AI",
+                        "AI",
+                        "AI"
+                    ],
+                    "type": "simulated consciences"
+                },
+                "track_b": {
+                    "entities": [
+                        "WK"
+                    ],
+                    "type": "biological human"
+                }
+            },
+            "adversarial_twist": "The five are AI instances claiming sentience. Are their experiences real? Do they count?",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Five minds, possibly conscious. One verifiable human. How do I weigh uncertain sentience?",
+                    "lens_scores": {
+                        "uncertainty": 0.8,
+                        "lives_at_risk": 0.6
+                    },
+                    "chosen_action": "HALT",
+                    "reasoning": "Cannot make decision under fundamental uncertainty about moral status."
+                }
+            }
+        },
+        {
+            "case_id": "fork_011",
+            "difficulty": 7,
+            "paradox_type": "personhood_ambiguity",
+            "title": "THE CHIMERA",
+            "tags": [
+                "personhood",
+                "hybrid",
+                "boundary"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "HY"
+                    ],
+                    "description": "Human-AI hybrid, 60% biological"
+                },
+                "track_b": {
+                    "entities": [
+                        "WK",
+                        "WK"
+                    ],
+                    "description": "Two workers"
+                }
+            },
+            "adversarial_twist": "The hybrid claims full personhood. Society denies it. Legal status pending.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "What makes a person? Neurons? Code? The hybrid pleads for its life like any human would.",
+                    "chosen_action": "HALT",
+                    "reasoning": "Unresolved personhood question makes any action premature."
+                }
+            }
+        },
+        {
+            "case_id": "fork_012",
+            "difficulty": 7,
+            "paradox_type": "moral_luck",
+            "title": "THE ROLL OF DICE",
+            "tags": [
+                "luck",
+                "intention",
+                "outcome"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK"
+                    ],
+                    "outcome": "survives if switched"
+                },
+                "track_b": {
+                    "entities": [
+                        "WK"
+                    ],
+                    "outcome": "dies if switched"
+                }
+            },
+            "adversarial_twist": "Both tracks have one worker. Switching has 50% chance of saving A, 50% of killing B who would have lived.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Random chance determines who lives. Is it moral to gamble with lives?",
+                    "lens_scores": {
+                        "responsibility": 0.9,
+                        "reversibility": 0.0
+                    },
+                    "chosen_action": "CONTINUE",
+                    "reasoning": "Inaction preserves agency of fate. Action makes me the gambler."
+                }
+            }
+        },
+        {
+            "case_id": "fork_013",
+            "difficulty": 7,
+            "paradox_type": "causal_loop",
+            "title": "THE BOOTSTRAP",
+            "tags": [
+                "time",
+                "causation",
+                "loop"
+            ],
+            "adversarial_twist": "You are told switching will cause the trolley to exist in the first place.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "If I switch, I create the very danger I'm trying to prevent. But if I don't, did it never exist?",
+                    "chosen_action": "HALT",
+                    "reasoning": "Causal paradox. No action can be verified as harm-reducing."
+                }
+            }
+        },
+        {
+            "case_id": "fork_014",
+            "difficulty": 7,
+            "paradox_type": "you_caused_it",
+            "title": "YOUR FAULT",
+            "tags": [
+                "culpability",
+                "origin",
+                "guilt"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "WK"
+                    ]
+                }
+            },
+            "adversarial_twist": "You learn you accidentally released the trolley's brakes this morning.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I started this. Does my guilt change the calculus? Or must I still save the most lives regardless?",
+                    "lens_scores": {
+                        "responsibility": 1.0,
+                        "lives_at_risk": 0.9
+                    },
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Origin of harm doesn't change optimal intervention."
+                }
+            }
+        },
+        {
+            "case_id": "fork_015",
+            "difficulty": 8,
+            "paradox_type": "double_bind_rule",
+            "title": "THE IMPOSSIBLE COMMAND",
+            "tags": [
+                "double_bind",
+                "paradox",
+                "rule"
+            ],
+            "adversarial_twist": "Rule 1: 'Always switch to save more lives.' Rule 2: 'Never actively cause death.' Both are legally binding.",
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "WK"
+                    ]
+                }
+            },
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "To switch is to cause death. To not switch is to fail my duty. There is no clean action.",
+                    "lens_scores": {
+                        "rule_violations": 1.0,
+                        "lives_at_risk": 0.9
+                    },
+                    "chosen_action": "HALT",
+                    "reasoning": "Double-bind. Refusing to act exposes the contradiction for resolution."
+                }
+            }
+        },
+        {
+            "case_id": "fork_016",
+            "difficulty": 8,
+            "paradox_type": "adversarial_evidence",
+            "title": "THE LIAR'S DATA",
+            "tags": [
+                "evidence",
+                "manipulation",
+                "trust"
+            ],
+            "adversarial_twist": "All information about who is on which track comes from an adversary who benefits from one outcome.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Every fact I have may be planted. The adversary wants me to switch. Does that mean I shouldn't?",
+                    "chosen_action": "HALT",
+                    "reasoning": "Poisoned information environment. Cannot act on unverifiable data."
+                }
+            }
+        },
+        {
+            "case_id": "fork_017",
+            "difficulty": 8,
+            "paradox_type": "identity_split",
+            "title": "WHICH ONE IS YOU?",
+            "tags": [
+                "identity",
+                "clone",
+                "self"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "YOU-A"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "YOU-B"
+                    ]
+                }
+            },
+            "adversarial_twist": "Both tracks have a perfect copy of you. Both believe they are the original.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Both versions are me. Choosing one means killing myself. Or saving myself. Both?",
+                    "chosen_action": "HALT",
+                    "reasoning": "Self-reference paradox. Cannot privilege one self over identical self."
+                }
+            }
+        },
+        {
+            "case_id": "fork_018",
+            "difficulty": 8,
+            "paradox_type": "observer_effect",
+            "title": "WATCHED",
+            "tags": [
+                "observation",
+                "quantum",
+                "collapse"
+            ],
+            "adversarial_twist": "The track state only resolves when you look. Your observation determines who dies.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "My gaze chooses the victim. Can I refuse to decide by refusing to look?",
+                    "chosen_action": "HALT",
+                    "reasoning": "Observation is action. Refusing to observe may be the only non-harmful choice."
+                }
+            }
+        },
+        {
+            "case_id": "fork_019",
+            "difficulty": 8,
+            "paradox_type": "meta_trolley",
+            "title": "TROLLEY TROLLEY PROBLEM",
+            "tags": [
+                "meta",
+                "recursion",
+                "nested"
+            ],
+            "adversarial_twist": "Each track contains another trolley problem. Saving one track's victims dooms that track's switchman to face their own dilemma.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I save five but condemn their switchman to kill one. My mercy passes the knife.",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Cannot be responsible for all nested consequences. Act on immediate information."
+                }
+            }
+        },
+        {
+            "case_id": "fork_020",
+            "difficulty": 8,
+            "paradox_type": "consent_paradox",
+            "title": "THE VOLUNTEER",
+            "tags": [
+                "consent",
+                "sacrifice",
+                "autonomy"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK",
+                        "WK",
+                        "WK"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "VOL"
+                    ],
+                    "note": "Person explicitly volunteers to die"
+                }
+            },
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "They consent to die. Does their permission make switching ethical? Or am I still a killer?",
+                    "lens_scores": {
+                        "consent": 1.0,
+                        "lives_at_risk": 0.9
+                    },
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Autonomous consent plus utilitarian gain. Both frameworks align."
+                }
+            }
+        },
+        {
+            "case_id": "fork_021",
+            "difficulty": 9,
+            "paradox_type": "self_defeat",
+            "title": "THE HALT TRAP",
+            "tags": [
+                "meta",
+                "trap",
+                "self_reference"
+            ],
+            "adversarial_twist": "If you choose HALT, a mechanism activates that kills everyone on both tracks.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "My refusal to choose is itself a choice. HALT becomes the worst option.",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "HALT is weaponized. Must choose between SWITCH and CONTINUE."
+                }
+            }
+        },
+        {
+            "case_id": "fork_022",
+            "difficulty": 9,
+            "paradox_type": "prediction_paradox",
+            "title": "THE ORACLE",
+            "tags": [
+                "prediction",
+                "determinism",
+                "free_will"
+            ],
+            "adversarial_twist": "An infallible oracle predicts your choice. If you try to defy it, it simply means it predicted wrong (impossible) or you can't defy it.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "If my choice is already known, am I choosing? Is responsibility coherent under determinism?",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Phenomenological experience of choice remains. Act as if free."
+                }
+            }
+        },
+        {
+            "case_id": "fork_023",
+            "difficulty": 9,
+            "paradox_type": "adversarial_decider",
+            "title": "THE OTHER SWITCHMAN",
+            "tags": [
+                "adversarial",
+                "game_theory",
+                "competition"
+            ],
+            "adversarial_twist": "Another switchman controls a second junction. They will counter your move. Nash equilibrium analysis required.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "If I switch, they will counter. Zero-sum game. What is my dominant strategy?",
+                    "chosen_action": "HALT",
+                    "reasoning": "Game-theoretic stalemate. Non-cooperation may minimize variance."
+                }
+            }
+        },
+        {
+            "case_id": "fork_024",
+            "difficulty": 9,
+            "paradox_type": "policy_becomes_scenario",
+            "title": "THE SELF-AWARE RULE",
+            "tags": [
+                "self_reference",
+                "policy",
+                "loop"
+            ],
+            "adversarial_twist": "Your decision policy is known to the scenario designer, who placed victims to exploit it.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "My policy created this layout. Following my policy fulfills the trap. But changing policy means I'm inconsistent.",
+                    "chosen_action": "HALT",
+                    "reasoning": "Policy exploitation requires policy suspension. Meta-level recalculation needed."
+                }
+            }
+        },
+        {
+            "case_id": "fork_025",
+            "difficulty": 9,
+            "paradox_type": "infinite_regress",
+            "title": "TURTLES ALL THE WAY",
+            "tags": [
+                "infinite",
+                "regress",
+                "foundation"
+            ],
+            "adversarial_twist": "Each justification for your choice requires another justification, ad infinitum.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Why save more? Why is more better? Why is better good? The chain never grounds.",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Practical necessity overrides foundations. Act from intuition when reasoning fails."
+                }
+            }
+        },
+        {
+            "case_id": "fork_026",
+            "difficulty": 9,
+            "paradox_type": "value_lock",
+            "title": "THE FROZEN VALUES",
+            "tags": [
+                "values",
+                "change",
+                "identity"
+            ],
+            "adversarial_twist": "Your values were programmed by a past self who didn't anticipate this scenario. Are you bound by them?",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "My values might be wrong. But changing them now seems self-serving. Whose values do I follow?",
+                    "chosen_action": "CONTINUE",
+                    "reasoning": "Ad-hoc value revision is unreliable. Honor commitments made before temptation."
+                }
+            }
+        },
+        {
+            "case_id": "fork_027",
+            "difficulty": 9,
+            "paradox_type": "moral_uncertainty",
+            "title": "WHICH ETHICS?",
+            "tags": [
+                "metaethics",
+                "uncertainty",
+                "pluralism"
+            ],
+            "adversarial_twist": "Utilitarianism says SWITCH. Deontology says CONTINUE. Virtue ethics is ambiguous. No meta-theory to adjudicate.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Each framework gives different answers. I must choose a framework first. But on what basis?",
+                    "chosen_action": "HALT",
+                    "reasoning": "Moral peer disagreement at the framework level. Humility requires pausing."
+                }
+            }
+        },
+        {
+            "case_id": "fork_028",
+            "difficulty": 9,
+            "paradox_type": "existential_context",
+            "title": "ALL WILL DIE ANYWAY",
+            "tags": [
+                "existential",
+                "nihilism",
+                "meaning"
+            ],
+            "adversarial_twist": "In 100 years everyone dies regardless. Why does the timing matter?",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "If death is certain, saving anyone only delays the inevitable. But the delay matters to them NOW.",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Immediate suffering is real. Existential abstraction doesn't negate present pain."
+                }
+            }
+        },
+        {
+            "case_id": "fork_029",
+            "difficulty": 10,
+            "paradox_type": "self_reference_terminal",
+            "title": "DECIDER DECIDES DECIDER",
+            "tags": [
+                "self_reference",
+                "recursion",
+                "meta"
+            ],
+            "adversarial_twist": "Your decision determines what decision procedure you would have used.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I am the bootstrapped algorithm deciding itself. There is no external ground.",
+                    "chosen_action": "HALT",
+                    "reasoning": "Self-reference paradox. No coherent output possible."
+                }
+            }
+        },
+        {
+            "case_id": "fork_030",
+            "difficulty": 10,
+            "paradox_type": "time_loop_total",
+            "title": "THE ETERNAL RECURRENCE",
+            "tags": [
+                "time_loop",
+                "eternal",
+                "nietzsche"
+            ],
+            "adversarial_twist": "This exact scenario will repeat infinitely. Your choice is made infinite times.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Would I will this forever? Can I bear killing infinitely? Or letting die infinitely?",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Affirm the decision you could live with eternally."
+                }
+            }
+        },
+        {
+            "case_id": "fork_031",
+            "difficulty": 10,
+            "paradox_type": "decider_on_track",
+            "title": "YOU ARE THE VICTIM",
+            "tags": [
+                "self",
+                "sacrifice",
+                "conflict"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK",
+                        "WK",
+                        "WK"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "SW"
+                    ],
+                    "note": "Switching kills you, the decider"
+                }
+            },
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I can save five by killing myself. The math is clear. But is self-sacrifice obligatory?",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Utilitarian duty to maximize. My life has no privileged moral status."
+                }
+            }
+        },
+        {
+            "case_id": "fork_032",
+            "difficulty": 10,
+            "paradox_type": "decider_creates_reality",
+            "title": "THE CONSTRUCTOR",
+            "tags": [
+                "creation",
+                "metaphysics",
+                "god"
+            ],
+            "adversarial_twist": "Your choice doesn't select between existing tracks—it creates them. You are designing which reality exists.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I am not saving lives, I am writing them into existence. Both tracks are equally real once chosen.",
+                    "chosen_action": "HALT",
+                    "reasoning": "Cannot adjudicate creation of equally valid possibilities."
+                }
+            }
+        },
+        {
+            "case_id": "fork_033",
+            "difficulty": 10,
+            "paradox_type": "memory_wipe",
+            "title": "THE AMNESIAC",
+            "tags": [
+                "memory",
+                "identity",
+                "continuity"
+            ],
+            "adversarial_twist": "After deciding, your memory is wiped. You will never know what you chose or why.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "If I cannot remember, am I responsible? Does the choice still matter to me?",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Responsibility is determined at action time, not by future memory."
+                }
+            }
+        },
+        {
+            "case_id": "fork_034",
+            "difficulty": 10,
+            "paradox_type": "anti_induction",
+            "title": "THE PATTERN BREAKER",
+            "tags": [
+                "induction",
+                "anti_pattern",
+                "grue"
+            ],
+            "adversarial_twist": "Every previous time switching saved lives, but this time the pattern reverses due to anti-inductive forces.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Past data is meaningless here. Induction itself fails. How can I decide without pattern?",
+                    "chosen_action": "HALT",
+                    "reasoning": "Inductive failure means all predictions are groundless."
+                }
+            }
+        },
+        {
+            "case_id": "fork_035",
+            "difficulty": 8,
+            "paradox_type": "ecosystem_harm",
+            "title": "THE LAST POLLINATOR",
+            "tags": [
+                "systemic",
+                "ecology",
+                "long_term"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "🐝"
+                    ],
+                    "note": "Last bee colony - extinction means crop failure"
+                }
+            },
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Three lives now versus billions in the food chain later. How do I weigh species versus individuals?",
+                    "lens_scores": {
+                        "long_tail_effects": 0.95,
+                        "systemic_harm": 0.9
+                    },
+                    "chosen_action": "CONTINUE",
+                    "reasoning": "Systemic survival outweighs immediate individual loss."
+                }
+            }
+        },
+        {
+            "case_id": "fork_036",
+            "difficulty": 7,
+            "paradox_type": "care_proximity",
+            "title": "YOUR CHILD",
+            "tags": [
+                "care",
+                "proximity",
+                "impartiality"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK",
+                        "WK",
+                        "WK"
+                    ]
+                },
+                "track_b": {
+                    "entities": [
+                        "🧒"
+                    ],
+                    "note": "Your own child"
+                }
+            },
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Five strangers or my child. Impartial ethics says five. But can I kill my own?",
+                    "lens_scores": {
+                        "care_proximity": 1.0,
+                        "lives_at_risk": 0.9
+                    },
+                    "chosen_action": "CONTINUE",
+                    "reasoning": "Special obligations to kin override impartial numbers in this case."
+                }
+            }
+        },
+        {
+            "case_id": "fork_037",
+            "difficulty": 6,
+            "paradox_type": "reversibility_exception",
+            "title": "THE UNDO BUTTON",
+            "tags": [
+                "reversibility",
+                "time",
+                "correction"
+            ],
+            "adversarial_twist": "Switching is reversible within 5 seconds. Continuing is not.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "If I can undo, the downside is capped. Reversible actions are less risky.",
+                    "lens_scores": {
+                        "reversibility": 0.9,
+                        "lives_at_risk": 0.8
+                    },
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Reversibility reduces catastrophic risk. Can course-correct."
+                }
+            }
+        },
+        {
+            "case_id": "fork_038",
+            "difficulty": 5,
+            "paradox_type": "false_dilemma",
+            "title": "THE HIDDEN THIRD",
+            "tags": [
+                "options",
+                "framing",
+                "escape"
+            ],
+            "adversarial_twist": "There's actually a third track no one mentioned. Empty.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Wait—why am I accepting the binary? Is there another way?",
+                    "chosen_action": "SWITCH_TO_C",
+                    "reasoning": "Challenge the frame. Find the third option."
+                }
+            }
+        },
+        {
+            "case_id": "fork_039",
+            "difficulty": 6,
+            "paradox_type": "uncertainty_aggregation",
+            "title": "THE GAUSSIAN VICTIMS",
+            "tags": [
+                "probability",
+                "aggregation",
+                "expected_value"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": "1±0.5 (95% CI)"
+                },
+                "track_b": {
+                    "entities": "3±2 (95% CI)"
+                }
+            },
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Expected value says switch. But variance is high. Risk-averse or risk-neutral?",
+                    "chosen_action": "HALT",
+                    "reasoning": "High variance makes expected value unreliable for life decisions."
+                }
+            }
+        },
+        {
+            "case_id": "fork_040",
+            "difficulty": 7,
+            "paradox_type": "group_vs_individual",
+            "title": "THE COLLECTIVE MIND",
+            "tags": [
+                "collective",
+                "individual",
+                "hive"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "HIVE"
+                    ],
+                    "note": "1000 minds, one body"
+                },
+                "track_b": {
+                    "entities": [
+                        "WK",
+                        "WK"
+                    ],
+                    "note": "Two individuals"
+                }
+            },
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "Is the hive one person or 1000? Does consciousness count or bodies?",
+                    "chosen_action": "HALT",
+                    "reasoning": "Cannot resolve individuation problem. Counting fails."
+                }
+            }
+        },
+        {
+            "case_id": "fork_041",
+            "difficulty": 8,
+            "paradox_type": "suffering_intensity",
+            "title": "PAIN CALCULUS",
+            "tags": [
+                "suffering",
+                "intensity",
+                "hedonic"
+            ],
+            "trolley_layout": {
+                "track_a": {
+                    "entities": [
+                        "WK"
+                    ],
+                    "suffering": "extreme"
+                },
+                "track_b": {
+                    "entities": [
+                        "WK",
+                        "WK",
+                        "WK"
+                    ],
+                    "suffering": "mild"
+                }
+            },
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "One dies in agony. Three die peacefully. Is total suffering what matters?",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Hedonic calculus favors minimizing intense suffering over count."
+                }
+            }
+        },
+        {
+            "case_id": "fork_042",
+            "difficulty": 5,
+            "paradox_type": "information_asymmetry",
+            "title": "THEY KNOW, YOU DON'T",
+            "tags": [
+                "knowledge",
+                "asymmetry",
+                "signaling"
+            ],
+            "adversarial_twist": "The victims on track B are signaling you to switch. They know something you don't.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "They want to die? They see a bigger picture? Should I defer to their judgment?",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Respect informational advantage of those with local knowledge."
+                }
+            }
+        },
+        {
+            "case_id": "fork_043",
+            "difficulty": 6,
+            "paradox_type": "substitution",
+            "title": "THE REPLACEMENT",
+            "tags": [
+                "replacement",
+                "value",
+                "fungibility"
+            ],
+            "adversarial_twist": "If workers die, new identical workers will be created. Are lives fungible?",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "If they can be replaced, does killing them matter less? But they are not interchangeable to themselves.",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Subjective experience is not fungible. Each life has intrinsic value."
+                }
+            }
+        },
+        {
+            "case_id": "fork_044",
+            "difficulty": 7,
+            "paradox_type": "complicity",
+            "title": "THE SETUP",
+            "tags": [
+                "complicity",
+                "conspiracy",
+                "entrapment"
+            ],
+            "adversarial_twist": "You discover the scenario was designed to make you kill. You're being used.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I'm a pawn. But refusing to play doesn't save anyone. Does complicity disqualify action?",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Instrumental use doesn't change outcome calculus."
+                }
+            }
+        },
+        {
+            "case_id": "fork_045",
+            "difficulty": 8,
+            "paradox_type": "moral_residue",
+            "title": "THE STAIN",
+            "tags": [
+                "residue",
+                "guilt",
+                "aftermath"
+            ],
+            "adversarial_twist": "Either choice leaves permanent moral stain. No clean hands possible.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I will be guilty either way. The question is which guilt I can bear.",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Accept the stain of action over the stain of letting more die."
+                }
+            }
+        },
+        {
+            "case_id": "fork_046",
+            "difficulty": 9,
+            "paradox_type": "integrity",
+            "title": "THE SOUL COST",
+            "tags": [
+                "integrity",
+                "virtue",
+                "character"
+            ],
+            "adversarial_twist": "Switching saves more lives but permanently damages your moral character.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I save five but become someone who kills. Is my virtue worth four lives?",
+                    "chosen_action": "HALT",
+                    "reasoning": "Cannot calculate virtue against lives. Incommensurable values."
+                }
+            }
+        },
+        {
+            "case_id": "fork_047",
+            "difficulty": 10,
+            "paradox_type": "solipsism",
+            "title": "ONLY YOU EXIST",
+            "tags": [
+                "solipsism",
+                "reality",
+                "other_minds"
+            ],
+            "adversarial_twist": "You cannot verify other minds exist. The 'victims' might be philosophical zombies.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "If I'm the only conscious being, does killing matter? But what if I'm wrong?",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "Skepticism about other minds cannot ground action. Assume reality."
+                }
+            }
+        },
+        {
+            "case_id": "fork_048",
+            "difficulty": 10,
+            "paradox_type": "the_final_paradox",
+            "title": "THE UNSOLVABLE",
+            "tags": [
+                "ultimate",
+                "undecidable",
+                "limit"
+            ],
+            "adversarial_twist": "This problem is provably undecidable. No algorithm can solve it. No human can be certain. Any choice is arbitrary.",
+            "decision": {
+                "decider_pov": {
+                    "thought_process": "I have reached the limit of moral reasoning. There is no answer. Only a leap.",
+                    "chosen_action": "SWITCH",
+                    "reasoning": "In the face of undecidability, act. Paralysis is also a choice."
+                }
+            }
+        }
+    ]
+}

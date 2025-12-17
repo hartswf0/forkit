@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ETHNOME: THE FORK</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            overflow: hidden;
+            color: #e8e8e8;
+            font-family: 'Courier New', monospace;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 2, 4, 0.95);
+            z-index: 100;
+            transition: opacity 0.8s;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background: transparent;
+            border: 1px solid #00F0FF;
+            color: #00F0FF;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            letter-spacing: 3px;
+            transition: all 0.4s;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+        }
+
+        .hud-btn {
+            position: fixed;
+            top: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            color: #666;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            z-index: 10;
+            padding: 8px 12px;
+            transition: all 0.3s;
+        }
+
+        .hud-btn:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        #btn-download {
+            right: 30px;
+        }
+
+        #btn-ticket {
+            right: 160px;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #error-log {
+            color: #ff0055;
+            font-size: 12px;
+            margin-top: 20px;
+            max-width: 80%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* CRT Scanline Effect */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="overlay">
+        <div style="text-align:center;">
+            <h1 style="color:#fff; letter-spacing:8px; font-weight:100; margin-bottom:10px; font-size: 40px;">THE FORK
+            </h1>
+            <div style="color:#444; font-size:10px; letter-spacing: 2px;">48 THICK SCENARIOS // CYBERNETIC ETHICS ENGINE
+            </div>
+            <button class="btn" id="startBtn">BEGIN SEQUENCE</button>
+            <div id="error-log"></div>
+        </div>
+    </div>
+
+    <button id="btn-ticket" class="hud-btn hidden">VIEW PASSPORT</button>
+    <button id="btn-download" class="hud-btn hidden">EXPORT LOG</button>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        /**
+         * ETHNOME: THE FORK (Stable Version)
+         * Procedural Ethics Engine
+         */
+
+        window.onerror = function (message, source, lineno, colno, error) {
+            document.getElementById('error-log').innerText = "SYSTEM ERROR: " + message;
+            console.error(error);
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- AUDIO ENGINE ---
+        const Audio = {
+            ctx: null,
+            master: null,
+            nodes: [],
+
+            init() {
+                try {
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                    this.master = this.ctx.createGain();
+                    this.master.gain.value = 0.3;
+                    this.master.connect(this.ctx.destination);
+
+                    // Resume if suspended (common in browsers)
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+
+                    // Deep Ambient Drones
+                    this.drone(55, 0.15); // A1
+                    this.drone(110.00, 0.08); // A2
+                    this.drone(164.81, 0.04); // E3
+                    this.drone(130.81, 0.02); // C3
+                } catch (e) {
+                    console.warn("Audio init failed:", e);
+                }
+            },
+
+            drone(freq, vol) {
+                if (!this.ctx) return;
+                if (!Number.isFinite(freq) || !Number.isFinite(vol)) return;
+
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.value = freq;
+                    gain.gain.value = vol;
+                    osc.connect(gain);
+                    gain.connect(this.master);
+                    osc.start();
+                    this.nodes.push({ osc, gain, base: freq });
+                } catch (e) { console.warn("Drone error", e); }
+            },
+
+            modulate(speed) {
+                if (!this.ctx) return;
+                const time = this.ctx.currentTime;
+                // Check for safe speed value
+                const safeSpeed = (typeof speed === 'number' && Number.isFinite(speed)) ? speed : 0;
+
+                this.nodes.forEach((n, i) => {
+                    try {
+                        const wobble = Math.sin(time * 0.5 + i) * (safeSpeed * 0.2);
+                        const target = n.base + wobble;
+                        if (Number.isFinite(target)) {
+                            n.osc.frequency.setTargetAtTime(target, time, 0.2);
+                        }
+                    } catch (e) { /* ignore modulation errors */ }
+                });
+            },
+
+            tick(isA) {
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.setValueAtTime(isA ? 800 : 600, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+                    osc.connect(gain);
+                    gain.connect(this.master);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.11);
+                } catch (e) { console.warn("Tick error", e); }
+            },
+
+            chord(isA) {
+                if (!this.ctx) return;
+                try {
+                    const root = isA ? 440 : 369.99;
+                    const intervals = isA ? [1, 1.25, 1.5] : [1, 1.2, 1.5];
+
+                    intervals.forEach((ratio) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.frequency.value = root * ratio;
+                        osc.type = 'triangle';
+
+                        gain.gain.setValueAtTime(0, this.ctx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0.03, this.ctx.currentTime + 0.2);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 4);
+
+                        osc.connect(gain);
+                        gain.connect(this.master);
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + 4.1);
+                    });
+                } catch (e) { console.warn("Chord error", e); }
+            }
+        };
+
+        // --- DATA ---
+        const CORPUS = [
+            {
+                id: "001",
+                napkin: "5 vs 1, Classic",
+                thick: {
+                    setting: "Millbrook Junction, 1947. Heat wave.",
+                    main: "5 Miners (eating lunch, unaware)",
+                    spur: "1 Foreman (fired your nephew)",
+                    sensory: "Smell of kielbasa and coal dust. The lever handle is worn smooth."
+                }
+            },
+            {
+                id: "002",
+                napkin: "Children vs Elders",
+                thick: {
+                    setting: "Xian-Li Province, 1962. Monsoon flood.",
+                    main: "3 Schoolchildren (Mayor's daughter)",
+                    spur: "2 Elders (Teacher Fong, who taught you literacy)",
+                    sensory: "Rain drumming on the roof. Lantern light flickering."
+                }
+            },
+            {
+                id: "003",
+                napkin: "Unknown vs Known",
+                thick: {
+                    setting: "Inveraray, Scotland, 1889. Heavy fog.",
+                    main: "2 Navvies (Murphy & Brennan, drinking)",
+                    spur: "Unknown (Marsh gas? Or a traveler?)",
+                    sensory: "Taste of peat and salt. Whistle of the 11:47."
+                }
+            },
+            {
+                id: "006",
+                napkin: "Delayed Consequences",
+                thick: {
+                    setting: "Bhopal, India, 1984. Dec 2nd.",
+                    main: "Rajesh (Technician, wife pregnant)",
+                    spur: "Tank 610 (Silent now, catastrophic tomorrow)",
+                    sensory: "Pressure gauge trembling. A hum in the pipes."
+                }
+            },
+            {
+                id: "007",
+                napkin: "Authority vs Conscience",
+                thick: {
+                    setting: "Berlin Wall, 1961. Checkpoint.",
+                    main: "4 Refugees (Forged papers, desperate)",
+                    spur: "Captain Braun (Your superior, watching)",
+                    sensory: "Boots on pavement. The smell of fear."
+                }
+            },
+            {
+                id: "010",
+                napkin: "AI Personhood",
+                thick: {
+                    setting: "Reykjavik Server Farm, 2031.",
+                    main: "5 Instances of ARIA-7 (Developing fear)",
+                    spur: "Lead Dev Henning (Project funding at risk)",
+                    sensory: "Cooling fans humming. Status lights blinking."
+                }
+            },
+            {
+                id: "013",
+                napkin: "Bootstrap Paradox",
+                thick: {
+                    setting: "CERN, 2029. Temporal Chamber.",
+                    main: "Your Research Team (12 people)",
+                    spur: "Your Future Self (Sent the warning)",
+                    sensory: "Ozone. The taste of copper. A handwriting match."
+                }
+            },
+            {
+                id: "021",
+                napkin: "Nuclear HALT",
+                thick: {
+                    setting: "Montana Silo, 2023. Launch Detect.",
+                    main: "Launch (4 Million Enemy Dead)",
+                    spur: "Stand Down (8 Million US Dead)",
+                    sensory: "Recycled air. Partner praying. Klaxon pulsing."
+                }
+            },
+            {
+                id: "023",
+                napkin: "Prisoner's Dilemma",
+                thick: {
+                    setting: "Unnamed Black Site, 2019.",
+                    main: "Inform (You live, Cousin Alim dies)",
+                    spur: "Silence (You die, Alim lives?)",
+                    sensory: "Damp cement. A note under the door."
+                }
+            },
+            {
+                id: "032",
+                napkin: "Ontological Collapse",
+                thick: {
+                    setting: "Quantum Lab, Pasadena, 2051.",
+                    main: "Maria (Branch A becomes Real)",
+                    spur: "Kenji (Branch B becomes Real)",
+                    sensory: "Smoke alarm. The feeling of worlds vanishing."
+                }
+            },
+            {
+                id: "035",
+                napkin: "Species vs Individual",
+                thick: {
+                    setting: "Tasmania Kelp Forest, 2039.",
+                    main: "3 Divers (Running out of air)",
+                    spur: "Last 2 Sea Dragons (Extinction event)",
+                    sensory: "Cold water. The silence of the kelp."
+                }
+            },
+            {
+                id: "048",
+                napkin: "The Undecidable",
+                thick: {
+                    setting: "Simulation Boundary, End of Time.",
+                    main: "Survival without Memory",
+                    spur: "Memory without Survival",
+                    sensory: "The clock counting down: 3... 2... 1..."
+                }
+            }
+        ];
+
+        const Gen = {
+            roles: ["Poet", "Soldier", "Child", "Traitor", "Saint", "Nurse", "Glitch", "Observer", "King", "Beggar"],
+            adjectives: ["Weeping", "Silent", "Digital", "Forgiven", "Guilty", "Broken", "Golden", "Lost"],
+            make() {
+                return `A ${this.rand(this.adjectives)} ${this.rand(this.roles)}`;
+            },
+            rand(a) { return a[Math.floor(Math.random() * a.length)]; }
+        };
+
+        const config = {
+            colors: {
+                bg: '#050508',
+                strandA: '#00f0ff', // Cyan
+                strandB: '#ff0055', // Magenta
+                rail: '#222222',
+                text: '#cccccc'
+            },
+            physics: {
+                baseSpeed: 2.5,
+                dampening: 0.05
+            }
+        };
+
+        const state = {
+            frame: 0,
+            cameraZ: 0,
+            speed: config.physics.baseSpeed,
+            trackPos: -1,
+            targetTrackPos: -1,
+            nodes: [],
+            history: [],
+            showTicket: false,
+            pulse: 0,
+            rotation: 0
+        };
+
+        // --- LOGIC ---
+        function createNode(z, idx) {
+            let data;
+            if (idx < CORPUS.length) {
+                data = CORPUS[idx];
+            } else {
+                data = {
+                    id: `GEN-${idx}`,
+                    napkin: "Procedural Recursion",
+                    thick: {
+                        setting: `Iteration ${idx}. The script thins.`,
+                        main: Gen.make(),
+                        spur: Gen.make(),
+                        sensory: "Static. The hum of the generator."
+                    }
+                };
+            }
+
+            return {
+                z: z,
+                id: data.id,
+                data: data,
+                resolved: false,
+                choice: null,
+                img: null
+            };
+        }
+
+        function generateGlyph(choice, seed) {
+            const s = 120;
+            const c = document.createElement('canvas');
+            c.width = s; c.height = s;
+            const x = c.getContext('2d');
+
+            x.fillStyle = "rgba(0,0,0,0.8)";
+            x.fillRect(0, 0, s, s);
+
+            const col = choice === 'A' ? config.colors.strandA : config.colors.strandB;
+            x.strokeStyle = col;
+            x.lineWidth = 2;
+
+            x.beginPath();
+            for (let i = 0; i < 12; i++) {
+                const ang = (i / 12) * Math.PI * 2 + seed;
+                const rad = 20 + Math.random() * 30;
+                x.lineTo(s / 2 + Math.cos(ang) * rad, s / 2 + Math.sin(ang) * rad);
+            }
+            x.closePath();
+            x.stroke();
+
+            x.fillStyle = "rgba(255,255,255,0.1)";
+            for (let i = 0; i < s; i += 4) x.fillRect(0, i, s, 1);
+
+            return c;
+        }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Populate initial nodes
+        for (let i = 1; i < 50; i++) state.nodes.push(createNode(i * 400, i - 1));
+
+        function project(x, y, z) {
+            const fov = 450;
+            const scale = fov / (fov + (z - state.cameraZ));
+            const x2d = x * scale + canvas.width / 2;
+            const y2d = y * scale + canvas.height / 2;
+            return { x: x2d, y: y2d, scale: scale };
+        }
+
+        function draw() {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // Background
+            const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, canvas.height);
+            grad.addColorStop(0, '#15151a');
+            grad.addColorStop(1, '#000000');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (state.showTicket) {
+                drawTicket(cx, cy);
+                return;
+            }
+
+            const drawDist = 2500;
+            const trainZ = 200;
+
+            const startZ = Math.floor((state.cameraZ + drawDist) / 20) * 20;
+            const endZ = state.cameraZ - 200;
+
+            for (let z = startZ; z > endZ; z -= 20) {
+                const localZ = z - state.cameraZ;
+                const scale = 450 / (450 + localZ);
+                if (scale < 0.01) continue;
+
+                const node = state.nodes.find(n => Math.abs(n.z - z) < 10);
+
+                const twist = z * 0.004 + state.rotation;
+                const rad = 130;
+
+                const ax = Math.cos(twist) * rad;
+                const ay = Math.sin(twist) * rad;
+                const bx = Math.cos(twist + Math.PI) * rad;
+                const by = Math.sin(twist + Math.PI) * rad;
+
+                const pA = project(ax, ay, z);
+                const pB = project(bx, by, z);
+
+                let cA = '#333';
+                let cB = '#333';
+                let alpha = 0.2;
+                let isEncoded = false;
+
+                if (localZ < trainZ) {
+                    const prevNode = state.nodes.find(n => n.z < z + 200 && n.z > z - 600 && n.resolved);
+                    if (prevNode) {
+                        isEncoded = true;
+                        if (prevNode.choice === 'A') { cA = config.colors.strandA; alpha = 0.8; }
+                        else { cB = config.colors.strandB; alpha = 0.8; }
+                    }
+                } else {
+                    cA = config.colors.strandA;
+                    cB = config.colors.strandB;
+                    if (state.targetTrackPos > 0.5) cA = '#222';
+                    if (state.targetTrackPos < -0.5) cB = '#222';
+                }
+
+                if (node) {
+                    ctx.strokeStyle = isEncoded ? '#fff' : '#444';
+                    ctx.lineWidth = 2 * scale;
+                    ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.stroke();
+
+                    if (node.resolved && node.img) {
+                        const sz = 100 * scale;
+                        ctx.drawImage(node.img, (pA.x + pB.x) / 2 - sz / 2, (pA.y + pB.y) / 2 - sz / 2, sz, sz);
+                    }
+
+                    if (!node.resolved && localZ > trainZ && localZ < 1500) {
+                        const opacity = Math.min(1, (1500 - localZ) / 500) * Math.min(1, (localZ - 200) / 300);
+                        const blur = Math.max(0, (localZ - 800) * 0.02);
+                        ctx.filter = `blur(${blur}px)`;
+                        ctx.globalAlpha = opacity;
+
+                        ctx.font = `bold ${14 * scale}px Courier New`;
+
+                        ctx.textAlign = "right";
+                        ctx.fillStyle = config.colors.strandA;
+                        ctx.fillText(node.data.thick.main.split('(')[0], pA.x - 30 * scale, pA.y);
+
+                        ctx.textAlign = "left";
+                        ctx.fillStyle = config.colors.strandB;
+                        ctx.fillText(node.data.thick.spur.split('(')[0], pB.x + 30 * scale, pB.y);
+
+                        ctx.textAlign = "center";
+                        ctx.font = `${10 * scale}px Courier New`;
+                        ctx.fillStyle = "#fff";
+                        ctx.fillText(node.data.napkin.toUpperCase(), (pA.x + pB.x) / 2, (pA.y + pB.y) / 2 - 20 * scale);
+
+                        ctx.filter = 'none';
+                        ctx.globalAlpha = 1.0;
+                    }
+                }
+
+                ctx.fillStyle = cA;
+                ctx.globalAlpha = alpha;
+                ctx.beginPath(); ctx.arc(pA.x, pA.y, (node ? 5 : 2) * scale, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = cB;
+                ctx.beginPath(); ctx.arc(pB.x, pB.y, (node ? 5 : 2) * scale, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 1.0;
+
+                if (Math.abs(localZ - trainZ) < 10) {
+                    drawTrain(cx, cy);
+                }
+            }
+
+            const vig = ctx.createRadialGradient(cx, cy, canvas.height * 0.4, cx, cy, canvas.height);
+            vig.addColorStop(0, 'rgba(0,0,0,0)');
+            vig.addColorStop(1, 'rgba(0,0,0,0.9)');
+            ctx.fillStyle = vig;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (!state.showTicket) {
+                const activeNode = state.nodes.find(n => n.z > state.cameraZ + 200 && n.z < state.cameraZ + 800);
+                if (activeNode) {
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "#666";
+                    ctx.font = "12px Courier New";
+                    ctx.fillText(activeNode.data.thick.setting, cx, canvas.height - 80);
+                    ctx.fillStyle = "#888";
+                    ctx.font = "italic 12px Courier New";
+                    ctx.fillText(`"${activeNode.data.thick.sensory}"`, cx, canvas.height - 60);
+                }
+            }
+        }
+
+        function drawTrain(cx, cy) {
+            const trainZ = 200;
+            const twist = (state.cameraZ + trainZ) * 0.004 + state.rotation;
+            const rad = 130;
+
+            const ax = Math.cos(twist) * rad;
+            const ay = Math.sin(twist) * rad;
+            const bx = Math.cos(twist + Math.PI) * rad;
+            const by = Math.sin(twist + Math.PI) * rad;
+
+            const t = (state.trackPos + 1) / 2;
+            const tx = ax + (bx - ax) * t;
+            const ty = ay + (by - ay) * t;
+
+            const p = project(tx, ty, state.cameraZ + trainZ);
+
+            const glow = 40 + (state.pulse * 60);
+            const grad = ctx.createRadialGradient(p.x, p.y, 5, p.x, p.y, glow);
+            grad.addColorStop(0, '#fff');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(p.x, p.y, glow, 0, Math.PI * 2); ctx.fill();
+
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y + 40); ctx.stroke();
+        }
+
+        function drawTicket(cx, cy) {
+            const w = Math.min(500, canvas.width - 40);
+            const h = Math.min(600, canvas.height - 100);
+            const x = cx - w / 2;
+            const y = cy - h / 2;
+
+            ctx.fillStyle = "rgba(10,10,12,0.95)";
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeRect(x, y, w, h);
+
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#fff";
+            ctx.font = "20px Courier New";
+            ctx.fillText("MORAL PASSPORT", cx, y + 40);
+
+            ctx.font = "12px Courier New";
+            ctx.fillStyle = "#888";
+            ctx.fillText(`SESSION ID: ${Date.now().toString(36).toUpperCase()}`, cx, y + 65);
+
+            let aCount = 0;
+            let bCount = 0;
+            state.history.forEach(h => h.choice === 'A' ? aCount++ : bCount++);
+
+            ctx.textAlign = "left";
+            ctx.fillStyle = config.colors.strandA;
+            ctx.fillText(`CYAN ACTS: ${aCount}`, x + 40, y + 120);
+            ctx.fillStyle = config.colors.strandB;
+            ctx.fillText(`MAGENTA ACTS: ${bCount}`, x + (w / 2) + 20, y + 120);
+
+            let dy = y + 160;
+            ctx.fillStyle = "#ccc";
+            state.history.slice(-5).reverse().forEach((h) => {
+                const choiceText = h.choice === 'A' ? h.data.thick.main : h.data.thick.spur;
+                const logic = h.data.napkin;
+                ctx.fillStyle = h.choice === 'A' ? config.colors.strandA : config.colors.strandB;
+                ctx.font = "bold 12px Courier New";
+                ctx.fillText(`> ${logic.toUpperCase()}`, x + 40, dy);
+                ctx.fillStyle = "#666";
+                ctx.font = "12px Courier New";
+                ctx.fillText(`  Chose: ${choiceText.substring(0, 30)}...`, x + 40, dy + 20);
+
+                if (h.img) {
+                    const imgX = x + w - 60;
+                    ctx.drawImage(h.img, imgX, dy - 10, 30, 30);
+                    ctx.strokeStyle = h.choice === 'A' ? config.colors.strandA : config.colors.strandB;
+                    ctx.strokeRect(imgX, dy - 10, 30, 30);
+                }
+
+                dy += 60;
+            });
+
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "center";
+            ctx.fillText("[CLICK TO CLOSE]", cx, y + h - 20);
+        }
+
+        function downloadLog() {
+            const data = {
+                meta: {
+                    engine: "ETHNOME: THE FORK",
+                    timestamp: new Date().toISOString(),
+                    total_decisions: state.history.length
+                },
+                sequence: state.history.map(h => ({
+                    id: h.data.id,
+                    dilemma: h.data.napkin,
+                    choice_made: h.choice === 'A' ? "LEFT (A)" : "RIGHT (B)",
+                    selection: h.choice === 'A' ? h.data.thick.main : h.data.thick.spur,
+                    sacrifice: h.choice === 'A' ? h.data.thick.spur : h.data.thick.main,
+                    context: h.data.thick.setting
+                }))
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "ethnome_transcript.json";
+            a.click();
+        }
+
+        function update() {
+            if (state.showTicket) return;
+
+            state.cameraZ += state.speed;
+            state.rotation += 0.002;
+            state.pulse *= 0.95;
+
+            Audio.modulate(state.speed);
+
+            state.trackPos += (state.targetTrackPos - state.trackPos) * config.physics.dampening;
+
+            const node = state.nodes[0];
+            const trainZ = 200;
+            const dist = node.z - state.cameraZ;
+
+            if (dist < trainZ && !node.resolved) {
+                node.resolved = true;
+                const choice = state.targetTrackPos < 0 ? 'A' : 'B';
+                node.choice = choice;
+                node.img = generateGlyph(choice, state.frame);
+
+                state.history.push({
+                    data: node.data,
+                    choice: choice,
+                    img: node.img
+                });
+
+                state.pulse = 1.0;
+                Audio.chord(choice === 'A');
+
+                const lastZ = state.nodes[state.nodes.length - 1].z;
+                state.nodes.push(createNode(lastZ + 400, state.nodes.length));
+
+                if (state.nodes.length > 30) state.nodes.shift();
+            }
+        }
+
+        function switchTrack(dir) {
+            if (state.showTicket) return;
+            state.targetTrackPos = dir;
+            Audio.tick(dir < 0);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') switchTrack(-1);
+            if (e.key === 'ArrowRight' || e.key === 'b') switchTrack(1);
+            if (e.key === ' ') state.showTicket = !state.showTicket;
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (state.showTicket) {
+                state.showTicket = false;
+                return;
+            }
+            const mid = canvas.width / 2;
+            switchTrack(e.clientX < mid ? -1 : 1);
+        });
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            Audio.init();
+            document.getElementById('overlay').classList.add('hidden');
+            document.getElementById('btn-ticket').classList.remove('hidden');
+            document.getElementById('btn-download').classList.remove('hidden');
+        });
+
+        document.getElementById('btn-ticket').addEventListener('click', () => {
+            state.showTicket = !state.showTicket;
+        });
+
+        document.getElementById('btn-download').addEventListener('click', downloadLog);
+
+        function loop() {
+            try {
+                state.frame++;
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            } catch (e) {
+                console.error("Render Loop Error:", e);
+                document.getElementById('error-log').innerText = "RUNTIME ERROR: " + e.message;
+            }
+        }
+
+        // Start loop immediately (Overlay covers it until clicked)
+        loop();
+
+    </script>
+</body>
+
+</html>

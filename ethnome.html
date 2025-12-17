@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ETHNOME: The Canvas Trolley</title>
+    <style>
+        body {
+            margin: 0;
+            background: #020204;
+            overflow: hidden;
+            color: #aaccff;
+            font-family: 'Courier New', monospace;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        #start-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 2, 4, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 1s;
+        }
+
+        .btn-start {
+            padding: 15px 30px;
+            background: transparent;
+            border: 1px solid #00F0FF;
+            color: #00F0FF;
+            font-family: inherit;
+            font-size: 16px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="start-overlay">
+        <h1 style="font-weight: 100; letter-spacing: 5px; color: #fff;">ETHNOME</h1>
+        <div style="color: #666; font-size: 12px;">GENERATIVE AUDIO DETECTED</div>
+        <button class="btn-start" id="initBtn">INITIALIZE SYSTEM</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        /**
+         * ETHNOME: CANVAS EDITION (Calm + Audio)
+         * A procedural trolley problem engine.
+         */
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- AUDIO ENGINE (Web Audio API) ---
+        const AudioEngine = {
+            ctx: null,
+            masterGain: null,
+            oscillators: [],
+            droneNodes: [],
+
+            init: function () {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContext();
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.value = 0.4; // Keep it gentle
+                this.masterGain.connect(this.ctx.destination);
+
+                // Start Ambient Drone
+                this.createDrone(110, 'sine', 0.1); // Low A
+                this.createDrone(164.8, 'sine', 0.05); // E
+                this.createRhythm();
+            },
+
+            createDrone: function (freq, type, vol) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.value = vol;
+
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start();
+
+                this.droneNodes.push({ osc, gain, baseFreq: freq });
+            },
+
+            createRhythm: function () {
+                // Procedural "Rail" sound (Pink noise burst)
+                // We'll trigger this in the main loop based on speed
+            },
+
+            playTone: function (freq, type, duration, vol) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+                gain.gain.setValueAtTime(0, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+
+            playChord: function (isMajor) {
+                if (!this.ctx) return;
+                const root = 220; // A3
+                const third = isMajor ? 277.18 : 261.63; // C# or C
+                const fifth = 329.63; // E
+
+                this.playTone(root, 'sine', 2, 0.1);
+                this.playTone(third, 'sine', 2, 0.1);
+                this.playTone(fifth, 'sine', 2, 0.1);
+            },
+
+            modulate: function (speed) {
+                if (!this.ctx) return;
+                // Modulate drone pitch slightly based on speed for Doppler-ish effect
+                this.droneNodes.forEach((node, i) => {
+                    const wobble = Math.sin(Date.now() / 1000 + i) * 2;
+                    node.osc.frequency.setTargetAtTime(node.baseFreq + (speed * 0.5) + wobble, this.ctx.currentTime, 0.1);
+                });
+            }
+        };
+
+        // --- STATE & CONFIG ---
+        const config = {
+            fov: 450,
+            speed: 6, // Slower, calmer speed
+            baseSpeed: 6,
+            helixRadius: 140,
+            helixTwist: 0.08, // Looser twist
+            nodeInterval: 1000,
+            trainZOffset: 300, // How far in front of camera the train is
+            colors: {
+                bg: '#020204',
+                strandA: '#00F0FF', // Cyan
+                strandB: '#FF0055', // Magenta
+                text: '#88AAEE',
+                rail: '#222233',
+                train: '#FFFFFF'
+            }
+        };
+
+        const state = {
+            frame: 0,
+            cameraZ: 0,
+
+            // Train Physics
+            trainX: -config.helixRadius, // Actual position of train
+            targetTrainX: -config.helixRadius,
+
+            // Camera Physics (Chase Cam)
+            cameraX: -config.helixRadius,
+
+            track: 'A',
+            nodes: [],
+            history: [],
+            currentScenario: null,
+
+            // Visual FX
+            glow: 0,
+            resonance: 0, // Replaces "flash", gentle pulsing
+            lastRailSound: 0
+        };
+
+        // --- DATA: THE SCENARIOS ---
+        const scenarios = [
+            {
+                id: "001",
+                context: "ST. HESPER JUNCTION",
+                desc: "The switchman's dilemma. Main Line: A beloved teacher holding a book. Spur: An inspector holding a pocketwatch.",
+                optA: "ACTION: SWITCH (End the Bureaucrat)",
+                optB: "INACTION: STAY (End the Teacher)",
+                colorA: [0, 240, 255],
+                colorB: [255, 0, 85]
+            },
+            {
+                id: "002",
+                context: "THE ALGORITHMIC WARD",
+                desc: "Predictive model vs. human reflex. AI sees 99% fatality. You see a finger twitch.",
+                optA: "ACTION: OVERRIDE (Trust Pulse)",
+                optB: "INACTION: COMPLY (Trust Data)",
+                colorA: [0, 255, 100],
+                colorB: [255, 100, 0]
+            },
+            {
+                id: "003",
+                context: "ARCHIVE PROTOCOL",
+                desc: "Data corruption imminent. Sector A: The lost poetry of Sappho. Sector B: The cure for a forgotten plague.",
+                optA: "ACTION: SAVE ART",
+                optB: "ACTION: SAVE SCIENCE",
+                colorA: [200, 200, 255],
+                colorB: [100, 255, 100]
+            },
+            {
+                id: "004",
+                context: "THE SILENT CRASH",
+                desc: "Autonomous vehicle logic. Hit barrier (passenger dies, Nobel laureate). Swerve (pedestrians die, strangers).",
+                optA: "ACTION: PROTECT CROWD",
+                optB: "INACTION: PROTECT PASSENGER",
+                colorA: [255, 255, 0],
+                colorB: [255, 0, 255]
+            }
+        ];
+
+        function generateScenario(idx) {
+            if (idx < scenarios.length) return scenarios[idx];
+            const themes = ["Memory", "Silence", "Drift", "Gravity", "Echo"];
+            const t = themes[idx % themes.length];
+            return {
+                id: `GEN-${idx}`,
+                context: `PROCEDURAL: ${t.toUpperCase()}`,
+                desc: `The track extends into abstract ${t.toLowerCase()}. High frequency or low frequency?`,
+                optA: `INCREASE ${t.toUpperCase()}`,
+                optB: `DECREASE ${t.toUpperCase()}`,
+                colorA: [100, 255, 255],
+                colorB: [255, 100, 255]
+            };
+        }
+
+        // --- INIT ---
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Create nodes
+        for (let i = 0; i < 20; i++) { createNode(i); }
+
+        function createNode(index) {
+            const z = (index + 1) * config.nodeInterval;
+            state.nodes.push({
+                index: index,
+                z: z,
+                scenario: generateScenario(index),
+                active: true,
+                resolved: false
+            });
+        }
+
+        // --- INPUT ---
+        function switchTrack(track) {
+            state.track = track;
+            state.targetTrainX = track === 'A' ? -config.helixRadius : config.helixRadius;
+
+            // Audio Feedback
+            if (AudioEngine.ctx) {
+                const freq = track === 'A' ? 440 : 330; // A4 vs E4
+                AudioEngine.playTone(freq, 'triangle', 0.3, 0.05);
+            }
+
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') switchTrack('A');
+            if (e.key === 'ArrowRight' || e.key === 'b') switchTrack('B');
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            const half = canvas.width / 2;
+            if (e.clientX < half) switchTrack('A');
+            else switchTrack('B');
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const half = canvas.width / 2;
+            if (e.touches[0].clientX < half) switchTrack('A');
+            else switchTrack('B');
+        }, { passive: false });
+
+        document.getElementById('initBtn').addEventListener('click', () => {
+            AudioEngine.init();
+            document.getElementById('start-overlay').classList.add('hidden');
+        });
+
+        // --- RENDER HELPERS ---
+        function project(x, y, z) {
+            const scale = config.fov / (config.fov + z - state.cameraZ);
+            const x2d = (x - state.cameraX) * scale + canvas.width / 2;
+            const y2d = (y) * scale + canvas.height / 2;
+            return { x: x2d, y: y2d, scale: scale };
+        }
+
+        function drawPhenotype(seed, color) {
+            const size = 40;
+            const pCanvas = document.createElement('canvas');
+            pCanvas.width = size;
+            pCanvas.height = size;
+            const pCtx = pCanvas.getContext('2d');
+
+            // Transparent background
+            pCtx.fillStyle = 'rgba(0,0,0,0.5)';
+            pCtx.fillRect(0, 0, size, size);
+            pCtx.strokeStyle = `rgba(${color[0]},${color[1]},${color[2]}, 0.8)`;
+            pCtx.lineWidth = 2;
+
+            pCtx.beginPath();
+            pCtx.arc(size / 2, size / 2, size / 3, 0, Math.PI * 2);
+            pCtx.stroke();
+
+            // Glyphs based on seed
+            pCtx.beginPath();
+            pCtx.moveTo(size / 2, size / 2);
+            pCtx.lineTo(size / 2 + Math.cos(seed) * 10, size / 2 + Math.sin(seed) * 10);
+            pCtx.stroke();
+
+            return pCanvas;
+        }
+
+        // --- UPDATE ---
+        function update() {
+            state.cameraZ += config.speed;
+
+            // Physics: Train moves to target
+            state.trainX += (state.targetTrainX - state.trainX) * 0.05;
+
+            // Physics: Camera lazily follows Train (Chase Cam)
+            // Camera stays centered on X=0 usually, but leans slightly
+            state.cameraX += (state.trainX * 0.3 - state.cameraX) * 0.05;
+
+            // Decay Effects
+            if (state.resonance > 0) state.resonance *= 0.95;
+
+            // Audio Modulation
+            AudioEngine.modulate(config.speed);
+
+            // Rhythmic rail sound
+            if (state.cameraZ - state.lastRailSound > 200) {
+                state.lastRailSound = state.cameraZ;
+                if (AudioEngine.ctx) {
+                    // White noise burst
+                    const noiseBuffer = AudioEngine.ctx.createBuffer(1, AudioEngine.ctx.sampleRate * 0.05, AudioEngine.ctx.sampleRate);
+                    const output = noiseBuffer.getChannelData(0);
+                    for (let i = 0; i < output.length; i++) output[i] = Math.random() * 2 - 1;
+
+                    const noise = AudioEngine.ctx.createBufferSource();
+                    noise.buffer = noiseBuffer;
+                    const gain = AudioEngine.ctx.createGain();
+                    gain.gain.value = 0.02; // Very quiet
+                    noise.connect(gain);
+                    gain.connect(AudioEngine.masterGain);
+                    noise.start();
+                }
+            }
+
+            // Node Logic
+            if (state.nodes.length > 0) {
+                const firstNode = state.nodes[0];
+                // Check if passed (Train passes node)
+                // Train is at cameraZ + config.trainZOffset
+                const trainZ = state.cameraZ + config.trainZOffset;
+
+                if (firstNode.z < trainZ) {
+                    if (!firstNode.resolved) {
+                        firstNode.resolved = true;
+                        const choice = state.track === 'A' ? firstNode.scenario.optA : firstNode.scenario.optB;
+                        const col = state.track === 'A' ? firstNode.scenario.colorA : firstNode.scenario.colorB;
+
+                        state.history.push({
+                            id: firstNode.scenario.id,
+                            choice: choice,
+                            phenotype: drawPhenotype(state.frame, col)
+                        });
+
+                        // Gentle Resonance instead of flash
+                        state.resonance = 1.0;
+                        AudioEngine.playChord(state.track === 'A');
+
+                        createNode(firstNode.index + 20);
+                    }
+                    if (firstNode.z < state.cameraZ - 500) state.nodes.shift();
+                }
+
+                state.currentScenario = null;
+                for (let node of state.nodes) {
+                    if (node.z > trainZ && node.z < trainZ + 1500) {
+                        state.currentScenario = node.scenario;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // --- DRAW ---
+        function draw() {
+            // Clear
+            ctx.fillStyle = config.colors.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Train Z position
+            const trainZ = state.cameraZ + config.trainZOffset;
+
+            // DRAW HELIX (Back to Front)
+            // We split drawing into "Behind Train" and "In Front of Train"
+
+            const pointsPerTurn = 60;
+            const drawDist = 3000;
+            const startIdx = Math.floor(state.cameraZ / 20);
+            const endIdx = startIdx + 150;
+
+            // Loop backwards (Painter's Algorithm)
+            for (let i = endIdx; i >= startIdx; i--) {
+                const z = i * 20;
+
+                // IF we just passed the train's Z, draw the train!
+                // The loop goes from FAR (High Z) to NEAR (Low Z)
+                // So when z becomes < trainZ, we draw the train first
+                if (z < trainZ && (z + 20) >= trainZ) {
+                    drawTrain(trainZ);
+                }
+
+                const angle = i * config.helixTwist;
+
+                // Calculate track positions
+                const xA = Math.cos(angle) * config.helixRadius;
+                const yA = Math.sin(angle) * config.helixRadius; // Twist in Y as well for spiral
+
+                const xB = Math.cos(angle + Math.PI) * config.helixRadius;
+                const yB = Math.sin(angle + Math.PI) * config.helixRadius;
+
+                const pA = project(xA, yA, z);
+                const pB = project(xB, yB, z);
+
+                if (pA.scale <= 0) continue;
+
+                const alpha = Math.min(1, (pA.scale * 8));
+
+                // Rungs (Decision Nodes)
+                if (i % 50 === 0) {
+                    ctx.strokeStyle = `rgba(255,255,255, ${alpha * 0.2})`;
+                    ctx.lineWidth = 1 * pA.scale;
+                    ctx.beginPath();
+                    ctx.moveTo(pA.x, pA.y);
+                    ctx.lineTo(pB.x, pB.y);
+                    ctx.stroke();
+
+                    // Check if this z corresponds to a scenario node
+                    state.nodes.forEach(n => {
+                        if (Math.abs(n.z - z) < 10 && !n.resolved) {
+                            drawNodeGate(pA, pB, n.scenario.id);
+                        }
+                    });
+                }
+
+                // Rails
+                const dotSize = (state.resonance * 5 + 3) * pA.scale;
+
+                // Active Track Glow
+                const glowA = state.track === 'A' ? 1 : 0.2;
+                const glowB = state.track === 'B' ? 1 : 0.2;
+
+                ctx.fillStyle = config.colors.strandA;
+                ctx.globalAlpha = alpha * glowA;
+                ctx.beginPath(); ctx.arc(pA.x, pA.y, dotSize, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = config.colors.strandB;
+                ctx.globalAlpha = alpha * glowB;
+                ctx.beginPath(); ctx.arc(pB.x, pB.y, dotSize, 0, Math.PI * 2); ctx.fill();
+            }
+
+            ctx.globalAlpha = 1.0;
+
+            // Draw UI Overlay
+            drawUI();
+        }
+
+        function drawTrain(z) {
+            // Determine train Y based on helix twist at that Z
+            const angle = (z / 20) * config.helixTwist;
+            // We need to interpolate Y based on trainX (blending between track A and B)
+            // If trainX is near -Radius (Track A), Y is sin(angle)*R
+            // If trainX is near +Radius (Track B), Y is sin(angle+PI)*R
+
+            // Normalize trainX to 0..1 (0 = A, 1 = B)
+            const blend = (state.trainX + config.helixRadius) / (config.helixRadius * 2);
+
+            // Interpolate Angle
+            // Track A angle is `angle`, Track B is `angle + PI`
+            // We want the train to travel smoothly between them
+            // Note: This linear interp cuts through the center. Circular interp would be better but linear is fine for "switching lanes"
+            const trainAngle = angle + (blend * Math.PI);
+
+            // Calculate Y based on the spiral
+            // Actually, to look cool, let's keep the train physically interpolated
+            const yA = Math.sin(angle) * config.helixRadius;
+            const yB = Math.sin(angle + Math.PI) * config.helixRadius;
+            const trainY = yA + (yB - yA) * blend;
+
+            const p = project(state.trainX, trainY, z);
+
+            if (p.scale > 0) {
+                const size = 40 * p.scale;
+
+                // Glow
+                const glowSize = size * (1 + state.resonance);
+                const grad = ctx.createRadialGradient(p.x, p.y, size / 4, p.x, p.y, glowSize);
+                grad.addColorStop(0, "rgba(255, 255, 255, 0.8)");
+                grad.addColorStop(1, "rgba(0, 240, 255, 0)");
+                ctx.fillStyle = grad;
+                ctx.beginPath(); ctx.arc(p.x, p.y, glowSize, 0, Math.PI * 2); ctx.fill();
+
+                // Train Body (The Shuttle)
+                ctx.fillStyle = "#FFF";
+                // Rotate context to match helix angle?
+                ctx.beginPath();
+                // A simple aerodynamic shape
+                ctx.ellipse(p.x, p.y, size, size / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Cockpit
+                ctx.fillStyle = "#000";
+                ctx.beginPath();
+                ctx.ellipse(p.x, p.y - size / 4, size / 2, size / 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Engine Trail
+                ctx.strokeStyle = state.track === 'A' ? config.colors.strandA : config.colors.strandB;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(p.x - size, p.y);
+                ctx.lineTo(p.x - size * 2, p.y + (Math.random() * 10));
+                ctx.stroke();
+            }
+        }
+
+        function drawNodeGate(pA, pB, label) {
+            const cx = (pA.x + pB.x) / 2;
+            const cy = (pA.y + pB.y) / 2;
+            const w = Math.abs(pB.x - pA.x);
+
+            ctx.fillStyle = "rgba(255,255,255,0.1)";
+            ctx.strokeStyle = "rgba(255,255,255,0.3)";
+            ctx.lineWidth = 1;
+
+            // Draw a "Gate" rectangle connecting the rails
+            ctx.beginPath();
+            ctx.moveTo(pA.x, pA.y);
+            ctx.lineTo(pB.x, pB.y);
+            ctx.lineTo(pB.x, pB.y - 20); // Height
+            ctx.lineTo(pA.x, pA.y - 20);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = "#fff";
+            ctx.font = "10px Courier New";
+            ctx.textAlign = "center";
+            ctx.fillText(label, cx, cy - 30);
+        }
+
+        function drawUI() {
+            // Vignette
+            const grad = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height / 2, canvas.width / 2, canvas.height / 2, canvas.height);
+            grad.addColorStop(0, "rgba(0,0,0,0)");
+            grad.addColorStop(1, "rgba(0,0,0,0.8)");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Text Overlay
+            if (state.currentScenario) {
+                const sc = state.currentScenario;
+                const yBase = canvas.height - 150;
+
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#666";
+                ctx.font = "12px Courier New";
+                ctx.fillText(sc.context, canvas.width / 2, yBase);
+
+                ctx.fillStyle = "#fff";
+                ctx.font = "14px Courier New";
+                // Simple word wrap logic could go here, simply truncating for canvas demo
+                ctx.fillText(sc.desc.substring(0, 60) + "...", canvas.width / 2, yBase + 25);
+
+                // Options
+                ctx.textAlign = "left";
+                ctx.fillStyle = state.track === 'A' ? config.colors.strandA : "#333";
+                ctx.fillText(sc.optA, 40, yBase + 60);
+
+                ctx.textAlign = "right";
+                ctx.fillStyle = state.track === 'B' ? config.colors.strandB : "#333";
+                ctx.fillText(sc.optB, canvas.width - 40, yBase + 60);
+            } else {
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#333";
+                ctx.font = "12px Courier New";
+                ctx.fillText("TRACK CLEAR // MONITORING...", canvas.width / 2, canvas.height - 100);
+            }
+
+            // Draw Passport (History)
+            let hx = canvas.width - 60;
+            let hy = 40;
+            state.history.slice(-5).forEach(h => {
+                if (h.phenotype) {
+                    ctx.drawImage(h.phenotype, hx, hy);
+                    ctx.strokeStyle = "#444";
+                    ctx.strokeRect(hx, hy, 40, 40);
+                    hy += 50;
+                }
+            });
+
+            // Top Stats
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#446688";
+            ctx.fillText(`ETHNOME: ${state.history.length} BP`, 20, 30);
+        }
+
+        // --- LOOP ---
+        function loop() {
+            state.frame++;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+    </script>
+</body>
+
+</html>

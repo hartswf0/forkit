@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ETHNOME: Hyperclay Edition</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            overflow: hidden;
+            color: #e8e8e8;
+            font-family: 'Courier New', monospace;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            transition: opacity 0.5s;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background: transparent;
+            border: 2px solid #00bcd4;
+            color: #00bcd4;
+            font-family: inherit;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: rgba(0, 188, 212, 0.2);
+            box-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="overlay">
+        <div style="text-align:center;">
+            <h1 style="color:#fff; letter-spacing:4px; font-weight:100; margin-bottom:10px;">ETHNOME</h1>
+            <div style="color:#666; font-size:12px; margin-bottom:30px;">PROCEDURAL ETHICS ENGINE // AUDIO REQUIRED
+            </div>
+            <button class="btn" id="startBtn">INITIALIZE SEQUENCE</button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        /**
+         * ETHNOME: HYPERCLAY EDITION (Updated)
+         * - Visualizes reasoning (Heuristics)
+         * - Encoded vs Empty Helix visualization
+         * - JSON Download capability
+         */
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- AUDIO ENGINE ---
+        const Audio = {
+            ctx: null,
+            master: null,
+
+            init() {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContext();
+                this.master = this.ctx.createGain();
+                this.master.gain.value = 0.3;
+                this.master.connect(this.ctx.destination);
+
+                // Background Drone
+                this.drone(110, 0.05); // A2
+                this.drone(164.81, 0.03); // E3
+            },
+
+            drone(freq, vol) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.value = freq;
+                gain.gain.value = vol;
+                osc.connect(gain);
+                gain.connect(this.master);
+                osc.start();
+            },
+
+            tick() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(this.master);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            },
+
+            chord(isA) {
+                if (!this.ctx) return;
+                const root = isA ? 440 : 293.66; // A or D
+                [1, 1.25, 1.5].forEach((ratio, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.value = root * ratio;
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.1, this.ctx.currentTime + 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 2);
+                    osc.connect(gain);
+                    gain.connect(this.master);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 2.1);
+                });
+            }
+        };
+
+        // --- CONFIGURATION ---
+        const config = {
+            colors: {
+                bg: '#050508',
+                strandA: '#00bcd4', // Cyan
+                strandB: '#ff9800', // Orange
+                empty: '#333333',   // Unwritten DNA
+                text: '#888888',
+                highlight: '#ffffff'
+            },
+            layout: {
+                sidebarWidth: 60,
+                helixWidth: 300,
+            },
+            physics: {
+                baseSpeed: 6,
+                dampening: 0.05
+            }
+        };
+
+        const state = {
+            frame: 0,
+            cameraZ: 0,
+            speed: config.physics.baseSpeed,
+
+            // Track Selection (0 = Center/Neutral, -1 = A, 1 = B)
+            trackPos: -1, // Start on A
+            targetTrackPos: -1,
+
+            // Data
+            nodes: [],
+            history: [],
+
+            // Visuals
+            rotation: 0,
+            pulse: 0,
+
+            // Interaction
+            activeScenario: null
+        };
+
+        // --- SCENARIO DATA (Thick Description + Heuristics) ---
+        const scenarios = [
+            {
+                id: "001",
+                context: "ST. HESPER JUNCTION",
+                text: "Main Line: Gavril (Teacher). Spur: Finch (Bureaucrat).",
+                optA: "LEVER (Kill Finch)",
+                heuristicA: "UTILITARIAN (Value Check)",
+                optB: "NO ACTION (Kill Gavril)",
+                heuristicB: "DEONTOLOGICAL (Do No Harm)"
+            },
+            {
+                id: "002",
+                context: "ALGORITHMIC WARD",
+                text: "AI predicts 99% fatality. Patient's hand moves.",
+                optA: "OVERRIDE AI",
+                heuristicA: "HUMANISM (Pulse)",
+                optB: "TRUST MODEL",
+                heuristicB: "RATIONALISM (Data)"
+            },
+            {
+                id: "003",
+                context: "BURNING LIBRARY",
+                text: "Box 1: Sophocles. Box 2: Penicillin.",
+                optA: "SAVE ART",
+                heuristicA: "AESTHETIC (Spirit)",
+                optB: "SAVE SCIENCE",
+                heuristicB: "MATERIAL (Body)"
+            },
+            {
+                id: "004",
+                context: "AUTONOMOUS LOOP",
+                text: "Hit barrier (Kill Nobel Laureate). Swerve (Kill 5 Strangers).",
+                optA: "SWERVE (Save Passenger)",
+                heuristicA: "EGOISM (Protect Client)",
+                optB: "BARRIER (Save Crowd)",
+                heuristicB: "UTILITARIAN (Numbers)"
+            }
+        ];
+
+        // Procedural Generator for infinite play
+        function createNode(z) {
+            const idx = Math.floor(z / 1500) % scenarios.length;
+            let data;
+
+            // If we run out of static scenarios, generate procedural ones
+            if (Math.floor(z / 1500) >= scenarios.length) {
+                const iter = Math.floor(z / 1500);
+                data = {
+                    id: `GEN-${iter}`,
+                    context: `PROCEDURAL NODE ${iter}`,
+                    text: "Abstract ethical branching point. Viscosity vs Fluidity.",
+                    optA: "INCREASE ORDER",
+                    heuristicA: "ORDER (Structure)",
+                    optB: "INCREASE CHAOS",
+                    heuristicB: "ENTROPY (Freedom)"
+                };
+            } else {
+                data = scenarios[idx];
+            }
+
+            return {
+                z: z,
+                resolved: false,
+                choice: null, // 'A' or 'B' stored here once resolved
+                data: data
+            };
+        }
+
+        // --- INIT ---
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Initial Nodes
+        for (let i = 1; i < 10; i++) state.nodes.push(createNode(i * 1500));
+
+        // --- LOGIC ---
+        function downloadLog() {
+            const logData = {
+                session_id: Date.now(),
+                agent: "User",
+                ethnome_sequence: state.history.map(h => ({
+                    id: h.id,
+                    decision: h.choice === 'A' ? h.scenario.optA : h.scenario.optB,
+                    heuristic: h.choice === 'A' ? h.scenario.heuristicA : h.scenario.heuristicB,
+                    timestamp: new Date().toISOString()
+                }))
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "ethnome_sequence.json");
+            document.body.appendChild(downloadAnchorNode); // required for firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // --- PHENOTYPE GENERATOR ---
+        function breedPhenotype(choice) {
+            const size = 60;
+            const c = document.createElement('canvas');
+            c.width = size;
+            c.height = size;
+            const x = c.getContext('2d');
+
+            // Background
+            x.fillStyle = 'rgba(20,20,20,0.8)';
+            x.fillRect(0, 0, size, size);
+
+            const color = choice === 'A' ? config.colors.strandA : config.colors.strandB;
+
+            // Procedural Glyph
+            x.strokeStyle = color;
+            x.lineWidth = 2;
+            x.beginPath();
+            const seed = state.frame;
+            x.moveTo(size / 2, size / 2);
+            for (let i = 0; i < 8; i++) {
+                const ang = (i / 8) * Math.PI * 2 + seed;
+                const rad = Math.random() * (size / 2);
+                x.lineTo(size / 2 + Math.cos(ang) * rad, size / 2 + Math.sin(ang) * rad);
+            }
+            x.closePath();
+            x.stroke();
+
+            // Add border
+            x.strokeStyle = 'rgba(255,255,255,0.2)';
+            x.strokeRect(0, 0, size, size);
+
+            return c;
+        }
+
+        // --- RENDER LOOP ---
+        function update() {
+            state.cameraZ += state.speed;
+            state.rotation += 0.005; // Slow ambient rotation
+            state.pulse *= 0.9;
+
+            // Smooth Track Switching
+            state.trackPos += (state.targetTrackPos - state.trackPos) * config.physics.dampening;
+
+            // Check Nodes
+            const nextNode = state.nodes[0];
+            const dist = nextNode.z - state.cameraZ;
+            const activationRange = 1200;
+
+            if (dist < activationRange && dist > 0) {
+                state.activeScenario = nextNode.data;
+            } else {
+                state.activeScenario = null;
+            }
+
+            // Resolution logic
+            if (dist < 0 && !nextNode.resolved) {
+                nextNode.resolved = true;
+                const choice = state.targetTrackPos < 0 ? 'A' : 'B';
+
+                nextNode.choice = choice; // Store choice on the node for visualization
+
+                state.history.push({
+                    id: nextNode.data.id,
+                    scenario: nextNode.data,
+                    choice: choice,
+                    img: breedPhenotype(choice)
+                });
+
+                state.pulse = 1.0;
+                Audio.chord(choice === 'A');
+
+                // Add new node
+                state.nodes.push(createNode(state.nodes[state.nodes.length - 1].z + 1500));
+
+                // We do NOT shift() nodes immediately so we can see the "Past" helix
+                if (state.nodes.length > 20) state.nodes.shift();
+            }
+        }
+
+        function project(x, y, z) {
+            const fov = 400;
+            const scale = fov / (fov + z);
+            const x2d = (x) * scale + canvas.width / 2;
+            const y2d = (y) * scale + canvas.height / 2;
+            return { x: x2d, y: y2d, scale: scale };
+        }
+
+        function draw() {
+            // 1. Background
+            ctx.fillStyle = config.colors.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // 2. Draw Helix segments
+            // We draw from far to near (Painter's algorithm)
+            const viewDist = 3000;
+            const segLen = 20;
+
+            // Determine start point relative to camera
+            const startZ = Math.floor(state.cameraZ / segLen) * segLen + viewDist;
+            const endZ = state.cameraZ - 500; // Draw a bit behind camera
+
+            for (let z = startZ; z > endZ; z -= segLen) {
+                const localZ = z - state.cameraZ;
+                if (localZ < -fovSafeCheck()) continue; // Don't divide by zero
+
+                const perspective = 400 / (400 + localZ);
+                if (perspective < 0.01) continue;
+
+                // Helix Twist Math
+                const twist = z * 0.005 + state.rotation;
+                const radius = 120;
+
+                const xA = Math.cos(twist) * radius;
+                const yA = Math.sin(twist) * radius;
+                const xB = Math.cos(twist + Math.PI) * radius;
+                const yB = Math.sin(twist + Math.PI) * radius;
+
+                const pA = project(xA, yA, localZ);
+                const pB = project(xB, yB, localZ);
+
+                const size = 3 * perspective;
+
+                // Determine "State" of this segment
+                // Is it "Encoded" (Past) or "Potential" (Future)?
+                const isPast = localZ < 0; // Behind the camera plane (roughly)
+                // Better check: Find if this Z belongs to a resolved node
+                // Actually, we can just check localZ relative to the "Train" (at z=0 for convenience)
+
+                let colA = config.colors.empty;
+                let colB = config.colors.empty;
+                let isEncoded = false;
+
+                // Check history to color the past
+                // This is a simplification: if z < current cameraZ, it's past
+                if (localZ < 200) {
+                    // Look up nearest resolved node
+                    const nearestNode = state.nodes.find(n => Math.abs(n.z - z) < 750 && n.resolved);
+                    if (nearestNode) {
+                        isEncoded = true;
+                        if (nearestNode.choice === 'A') {
+                            colA = config.colors.strandA;
+                            colB = '#222'; // Dim other strand
+                        } else {
+                            colA = '#222';
+                            colB = config.colors.strandB;
+                        }
+                    }
+                } else {
+                    // Future Potential
+                    colA = config.colors.strandA;
+                    colB = config.colors.strandB;
+                }
+
+                // Draw Rungs (Base Pairs)
+                if (Math.floor(z) % 100 < segLen) {
+                    ctx.strokeStyle = isEncoded ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.1)';
+                    ctx.lineWidth = 1 * perspective;
+                    ctx.beginPath();
+                    ctx.moveTo(pA.x, pA.y);
+                    ctx.lineTo(pB.x, pB.y);
+                    ctx.stroke();
+
+                    // Draw Node Text in 3D Space if active
+                    state.nodes.forEach(n => {
+                        if (Math.abs(n.z - z) < segLen && localZ > 0 && localZ < 1000) {
+                            drawFloatingLabels(n, pA, pB, perspective);
+                        }
+                    });
+                }
+
+                // Draw Strands
+                // If Future: Wireframe/Dots. If Past: Solid/Glow.
+
+                // Strand A
+                ctx.fillStyle = colA;
+                ctx.globalAlpha = isEncoded ? 1.0 : (state.trackPos < 0 ? 0.8 : 0.3); // Highlight active track in future
+                ctx.beginPath(); ctx.arc(pA.x, pA.y, size, 0, Math.PI * 2); ctx.fill();
+
+                // Strand B
+                ctx.fillStyle = colB;
+                ctx.globalAlpha = isEncoded ? 1.0 : (state.trackPos > 0 ? 0.8 : 0.3);
+                ctx.beginPath(); ctx.arc(pB.x, pB.y, size, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.globalAlpha = 1.0;
+
+            // 3. Draw Train (The Editor)
+            drawTrain(cx, cy);
+
+            // 4. UI Overlays
+            drawSidebars();
+            drawHUD();
+        }
+
+        function fovSafeCheck() { return 300; }
+
+        function drawFloatingLabels(node, pA, pB, scale) {
+            ctx.font = `bold ${10 * scale}px Courier New`;
+            ctx.textAlign = "right";
+
+            // Heuristic A Label
+            ctx.fillStyle = config.colors.strandA;
+            ctx.fillText(node.data.heuristicA, pA.x - 20 * scale, pA.y);
+
+            // Heuristic B Label
+            ctx.textAlign = "left";
+            ctx.fillStyle = config.colors.strandB;
+            ctx.fillText(node.data.heuristicB, pB.x + 20 * scale, pB.y);
+
+            // Central Node ID
+            const mx = (pA.x + pB.x) / 2;
+            const my = (pA.y + pB.y) / 2;
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "center";
+            ctx.fillText(node.data.id, mx, my - 20 * scale);
+        }
+
+        function drawTrain(cx, cy) {
+            // Train sits at a fixed Z distance relative to camera, usually z=200
+            const trainZ = 200;
+            const perspective = 400 / (400 + trainZ);
+
+            // Interpolate X based on trackPos (-1 to 1)
+            // We visually map this to the helix width at trainZ
+            const twist = (state.cameraZ + trainZ) * 0.005 + state.rotation;
+            const radius = 120;
+
+            const ax = Math.cos(twist) * radius;
+            const ay = Math.sin(twist) * radius;
+            const bx = Math.cos(twist + Math.PI) * radius;
+            const by = Math.sin(twist + Math.PI) * radius;
+
+            // Linear interp -1..1 -> 0..1
+            const t = (state.trackPos + 1) / 2;
+
+            const tx = ax + (bx - ax) * t;
+            const ty = ay + (by - ay) * t;
+
+            const px = cx + (tx * perspective);
+            const py = cy + (ty * perspective);
+
+            // Glow
+            const glowSize = 30 + (state.pulse * 100);
+            const grad = ctx.createRadialGradient(px, py, 5, px, py, glowSize);
+            grad.addColorStop(0, '#fff');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(px, py, glowSize, 0, Math.PI * 2); ctx.fill();
+
+            // Core
+            ctx.fillStyle = "#fff";
+            ctx.beginPath(); ctx.arc(px, py, 10 * perspective, 0, Math.PI * 2); ctx.fill();
+
+            // Connector line to rail
+            ctx.strokeStyle = state.trackPos < 0 ? config.colors.strandA : config.colors.strandB;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(px, py);
+            ctx.lineTo(px, py + 50); // Engine trail
+            ctx.stroke();
+        }
+
+        function drawSidebars() {
+            const w = config.layout.sidebarWidth;
+            const h = canvas.height;
+
+            // Left
+            ctx.fillStyle = 'rgba(10, 20, 25, 0.8)';
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = config.colors.strandA;
+            ctx.fillRect(w - 2, 0, 2, h);
+
+            // Right
+            ctx.fillStyle = 'rgba(25, 15, 10, 0.8)';
+            ctx.fillRect(canvas.width - w, 0, w, h);
+            ctx.fillStyle = config.colors.strandB;
+            ctx.fillRect(canvas.width - w, 0, 2, h);
+
+            // Symbols
+            ctx.font = "20px Courier New";
+            ctx.textAlign = "center";
+
+            ctx.fillStyle = config.colors.strandA;
+            ctx.fillText("A", w / 2, 50);
+            ctx.fillText("◀", w / 2, h / 2);
+
+            ctx.fillStyle = config.colors.strandB;
+            ctx.fillText("B", canvas.width - w / 2, 50);
+            ctx.fillText("▶", canvas.width - w / 2, h / 2);
+        }
+
+        function drawHUD() {
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Top Bar - Download Button
+            const btnW = 140;
+            const btnH = 30;
+            const btnX = w - btnW - 80; // Offset from right sidebar
+            const btnY = 20;
+
+            ctx.fillStyle = "rgba(0, 188, 212, 0.1)";
+            ctx.strokeStyle = config.colors.strandA;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(btnX, btnY, btnW, btnH);
+
+            ctx.fillStyle = config.colors.strandA;
+            ctx.font = "12px Courier New";
+            ctx.textAlign = "center";
+            ctx.fillText("DOWNLOAD LOG", btnX + btnW / 2, btnY + 20);
+
+            // Store button bounds for click handler
+            state.downloadBtn = { x: btnX, y: btnY, w: btnW, h: btnH };
+
+            // Bottom Scenario Panel
+            if (state.activeScenario) {
+                const sc = state.activeScenario;
+                const panelH = 140;
+                const panelY = h - panelH;
+
+                ctx.fillStyle = "rgba(0,0,0,0.85)";
+                ctx.fillRect(60, panelY, w - 120, panelH);
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(60, panelY, w - 120, 1); // Top border
+
+                ctx.textAlign = "center";
+                ctx.font = "bold 16px Courier New";
+                ctx.fillText(sc.context, w / 2, panelY + 30);
+
+                ctx.fillStyle = "#aaa";
+                ctx.font = "14px Courier New";
+                ctx.fillText(sc.text, w / 2, panelY + 60);
+
+                // Options
+                ctx.textAlign = "left";
+                ctx.fillStyle = config.colors.strandA;
+                ctx.fillText(`A: ${sc.optA}`, 100, panelY + 100);
+
+                ctx.textAlign = "right";
+                ctx.fillStyle = config.colors.strandB;
+                ctx.fillText(`B: ${sc.optB}`, w - 100, panelY + 100);
+            }
+
+            // Ethnome Sequence (Right Side Thumbnails)
+            const hist = state.history.slice(-5).reverse(); // Show newest at top
+            let ty = 80;
+            const tx = w - 45;
+
+            hist.forEach(item => {
+                if (item.img) {
+                    ctx.drawImage(item.img, tx - 20, ty, 40, 40);
+                    ctx.strokeStyle = item.choice === 'A' ? config.colors.strandA : config.colors.strandB;
+                    ctx.strokeRect(tx - 20, ty, 40, 40);
+                    ty += 50;
+                }
+            });
+        }
+
+        // --- INPUT HANDLERS ---
+        function handleInput(type, e) {
+            if (type === 'click') {
+                const r = canvas.getBoundingClientRect();
+                const x = e.clientX - r.left;
+                const y = e.clientY - r.top;
+
+                // Check Download Button
+                if (state.downloadBtn) {
+                    const b = state.downloadBtn;
+                    if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+                        downloadLog();
+                        return;
+                    }
+                }
+
+                // Track switching
+                const mid = canvas.width / 2;
+                state.targetTrackPos = x < mid ? -1 : 1;
+                Audio.tick();
+            }
+        }
+
+        canvas.addEventListener('mousedown', (e) => handleInput('click', e));
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') { state.targetTrackPos = -1; Audio.tick(); }
+            if (e.key === 'ArrowRight' || e.key === 'b') { state.targetTrackPos = 1; Audio.tick(); }
+        });
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            Audio.init();
+            document.getElementById('overlay').classList.add('hidden');
+        });
+
+        // --- LOOP ---
+        function loop() {
+            state.frame++;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+    </script>
+</body>
+
+</html>

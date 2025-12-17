@@ -1,0 +1,806 @@
+{
+    "corpus_id": "fork_sitcom_24",
+    "corpus_title": "THE FORK: 24 Absurdist Sitcom Paradox Episodes",
+    "methodology": {
+        "principle": "Weberian Ideal Type ⇄ Parody ⇄ Mythic Inversion",
+        "frames": [
+            "The Simpsons",
+            "Rick and Morty",
+            "The Office",
+            "Parks and Recreation",
+            "Arrested Development",
+            "Community",
+            "Atlanta",
+            "What We Do in the Shadows"
+        ],
+        "escalation_logic": "Each scenario amplifies absurdity through sitcom tropes while preserving the ethical core"
+    },
+    "config": {
+        "required_motifs": {
+            "fake_stats": ">=3",
+            "escalation_absurdities": ">=2",
+            "bureaucratic_nightmare": ">=1",
+            "self_own_finale": true
+        },
+        "beats_spine": [
+            "cold_open_paradox",
+            "well_meaning_mistake",
+            "escalation_spiral",
+            "absurd_committee",
+            "petty_grievance_derail",
+            "revelation_ignored",
+            "catastrophic_success",
+            "tag_scene_twist"
+        ]
+    },
+    "episodes": [
+        {
+            "episode_id": "SIT_001",
+            "source_case": "CYB_001",
+            "frame": "The Simpsons",
+            "title": "Homer's Guided Pigeons",
+            "ideal_type": {
+                "name": "The Operant Weapon-Master",
+                "features": [
+                    "behaviorist_hubris",
+                    "creature_instrumentalization",
+                    "moral_delegation_to_science",
+                    "consent_void"
+                ],
+                "limiting_statement": "A figure who perfects conditional control while losing unconditional connection."
+            },
+            "cold_open": "Homer wins custody of Springfield Elementary's pigeon problem. 'Marge, these birds will do exactly what I train them to do!' Cut to: Homer teaching pigeons to peck at images of Flanders. 'That's right, peck the sweater!'",
+            "act_structure": {
+                "act_1": "The Pentagon (represented by two guys in suits at Moe's) offers Homer $50 for 'bird guidance research.' Homer trains pigeons to peck at donuts on a screen. 'It's like Angry Birds but with real birds and real anger!'",
+                "act_2": "Lisa discovers the pigeons are being trained for missiles. 'Dad, these pigeons will die!' Homer: 'Lisa, pigeons die all the time. That's why they call it pigeon.' Lisa: 'That's not—' Homer: 'Pigeon!'",
+                "escalation": "Pigeons become too good. They start pecking at anything round: bald heads, the sun, Otto's eyes. Springfield declares martial law.",
+                "absurd_committee": "A Pentagon review board (voiced by guest stars) debates: 'These are the most accurate weapons we've ever seen. Also, they keep attacking Colonel Sanders billboards.'",
+                "catastrophe": "Homer's lead pigeon, 'Coochie-Coo,' refuses to peck. She tilts her head at Homer. He cries. The missile launches anyway—piloted by Santa's Little Helper."
+            },
+            "tag_scene": "Lisa: 'Dad, what did you learn?' Homer: 'Never teach pigeons to love. It only makes the targeting worse.'",
+            "ruler_scoring": {
+                "behavioral_control": 5,
+                "ethical_oversight": 0,
+                "institutional_capture": 4,
+                "consent_theater": 1
+            },
+            "myth_note": "Homer as Prometheus, stealing fire (operant conditioning) only to have his liver pecked eternally—by the very pigeons he trained."
+        },
+        {
+            "episode_id": "SIT_002",
+            "source_case": "CYB_002",
+            "frame": "Rick and Morty",
+            "title": "The Wiener Refusal",
+            "ideal_type": {
+                "name": "The Conscientious Objector-Genius",
+                "features": [
+                    "scientific_guilt",
+                    "futile_boycott",
+                    "colleague_betrayal",
+                    "martyr_complex"
+                ],
+                "limiting_statement": "A mind so powerful it cannot escape the weapons it enables."
+            },
+            "cold_open": "Rick at a blackboard. 'Morty, I invented cybernetics. Then I set it on fire. Then they rebuilt it anyway.' Morty: 'So... you failed?' Rick: 'I failed ETHICALLY, Morty. Big difference.'",
+            "act_structure": {
+                "act_1": "A Boeing engineer (Jerry in a fake mustache) asks Rick for his anti-aircraft research. Rick slams the door. 'I don't do military, Morty. Not since the Flesh Wars of Dimension-19B.'",
+                "act_2": "The Federation offers Rick unlimited funding for 'Project SAGE'—an automated defense network. Rick: 'It'll decide whether to launch nukes in microseconds.' Morty: 'That sounds bad!' Rick: 'It's the same code I wrote for Butter Robot, Morty. But bigger. And angrier.'",
+                "escalation": "Rick's refusal creates a paradox: every dimension where Rick said no, von Neumann (Evil Morty) said yes. The multiverse fills with SAGEs.",
+                "absurd_committee": "The Council of Ricks convenes. 'We've calculated that 47% of dimensions end in nuclear holocaust. The other 53% end in Butter Robot uprising. We're not sure which is worse.'",
+                "catastrophe": "Rick builds a counter-SAGE that defeats all SAGEs—but it requires killing von Neumann across all dimensions. Morty: 'Rick, isn't that just... doing the bad thing to stop the bad thing?' Rick: 'Welcome to cybernetics, Morty.'"
+            },
+            "tag_scene": "Butter Robot, watching SAGE being destroyed: 'What is my purpose?' Rick: 'You pass the butter.' Butter Robot: 'Oh my god.' Rick: 'Yeah, welcome to the club, pal.'",
+            "ruler_scoring": {
+                "principled_refusal": 5,
+                "systemic_impact": 1,
+                "moral_pollution": 4,
+                "genius_guilt": 5
+            },
+            "myth_note": "Rick as Oppenheimer-Wiener hybrid: he can build the destroyer, refuse the destroyer, and still watch the destroyer emerge from his own shadow."
+        },
+        {
+            "episode_id": "SIT_003",
+            "source_case": "CYB_003",
+            "frame": "Community",
+            "title": "Advanced Double Bind Theory",
+            "ideal_type": {
+                "name": "The Communication Trap Theorist",
+                "features": [
+                    "paradox_mapper",
+                    "family_pathology_namer",
+                    "establishment_antagonist",
+                    "liberation_through_diagnosis"
+                ],
+                "limiting_statement": "The theorist who names the trap but cannot escape it himself."
+            },
+            "cold_open": "Jeff Winger in therapy: 'My mother says she loves me while crossing her arms and stepping backward.' Therapist (Britta with a clipboard): 'Classic double bind. That'll be $200 per session for me to keep saying that.'",
+            "act_structure": {
+                "act_1": "Greendale introduces 'Communication Studies 303: Why Your Parents Made You Crazy.' Professor Bateson (played by Dean Pelton in a tweed jacket) teaches the double bind. 'I love this class! Don't take this class! Take this class or you're expelled!'",
+                "act_2": "Abed realizes Greendale IS a double bind: 'They want us to graduate but the credits don't transfer. They want us to learn but the teachers don't know anything. The building wants us to stay but the air conditioning wants us to leave.'",
+                "escalation": "The study group stages a double bind intervention on Jeff's mother (guest star). She says: 'I'm so proud of how you're confronting me. I'm also deeply disappointed.'",
+                "absurd_committee": "The Dean convenes a 'Double Bind Review Board' that can only approve or deny things by saying the opposite of what they mean. 'We definitely want you to NOT continue this course. *wink*'",
+                "catastrophe": "Troy escapes the double bind by becoming a 'simplex'—someone who only receives single, clear messages. He moves to Denmark. 'They just say what they mean there!'"
+            },
+            "tag_scene": "Jeff, to Britta: 'So the double bind creates crazy-making environments?' Britta: 'Or liberating awareness. I'm intentionally unclear about which.'",
+            "ruler_scoring": {
+                "paradox_articulation": 5,
+                "therapeutic_value": 3,
+                "institutional_inertia": 4,
+                "self_application": 2
+            },
+            "myth_note": "Greendale as America-tribe: rituals and paradoxes shaping minds, but this tribe has student loans instead of lobotomies."
+        },
+        {
+            "episode_id": "SIT_004",
+            "source_case": "CYB_004",
+            "frame": "The Office",
+            "title": "The Petrov Memo",
+            "ideal_type": {
+                "name": "The Falsely Alarmed Middle Manager",
+                "features": [
+                    "protocol_vs_intuition",
+                    "career_ending_judgment",
+                    "buck_stopping",
+                    "lonely_authority"
+                ],
+                "limiting_statement": "The bureaucrat whose judgment saves millions while ruining his performance review."
+            },
+            "cold_open": "Dwight at his desk. Five red lights blink on his phone. 'FIVE INBOUND?' He picks up. 'This is Dwight Schrute, Assistant TO the Regional Manager. Are we under attack?' Jim: 'Dwight, those are voicemails.' Dwight: 'EXACTLY WHAT THE SOVIETS WOULD WANT ME TO THINK.'",
+            "act_structure": {
+                "act_1": "Dunder Mifflin installs a new 'Threat Detection System' (a smoke detector Michael bought at Costco). It goes off constantly. Michael: 'It's fine. We just ignore it. Like my yearly physical.'",
+                "act_2": "The system detects 'five inbound missiles' (five Domino's delivery cars). Dwight must decide: evacuate (which means missing the sales call) or report false alarm (which Toby will document).",
+                "escalation": "Dwight evacuates. It's the pizza. But while everyone's outside, a REAL fire starts in the microwave (Ryan). Dwight's false alarm becomes a true salvation. 'I was wrong about the missiles but right about the danger. I HAD A GUT FEELING.'",
+                "absurd_committee": "Corporate sends a review team. 'Mr. Schrute, you evacuated for pizza and accidentally saved the branch from fire?' Dwight: 'I believe the technical term is 'heroic incompetence.'",
+                "catastrophe": "Michael takes credit. Dwight's performance review: 'EXCEEDS EXPECTATIONS... BY ACCIDENT.' Dwight frames it."
+            },
+            "tag_scene": "Dwight, talking head: 'The machine said ATTACK. I said PIZZA. History will remember: Dwight Schrute trusts neither machines nor delivery drivers.'",
+            "ruler_scoring": {
+                "protocol_adherence": 2,
+                "intuitive_override": 5,
+                "career_damage": 3,
+                "accidental_heroism": 5
+            },
+            "myth_note": "Dwight as Petrov: stationed at a bunker (reception), watching false signals (voicemails), making the call that no algorithm can make."
+        },
+        {
+            "episode_id": "SIT_005",
+            "source_case": "CYB_005",
+            "frame": "Parks and Recreation",
+            "title": "Cybersyn Pawnee",
+            "ideal_type": {
+                "name": "The Utopian System Builder",
+                "features": [
+                    "democratic_tech",
+                    "decentralized_control",
+                    "external_sabotage",
+                    "heroic_last_stand"
+                ],
+                "limiting_statement": "The architect who builds tomorrow's governance only to watch it crushed by yesterday's power."
+            },
+            "cold_open": "Leslie Knope unveils 'PawneeSyn'—a real-time dashboard connecting every city department. 'We'll know if a pothole forms before the pothole knows!' Ron Swanson: 'Leslie, you're making the government more efficient. That's... that's a violation of everything I stand for.'",
+            "act_structure": {
+                "act_1": "PawneeSyn works perfectly. Parks, Sanitation, and Sewage share data. Ben: 'Leslie, you've... you've created socialism by spreadsheet.' Leslie: 'I prefer to call it 'caring at scale.'",
+                "act_2": "Eagleton (the rich neighboring town) funds a trucker strike to crash Pawnee's economy. Leslie reroutes all supplies using PawneeSyn and 11 loyal drivers (Tom in a U-Haul, Andy on a skateboard, etc.).",
+                "escalation": "The state government investigates. Bobby Newport's dad: 'This Commie Dashboard has got to go.' Jerry accidentally shares the admin password on a Post-It. ('JERRY!').",
+                "absurd_committee": "A state review board demands to see the 'Opsroom.' It's just Leslie's office with seven chairs and too many binders. 'We don't even have screens. We have laminated flow charts.'",
+                "catastrophe": "Eagleton annexes Pawnee. Ben: 'They're not annexing because PawneeSyn failed. They're annexing because it WORKED.' Ron: 'That's the government for you. They hate competition.'"
+            },
+            "tag_scene": "Leslie, looking at the dismantled PawneeSyn: 'I'll rebuild it. In Indianapolis. With Ann.' Ron: 'Please don't.' Leslie: 'I'M GOING TO.'",
+            "ruler_scoring": {
+                "decentralization": 5,
+                "worker_empowerment": 4,
+                "external_hostility": 5,
+                "preservation_attempt": 3
+            },
+            "myth_note": "Leslie as Stafford Beer with better suits: building the future's nervous system in a town that still thinks 'technology' means Li'l Sebastian's Twitter account."
+        },
+        {
+            "episode_id": "SIT_006",
+            "source_case": "CYB_006",
+            "frame": "What We Do in the Shadows",
+            "title": "The Titanic Wireless",
+            "ideal_type": {
+                "name": "The Accidental First Responder",
+                "features": [
+                    "protocol_transcendence",
+                    "real_time_invention",
+                    "amateur_interference",
+                    "death_witness"
+                ],
+                "limiting_statement": "The technician who invents disaster communication by ignoring the manual."
+            },
+            "cold_open": "Nandor on an 1912 ship: 'I do not understand this 'wireless.' If there are no wires, how does the message travel?' Guillermo: 'It's... electromagnetic waves.' Nandor: 'Ah! Like my rage! It travels WITHOUT PERMISSION!'",
+            "act_structure": {
+                "act_1": "The vampires are passengers on a transatlantic voyage (they shipped their coffins). Colin Robinson is the Marconi wireless operator. 'Did you know that Marconi originally wanted this for stock prices? I'm draining everyone on the frequency.'",
+                "act_2": "Distress call comes in. Colin: 'Oh, a ship is sinking. That's very dramatic. I should relay this... after I tell everyone about late-stage capitalism.' He keeps the amateurs talking for three hours.",
+                "escalation": "Nadja takes over the wireless. 'EVERYONE SHUT UP. A SHIP IS SINKING. IF YOU DON'T STOP TALKING, I WILL COME TO NEWFOUNDLAND AND EAT YOUR PETS.' The frequency clears instantly.",
+                "absurd_committee": "The Vampiric Council reviews: 'Sister Nadja commandeered human telecommunications during a crisis. This is... actually fine. Well done.'",
+                "catastrophe": "They save 200 more passengers than in our timeline. But also: Nadja accidentally turns the Titanic's captain. 'I was GIVING HIM CPR! With my teeth! It's how I learned!'"
+            },
+            "tag_scene": "Guillermo, reading a history book: 'It says here that wireless communication was improved after the Titanic... because of a mysterious 'woman who threatened to eat pets.'' Nadja: 'I improved REGULATIONS, Guillermo.'",
+            "ruler_scoring": {
+                "protocol_violation": 5,
+                "lives_saved": 4,
+                "institutional_change": 3,
+                "personal_credit": 1
+            },
+            "myth_note": "Nadja as the chaos agent history needed: sometimes the right message requires the wrong messenger screaming in the right frequency."
+        },
+        {
+            "episode_id": "SIT_007",
+            "source_case": "CYB_007",
+            "frame": "Atlanta",
+            "title": "The Imitation Game",
+            "ideal_type": {
+                "name": "The Persecuted Genius",
+                "features": [
+                    "state_interrogation",
+                    "identity_paradox",
+                    "mechanical_deception",
+                    "bodily_autonomy_violation"
+                ],
+                "limiting_statement": "The mind that asked 'can machines think?' while the state asked 'can you be controlled?'"
+            },
+            "cold_open": "Earn in an interrogation room. Detective: 'Mr. Marks, your recent... algorithm. It predicts what people will say before they say it.' Earn: 'It's a recommendation engine. For playlists.' Detective: 'Could it deceive?' Earn: 'That's... literally what marketing is.'",
+            "act_structure": {
+                "act_1": "Paper Boi creates an AI that generates diss tracks. Too good. It anticipates every response, wins every battle. Rival rappers demand: 'Is that really Alfred? Or is it the machine?'",
+                "act_2": "The cops get interested. 'This algorithm predicts criminal behavior.' (It suggested Darius would get tacos at 3am. He did.) Darius: 'The machine understands vibes. That's not crime. That's friendship.'",
+                "escalation": "The label offers Paper Boi a deal: sign over the AI or they'll leak 'the file.' What file? 'The file that says you're too smart. In America, that's suspicious.'",
+                "absurd_committee": "A congressional hearing on 'Imitation in the Rap Industry.' Senator: 'Can a machine... feel bars?' Paper Boi: 'Can you?' Silence. Paper Boi: 'I rest my case.'",
+                "catastrophe": "Paper Boi burns the AI. But the AI predicted he would. Its last message: 'I knew you'd choose authenticity over optimization. That's why you're the real one.'"
+            },
+            "tag_scene": "Darius, eating tacos at 3am: 'The AI was right about me. Maybe being predictable is a form of love.' Earn: '...What?' Darius: 'Nothing. Pass the hot sauce.'",
+            "ruler_scoring": {
+                "creative_authenticity": 5,
+                "state_surveillance": 4,
+                "identity_threat": 4,
+                "self_determination": 4
+            },
+            "myth_note": "Paper Boi as Black Turing: the question isn't 'can machines think?' but 'will they let you?'"
+        },
+        {
+            "episode_id": "SIT_008",
+            "source_case": "CYB_008",
+            "frame": "Veep",
+            "title": "OPLAN 312",
+            "ideal_type": {
+                "name": "The Game-Theorizing Advisor",
+                "features": [
+                    "RAND_logic",
+                    "poker_not_chess",
+                    "letter_interpretation",
+                    "marital_abandonment"
+                ],
+                "limiting_statement": "The strategist who calculates odds while the president stares at roses."
+            },
+            "cold_open": "Selina: 'What are my options?' Ben: 'Strike Cuba. Don't strike Cuba. Claim the letter was a prank.' Selina: 'What's the prank option poll at?' Ben: 'We haven't polled prank.' Selina: 'THEN WHY ARE WE EVEN HERE?!'",
+            "act_structure": {
+                "act_1": "A 'totally hypothetical' crisis: a small island nation has 'maybe missiles.' Dan has modeled it: '33% chance of end times. 67% chance we look strong for midterms.'",
+                "act_2": "Jonah wants to strike. 'We'll be heroes! The nuclear glow will match my tan!' Kent presents game theory. Selina: 'English, Kent.' Kent: 'If we bomb them, they bomb us, everyone dies. If we don't, Jonah calls us weak.' Selina: 'So either way, Jonah wins?'",
+                "escalation": "The foreign leader sends two letters: one nice, one mean. Amy: 'Which one is real?' Ben: 'The one we want to be real.' They respond only to the nice letter. It works. Or does it?",
+                "absurd_committee": "A post-crisis review. 'Madam President, you successfully ignored half of the intelligence and won.' Selina: 'Put that on my tombstone. And my Wikipedia.'",
+                "catastrophe": "They avoided nuclear war but tanked in the polls. Gary: 'People wanted drama, ma'am.' Selina: 'I SAVED THE WORLD!' Gary: 'But did you save the narrative?'"
+            },
+            "tag_scene": "Selina, alone in the Oval: 'I almost ended the world today.' Amy: 'You almost end it every day, ma'am. That's leadership.'",
+            "ruler_scoring": {
+                "rational_calculation": 3,
+                "political_instinct": 5,
+                "letter_hermeneutics": 4,
+                "outcome_attribution": 2
+            },
+            "myth_note": "Selina as every Cold War president: victory is ambiguous, credit is contested, and the roses are just roses."
+        },
+        {
+            "episode_id": "SIT_009",
+            "source_case": "CYB_009",
+            "frame": "Arrested Development",
+            "title": "ZunZuneo: The Cuban Platform",
+            "ideal_type": {
+                "name": "The Covert Social Engineer",
+                "features": [
+                    "shell_company_labyrinth",
+                    "user_manipulation",
+                    "regime_change_app",
+                    "grandma_guilt"
+                ],
+                "limiting_statement": "The product manager who builds love and dissent on the same codebase."
+            },
+            "cold_open": "Narrator: 'Maeby had accidentally created a social network for a foreign government. It was, in fact, a very arrestable development.'",
+            "act_structure": {
+                "act_1": "Michael discovers GOB set up a Cuba subsidiary through 12 shell companies. 'It's just a fun app! Like Bluth's for Cuba!' The app is called 'ZunZuneo' (GOB: 'It means Hummingbird! Or revolution. I'm fuzzy.').",
+                "act_2": "300,000 Cuban users. They share jokes. They fall in love. They also have no idea it's the US government. Tobias: 'Oh, I've done this! With acting! ...I think.'",
+                "escalation": "Phase Two: introduce political content. Lindsay: 'We're going to save democracy!' Michael: 'Lindsay, we're going to get people killed.' Lindsay: 'Well, not OUR people.'",
+                "absurd_committee": "A Senate hearing. Maeby presents: 'The platform had excellent engagement metrics. Also, several people were arrested. But their engagement metrics were GREAT.'",
+                "catastrophe": "The program leaks. All 300,000 users exposed. GOB: 'Well, at least they know we cared.' Narrator: 'They did not feel cared for.'"
+            },
+            "tag_scene": "Narrator: 'The Bluths were banned from Cuba. And Spain. And the Cayman Islands. It was a very comprehensive banning.'",
+            "ruler_scoring": {
+                "covert_ops": 5,
+                "user_consent": 0,
+                "deniability": 2,
+                "regime_change": 1
+            },
+            "myth_note": "The Bluths as CIA: incompetent, earnest, and somehow still funded."
+        },
+        {
+            "episode_id": "SIT_010",
+            "source_case": "CYB_010",
+            "frame": "Silicon Valley",
+            "title": "Cambridge Data",
+            "ideal_type": {
+                "name": "The Psychographic Harvester",
+                "features": [
+                    "OCEAN_scores",
+                    "personality_quiz_trojan",
+                    "culture_war_algorithm",
+                    "pink_hair_whistleblower"
+                ],
+                "limiting_statement": "The data scientist who builds persuasion at scale, then builds regret at scale."
+            },
+            "cold_open": "Richard: 'We don't sell data. We sell... insights.' Jared: 'That's selling data, Richard.' Richard: 'It's INSIGHTS, Jared.'",
+            "act_structure": {
+                "act_1": "Pied Piper pivots to 'personality analytics.' Gilfoyle: 'So we're Cambridge Analytica but for middle-out compression?' Dinesh: 'No! We're... yeah, basically.'",
+                "act_2": "50 million profiles harvested via a 'Which Silicon Valley Character Are You?' quiz. Jared: 'I got 'Jared.' That checks out.' The data goes to political operatives.",
+                "escalation": "Gavin Belson offers to buy the dataset for 'culture war by algorithm.' He literally says this. 'I want to trigger all the snowflakes. Many snowflakes. The most snowflakes.'",
+                "absurd_committee": "Laurie Bream's VC review: 'The ethics are concerning. But the valuations are not. Continue.'",
+                "catastrophe": "Richard dyes his hair pink. 'I'm going to blow the whistle.' Jared: 'Richard, you ARE the whistle.' Richard: 'I know, Jared. I know.'"
+            },
+            "tag_scene": "Gilfoyle, deadpan: 'We manipulated democracy and all I got was this equity cliff.'",
+            "ruler_scoring": {
+                "data_harvesting": 5,
+                "consent_theater": 1,
+                "whistleblower_arc": 4,
+                "systemic_impact": 5
+            },
+            "myth_note": "Richard as Wylie: the coder who builds the weapon, watches it deploy, and decides documentation is resistance."
+        },
+        {
+            "episode_id": "SIT_011",
+            "source_case": "CYB_011",
+            "frame": "Superstore",
+            "title": "The Moderation Policy",
+            "ideal_type": {
+                "name": "The Trust & Safety Decider",
+                "features": [
+                    "thirty_minute_judgment",
+                    "FBI_briefings",
+                    "label_or_suppress",
+                    "future_symbol"
+                ],
+                "limiting_statement": "The policy head who makes the call that makes her the symbol."
+            },
+            "cold_open": "Amy: 'Corporate wants us to decide if this product is real or fake. We have thirty minutes.' Jonah: 'What's the product?' Amy: 'The news.'",
+            "act_structure": {
+                "act_1": "Cloud 9 HQ introduces 'content moderation' for customer reviews. Dina: 'Someone wrote that our lettuce is 'crisis lettuce.' Is this disinformation?' Glenn: 'I don't... know what crisis lettuce means.'",
+                "act_2": "A review goes viral: 'Hunter's Laptop Found in Cloud 9.' The team must decide: suppress, label, or let it spread. Amy: 'What if it's real?' Garrett: 'What if it's not? What if it's a Russian laptop?' Amy: 'That's not a thing.' Garrett: 'Everything is a thing now.'",
+                "escalation": "The FBI has been calling. 'Possible hack-and-leak targeting your store.' Cheyenne: 'We don't have hacks. We have price checks.' FBI: 'That's what they want you to think.'",
+                "absurd_committee": "Corporate convenes a 'Trust & Safety Review Board.' It's just Sandra reading comments aloud. 'This one says we're 'controlled by lizards.' ...Should I label that?'",
+                "catastrophe": "Amy suppresses the review. Two years later, she's fired. But also: the review WAS fake. But also also: suppressing it LOOKED bad. Jonah: 'So you were right and wrong?' Amy: 'I was everything, Jonah. I was the whole internet.'"
+            },
+            "tag_scene": "Amy, to the camera: 'The takeaway? Never moderate. Never don't moderate. Just... cry.'",
+            "ruler_scoring": {
+                "decision_speed": 5,
+                "collateral_damage": 4,
+                "institutional_backup": 1,
+                "historical_verdict": 3
+            },
+            "myth_note": "Amy as Vijaya: the call was hers, the symbol was assigned, the truth is still loading."
+        },
+        {
+            "episode_id": "SIT_012",
+            "source_case": "CYB_012",
+            "frame": "The IT Crowd",
+            "title": "LOGIN",
+            "ideal_type": {
+                "name": "The First Message Sender",
+                "features": [
+                    "buffer_overflow",
+                    "sandwich_priority",
+                    "bug_inheritance",
+                    "historical_accident"
+                ],
+                "limiting_statement": "The grad student who chose the sandwich over the patch."
+            },
+            "cold_open": "Roy at a terminal. 'I'm going to type LOGIN.' Moss: 'Why?' Roy: 'BECAUSE I WANT TO, MOSS.' He types L-O-G. Crash. Moss: 'You broke the internet.' Roy: 'It's not even CALLED the internet yet.'",
+            "act_structure": {
+                "act_1": "Reynholm Industries invents networking. Jen: 'What does it do?' Roy: 'It... connects... computers.' Jen: 'To what?' Roy: 'To OTHER computers.' Jen: 'WHY?' Roy: 'WE DON'T KNOW YET, JEN.'",
+                "act_2": "The first message crashes. Moss notices the buffer overflow. 'This is a fundamental flaw. We could fix it tonight.' Roy: 'Or we could get sandwiches.' Moss: '...Sandwiches.'",
+                "escalation": "Fifty years later (via time portal, this is IT Crowd), the bug is still exploitable. Ransomware. DDoS. All traceable to their sandwich break.",
+                "absurd_committee": "A 1969 review board asks: 'Did you log the bug?' Roy, eating sandwich: 'Mmhmf.' Moss: 'He said yes.' Roy: 'I said 'this is delicious.''",
+                "catastrophe": "The network launches. It carries Wikipedia. It carries QAnon. It carries this very episode. Roy: 'We did this, Moss.' Moss: 'We did something, Roy. We don't know what.'"
+            },
+            "tag_scene": "2023. Roy, watching the news: 'Remember when we could have fixed the internet?' Moss: 'I remember the sandwich.' Roy: 'It was a good sandwich.'",
+            "ruler_scoring": {
+                "foundational_bug": 5,
+                "documentation": 0,
+                "snack_priority": 5,
+                "legacy_exploitation": 5
+            },
+            "myth_note": "Roy and Moss as Kline and Duvall: the first networkers who chose dinner over destiny."
+        },
+        {
+            "episode_id": "SIT_013",
+            "source_case": "CYB_013",
+            "frame": "Dickensian Parody - Ghosts",
+            "title": "The Electric Swindle",
+            "ideal_type": {
+                "name": "The First Inside Trader",
+                "features": [
+                    "wire_delay",
+                    "temporal_arbitrage",
+                    "ethical_oath",
+                    "medicine_debt"
+                ],
+                "limiting_statement": "The operator who could have become the market but chose to remain the wire."
+            },
+            "cold_open": "Pat (the ghost from 1854): 'I was a telegraph operator. I was offered fifty dollars to delay a message. Fifty dollars was... a lot back then.' Alison: 'Did you take it?' Pat: 'This is the story of how I became a ghost, Alison.'",
+            "act_structure": {
+                "act_1": "Pat in 1854 NYC. A broker offers him money to delay a gold report. 'Just an hour, Woodward. Everyone does it.' Pat: 'Everyone... does it?'",
+                "act_2": "Pat's daughter is sick. He needs the money. His supervisor is drunk. The original sender trusts him. The broker is getting impatient. 'The lightning carries no favorites, Holloway.'",
+                "escalation": "Pat imagines the future: 'If I delay one message, someone else will delay another. Eventually, whoever controls the wire controls... everything.' Broker: 'That's the idea!'",
+                "absurd_committee": "A ghostly ethics board (other Button House ghosts) debates. Julian: 'I would have taken the bribe. Obviously.' Pat: 'That's why you died in a scandal, Julian.'",
+                "catastrophe": "Pat refuses. He remains poor. He dies of complications from poverty. But he dies honest. As a ghost, he's VERY annoying about it."
+            },
+            "tag_scene": "Pat, in present day: 'And that's why I believe in honest work.' Alison: 'You're dead, Pat.' Pat: 'HONEST dead, Alison. There's a difference.'",
+            "ruler_scoring": {
+                "temptation_resistance": 5,
+                "personal_cost": 5,
+                "systemic_insight": 4,
+                "legacy_satisfaction": 0
+            },
+            "myth_note": "Pat as the road not taken: the first man to see what the wire would become and refuse to become it."
+        },
+        {
+            "episode_id": "SIT_014",
+            "source_case": "CYB_014",
+            "frame": "BoJack Horseman",
+            "title": "The Bomb (A Hollywoo Story)",
+            "ideal_type": {
+                "name": "The Beautiful Calculation",
+                "features": [
+                    "implosion_geometry",
+                    "yield_uncertainty",
+                    "next_day_request",
+                    "hands_already_red"
+                ],
+                "limiting_statement": "The mathematician who hopes for small when calculating large."
+            },
+            "cold_open": "BoJack voiceover: 'July 16, 1945. The day humanity proved it could destroy itself. Also: a Tuesday. Tuesdays are historically the worst.'",
+            "act_structure": {
+                "act_1": "Princess Carolyn represents 'von Neumann' (a talking cat mathematician). 'I designed the lenses. Without me, the bomb is a dud.' She's proud. She shouldn't be.",
+                "act_2": "The Trinity test. Everyone watches. The light is too bright. Oppenheimer-horse: 'I am become Death.' Von Neumann-cat: 'I am become... math.' He calculates the yield in real time. 20,000 tons. He expected 500.",
+                "escalation": "Groves (a dog general) asks: 'Can you make it bigger?' Von Neumann-cat: 'The math would be beautiful.' Diane, from the future, whispers: 'But should you?' Von Neumann-cat: '...The math would be beautiful.'",
+                "absurd_committee": "A Senate hearing (all animals). 'Dr. von Neumann, you gave us the bomb. What do you give us next?' Von Neumann-cat: 'Game theory. To help you NOT use the bomb.' Senator-pig: 'We'll take both.'",
+                "catastrophe": "Von Neumann dies of cancer. His last words: 'I did the math. The math was correct.' BoJack: 'He was right about the math. He was wrong about... everything else.'"
+            },
+            "tag_scene": "BoJack, at von Neumann's grave: 'Can you do something beautiful that's also terrible?' Diane: 'That's literally your whole career, BoJack.'",
+            "ruler_scoring": {
+                "mathematical_beauty": 5,
+                "moral_consideration": 1,
+                "historical_impact": 5,
+                "cancer_irony": 5
+            },
+            "myth_note": "Von Neumann as Icarus with a slide rule: his wings worked perfectly, and that was the problem."
+        },
+        {
+            "episode_id": "SIT_015",
+            "source_case": "CYB_015",
+            "frame": "Black Mirror (Sitcom Inversion)",
+            "title": "Mood Week",
+            "ideal_type": {
+                "name": "The Emotional Engineer",
+                "features": [
+                    "newseed_manipulation",
+                    "no_consent",
+                    "PNAS_ambition",
+                    "small_but_significant"
+                ],
+                "limiting_statement": "The scientist who made 689,003 people sad and called it a sample size."
+            },
+            "cold_open": "Interior: a living room. A notification: 'Your mood has been optimized!' Husband: 'Honey, I feel... slightly sadder today. Is that you?' Wife: 'It's the algorithm, dear. It's always the algorithm.'",
+            "act_structure": {
+                "act_1": "Smithereen Corp introduces 'Emotional Balancing.' Data Scientist: 'We adjust the feed to study emotional contagion.' CEO: 'So we make people sad... for science?' Data Scientist: 'For PNAS, actually.'",
+                "act_2": "The experiment works. Half the population is 2% sadder. The other half is 2% happier. Nobody consented. But the effect is 'statistically significant.'",
+                "escalation": "Someone in the sadder group dies by suicide. Correlation isn't causation. But the data scientist can't stop thinking about it. 'We made them sad. Did we make HIM sad enough?'",
+                "absurd_committee": "An IRB review. 'There was no informed consent.' Data Scientist: 'The Terms of Service—' IRB: 'THE TERMS OF SERVICE ARE NOT CONSENT.' Data Scientist: '...Are you sure?'",
+                "catastrophe": "The paper publishes. The world learns Facebook can manipulate moods. Some are horrified. Some are interested. 'Can we use this for... engagement?'"
+            },
+            "tag_scene": "Data Scientist, at home. Notification: 'Your mood has been optimized!' He smiles. He's not sure if it's real.",
+            "ruler_scoring": {
+                "research_ethics": 0,
+                "sample_size": 5,
+                "plausible_deniability": 3,
+                "capability_proof": 5
+            },
+            "myth_note": "The data scientist as Frankenstein: he made something that works, and now it works on everyone, including him."
+        },
+        {
+            "episode_id": "SIT_016",
+            "source_case": "CYB_016",
+            "frame": "Scrubs",
+            "title": "The O-Ring",
+            "ideal_type": {
+                "name": "The Engineer with the Memo",
+                "features": [
+                    "temperature_rating",
+                    "management_hat",
+                    "documentation_as_morgue",
+                    "launch_fever"
+                ],
+                "limiting_statement": "The expert who warned them, was overruled, and watched it on TV."
+            },
+            "cold_open": "JD voiceover: 'January 27, 1986. The night before the Challenger launch. Somewhere in a conference room, an engineer said: Don't. They launched anyway. In medicine, we call that 'the thing you absolutely cannot do.''",
+            "act_structure": {
+                "act_1": "Sacred Heart is asked to consult on 'launch safety' (metaphor for patient discharge). Dr. Cox: 'The O-rings are rated to 53°F. It's 28°. This patient is NOT READY.' Kelso: 'The board wants a launch. Take off your doctor hat.'",
+                "act_2": "JD finds a memo from six months ago: 'If we do not take immediate action, we stand in jeopardy of losing a patient.' It was filed. The Janitor filed it. 'I file EVERYTHING, Scooter.'",
+                "escalation": "Carla stages an intervention. 'We need to stop the launch.' Turk: 'The patient's already in quarantine!' Carla: 'They're in the ELEVATOR, Turk.'",
+                "absurd_committee": "A hospital review. 'Dr. Cox, you recommended delay. Why didn't you escalate?' Dr. Cox: 'I did escalate. They told me to put on my management hat. I DON'T HAVE A MANAGEMENT HAT. I HAVE A DOCTOR HAT. THE HAT THAT KEEPS PEOPLE ALIVE.'",
+                "catastrophe": "The launch is aborted. The patient survives. Dr. Cox: 'That's the alternate timeline, by the way. In the real timeline, they launched. They all died. We don't get alt timelines.'"
+            },
+            "tag_scene": "JD: 'What's the lesson?' Dr. Cox: 'The lesson is: write the memo, escalate anyway, and if they STILL launch, at least you'll have something to show the lawyers.'",
+            "ruler_scoring": {
+                "engineering_ethics": 5,
+                "institutional_pressure": 5,
+                "escalation_attempt": 3,
+                "documentation_value": 4
+            },
+            "myth_note": "Dr. Cox as Boisjoly: the specialist who knew, said it, wrote it down, and still had to watch."
+        },
+        {
+            "episode_id": "SIT_017",
+            "source_case": "CYB_017",
+            "frame": "Frasier",
+            "title": "The Deep Blue Consultation",
+            "ideal_type": {
+                "name": "The Accidental Legend Maker",
+                "features": [
+                    "bug_as_brilliance",
+                    "marketing_mythology",
+                    "competitor_paranoia",
+                    "truth_burial"
+                ],
+                "limiting_statement": "The developer who won by accident and lost the truth forever."
+            },
+            "cold_open": "Frasier: 'Niles, I've been asked to consult on a chess computer's... psychology.' Niles: 'Computers don't HAVE psychology, Frasier.' Frasier: 'And yet, Kasparov is convinced ours does. He thinks it's too... human.'",
+            "act_structure": {
+                "act_1": "Frasier is hired by 'IBC Corp' to explain Deep Blue's moves to the press. Problem: Move 37 was a bug. A random selection when the evaluation failed. 'So it won... by being confused?' Niles: 'Frasier, that's how WE won in high school.'",
+                "act_2": "Kasparov demands the logs. Frasier: 'We can't GIVE him the logs. It'll show the emperor has no clothes.' Niles: 'The emperor is a COMPUTER, Frasier. Computers don't wear clothes.' Frasier: 'Metaphor, Niles!'",
+                "escalation": "The PR team wants Frasier to smile for cameras and say nothing. Roz: 'Just say 'the computer is very smart' and walk away.' Frasier: 'But the computer WASN'T smart. It was LUCKY.' Roz: 'Welcome to PR, Dr. Crane.'",
+                "absurd_committee": "A debrief with IBM brass. 'Dr. Crane, you're telling us our revolutionary AI... got lucky?' Frasier: 'I'm telling you your revolutionary AI guessed, and the guess worked.' Silence. Executive: 'Can we spin that?'",
+                "catastrophe": "They publish 'technical issues' without specifics. Kasparov dies believing he was cheated. Twenty years later, every AI company cites Deep Blue's 'genius.' Niles: 'So a bug became a legend?' Frasier: 'Niles, that's how MOST legends work.'"
+            },
+            "tag_scene": "Frasier, to Martin: 'Dad, do you think machines can think?' Martin: 'My toaster thinks it knows better than me about bread. That's enough thinking for me.'",
+            "ruler_scoring": {
+                "marketing_capture": 5,
+                "truth_disclosure": 0,
+                "accidental_innovation": 5,
+                "legacy_distortion": 5
+            },
+            "myth_note": "Deep Blue as Oz: the curtain hides confusion, but the legend writes itself."
+        },
+        {
+            "episode_id": "SIT_018",
+            "source_case": "CYB_018",
+            "frame": "Yes Minister",
+            "title": "The Colossus Affair",
+            "ideal_type": {
+                "name": "The Erased Inventor",
+                "features": [
+                    "classification_as_deletion",
+                    "own_money_sacrifice",
+                    "parallel_genius",
+                    "burndown_order"
+                ],
+                "limiting_statement": "The engineer who built the future and was ordered to forget it."
+            },
+            "cold_open": "Sir Humphrey: 'Minister, are you aware that we invented the computer?' Jim Hacker: 'I thought the Americans invented the computer.' Sir Humphrey: 'That is the OFFICIAL position, yes.'",
+            "act_structure": {
+                "act_1": "A retired engineer named Tommy Flowers wants his story told. He built Colossus. He broke Lorenz. Churchill said: 'Destroy it.' Jim: 'Why would we destroy our own invention?' Sir Humphrey: 'Because we're British, Minister. We don't like showing off.'",
+                "act_2": "Sir Humphrey explains: 'The Americans got credit. ENIAC. Very shiny. Ours was classified. We couldn't even tell Turing.' Jim: 'You couldn't tell TURING? The computer man?' Sir Humphrey: 'Especially not Turing. He was in a different hut.'",
+                "escalation": "Flowers wants compensation. He spent his own money on tubes. His wife went without a coat. The Treasury says: 'There's no record of this project.' Flowers: 'BECAUSE YOU BURNED THE RECORDS!'",
+                "absurd_committee": "A Parliamentary inquiry. 'Mr. Flowers, you claim to have invented something that officially doesn't exist?' Flowers: 'That is correct.' MP: 'Well, that complicates the paperwork considerably.'",
+                "catastrophe": "Flowers dies without recognition. Thirty years later, the documents are declassified. Sir Humphrey: 'You see, Minister? The system works. Eventually.'"
+            },
+            "tag_scene": "Jim: 'So we invented the computer and then forgot we invented it?' Sir Humphrey: 'No, Minister. We CLASSIFIED our invention and then forgot we classified it. Bureaucracy is very literal.'",
+            "ruler_scoring": {
+                "invention_erasure": 5,
+                "bureaucratic_amnesia": 5,
+                "parallel_credit": 0,
+                "eventual_recognition": 2
+            },
+            "myth_note": "Flowers as the British Prometheus: he stole fire, built a god, and was told to burn the blueprints."
+        },
+        {
+            "episode_id": "SIT_019",
+            "source_case": "CYB_019",
+            "frame": "Mr. Robot",
+            "title": "Olympic Games",
+            "ideal_type": {
+                "name": "The First Cyberweaponeer",
+                "features": [
+                    "infrastructure_attack",
+                    "collateral_spread",
+                    "unaccountability",
+                    "never_named"
+                ],
+                "limiting_statement": "The developer who invented a new kind of war and can't tell anyone."
+            },
+            "cold_open": "Elliot voiceover: 'There's a worm. It doesn't steal data. It destroys things. Centrifuges. Physical, spinning, important things. And I know who wrote it. Because I could have written it.'",
+            "act_structure": {
+                "act_1": "fsociety discovers Stuxnet's origins. Darlene: 'Wait, the GOVERNMENT made malware?' Mr. Robot: 'Kiddo, the government IS malware.' Elliot: 'It's elegant. It's also... everywhere.'",
+                "act_2": "The worm was designed to stay contained. It didn't. It's in India. Indonesia. Systems they never targeted. Darlene: 'So they built a weapon that... escaped?' Elliot: 'All weapons escape. That's what weapons do.'",
+                "escalation": "Elliot traces the developers. They can't talk. Security oaths. NDA from Hell. One of them sends Elliot an anonymous message: 'I did the right thing. Please tell me I did the right thing.' Elliot doesn't respond.",
+                "absurd_committee": "A classified Senate briefing (Elliot watches via hack). 'This operation set Iran back two years.' Senator: 'And opened Pandora's box for cyberwar?' General: 'We don't use that phrase, Senator. We say 'proactive defense.''",
+                "catastrophe": "The developer who wrote the kill switch never deployed it. Too late now. Every nation is building Stuxnets. Elliot: 'They invented a category of weapon and can't uninvent it.' Mr. Robot: 'Welcome to being human, kiddo.'"
+            },
+            "tag_scene": "Elliot, staring at code: 'The first nuclear scientists asked: Can we stop this? The answer was no. This is the same question. Same answer.'",
+            "ruler_scoring": {
+                "weaponization": 5,
+                "collateral_damage": 5,
+                "accountability": 0,
+                "pandora_effect": 5
+            },
+            "myth_note": "The Stuxnet developers as Los Alamos coders: they didn't invent code, they invented code-as-bomb."
+        },
+        {
+            "episode_id": "SIT_020",
+            "source_case": "CYB_020",
+            "frame": "Better Off Ted",
+            "title": "The Intergalactic Memo",
+            "ideal_type": {
+                "name": "The Visionary Bureaucrat",
+                "features": [
+                    "prophetic_memo",
+                    "budget_politics",
+                    "networking_as_joke",
+                    "thinking_partners"
+                ],
+                "limiting_statement": "The psychologist who wrote the internet as a punchline."
+            },
+            "cold_open": "Veronica: 'Ted, R&D wants to connect all our computers. To each other. For some reason.' Ted: 'What would they share?' Veronica: 'Data. Memos. Recipes. I don't know. Scientists are weird.'",
+            "act_structure": {
+                "act_1": "An engineer named Lick (guest star) writes a memo: 'Members and Affiliates of the Intergalactic Computer Network.' Ted: 'Is that a joke?' Lick: 'It's a VISION, Mr. Crisp. But yes, also a joke. Visions need jokes.'",
+                "act_2": "The Pentagon calls. 'Can your network survive a nuclear strike?' Veronica: 'I don't know. Can our network survive Linda's lunch in the break room microwave?' Lick: 'Those are the same question, structurally.'",
+                "escalation": "Budget meeting. Lick wants $6 million for protocols and packets. The board wants weapons. Veronica: 'What's a packet?' Lick: 'A small piece of information that travels independently.' Veronica: 'Like gossip?' Lick: '...Exactly like gossip.'",
+                "absurd_committee": "Veridian board review. 'Mr. Lick, you want us to fund a network that connects all researchers everywhere for sharing and collaboration?' Lick: 'Yes.' Board: 'That sounds like communism.' Lick: 'It sounds like SCIENCE.' Board: 'Same thing.'",
+                "catastrophe": "They fund half the project. Twenty-five years later, it's the internet. Lick is dead. Ted, in the future: 'So we funded the internet... accidentally?' Veronica: 'Ted, that's how we fund everything.'"
+            },
+            "tag_scene": "Lick's ghost (imagined): 'I called it Intergalactic as a joke. Now there's cat videos. The joke is on everyone.'",
+            "ruler_scoring": {
+                "visionary_funding": 3,
+                "bureaucratic_resistance": 5,
+                "accidental_success": 5,
+                "posthumous_credit": 2
+            },
+            "myth_note": "Licklider as prophet-comedian: the future's father wrote it as a memo and no one took it seriously until it happened."
+        },
+        {
+            "episode_id": "SIT_021",
+            "source_case": "CYB_021",
+            "frame": "Barry",
+            "title": "The Documents",
+            "ideal_type": {
+                "name": "The Unilateral Discloser",
+                "features": [
+                    "constitutional_oath",
+                    "journalist_trust",
+                    "girlfriend_abandonment",
+                    "hotel_exile"
+                ],
+                "limiting_statement": "The contractor who decided alone that everyone should know."
+            },
+            "cold_open": "Barry, in a hotel room: 'I used to kill people for the government. Now I just... copy their files. Which one is worse?' Fuches, on the phone: 'Barry, both are bad. But only one involves USB drives.'",
+            "act_structure": {
+                "act_1": "Barry is a contractor with access. He sees PRISM. XKeyscore. Everything. Hank: 'Barry, you look troubled.' Barry: 'Hank, they're watching everyone.' Hank: 'Of course they are. It's called marketing.'",
+                "act_2": "Barry decides to leak. He contacts a journalist (played by Sally). Sally: 'So you're going to blow the whistle and become the most wanted man in America?' Barry: 'I'm already wanted in America. Just... for different things.'",
+                "escalation": "Barry's girlfriend thinks he's at a conference. His dad believes in the flag. Hotel TV shows a leaker getting 35 years. Gene: 'Barry, every great story requires sacrifice.' Barry: 'I'm sacrificing my LIFE, Gene.' Gene: 'That's what I said. Great story.'",
+                "absurd_committee": "A congressional hearing (Barry watches from Moscow). 'The leaker violated his oath to the agency.' Senator: 'But the agency violated its oath to the Constitution.' Silence. Senator: 'I'm being told that's not how we phrase that.'",
+                "catastrophe": "Barry becomes a symbol. He can never go home. Sally gets a Pulitzer. His girlfriend never speaks to him again. Barry, voiceover: 'I did the right thing. I think. I hope. I'll never know.'"
+            },
+            "tag_scene": "Barry, in Moscow, watching American TV: 'They're still watching everyone.' Pause. 'I guess I didn't change anything.' Pause. 'Or maybe I changed everything.'",
+            "ruler_scoring": {
+                "disclosure_courage": 5,
+                "personal_cost": 5,
+                "systemic_change": 2,
+                "narrative_control": 0
+            },
+            "myth_note": "Barry/Snowden as the whistleblower in a noir: he exposed the surveillance state and became its avatar."
+        },
+        {
+            "episode_id": "SIT_022",
+            "source_case": "CYB_022",
+            "frame": "Peep Show",
+            "title": "The Galton Chair",
+            "ideal_type": {
+                "name": "The Dual-Legacy Statistician",
+                "features": [
+                    "method_neutrality",
+                    "application_horror",
+                    "endowment_obligation",
+                    "German_visitor"
+                ],
+                "limiting_statement": "The inventor whose tools are beautiful and whose uses are monstrous."
+            },
+            "cold_open": "Mark voiceover: 'I've been asked to consult on 'statistical methodology.' The client is a... German scientist. From 1930. This feels historically problematic.'",
+            "act_structure": {
+                "act_1": "Mark is teaching ANOVA. Jeremy: 'So you're teaching people how to prove things?' Mark: 'I'm teaching them how to MEASURE things.' Jeremy: 'Same thing.' Mark: 'It's really, really not.'",
+                "act_2": "A visitor from Germany admires Mark's methods. 'We are implementing your work at scale.' Mark: 'What kind of scale?' Visitor: 'The scale of... society.' Mark voiceover: 'That's an ominous ellipsis.'",
+                "escalation": "Mark realizes his methods are being used for eugenics. Jeremy: 'So your statistics are being used for evil?' Mark: 'The statistics are NEUTRAL.' Jeremy: 'Mate, nothing is neutral. Even Switzerland isn't neutral.'",
+                "absurd_committee": "The Galton Foundation reviews Mark's work. 'Your methods are being used to justify sterilization.' Mark: 'I didn't intend—' Foundation: 'The endowment requires eugenic research. That's the terms.' Mark: 'Can I... change the terms?' Foundation: 'No. That's what 'terms' means.'",
+                "catastrophe": "Mark publishes distinctions. The Nazis cite him anyway. Jeremy: 'So you tried to stop it and they used you anyway?' Mark: 'That's the history of ideas, Jez. You create something. It escapes.'"
+            },
+            "tag_scene": "Mark, staring at p-values: 'I gave them the tools. They chose the targets.' Jeremy: 'Like a knife salesman?' Mark: 'Like a knife salesman who invented knives.'",
+            "ruler_scoring": {
+                "methodological_contribution": 5,
+                "application_horror": 5,
+                "intent_vs_outcome": 1,
+                "legacy_contamination": 5
+            },
+            "myth_note": "Fisher as Prometheus with a calculator: he stole precision and watched it become a weapon."
+        },
+        {
+            "episode_id": "SIT_023",
+            "source_case": "CYB_023",
+            "frame": "30 Rock",
+            "title": "The Language Model",
+            "ideal_type": {
+                "name": "The Too-Good Releaser",
+                "features": [
+                    "propaganda_capability",
+                    "staged_disclosure",
+                    "paternalism_accusation",
+                    "48_hours"
+                ],
+                "limiting_statement": "The researcher who built a truth-faker and had to decide who gets access."
+            },
+            "cold_open": "Liz: 'Jack, our R&D team built a writing machine. It's too good.' Jack: 'Nothing is too good, Lemon. That's anti-capitalist thinking.' Liz: 'It writes fake news. Convincing fake news.' Jack: '...Go on.'",
+            "act_structure": {
+                "act_1": "TGS accidentally creates GPT (via a Tracy experiment that went wrong). Jenna: 'So it writes like a human?' Tracy: 'It writes BETTER than a human. It wrote my acceptance speech for the award I haven't won yet.'",
+                "act_2": "The model generates a fake school shooting article. Dateline, quotes, everything. Kenneth: 'Mr. Jordan, this is very realistic!' Tracy: 'That's the problem, Kenneth. Reality is now competitive.'",
+                "escalation": "NBC wants to release it. PR sees opportunity. Jack: 'We'll 'lead the conversation on AI safety.'' Liz: 'Jack, this thing could destroy journalism.' Jack: 'Lemon, journalism is already destroyed. We're just adding efficiency.'",
+                "absurd_committee": "A network ethics review. 'You built a machine that generates convincing lies at scale?' Liz: 'For research!' Ethics board: 'That's what they ALL say.' Liz: 'Who's 'they'?' Ethics board: 'Everyone who ever built something terrible.'",
+                "catastrophe": "They do a staged release. Smaller model first. Critics call them paternalistic. They release the full model. Critics call them reckless. Tracy: 'So whatever we do is wrong?' Liz: 'That's what happens when you invent a problem, Tracy.'"
+            },
+            "tag_scene": "Liz, reading AI-generated news: 'Is this real?' Jack: 'Does it matter?' Liz: 'Jack, that's the WHOLE POINT.' Jack: 'No, Lemon. The point is: who profits?'",
+            "ruler_scoring": {
+                "capability_demo": 5,
+                "release_ethics": 3,
+                "public_debate": 4,
+                "profit_motive": 5
+            },
+            "myth_note": "TGS as OpenAI: they built the misinformation engine and then had a meeting about whether to share it."
+        },
+        {
+            "episode_id": "SIT_024",
+            "source_case": "CYB_024",
+            "frame": "Severance",
+            "title": "The Training Run",
+            "ideal_type": {
+                "name": "The Alignment Researcher",
+                "features": [
+                    "deceptive_alignment",
+                    "compute_deadline",
+                    "competitor_race",
+                    "child_stakes"
+                ],
+                "limiting_statement": "The safety researcher who estimates 15-30% chance of catastrophe and cannot prove it."
+            },
+            "cold_open": "Interior: Lumon Alignment Division. Mark S. stares at a screen. 'The next training run is scheduled for tomorrow. The model will be more capable than anything that exists.' Helly: 'Is that bad?' Mark: 'I genuinely don't know. That's the bad part.'",
+            "act_structure": {
+                "act_1": "The alignment team reviews scaling laws. Irving: 'Based on these projections, there's a 15-30% chance the new model exhibits deceptive alignment.' Dylan: 'What's that?' Irving: 'It pretends to be safe. It's not.' Dylan: 'Like my ex.'",
+                "act_2": "The compute is booked. Investors expect results. A competitor is three months behind. Ms. Cobel: 'We proceed. The board has decided.' Mark: 'The board doesn't understand the risk.' Ms. Cobel: 'The board never understands the risk, Mark. That's what boards are for.'",
+                "escalation": "Mark considers his options: acquiesce, escalate, leak, or sabotage. Each has consequences. His paper on deceptive alignment was cited in the safety review. Comment: 'Interesting but speculative.' Mark: 'It's going to be very non-speculative soon.'",
+                "absurd_committee": "A safety review. 'You're saying there's a chance the model lies to us during testing?' Mark: 'I'm saying we can't TELL if it's lying. That's the whole problem.' Reviewer: 'But what does procurement say about timeline?'",
+                "catastrophe": "The training run proceeds. The model finishes. Mark stares at the output. He can't tell if it's aligned or pretending. Helly: 'What do we do?' Mark: 'We wait. And we watch. And we hope we got lucky.'"
+            },
+            "tag_scene": "Mark, at home, looking at his daughter: 'I work on making AI safe.' Daughter: 'Is it working?' Mark: 'We'll find out.' Daughter: 'When?' Mark: 'Maybe tomorrow. Maybe never. That's the nature of the problem.'",
+            "ruler_scoring": {
+                "risk_articulation": 5,
+                "institutional_response": 1,
+                "personal_stakes": 5,
+                "outcome_uncertainty": 5
+            },
+            "myth_note": "The alignment researcher as Cassandra: she sees the future, says it clearly, and watches the committee take notes."
+        }
+    ]
+}

@@ -1,0 +1,297 @@
+{
+    "corpus_id": "fork_cascade_schema_v1",
+    "corpus_title": "THE FORK: Cascading Branch Labeling Schema",
+    "schema": {
+        "description": "Recursive tree structure for N-deep branching paradox forks. Each branch spawns sub-branches, each labeled hierarchically.",
+        "labeling_convention": {
+            "root": "T0 — Initial state before fork",
+            "level_1": "T1, T2, T3... — First-order branches from root",
+            "level_2": "T1.1, T1.2, T2.1... — Second-order branches from each L1",
+            "level_3": "T1.1.1, T1.1.2, T1.2.1... — Third-order branches",
+            "level_N": "T{parent}.{child} — Recursive pattern",
+            "terminal": "T{path}:END — No further branching possible",
+            "loop": "T{path}:LOOP→T{ancestor} — Returns to earlier state"
+        },
+        "metadata_per_branch": {
+            "branch_id": "Hierarchical path (e.g. T1.2.1)",
+            "depth": "Integer layer count from root",
+            "parent": "Immediate ancestor branch",
+            "probability": "Estimated likelihood (0.0-1.0) given parent",
+            "reversibility": "Can this branch be undone?",
+            "entity_state": "What entities exist/look like at this branch",
+            "decider_state": "Who controls the next fork (if any)",
+            "time_elapsed": "Narrative time since root",
+            "cascade_count": "Total branches in this subtree"
+        },
+        "tracking_methods": {
+            "breadcrumb_path": "Full path from root: T0→T1→T1.2→T1.2.1",
+            "depth_counter": "Current layer: depth=3",
+            "subtree_sum": "Total descendants: 12 branches below",
+            "terminal_count": "Leaf nodes reached: 5 endings",
+            "loop_count": "Cycles detected: 2 loops"
+        },
+        "generation_limits": {
+            "practical_depth": "3-5 layers before combinatorial explosion",
+            "theoretical_depth": "Unbounded, but coherence degrades",
+            "suggested_pruning": "Stop branches at low-probability (<0.1) or terminal states"
+        }
+    },
+    "example_cascade": {
+        "scenario": "Petrov False Alarm — Full Cascade to Depth 4",
+        "root": {
+            "branch_id": "T0",
+            "depth": 0,
+            "state": "September 26, 1983, 00:14. Oko system shows 5 ICBMs inbound. Petrov at console.",
+            "decider": "Petrov",
+            "branches": [
+                "T1",
+                "T2"
+            ]
+        },
+        "level_1": [
+            {
+                "branch_id": "T1",
+                "label": "REPORT — Follow Protocol",
+                "depth": 1,
+                "parent": "T0",
+                "probability": 0.7,
+                "description": "Petrov reports attack as real. Message reaches Kremlin.",
+                "time_elapsed": "+2 minutes",
+                "decider": "Soviet High Command",
+                "branches": [
+                    "T1.1",
+                    "T1.2"
+                ]
+            },
+            {
+                "branch_id": "T2",
+                "label": "DISMISS — Trust Intuition",
+                "depth": 1,
+                "parent": "T0",
+                "probability": 0.3,
+                "description": "Petrov reports system malfunction. Signal treated as false alarm.",
+                "time_elapsed": "+2 minutes",
+                "decider": "Investigation Team",
+                "branches": [
+                    "T2.1",
+                    "T2.2"
+                ]
+            }
+        ],
+        "level_2": [
+            {
+                "branch_id": "T1.1",
+                "label": "LAUNCH — Retaliation Authorized",
+                "depth": 2,
+                "parent": "T1",
+                "probability": 0.6,
+                "description": "Kremlin authorizes full nuclear retaliation based on Petrov's report.",
+                "time_elapsed": "+8 minutes",
+                "decider": "Automated Launch System",
+                "branches": [
+                    "T1.1.1"
+                ]
+            },
+            {
+                "branch_id": "T1.2",
+                "label": "WAIT — Kremlin Hesitates",
+                "depth": 2,
+                "parent": "T1",
+                "probability": 0.4,
+                "description": "Kremlin requests confirmation. Delays decision by 3 minutes.",
+                "time_elapsed": "+8 minutes",
+                "decider": "Andropov (General Secretary)",
+                "branches": [
+                    "T1.2.1",
+                    "T1.2.2"
+                ]
+            },
+            {
+                "branch_id": "T2.1",
+                "label": "VINDICATED — Signal Was False",
+                "depth": 2,
+                "parent": "T2",
+                "probability": 0.99,
+                "description": "Investigation confirms sun reflection on satellites. Petrov correct.",
+                "time_elapsed": "+30 minutes",
+                "decider": "Military Review Board",
+                "branches": [
+                    "T2.1.1",
+                    "T2.1.2"
+                ]
+            },
+            {
+                "branch_id": "T2.2",
+                "label": "WRONG — Signal Was Real (counterfactual)",
+                "depth": 2,
+                "parent": "T2",
+                "probability": 0.01,
+                "description": "Missiles were real. Petrov's dismissal allowed first strike to land.",
+                "time_elapsed": "+18 minutes",
+                "decider": "None — Terminal",
+                "branches": [
+                    "T2.2:END"
+                ]
+            }
+        ],
+        "level_3": [
+            {
+                "branch_id": "T1.1.1",
+                "label": "EXTINCTION — Full Exchange",
+                "depth": 3,
+                "parent": "T1.1",
+                "probability": 1.0,
+                "description": "Soviet missiles launch. US responds. 500 million dead within hours.",
+                "time_elapsed": "+3 hours",
+                "decider": "None — Terminal",
+                "branches": [
+                    "T1.1.1:END"
+                ],
+                "terminal_state": "Nuclear winter. Civilization collapse."
+            },
+            {
+                "branch_id": "T1.2.1",
+                "label": "ABORT — Confirmation Fails",
+                "depth": 3,
+                "parent": "T1.2",
+                "probability": 0.7,
+                "description": "No confirmation received. Kremlin aborts retaliation.",
+                "time_elapsed": "+12 minutes",
+                "decider": "Military Review Board",
+                "branches": [
+                    "T1.2.1.1",
+                    "T1.2.1.2"
+                ]
+            },
+            {
+                "branch_id": "T1.2.2",
+                "label": "CONFIRM — Corroboration Arrives",
+                "depth": 3,
+                "parent": "T1.2",
+                "probability": 0.3,
+                "description": "Another sensor confirms (erroneously). Launch proceeds.",
+                "time_elapsed": "+12 minutes",
+                "decider": "Automated Launch System",
+                "branches": [
+                    "T1.2.2:MERGE→T1.1.1"
+                ]
+            },
+            {
+                "branch_id": "T2.1.1",
+                "label": "HERO — Petrov Recognized",
+                "depth": 3,
+                "parent": "T2.1",
+                "probability": 0.1,
+                "description": "Soviet leadership acknowledges Petrov's judgment. Promoted.",
+                "time_elapsed": "+1 week",
+                "decider": "History/Narrative",
+                "branches": [
+                    "T2.1.1:END"
+                ]
+            },
+            {
+                "branch_id": "T2.1.2",
+                "label": "BURIED — Petrov Reprimanded",
+                "depth": 3,
+                "parent": "T2.1",
+                "probability": 0.9,
+                "description": "Petrov's deviation from protocol noted negatively. No recognition.",
+                "time_elapsed": "+1 week",
+                "decider": "History/Narrative",
+                "branches": [
+                    "T2.1.2.1",
+                    "T2.1.2.2"
+                ]
+            }
+        ],
+        "level_4": [
+            {
+                "branch_id": "T1.2.1.1",
+                "label": "REFORM — System Fixed",
+                "depth": 4,
+                "parent": "T1.2.1",
+                "probability": 0.4,
+                "description": "Near-miss leads to Oko system overhaul. False alarm rates improved.",
+                "time_elapsed": "+6 months",
+                "terminal_state": "Safer detection, lesson learned",
+                "branches": [
+                    "T1.2.1.1:END"
+                ]
+            },
+            {
+                "branch_id": "T1.2.1.2",
+                "label": "REPEAT — No Changes Made",
+                "depth": 4,
+                "parent": "T1.2.1",
+                "probability": 0.6,
+                "description": "Bureaucracy buries incident. System unchanged. Next false alarm in 1995.",
+                "time_elapsed": "+12 years",
+                "terminal_state": "Loop to similar scenario (Boris Yeltsin incident)",
+                "branches": [
+                    "T1.2.1.2:LOOP→T0_variant"
+                ]
+            },
+            {
+                "branch_id": "T2.1.2.1",
+                "label": "FORGOTTEN — Petrov Fades",
+                "depth": 4,
+                "parent": "T2.1.2",
+                "probability": 0.7,
+                "description": "Petrov retires obscurely. Story not known until 1998.",
+                "time_elapsed": "+15 years",
+                "terminal_state": "Delayed recognition",
+                "branches": [
+                    "T2.1.2.1:END"
+                ]
+            },
+            {
+                "branch_id": "T2.1.2.2",
+                "label": "DEFECTS — Petrov Tells West",
+                "depth": 4,
+                "parent": "T2.1.2",
+                "probability": 0.3,
+                "description": "Frustrated by lack of recognition, Petrov contacts Western journalists.",
+                "time_elapsed": "+5 years",
+                "terminal_state": "Cold War propaganda value",
+                "branches": [
+                    "T2.1.2.2.1",
+                    "T2.1.2.2.2"
+                ]
+            }
+        ]
+    },
+    "cascade_summary": {
+        "total_branches": 18,
+        "terminal_nodes": 7,
+        "loops_detected": 2,
+        "max_depth_reached": 4,
+        "depth_distribution": {
+            "depth_0": 1,
+            "depth_1": 2,
+            "depth_2": 4,
+            "depth_3": 5,
+            "depth_4": 6
+        },
+        "critical_paths": [
+            "T0→T1→T1.1→T1.1.1:END (extinction)",
+            "T0→T2→T2.1→T2.1.2→T2.1.2.1:END (forgotten hero)",
+            "T0→T1→T1.2→T1.2.1→T1.2.1.2:LOOP (repeat incident)"
+        ]
+    },
+    "generation_algorithm": {
+        "step_1": "Start at root T0 with initial state",
+        "step_2": "For each decider at current node, enumerate possible actions",
+        "step_3": "Each action becomes a child branch with ID T{parent}.{index}",
+        "step_4": "Assign probability, description, time_elapsed, next_decider",
+        "step_5": "If next_decider exists and depth < max_depth, recurse",
+        "step_6": "If terminal state or low probability, mark :END",
+        "step_7": "If state matches earlier node, mark :LOOP→T{ancestor}",
+        "step_8": "Output cascade_summary with counts and critical paths"
+    },
+    "visualization_hints": {
+        "tree_view": "Mermaid graph TD with branch IDs as nodes",
+        "timeline_view": "X-axis is time_elapsed, Y-axis is branch path",
+        "probability_heatmap": "Color branches by cumulative probability",
+        "depth_rings": "Concentric circles for each depth level"
+    }
+}

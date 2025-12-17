@@ -1,0 +1,261 @@
+{
+    "analysis_id": "fork_corpus_compatibility_v1",
+    "generated": "2025-12-17T03:53:00-05:00",
+    "purpose": "Test LEGOS/tracks/thick against existing HTML infrastructure",
+    "file_inventory": {
+        "json_corpora": [
+            {
+                "file": "fork-paradox-thick.json",
+                "bytes": 91130,
+                "tokens_est": 22783,
+                "scenarios": 48
+            },
+            {
+                "file": "fork-paradox-corpus.json",
+                "bytes": 69323,
+                "tokens_est": 17331,
+                "scenarios": "variable"
+            },
+            {
+                "file": "fork-paradox-cybernetics.json",
+                "bytes": 63513,
+                "tokens_est": 15878,
+                "scenarios": 24
+            },
+            {
+                "file": "fork-paradox-sitcom.json",
+                "bytes": 61181,
+                "tokens_est": 15295,
+                "scenarios": 24
+            },
+            {
+                "file": "fork-paradox-midnight.json",
+                "bytes": 51479,
+                "tokens_est": 12870,
+                "scenarios": 24
+            },
+            {
+                "file": "fork-paradox-cascade-thick.json",
+                "bytes": 25763,
+                "tokens_est": 6441,
+                "branches": 15
+            },
+            {
+                "file": "fork-paradox-tracks-deciders.json",
+                "bytes": 21173,
+                "tokens_est": 5293,
+                "flows": 8
+            },
+            {
+                "file": "fork-paradox-tracks-entities.json",
+                "bytes": 20285,
+                "tokens_est": 5071,
+                "flows": 8
+            },
+            {
+                "file": "fork-paradox-cascade-schema.json",
+                "bytes": 11967,
+                "tokens_est": 2992,
+                "example": 1
+            }
+        ],
+        "yaml_corpora": [
+            {
+                "file": "fork-legos-petrov.yaml",
+                "bytes": 22888,
+                "tokens_est": 5722,
+                "scenes": 10
+            }
+        ],
+        "html_viewers": [
+            {
+                "file": "HOLO-VIEWER.html",
+                "bytes": 117598,
+                "has_fetch": true,
+                "supports_json": true,
+                "supports_yaml": false
+            },
+            {
+                "file": "fork-cascade-viz.html",
+                "bytes": 11533,
+                "has_fetch": false,
+                "supports_json": "hardcoded",
+                "supports_yaml": false
+            },
+            {
+                "file": "ethnome.html",
+                "bytes": 24189,
+                "has_fetch": false,
+                "supports_json": "hardcoded",
+                "supports_yaml": false
+            },
+            {
+                "file": "ETHICS-HELIX-TROLLEY.html",
+                "bytes": "unknown",
+                "has_fetch": false,
+                "supports_json": "hardcoded",
+                "supports_yaml": false
+            }
+        ]
+    },
+    "processing_time_estimates": {
+        "methodology": "4 chars ≈ 1 token; GPT-4 turbo ~150 tokens/sec; Claude ~100 tokens/sec",
+        "per_file": [
+            {
+                "file": "fork-paradox-thick.json",
+                "tokens": 22783,
+                "gpt4_turbo_sec": 152,
+                "claude_sec": 228,
+                "per_scenario_tokens": 475,
+                "retrieval_strategy": "Index by scenario_id, load one at a time"
+            },
+            {
+                "file": "fork-paradox-cascade-thick.json",
+                "tokens": 6441,
+                "gpt4_turbo_sec": 43,
+                "claude_sec": 64,
+                "per_branch_tokens": 429,
+                "retrieval_strategy": "Index by branch_id + timestamp, load branch tree"
+            },
+            {
+                "file": "fork-legos-petrov.yaml",
+                "tokens": 5722,
+                "gpt4_turbo_sec": 38,
+                "claude_sec": 57,
+                "per_scene_tokens": 572,
+                "retrieval_strategy": "Use retrieval_index at end, load by timestamp/entity/taxonomy"
+            },
+            {
+                "file": "fork-paradox-midnight.json",
+                "tokens": 12870,
+                "gpt4_turbo_sec": 86,
+                "claude_sec": 129,
+                "per_episode_tokens": 536,
+                "retrieval_strategy": "Index by episode_id + source_case"
+            },
+            {
+                "file": "fork-paradox-tracks-entities.json",
+                "tokens": 5071,
+                "gpt4_turbo_sec": 34,
+                "claude_sec": 51,
+                "per_flow_tokens": 634,
+                "retrieval_strategy": "Index by flow_id, expand tracks as needed"
+            }
+        ]
+    },
+    "compatibility_matrix": {
+        "description": "Which HTML can read which data format",
+        "matrix": {
+            "HOLO-VIEWER.html": {
+                "can_read": [
+                    "fork-paradox-*.json"
+                ],
+                "cannot_read": [
+                    "*.yaml"
+                ],
+                "modification_needed": "Add preset paths to dropdown for new JSON files",
+                "effort": "LOW — just add <option> elements"
+            },
+            "fork-cascade-viz.html": {
+                "can_read": [
+                    "hardcoded scenarios only"
+                ],
+                "cannot_read": [
+                    "external JSON",
+                    "*.yaml"
+                ],
+                "modification_needed": "Add fetch() capability + YAML parser (js-yaml)",
+                "effort": "MEDIUM — refactor renderDiagram() to accept external data"
+            },
+            "ethnome.html": {
+                "can_read": [
+                    "hardcoded scenarios only"
+                ],
+                "cannot_read": [
+                    "external files"
+                ],
+                "modification_needed": "Replace scenarios[] with fetch() loader",
+                "effort": "MEDIUM — similar pattern to HOLO-VIEWER"
+            }
+        }
+    },
+    "yaml_vs_json_tradeoffs": {
+        "yaml_advantages": [
+            "Human-readable multi-line dialogue (block scalars)",
+            "Comments for documentation",
+            "Cleaner nested structures",
+            "LEGOS grammar fits naturally"
+        ],
+        "yaml_disadvantages": [
+            "No native browser parser (need js-yaml library)",
+            "Slower to parse than JSON",
+            "Whitespace-sensitive (error-prone)"
+        ],
+        "json_advantages": [
+            "Native JSON.parse() in all browsers",
+            "Faster parsing",
+            "No external dependencies"
+        ],
+        "json_disadvantages": [
+            "Escaped quotes in dialogue",
+            "No comments",
+            "Harder to read long text blocks"
+        ],
+        "recommendation": "Keep both: YAML for authoring/human review, auto-generate JSON for browser consumption"
+    },
+    "retrieval_optimization": {
+        "problem": "Large corpora exceed context window",
+        "solutions": [
+            {
+                "strategy": "Index-first retrieval",
+                "description": "Load only retrieval_index, then fetch specific scenes by ID",
+                "implementation": "Split files into index.json + scenes/*.json",
+                "context_savings": "95% — load 500 tokens instead of 20K+"
+            },
+            {
+                "strategy": "Timestamp sharding",
+                "description": "Split by time periods (pre-1950, 1950-1990, 1990-2020, 2020+)",
+                "implementation": "fork-paradox-era-{name}.json",
+                "context_savings": "75% — load relevant era only"
+            },
+            {
+                "strategy": "Entity extraction",
+                "description": "Pre-extract entities into separate lookup table",
+                "implementation": "fork-entities.json with entity_id → [appears_in_scenes]",
+                "context_savings": "80% — query by entity, load only relevant scenes"
+            },
+            {
+                "strategy": "Embedding search",
+                "description": "Embed each scene, use vector similarity for retrieval",
+                "implementation": "Requires embedding API + vector store",
+                "context_savings": "90%+ — load only top-K similar scenes"
+            }
+        ]
+    },
+    "recommended_next_steps": [
+        {
+            "priority": 1,
+            "action": "Add LEGOS JSON files to HOLO-VIEWER preset dropdown",
+            "effort": "5 minutes",
+            "impact": "Immediate visualization of all corpora"
+        },
+        {
+            "priority": 2,
+            "action": "Upgrade fork-cascade-viz.html to load external JSON/YAML",
+            "effort": "30 minutes",
+            "impact": "Dynamic cascade visualization from any file"
+        },
+        {
+            "priority": 3,
+            "action": "Create YAML→JSON converter script",
+            "effort": "15 minutes",
+            "impact": "Maintain YAML for authoring, auto-generate JSON for browsers"
+        },
+        {
+            "priority": 4,
+            "action": "Implement index-first retrieval for large corpora",
+            "effort": "1-2 hours",
+            "impact": "90%+ context savings for LLM consumption"
+        }
+    ]
+}

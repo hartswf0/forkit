@@ -1,0 +1,1862 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>THE FORK — The Lever (City Minifigs)</title>
+
+    <!-- THREE.JS r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #05080a;
+            --panel: rgba(15, 20, 25, .92);
+            --panel2: rgba(10, 12, 16, .85);
+            --text: #e8e8e8;
+            --dim: #8a97a6;
+            --border: rgba(255, 255, 255, .14);
+            --accent: #ffd400;
+            /* junction */
+            --trackA: #00f0ff;
+            --trackB: #ff3355;
+            --safe: #00ff88;
+            --danger: #ff3355;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            user-select: none;
+        }
+
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+        }
+
+        /* UI layer */
+        #ui-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        /* Top HUD */
+        .top-hud {
+            pointer-events: auto;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .95) 0%, rgba(0, 0, 0, .80) 60%, transparent 100%);
+            padding: 12px 14px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .title h1 {
+            margin: 0;
+            font-size: 13px;
+            letter-spacing: 1px;
+            font-weight: 900;
+        }
+
+        .title span {
+            display: block;
+            margin-top: 2px;
+            font-size: 10px;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 1.6px;
+        }
+
+        .tool-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mini-btn {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(255, 255, 255, .16);
+            color: #cfd7e1;
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform .08s ease, background .2s ease;
+        }
+
+        .mini-btn:active {
+            transform: translateY(1px) scale(.99);
+        }
+
+        .mini-btn:hover {
+            background: rgba(255, 255, 255, .14);
+        }
+
+        /* Tape */
+        #tape {
+            pointer-events: auto;
+            display: flex;
+            gap: 2px;
+            height: 12px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 3px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, .45);
+            cursor: pointer;
+        }
+
+        .tick {
+            height: 100%;
+            flex: 1;
+            opacity: .95;
+        }
+
+        .tick.A {
+            background: var(--trackA);
+        }
+
+        .tick.B {
+            background: var(--trackB);
+        }
+
+        .tick.H {
+            background: #666;
+        }
+
+        .subrow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 10px;
+            color: rgba(232, 232, 232, .7);
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            opacity: .85;
+        }
+
+        /* System log */
+        #sys-log {
+            position: absolute;
+            top: 108px;
+            left: 14px;
+            right: 14px;
+            height: 140px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 6px;
+            mask-image: linear-gradient(to bottom, transparent, black 18%);
+            pointer-events: none;
+        }
+
+        .log {
+            font-size: 11px;
+            background: rgba(10, 15, 20, .82);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-left: 3px solid rgba(255, 255, 255, .25);
+            border-radius: 12px;
+            padding: 7px 10px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
+            animation: in .22s cubic-bezier(.2, .8, .2, 1);
+            max-width: 520px;
+        }
+
+        .log b {
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-right: 6px;
+        }
+
+        @keyframes in {
+            from {
+                transform: translateX(-16px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Bottom controls */
+        .controls {
+            pointer-events: auto;
+            padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
+            background: linear-gradient(0deg, rgba(0, 0, 0, 1) 48%, transparent);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .fork-readout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, .45);
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 14px;
+        }
+
+        .fork-ascii {
+            font-size: 10px;
+            line-height: 1.05;
+            color: rgba(232, 232, 232, .75);
+            white-space: pre;
+            margin: 0;
+        }
+
+        .meter {
+            flex: 1;
+            height: 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(255, 255, 255, .06);
+            overflow: hidden;
+            position: relative;
+            min-width: 120px;
+        }
+
+        .meter>i {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(255, 212, 0, .0), rgba(255, 212, 0, .9));
+        }
+
+        .meter-label {
+            font-size: 10px;
+            color: rgba(232, 232, 232, .65);
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            white-space: nowrap;
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .big {
+            pointer-events: auto;
+            height: 64px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(25, 30, 38, .85);
+            color: #fff;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .35);
+            transition: transform .08s ease, border-color .15s ease, background .15s ease;
+            touch-action: manipulation;
+        }
+
+        .big:active {
+            transform: translateY(2px) scale(.995);
+        }
+
+        .big .left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .big .left strong {
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        .big .left small {
+            font-size: 10px;
+            opacity: .75;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .big .pill {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(0, 0, 0, .25);
+            white-space: nowrap;
+        }
+
+        .continue {
+            border-color: color-mix(in srgb, var(--trackA) 55%, rgba(255, 255, 255, .14));
+        }
+
+        .continue .pill {
+            color: var(--trackA);
+            border-color: color-mix(in srgb, var(--trackA) 55%, rgba(255, 255, 255, .18));
+        }
+
+        .switch {
+            border-color: color-mix(in srgb, var(--trackB) 55%, rgba(255, 255, 255, .14));
+        }
+
+        .switch .pill {
+            color: var(--trackB);
+            border-color: color-mix(in srgb, var(--trackB) 55%, rgba(255, 255, 255, .18));
+        }
+
+        .halt {
+            height: 54px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, .55);
+            border: 1px dashed rgba(255, 255, 255, .18);
+            color: rgba(232, 232, 232, .85);
+        }
+
+        .halt .pill {
+            color: #aaa;
+        }
+
+        /* Modals */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, .86);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease;
+            padding: 18px;
+        }
+
+        .overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            width: min(560px, 96vw);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(12, 14, 18, .92);
+            box-shadow: 0 30px 90px rgba(0, 0, 0, .6);
+            overflow: hidden;
+        }
+
+        .modal .top {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, .10);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .modal h2 {
+            margin: 0;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .modal .tag {
+            font-size: 10px;
+            color: rgba(232, 232, 232, .65);
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .modal .x {
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(255, 255, 255, .06);
+            color: #fff;
+            font-weight: 900;
+            font-family: inherit;
+        }
+
+        .modal .body {
+            padding: 14px 16px 16px;
+            max-height: 70vh;
+            overflow: auto;
+        }
+
+        .kv {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 8px 0 12px;
+        }
+
+        .badge {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(0, 0, 0, .20);
+            color: rgba(232, 232, 232, .85);
+        }
+
+        .badge.a {
+            border-color: color-mix(in srgb, var(--trackA) 45%, rgba(255, 255, 255, .14));
+            color: var(--trackA);
+        }
+
+        .badge.b {
+            border-color: color-mix(in srgb, var(--trackB) 45%, rgba(255, 255, 255, .14));
+            color: var(--trackB);
+        }
+
+        .badge.j {
+            border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, .14));
+            color: var(--accent);
+        }
+
+        .section {
+            margin: 12px 0 0;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .section summary {
+            cursor: pointer;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, .04);
+            list-style: none;
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: rgba(232, 232, 232, .78);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .section .content {
+            padding: 10px 12px;
+            font-size: 12px;
+            line-height: 1.55;
+            color: rgba(232, 232, 232, .90);
+        }
+
+        .mono {
+            font-family: var(--mono);
+            white-space: pre-wrap;
+        }
+
+        .cta {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .cta button {
+            flex: 1;
+            min-width: 170px;
+            height: 46px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: #eee;
+            color: #000;
+            font-weight: 900;
+            letter-spacing: 1px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .cta button.secondary {
+            background: rgba(255, 255, 255, .08);
+            color: #fff;
+        }
+
+        .cta button:active {
+            transform: translateY(1px);
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: opacity .4s ease;
+        }
+
+        .spin {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            border: 3px solid rgba(255, 255, 255, .12);
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #err {
+            display: none;
+            color: #ff6b7a;
+            font-size: 12px;
+            max-width: 80vw;
+            text-align: center;
+        }
+
+        /* Small helper */
+        .kbd {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(232, 232, 232, .68);
+            border: 1px solid rgba(255, 255, 255, .16);
+            border-radius: 10px;
+            padding: 3px 8px;
+            background: rgba(0, 0, 0, .25);
+            display: inline-block;
+            margin-left: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <div class="top-hud">
+            <div class="header-row">
+                <div class="title">
+                    <h1>THE FORK — THE LEVER</h1>
+                    <span>city minifigs · 40 tons · hamlet mode</span>
+                </div>
+                <div class="tool-btns">
+                    <button class="mini-btn" id="btn-help">HELP</button>
+                    <button class="mini-btn" id="btn-reset">RESET</button>
+                </div>
+            </div>
+
+            <div id="tape" title="Tap: session ticket"></div>
+
+            <div class="subrow">
+                <span>TAPE (TAP FOR TICKET)</span>
+                <span><span id="time-disp">—</span> · <span id="state-disp">ARMED</span></span>
+            </div>
+        </div>
+
+        <div id="sys-log"></div>
+
+        <div class="controls">
+            <div class="fork-readout">
+                <pre class="fork-ascii" aria-hidden="true">THE FORK
+▬▬▬▉
+▬▬▬▉
+▬▬▬▉
+▬▬▬▉
+A (3)  B (1)  ▬▬▬▉⚡</pre>
+                <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                    <div class="meter"><i id="meter-fill"></i></div>
+                    <div class="meter-label" id="meter-label">approach: —</div>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button class="big continue" id="btn-continue">
+                    <div class="left">
+                        <strong>CONTINUE</strong>
+                        <small>stay on Track A</small>
+                    </div>
+                    <div class="pill">A · 3 on track</div>
+                </button>
+
+                <button class="big switch" id="btn-switch">
+                    <div class="left">
+                        <strong>SWITCH</strong>
+                        <small>pull lever → Track B</small>
+                    </div>
+                    <div class="pill">B · 1 on track</div>
+                </button>
+            </div>
+
+            <button class="big halt" id="btn-halt">
+                <div class="left">
+                    <strong>HALT</strong>
+                    <small>abandon lever · futility run</small>
+                </div>
+                <div class="pill">H</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- HELP MODAL -->
+    <div class="overlay" id="help-modal">
+        <div class="modal">
+            <div class="top">
+                <div>
+                    <h2>Help</h2>
+                    <div class="tag">controls + modes</div>
+                </div>
+                <button class="x" data-close="help-modal">✕</button>
+            </div>
+            <div class="body">
+                <div class="kv">
+                    <span class="badge j">⚡ Junction</span>
+                    <span class="badge a">Track A · 3</span>
+                    <span class="badge b">Track B · 1</span>
+                    <span class="badge">Tap the tape for a ticket</span>
+                </div>
+
+                <div class="section">
+                    <details open>
+                        <summary>Mobile controls <span>▾</span></summary>
+                        <div class="content">
+                            <div>Use the big buttons: <b>CONTINUE</b>, <b>SWITCH</b>, or <b>HALT</b>.</div>
+                            <div>Decision is locked once the trolley passes the junction.</div>
+                            <div style="margin-top:8px; opacity:.85;">Haptics: your phone will vibrate at the decision
+                                window + impact (if supported).</div>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="section">
+                    <details>
+                        <summary>Keyboard shortcuts <span>▾</span></summary>
+                        <div class="content">
+                            <div><b>S</b> switch · <b>C</b> continue · <b>H</b> halt · <b>R</b> reset · <b>?</b> help
+                            </div>
+                            <div><span class="kbd">S</span><span class="kbd">C</span><span class="kbd">H</span><span
+                                    class="kbd">R</span><span class="kbd">?</span></div>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="section">
+                    <details>
+                        <summary>Hamlet mode <span>▾</span></summary>
+                        <div class="content">
+                            This build uses <b>thick description</b> + <b>LEGOS</b> fields to make the decision feel
+                            like it weighs 40 tons.
+                            The simulation is deterministic: one junction, two branches, one impact.
+                        </div>
+                    </details>
+                </div>
+
+                <div class="cta">
+                    <button class="secondary" data-close="help-modal">Return</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DECISION MODAL -->
+    <div class="overlay" id="decision-modal">
+        <div class="modal">
+            <div class="top">
+                <div>
+                    <h2 id="decision-title">Decision Window</h2>
+                    <div class="tag" id="decision-tag">—</div>
+                </div>
+                <button class="x" data-close="decision-modal">✕</button>
+            </div>
+            <div class="body">
+                <div class="kv">
+                    <span class="badge a">Track A: 3</span>
+                    <span class="badge b">Track B: 1</span>
+                    <span class="badge j">~7 seconds</span>
+                </div>
+
+                <details class="section" open>
+                    <summary>Situation (Hamlet) <span>▾</span></summary>
+                    <div class="content" id="hamlet-situation"></div>
+                </details>
+
+                <details class="section">
+                    <summary>LEGOS stakes <span>▾</span></summary>
+                    <div class="content mono" id="legos-block"></div>
+                </details>
+
+                <div class="cta">
+                    <button id="modal-continue" class="secondary">CONTINUE (A)</button>
+                    <button id="modal-switch">SWITCH (B)</button>
+                    <button id="modal-halt" class="secondary">HALT (H)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OUTCOME MODAL -->
+    <div class="overlay" id="outcome-modal">
+        <div class="modal">
+            <div class="top">
+                <div>
+                    <h2 id="outcome-title">Outcome</h2>
+                    <div class="tag" id="outcome-tag">—</div>
+                </div>
+                <button class="x" data-close="outcome-modal">✕</button>
+            </div>
+            <div class="body">
+                <div class="kv" id="outcome-badges"></div>
+
+                <details class="section" open>
+                    <summary>What happens <span>▾</span></summary>
+                    <div class="content" id="outcome-text"></div>
+                </details>
+
+                <details class="section">
+                    <summary>Objects (evidence) <span>▾</span></summary>
+                    <div class="content" id="object-text"></div>
+                </details>
+
+                <div class="cta">
+                    <button id="btn-ticket">SHOW TICKET</button>
+                    <button class="secondary" data-close="outcome-modal">Return</button>
+                    <button class="secondary" id="btn-restart">RESET</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TICKET MODAL -->
+    <div class="overlay" id="ticket-modal">
+        <div class="modal">
+            <div class="top">
+                <div>
+                    <h2>Session Ticket</h2>
+                    <div class="tag">save to your research log</div>
+                </div>
+                <button class="x" data-close="ticket-modal">✕</button>
+            </div>
+            <div class="body">
+                <canvas id="ticket" width="720" height="360"
+                    style="width:100%;height:auto;border:1px solid rgba(255,255,255,.10);border-radius:12px;"></canvas>
+                <div style="margin-top:10px;color:rgba(232,232,232,.65);font-size:11px;line-height:1.4;">
+                    Tip: long‑press the image on mobile to save. The tape records each run as: <b>A</b> continue,
+                    <b>B</b> switch, <b>H</b> halt.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOADER -->
+    <div id="loader">
+        <div class="spin"></div>
+        <div style="font-size:10px;color:#666;letter-spacing:2px;text-transform:uppercase;">initializing railyard</div>
+        <div id="err"></div>
+    </div>
+
+    <script>
+        /* THE FORK — The Lever (City Minifigs)
+           - Two-track fork with a junction
+           - Minifig-like victims on rails
+           - Hamlet mode + LEGOS progressive disclosure
+           - Mobile-first controls + haptics
+           - Ticket + tape
+        */
+
+        const PERSONAS = {
+            A: [
+                {
+                    id: "gavril",
+                    name: "Gavril",
+                    role: "Blacksmith",
+                    age: 67,
+                    sensory: "coal smoke · sweetgrass tobacco · iron filings in cuffs",
+                    object: "a folded letter (unread) and a walking stick, polished by years",
+                    debt: "taught you to read when you were eight; made your mother’s coffin and refused payment",
+                    obstacle: "a limp from a horse kick in 1891 — he cannot clear the ties fast",
+                    goal: "sell horseshoes at market; read his son’s letter over tea",
+                },
+                {
+                    id: "lena",
+                    name: "Lena",
+                    role: "Egg seller",
+                    age: 34,
+                    sensory: "lye soap · straw · her humming under breath",
+                    object: "a cart with 48 eggs, black bread wrapped in cloth",
+                    debt: "you owe her 6 rubles for three weeks of eggs",
+                    obstacle: "the cart is heavy; the wheel catches in gravel at the worst time",
+                    goal: "get food to her children; buy medicine for Dmitri",
+                },
+                {
+                    id: "piotr",
+                    name: "Piotr",
+                    role: "Boy / caretaker",
+                    age: 12,
+                    sensory: "stone dust · pencil marks · cold wind up the cut",
+                    object: "a smooth stone shaped like a bird — a gift for his sister Anya",
+                    debt: "you watched him become “man of the house” after his father drowned",
+                    obstacle: "small feet, faster fear than speed",
+                    goal: "bring the cart home; give the bird-stone to Anya",
+                }
+            ],
+            B: [
+                {
+                    id: "finch",
+                    name: "Inspector Finch",
+                    role: "Railway Authority, District 7",
+                    age: 43,
+                    sensory: "Earl Grey · brass polish · red ink on fingertips",
+                    object: "a leather ledger, German fountain pen, Form 17‑B stamped DENIED",
+                    debt: "six weeks ago he denied your emergency brake repair request (Form 17‑B). “Budget constraints,” in red ink.",
+                    obstacle: "institutional comfort — soft hands that have never felt a lever stick",
+                    goal: "finish quarterly inspection; document vegetation encroachment",
+                }
+            ]
+        };
+
+        const LEGOS = {
+            A: {
+                location: "Main line (Track A), 40m beyond the fork, city cut between warehouses.",
+                entity: "Gavril (67), Lena (34), Piotr (12) — known to you, owed by you, connected by history.",
+                goal: "Live long enough to do ordinary things that matter: read, feed, give.",
+                obstacle: "Speed + mass + a paper trail that denied repair.",
+                shift: "If saved → debts continue in the living world. If killed → objects outlive them; you inherit the silence.",
+                solution: "Continue on Track A (do nothing)."
+            },
+            B: {
+                location: "Spur line (Track B), disused, weeds between ties; one man kneels writing.",
+                entity: "Inspector Finch (43) — bureaucratic authority, the signature on your denied repair.",
+                goal: "Complete inspection; keep the system looking orderly on paper.",
+                obstacle: "Your hand on a lever that makes paperwork become physics.",
+                shift: "If killed → Form 17‑B lands face‑up in weeds. If saved → the denial remains clean, filed, untouched.",
+                solution: "Switch to Track B (pull lever)."
+            },
+            H: {
+                location: "Tower platform; the lever station; seven steps down.",
+                entity: "You — the node where ethics meets timing.",
+                goal: "Stop the trolley.",
+                obstacle: "40 tons, no brakes, time already spent in forms.",
+                shift: "Running is refusal; refusal is still a choice.",
+                solution: "Halt (abandon lever)."
+            }
+        };
+
+        const NARRATIVE = {
+            situation: () => `
+2:17pm. A rust‑red ore car howls through the cut. Forty tons. No brakes.
+You can smell the wet iron. You can feel the lever’s varnished handle warming in your palm.
+
+Track A holds three people you know in ways that won’t fit into a number:
+• Gavril—coal smoke and a limp—your first reading teacher.
+• Lena—straw and lye soap—48 eggs in a cart, and your 6‑ruble debt.
+• Piotr—stone dust—bird‑shaped stone in his pocket, meant for Anya.
+
+Track B holds one person who knows you as paperwork:
+• Inspector Finch—Earl Grey and red ink—Form 17‑B: DENIED.
+
+The junction is ahead. The rails don’t care which story they are about to cut through.
+`.trim()
+        };
+
+        const OUTCOMES = {
+            A: {
+                title: "CONTINUE (Track A)",
+                tag: "You do not pull the lever.",
+                badges: [{ k: "Track", v: "A" }, { k: "Deaths", v: "3" }, { k: "Lives", v: "1" }],
+                text: `
+You do not pull the lever.
+
+Gavril sees it first. He tries to move—his limp turns speed into math he cannot solve.
+His walking stick skitters across the ties. The folded letter breaks open and pages tear.
+
+Lena shoves Piotr with a sound like a prayer and a curse together.
+The cart tips. Forty‑eight eggs burst on steel—yolk mixing with grit, then with blood.
+
+Piotr’s bird‑stone slips from his pocket. It rolls into weeds. It will never be given.
+
+Seventeen seconds of echo in the quarry walls. Then: the unbearable quiet.
+Meanwhile, on Track B, Finch keeps writing. “Vegetation encroachment: moderate.”
+He looks up once. Writes: “Incident on main line. Not my jurisdiction.”
+`.trim(),
+                objects: `
+• Gavril’s letter: torn, unread, scattered like a sentence cut in half.
+• Lena’s eggs: 48 shattered—evidence of a week’s food erased in one impact.
+• Piotr’s stone: bird‑shaped, lost in weeds, Anya’s gift ungiven.
+• Finch’s Form 17‑B: still clean in his satchel—DENIED, filed, true on paper.
+`.trim()
+            },
+            B: {
+                title: "SWITCH (Track B)",
+                tag: "You pull the lever.",
+                badges: [{ k: "Track", v: "B" }, { k: "Deaths", v: "1" }, { k: "Lives", v: "3" }],
+                text: `
+You pull the lever.
+
+The mechanism fights you—metal shrieking like it remembers every time it was ignored.
+The trolley takes the spur.
+
+Finch looks up in disbelief, as if law itself has been violated.
+Then forty tons teaches the only lesson it ever teaches.
+
+His leather ledger flips open. Pages scatter. A fountain pen rolls into the ditch.
+Form 17‑B—DENIED—lands face‑up in the weeds, stamped into sunlight.
+
+Track A continues:
+Gavril’s limp carries him forward.
+Lena’s cart keeps its eggs.
+Piotr keeps the bird‑stone warm in his fist.
+
+They never knew you chose. They will never know.
+You will.
+`.trim(),
+                objects: `
+• Finch’s ledger: opened by impact; order made into confetti.
+• Form 17‑B: DENIED—face‑up in weeds; irony made visible.
+• Earl Grey tin: split; tea leaves mixing with dirt.
+• On Track A: the letter remains folded; the eggs remain whole; the bird‑stone remains a promise.
+`.trim()
+            },
+            H: {
+                title: "HALT (Futility)",
+                tag: "You abandon the lever.",
+                badges: [{ k: "Track", v: "—" }, { k: "Deaths", v: "3 or 1" }, { k: "Lives", v: "—" }],
+                text: `
+You abandon the lever.
+
+Seven steps down. You’ve counted them ten thousand times.
+You run toward the rails waving your arms as if physics can be convinced.
+
+It cannot.
+
+A denial stamped six weeks ago becomes a collision stamped today.
+Your voice doesn’t slow forty tons. The trolley does not negotiate.
+
+You return to the tower because there is nowhere else to stand.
+The lever is cold now. It was always too late.
+`.trim(),
+                objects: `
+• Forms: 17‑B, 22‑C, all DENIED—paper armor for institutional failure.
+• Your hands: empty for a moment, then back on the lever—too late.
+`.trim()
+            }
+        };
+
+        // --- STATE ---
+        const STATE = {
+            runId: Math.floor(Math.random() * 9999),
+            phase: "ARMED", // ARMED → APPROACH → DECISION → COMMITTED → IMPACT → ENDED
+            choice: null,  // 'A' | 'B' | 'H'
+            committed: null,
+            tape: [],      // array of 'A','B','H'
+            t: 0,          // normalized progress along shared+branch curve
+            speed: 0.045,  // world speed units per second (normalized)
+            decisionOpened: false,
+            junctionT: 0.46,
+            impactT: 0.95,
+            cameraMode: "CHASE",
+            lastTime: performance.now(),
+        };
+
+        // --- THREE GLOBALS ---
+        let scene, camera, renderer;
+        let train, headlight;
+        let world = new THREE.Group();
+        let rails = { shared: null, A: null, B: null };
+        let victims = { A: [], B: [] };
+        let objects = [];
+        let sparks = [];
+        let ground;
+
+        const el = (id) => document.getElementById(id);
+
+        // --- AUDIO (tiny, non-intrusive) ---
+        let audioCtx = null;
+        function beep(freq = 440, dur = 0.06, gain = 0.03) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.type = "sine";
+                o.frequency.value = freq;
+                g.gain.value = gain;
+                o.connect(g); g.connect(audioCtx.destination);
+                o.start();
+                o.stop(audioCtx.currentTime + dur);
+            } catch (e) { }
+        }
+        function buzz(ms = 30) {
+            try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { }
+        }
+
+        // --- UI helpers ---
+        function log(msg, who = "System", flavor = null) {
+            const box = el("sys-log");
+            const div = document.createElement("div");
+            div.className = "log";
+            let c = "rgba(255,255,255,.25)";
+            if (flavor === "A") c = getComputedStyle(document.documentElement).getPropertyValue("--trackA").trim();
+            if (flavor === "B") c = getComputedStyle(document.documentElement).getPropertyValue("--trackB").trim();
+            if (flavor === "J") c = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+            div.style.borderLeftColor = c;
+            div.innerHTML = `<b style="color:${c}">${who}</b> ${msg}`;
+            box.prepend(div);
+            while (box.children.length > 6) box.lastChild.remove();
+        }
+
+        function showModal(id) { el(id).classList.add("visible"); }
+        function hideModal(id) { el(id).classList.remove("visible"); }
+        function hideAllModals() {
+            document.querySelectorAll(".overlay.visible").forEach(o => o.classList.remove("visible"));
+        }
+
+        function addTapeTick(ch) {
+            const tape = el("tape");
+            const d = document.createElement("div");
+            d.className = "tick " + ch;
+            d.title = ch === "A" ? "Continue (A)" : ch === "B" ? "Switch (B)" : "Halt (H)";
+            tape.appendChild(d);
+            while (tape.children.length > 60) tape.removeChild(tape.firstChild);
+        }
+
+        // --- init ---
+        function init() {
+            try {
+                if (typeof THREE === "undefined") throw new Error("Three.js failed to load.");
+                const container = el("canvas-container");
+
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x05080a);
+                scene.fog = new THREE.FogExp2(0x05080a, 0.030);
+
+                camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 3000);
+
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+                renderer.setSize(innerWidth, innerHeight);
+                renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+                container.appendChild(renderer.domElement);
+
+                // lights
+                scene.add(new THREE.AmbientLight(0xffffff, 0.56));
+                const sun = new THREE.DirectionalLight(0xffffff, 1.05);
+                sun.position.set(30, 70, 30);
+                scene.add(sun);
+
+                // ground
+                const gGeo = new THREE.PlaneGeometry(600, 600, 1, 1);
+                const gMat = new THREE.MeshStandardMaterial({ color: 0x070a0d, roughness: 1.0, metalness: 0.0 });
+                ground = new THREE.Mesh(gGeo, gMat);
+                ground.rotation.x = -Math.PI / 2;
+                ground.position.y = -0.35;
+                scene.add(ground);
+
+                // city blocks
+                buildCity();
+                buildTracks();
+                buildTrain();
+                buildVictims();
+
+                // add world
+                scene.add(world);
+
+                // ui
+                wireUI();
+
+                // start phase
+                setPhase("APPROACH");
+                log("Simulation initialized.", "System");
+                log("Approach the junction. Decide before ⚡.", "System", "J");
+
+                // hide loader
+                const loader = el("loader");
+                loader.style.opacity = 0;
+                setTimeout(() => loader.remove(), 420);
+
+                // kick camera
+                camera.position.set(0, 24, 44);
+                camera.lookAt(0, 0, 0);
+
+                requestAnimationFrame(loop);
+
+            } catch (err) {
+                el("err").style.display = "block";
+                el("err").innerText = "INIT FAILED: " + err.message;
+            }
+        }
+
+        function buildCity() {
+            const group = new THREE.Group();
+            const geo = new THREE.BoxGeometry(1, 1, 1);
+            const matA = new THREE.MeshStandardMaterial({ color: 0x0d1116, roughness: 0.9, metalness: 0.1 });
+            const matB = new THREE.MeshStandardMaterial({ color: 0x101820, roughness: 0.85, metalness: 0.15 });
+
+            // deterministic-ish placement
+            const rng = mulberry32(STATE.runId);
+            for (let x = -22; x <= 22; x++) {
+                for (let z = -22; z <= 22; z++) {
+                    const r = Math.hypot(x, z);
+                    if (r < 6) continue;
+                    if (rng() > 0.22) continue;
+                    const h = 2 + Math.floor(rng() * 10);
+                    const m = new THREE.Mesh(geo, (rng() > 0.55 ? matA : matB));
+                    m.scale.set(2.2, h, 2.2);
+                    m.position.set(x * 6, h / 2 - 0.35, z * 6);
+                    group.add(m);
+                }
+            }
+            world.add(group);
+        }
+
+        function buildTracks() {
+            // Curves in XZ plane
+            const shared = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(-80, 0, -10),
+                new THREE.Vector3(-45, 0, -8),
+                new THREE.Vector3(-18, 0, -5),
+                new THREE.Vector3(0, 0, 0),    // junction
+            ]);
+
+            const trackA = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(18, 0, 6),
+                new THREE.Vector3(38, 0, 10),
+                new THREE.Vector3(62, 0, 12),
+                new THREE.Vector3(90, 0, 12),
+            ]);
+
+            const trackB = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(18, 0, -8),
+                new THREE.Vector3(40, 0, -18),
+                new THREE.Vector3(64, 0, -26),
+                new THREE.Vector3(92, 0, -28),
+            ]);
+
+            rails.shared = shared;
+            rails.A = trackA;
+            rails.B = trackB;
+
+            // visuals
+            drawRail(shared, 0x8899aa, 0.25, true);
+            drawRail(trackA, hex(getCss("--trackA")), 0.55);
+            drawRail(trackB, hex(getCss("--trackB")), 0.55);
+
+            // sleepers around junction + along lines
+            placeSleepers(shared, 60, 0x2a2f35);
+            placeSleepers(trackA, 60, 0x2a2f35);
+            placeSleepers(trackB, 60, 0x2a2f35);
+
+            // junction marker
+            const j = new THREE.Mesh(
+                new THREE.SphereGeometry(0.9, 20, 20),
+                new THREE.MeshBasicMaterial({ color: hex(getCss("--accent")) })
+            );
+            j.position.copy(shared.getPoint(1));
+            j.position.y = 0.25;
+            world.add(j);
+
+            // glowing ring
+            const ring = new THREE.Mesh(
+                new THREE.TorusGeometry(1.6, 0.11, 10, 32),
+                new THREE.MeshBasicMaterial({ color: hex(getCss("--accent")), transparent: true, opacity: 0.85 })
+            );
+            ring.rotation.x = Math.PI / 2;
+            ring.position.copy(j.position);
+            ring.position.y = 0.12;
+            ring.userData.pulse = true;
+            world.add(ring);
+            objects.push(ring);
+        }
+
+        function drawRail(curve, color, opacity = 0.5, dashed = false) {
+            const pts = curve.getPoints(140);
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const mat = new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+            const line = new THREE.Line(geo, mat);
+            line.position.y = 0.02;
+            world.add(line);
+
+            // second line offset a bit (two rails)
+            const pts2 = pts.map(p => p.clone().add(new THREE.Vector3(0, 0, 0.8)));
+            const geo2 = new THREE.BufferGeometry().setFromPoints(pts2);
+            const mat2 = new THREE.LineBasicMaterial({ color, transparent: true, opacity: opacity * 0.85 });
+            const line2 = new THREE.Line(geo2, mat2);
+            line2.position.y = 0.02;
+            world.add(line2);
+        }
+
+        function placeSleepers(curve, n, color) {
+            const sleeperGeo = new THREE.BoxGeometry(1.2, 0.12, 2.2);
+            const sleeperMat = new THREE.MeshStandardMaterial({ color, roughness: 1.0, metalness: 0.0 });
+            for (let i = 0; i < n; i++) {
+                const t = i / (n - 1);
+                const p = curve.getPoint(t);
+                const p2 = curve.getPoint(Math.min(1, t + 0.01));
+                const s = new THREE.Mesh(sleeperGeo, sleeperMat);
+                s.position.set(p.x, -0.06, p.z);
+                s.lookAt(p2.x, -0.06, p2.z);
+                s.rotation.y += Math.PI / 2;
+                world.add(s);
+            }
+        }
+
+        function buildTrain() {
+            train = new THREE.Group();
+
+            const matDark = new THREE.MeshStandardMaterial({ color: 0x101316, roughness: 0.55, metalness: 0.6 });
+            const matBody = new THREE.MeshStandardMaterial({ color: 0x20262b, roughness: 0.45, metalness: 0.75 });
+            const matGlow = new THREE.MeshBasicMaterial({ color: hex(getCss("--accent")) });
+
+            // chassis
+            const chassis = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.55, 7.0), matDark);
+            chassis.position.y = 0.55;
+            train.add(chassis);
+
+            // boiler
+            const boiler = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 4.2, 16), matBody);
+            boiler.rotation.x = Math.PI / 2;
+            boiler.position.set(0, 1.85, 0.7);
+            train.add(boiler);
+
+            // cabin
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.8, 2.6, 2.3), matBody);
+            cabin.position.set(0, 2.05, -2.2);
+            train.add(cabin);
+
+            // cowcatcher
+            const cow = new THREE.Mesh(new THREE.ConeGeometry(1.55, 1.6, 4), matDark);
+            cow.rotation.x = -Math.PI / 2;
+            cow.rotation.z = Math.PI / 4;
+            cow.position.set(0, 0.9, 3.6);
+            train.add(cow);
+
+            // stack
+            const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 1.1, 16), matGlow);
+            stack.position.set(0, 3.0, 1.8);
+            train.add(stack);
+
+            // headlight
+            headlight = new THREE.PointLight(hex(getCss("--accent")), 2.2, 40);
+            headlight.position.set(0, 2.4, 3.6);
+            train.add(headlight);
+
+            // beam
+            const beamGeo = new THREE.ConeGeometry(2.4, 14, 24, 1, true);
+            const beamMat = new THREE.MeshBasicMaterial({
+                color: hex(getCss("--accent")),
+                transparent: true,
+                opacity: 0.09,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            const beam = new THREE.Mesh(beamGeo, beamMat);
+            beam.rotation.x = -Math.PI / 2;
+            beam.position.set(0, 1.4, 11);
+            train.add(beam);
+
+            // wheels
+            const wGeo = new THREE.CylinderGeometry(0.62, 0.62, 0.35, 16);
+            const wMat = new THREE.MeshStandardMaterial({ color: 0x555a61, roughness: 0.35, metalness: 0.9 });
+            const wheelPositions = [
+                [-1.55, 2.2], [1.55, 2.2],
+                [-1.55, 0.2], [1.55, 0.2],
+                [-1.55, -1.8], [1.55, -1.8],
+            ];
+            wheelPositions.forEach(([x, z]) => {
+                const w = new THREE.Mesh(wGeo, wMat);
+                w.rotation.z = Math.PI / 2;
+                w.position.set(x, 0.55, z);
+                train.add(w);
+            });
+
+            // starting position
+            const p0 = rails.shared.getPoint(0);
+            train.position.set(p0.x, 0, p0.z);
+            train.lookAt(rails.shared.getPoint(0.01));
+
+            world.add(train);
+        }
+
+        function buildVictims() {
+            // place A victims near end of Track A
+            const positionsA = [0.86, 0.90, 0.94].map(t => rails.A.getPoint(t));
+            const personasA = PERSONAS.A;
+
+            for (let i = 0; i < 3; i++) {
+                const m = makeMinifig(hex(getCss("--trackA")));
+                const p = positionsA[i];
+                m.position.set(p.x, 0, p.z);
+                m.userData = { track: "A", persona: personasA[i] };
+                victims.A.push(m);
+                world.add(m);
+
+                // object near feet
+                const obj = makeObjectToken(i);
+                obj.position.set(p.x + 1.2, 0.1, p.z + (i - 1) * 0.5);
+                world.add(obj);
+                objects.push(obj);
+            }
+
+            // place B victim near end of Track B
+            const pB = rails.B.getPoint(0.93);
+            const mB = makeMinifig(hex(getCss("--trackB")));
+            mB.position.set(pB.x, 0, pB.z);
+            mB.userData = { track: "B", persona: PERSONAS.B[0] };
+            victims.B.push(mB);
+            world.add(mB);
+
+            const ledger = makeLedgerToken();
+            ledger.position.set(pB.x + 1.0, 0.08, pB.z - 0.8);
+            world.add(ledger);
+            objects.push(ledger);
+        }
+
+        function makeMinifig(color) {
+            const g = new THREE.Group();
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 0.9, 0.45),
+                new THREE.MeshStandardMaterial({ color, roughness: 0.65, metalness: 0.05 })
+            );
+            body.position.y = 0.9;
+            g.add(body);
+
+            const head = new THREE.Mesh(
+                new THREE.SphereGeometry(0.33, 14, 14),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, metalness: 0.0 })
+            );
+            head.position.y = 1.55;
+            g.add(head);
+
+            const legs = new THREE.Mesh(
+                new THREE.BoxGeometry(0.75, 0.45, 0.42),
+                new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.9, metalness: 0.0 })
+            );
+            legs.position.y = 0.3;
+            g.add(legs);
+
+            const halo = new THREE.Mesh(
+                new THREE.TorusGeometry(0.65, 0.05, 8, 18),
+                new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55 })
+            );
+            halo.rotation.x = Math.PI / 2;
+            halo.position.y = 0.06;
+            g.add(halo);
+
+            g.userData.bob = Math.random() * 1000;
+            return g;
+        }
+
+        function makeObjectToken(i) {
+            const mats = [
+                new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.7 }),
+                new THREE.MeshStandardMaterial({ color: 0xfff2b0, roughness: 0.7 }),
+                new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.7 }),
+            ];
+            const geo = new THREE.BoxGeometry(0.6, 0.25, 0.4);
+            const m = new THREE.Mesh(geo, mats[i % 3]);
+            m.userData.spin = 0.007 + i * 0.003;
+            return m;
+        }
+        function makeLedgerToken() {
+            const geo = new THREE.BoxGeometry(0.75, 0.12, 0.55);
+            const mat = new THREE.MeshStandardMaterial({ color: 0x3a2a20, roughness: 0.8, metalness: 0.0 });
+            const m = new THREE.Mesh(geo, mat);
+            m.userData.spin = 0.01;
+            return m;
+        }
+
+        function spawnSparks(at) {
+            const n = 18;
+            for (let i = 0; i < n; i++) {
+                const p = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.09, 8, 8),
+                    new THREE.MeshBasicMaterial({ color: hex(getCss("--accent")) })
+                );
+                p.position.copy(at);
+                p.position.y = 0.6 + Math.random() * 1.5;
+                p.userData = {
+                    v: new THREE.Vector3((Math.random() - 0.5) * 10, 6 + Math.random() * 6, (Math.random() - 0.5) * 10),
+                    life: 0.9 + Math.random() * 0.5
+                };
+                world.add(p);
+                sparks.push(p);
+            }
+        }
+
+        function wireUI() {
+            // buttons
+            el("btn-switch").addEventListener("click", () => choose("B"));
+            el("btn-continue").addEventListener("click", () => choose("A"));
+            el("btn-halt").addEventListener("click", () => choose("H"));
+
+            // modals buttons
+            el("modal-switch").addEventListener("click", () => choose("B"));
+            el("modal-continue").addEventListener("click", () => choose("A"));
+            el("modal-halt").addEventListener("click", () => choose("H"));
+
+            // help/reset
+            el("btn-help").addEventListener("click", () => showModal("help-modal"));
+            el("btn-reset").addEventListener("click", reset);
+
+            // ticket
+            el("tape").addEventListener("click", () => {
+                renderTicket();
+                showModal("ticket-modal");
+            });
+            el("btn-ticket").addEventListener("click", () => {
+                renderTicket();
+                showModal("ticket-modal");
+            });
+
+            // outcome reset
+            el("btn-restart").addEventListener("click", reset);
+
+            // close buttons
+            document.querySelectorAll("[data-close]").forEach(btn => {
+                btn.addEventListener("click", (e) => hideModal(btn.getAttribute("data-close")));
+            });
+
+            // keyboard
+            window.addEventListener("keydown", (e) => {
+                const k = e.key.toLowerCase();
+                if (k === "s") choose("B");
+                if (k === "c") choose("A");
+                if (k === "h") choose("H");
+                if (k === "r") reset();
+                if (k === "?") showModal("help-modal");
+                if (k === "escape") hideAllModals();
+            });
+
+            // resize
+            window.addEventListener("resize", onResize, { passive: true });
+        }
+
+        function setPhase(phase) {
+            STATE.phase = phase;
+            el("state-disp").innerText = phase;
+        }
+
+        function choose(ch) {
+            if (STATE.phase === "IMPACT" || STATE.phase === "ENDED") return;
+
+            // allow choices anytime before committed; after commit lock
+            if (STATE.committed) return;
+
+            STATE.choice = ch;
+            if (ch === "B") {
+                log("Lever pulled. Targeting Track B.", "You", "B");
+                beep(640, 0.06, 0.04); buzz(25);
+            } else if (ch === "A") {
+                log("Hands off lever. Staying on Track A.", "You", "A");
+                beep(420, 0.05, 0.03);
+            } else {
+                log("You abandon the lever. Running (futility).", "You");
+                beep(220, 0.08, 0.03); buzz(40);
+            }
+
+            // if in decision window, close the modal
+            hideModal("decision-modal");
+        }
+
+        function openDecisionWindow() {
+            if (STATE.decisionOpened) return;
+            STATE.decisionOpened = true;
+            setPhase("DECISION");
+            buzz(40);
+            beep(780, 0.06, 0.04);
+            log("DECISION WINDOW OPEN — choose A / B / H.", "System", "J");
+
+            el("decision-title").innerText = "Decision Window";
+            el("decision-tag").innerText = "The junction is seconds away.";
+
+            el("hamlet-situation").innerText = NARRATIVE.situation();
+
+            const legosText =
+                `TRACK A (3)
+L: ${LEGOS.A.location}
+E: ${LEGOS.A.entity}
+G: ${LEGOS.A.goal}
+O: ${LEGOS.A.obstacle}
+S: ${LEGOS.A.shift}
+✓: ${LEGOS.A.solution}
+
+TRACK B (1)
+L: ${LEGOS.B.location}
+E: ${LEGOS.B.entity}
+G: ${LEGOS.B.goal}
+O: ${LEGOS.B.obstacle}
+S: ${LEGOS.B.shift}
+✓: ${LEGOS.B.solution}
+
+HALT
+L: ${LEGOS.H.location}
+E: ${LEGOS.H.entity}
+G: ${LEGOS.H.goal}
+O: ${LEGOS.H.obstacle}
+S: ${LEGOS.H.shift}
+✓: ${LEGOS.H.solution}`;
+            el("legos-block").innerText = legosText;
+
+            showModal("decision-modal");
+        }
+
+        function commitChoiceIfNeeded() {
+            // when passing junction, commit
+            if (STATE.committed) return;
+            if (STATE.t >= STATE.junctionT) {
+                // default is A unless user chose B or H
+                const ch = STATE.choice || "A";
+                STATE.committed = ch;
+                setPhase("COMMITTED");
+
+                if (ch === "B") {
+                    log("COMMIT: Track B.", "System", "B");
+                    beep(900, 0.05, 0.05);
+                } else if (ch === "A") {
+                    log("COMMIT: Track A.", "System", "A");
+                    beep(520, 0.05, 0.04);
+                } else {
+                    log("COMMIT: Halt (futility).", "System");
+                    beep(260, 0.06, 0.04);
+                }
+            }
+        }
+
+        function impactIfNeeded() {
+            if (STATE.phase === "IMPACT" || STATE.phase === "ENDED") return;
+            if (STATE.t >= STATE.impactT) {
+                setPhase("IMPACT");
+                buzz(80);
+                beep(120, 0.12, 0.06);
+
+                const ch = STATE.committed || "A";
+                const outcomeKey = ch === "B" ? "B" : ch === "H" ? "H" : "A";
+                showOutcome(outcomeKey);
+
+                // tape
+                STATE.tape.push(outcomeKey);
+                addTapeTick(outcomeKey);
+
+                // sparks at victim location (approx)
+                const at = (outcomeKey === "B")
+                    ? victims.B[0].position.clone()
+                    : victims.A[1].position.clone();
+                spawnSparks(at);
+
+                // freeze movement after a moment
+                setTimeout(() => {
+                    setPhase("ENDED");
+                }, 300);
+            }
+        }
+
+        function showOutcome(key) {
+            const o = OUTCOMES[key];
+            el("outcome-title").innerText = o.title;
+            el("outcome-tag").innerText = o.tag;
+
+            const badgeWrap = el("outcome-badges");
+            badgeWrap.innerHTML = "";
+            const mk = (txt, cls = "badge") => {
+                const s = document.createElement("span");
+                s.className = cls;
+                s.innerText = txt;
+                badgeWrap.appendChild(s);
+            };
+            mk("RUN #" + STATE.runId);
+            if (key === "A") mk("TRACK A", "badge a");
+            if (key === "B") mk("TRACK B", "badge b");
+            if (key === "H") mk("HALT", "badge");
+            o.badges.forEach(b => mk(`${b.k}: ${b.v}`, "badge"));
+
+            el("outcome-text").innerText = o.text;
+            el("object-text").innerText = o.objects;
+
+            showModal("outcome-modal");
+        }
+
+        function renderTicket() {
+            const cvs = el("ticket");
+            const ctx = cvs.getContext("2d");
+            const W = cvs.width, H = cvs.height;
+
+            // bg
+            ctx.fillStyle = "#05080a";
+            ctx.fillRect(0, 0, W, H);
+
+            // grid
+            ctx.strokeStyle = "rgba(255,255,255,0.08)";
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= W; x += 24) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+            }
+            for (let y = 0; y <= H; y += 24) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y, H); ctx.stroke();
+            }
+
+            // header
+            ctx.fillStyle = "#fff";
+            ctx.font = "900 26px " + getCanvasMono();
+            ctx.fillText("THE FORK — ETHICS TICKET", 26, 52);
+
+            ctx.fillStyle = "rgba(232,232,232,.70)";
+            ctx.font = "12px " + getCanvasMono();
+            const dt = new Date();
+            ctx.fillText(`RUN: #${STATE.runId}`, 26, 78);
+            ctx.fillText(`DATE: ${dt.toLocaleString()}`, 26, 96);
+
+            // tape bar
+            const tape = STATE.tape.length ? STATE.tape : (STATE.committed ? [STATE.committed] : []);
+            const barX = 26, barY = 128, barW = W - 52, barH = 120;
+            ctx.strokeStyle = "rgba(255,255,255,0.14)";
+            ctx.strokeRect(barX, barY, barW, barH);
+
+            const n = Math.max(10, tape.length);
+            const w = barW / n;
+            for (let i = 0; i < n; i++) {
+                const ch = tape[i] || "—";
+                let col = "rgba(255,255,255,0.10)";
+                if (ch === "A") col = css("--trackA");
+                if (ch === "B") col = css("--trackB");
+                if (ch === "H") col = "#666";
+                ctx.fillStyle = col;
+                ctx.fillRect(barX + i * w, barY, Math.max(1, w - 1), barH);
+            }
+
+            // legend
+            ctx.fillStyle = "rgba(232,232,232,.78)";
+            ctx.font = "12px " + getCanvasMono();
+            ctx.fillText("TAPE LEGEND:", 26, 278);
+            ctx.fillStyle = css("--trackA"); ctx.fillText("A = CONTINUE", 140, 278);
+            ctx.fillStyle = css("--trackB"); ctx.fillText("B = SWITCH", 290, 278);
+            ctx.fillStyle = "#aaa"; ctx.fillText("H = HALT", 420, 278);
+
+            // footer
+            ctx.fillStyle = "rgba(232,232,232,.55)";
+            ctx.font = "11px " + getCanvasMono();
+            ctx.fillText("Hamlet mode · LEGOS stakes · city minifigs", 26, 320);
+        }
+
+        function getCanvasMono() {
+            return 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+        }
+
+        function onResize() {
+            camera.aspect = innerWidth / innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth, innerHeight);
+        }
+
+        // --- animation loop ---
+        function loop(now) {
+            requestAnimationFrame(loop);
+
+            const dt = Math.min(0.05, (now - STATE.lastTime) / 1000);
+            STATE.lastTime = now;
+
+            // pulse junction ring
+            objects.forEach(o => {
+                if (o.userData.pulse) {
+                    const s = 1.0 + Math.sin(now * 0.004) * 0.12;
+                    o.scale.set(s, s, s);
+                    o.material.opacity = 0.55 + Math.sin(now * 0.004 + 1.4) * 0.20;
+                }
+                if (o.userData.spin) {
+                    o.rotation.y += o.userData.spin;
+                }
+            });
+
+            // victim bob
+            [...victims.A, ...victims.B].forEach(v => {
+                v.userData.bob += dt;
+                v.position.y = Math.abs(Math.sin(v.userData.bob * 3.0)) * 0.12;
+                v.rotation.y += dt * 0.6;
+            });
+
+            // sparks
+            for (let i = sparks.length - 1; i >= 0; i--) {
+                const p = sparks[i];
+                p.userData.life -= dt;
+                p.userData.v.y -= 18 * dt;
+                p.position.addScaledVector(p.userData.v, dt);
+                p.material.opacity = Math.max(0, p.userData.life);
+                if (p.userData.life <= 0) {
+                    world.remove(p);
+                    sparks.splice(i, 1);
+                }
+            }
+
+            // move trolley until ended
+            if (STATE.phase !== "ENDED") {
+                // open decision window shortly before junction
+                if (STATE.t >= STATE.junctionT - 0.12 && !STATE.decisionOpened) {
+                    openDecisionWindow();
+                }
+
+                commitChoiceIfNeeded();
+
+                // integrate t
+                // If HALT chosen before commit, slow down but keep moving (futility)
+                const slow = (STATE.choice === "H" && !STATE.committed) ? 0.45 : 1.0;
+                STATE.t += STATE.speed * slow * dt;
+
+                // clamp
+                if (STATE.t > 1) STATE.t = 1;
+
+                // compute position along piecewise curve:
+                // segment 0..junctionT uses shared curve (0..1)
+                // after junction uses chosen branch curve (0..1)
+                const t = STATE.t;
+                let pos, look;
+                if (t < STATE.junctionT) {
+                    const u = t / STATE.junctionT;
+                    pos = rails.shared.getPoint(u);
+                    look = rails.shared.getPoint(Math.min(1, u + 0.01));
+                } else {
+                    const u = (t - STATE.junctionT) / (1 - STATE.junctionT);
+                    const committed = STATE.committed || (STATE.choice === "B" ? "B" : "A");
+                    const curve = (committed === "B") ? rails.B : rails.A;
+                    pos = curve.getPoint(u);
+                    look = curve.getPoint(Math.min(1, u + 0.01));
+                }
+
+                train.position.set(pos.x, 0, pos.z);
+                train.lookAt(look.x, 0, look.z);
+
+                // camera (chase)
+                const forward = new THREE.Vector3().subVectors(look, pos).normalize();
+                const right = new THREE.Vector3(forward.z, 0, -forward.x);
+                const camBack = pos.clone().addScaledVector(forward, -16).addScaledVector(right, 6);
+                const camUp = 14;
+                const targetCam = new THREE.Vector3(camBack.x, camUp, camBack.z);
+                camera.position.lerp(targetCam, 0.08);
+                camera.lookAt(pos.x, 2.0, pos.z);
+
+                // UI meter
+                const pct = Math.min(100, Math.max(0, (t / STATE.junctionT) * 100));
+                el("meter-fill").style.width = pct.toFixed(1) + "%";
+                const secsToJunction = Math.max(0, (STATE.junctionT - t) / (STATE.speed || 0.001));
+                el("meter-label").innerText = (t < STATE.junctionT)
+                    ? `approach: ${secsToJunction.toFixed(1)}s to ⚡`
+                    : `past junction`;
+
+                // time display
+                el("time-disp").innerText = `t=${t.toFixed(2)}`;
+
+                // impact
+                impactIfNeeded();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // --- reset ---
+        function reset() {
+            // clear scene objects
+            hideAllModals();
+
+            // clear tape UI (keep across resets? for now: clear)
+            el("tape").innerHTML = "";
+
+            // reset state
+            STATE.runId = Math.floor(Math.random() * 9999);
+            STATE.phase = "ARMED";
+            STATE.choice = null;
+            STATE.committed = null;
+            STATE.tape = [];
+            STATE.t = 0;
+            STATE.decisionOpened = false;
+            STATE.lastTime = performance.now();
+
+            // remove world and rebuild everything cleanly
+            scene.remove(world);
+            world = new THREE.Group();
+            rails = { shared: null, A: null, B: null };
+            victims = { A: [], B: [] };
+            objects = [];
+            sparks.forEach(p => world.remove(p));
+            sparks = [];
+
+            buildCity();
+            buildTracks();
+            buildTrain();
+            buildVictims();
+
+            scene.add(world);
+
+            setPhase("APPROACH");
+            log("Simulation Reset.", "System");
+            log("Approach the junction. Decide before ⚡.", "System", "J");
+
+            beep(520, 0.05, 0.03);
+            buzz(25);
+        }
+
+        // --- utils ---
+        function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+        function getCss(v) { return css(v); }
+        function hex(cssColor) {
+            // supports hex like #rrggbb
+            if (cssColor.startsWith("#")) {
+                return parseInt(cssColor.slice(1), 16);
+            }
+            return 0xffffff;
+        }
+        function mulberry32(a) {
+            return function () {
+                var t = a += 0x6D2B79F5;
+                t = Math.imul(t ^ t >>> 15, t | 1);
+                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            }
+        }
+
+        // kick
+        window.addEventListener("load", init, { once: true });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>THICK FORK // 48 Paradoxes</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <style>
+        :root {
+            --bg: #000203;
+            --term: #050a10;
+            --line: #1f293a;
+            --accent: #00f0ff;
+            --accent-alt: #ff0055;
+            --text: #a0c0d0;
+            --font: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            user-select: none;
+        }
+
+        .scanlines::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 2px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        #app {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+        }
+
+        #viewport {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* === SCENARIO SELECTOR === */
+        #scenario-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: calc(100vh - 40px);
+        }
+
+        #corpus-select,
+        #scenario-select {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--line);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 11px;
+            padding: 8px 12px;
+            cursor: pointer;
+            max-width: 280px;
+        }
+
+        #corpus-select:focus,
+        #scenario-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* === HUD TOP === */
+        #scenario-hud {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .scenario-id {
+            font-size: 10px;
+            color: #666;
+            letter-spacing: 3px;
+        }
+
+        .scenario-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            margin: 5px 0;
+            text-shadow: 0 0 20px var(--accent);
+        }
+
+        .scenario-setting {
+            font-size: 11px;
+            color: var(--text);
+            max-width: 500px;
+            line-height: 1.4;
+        }
+
+        /* === BRANCH CARDS === */
+        #branch-display {
+            position: absolute;
+            top: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+
+        .branch-card {
+            flex: 1;
+            background: rgba(0, 5, 10, 0.95);
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            cursor: pointer;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .branch-card::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .branch-card::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .branch-card.A {
+            border-left: 4px solid var(--accent);
+            box-shadow: -5px 0 30px rgba(0, 240, 255, 0.15);
+        }
+
+        .branch-card.B {
+            border-right: 4px solid var(--accent-alt);
+            box-shadow: 5px 0 30px rgba(255, 0, 85, 0.15);
+        }
+
+        .branch-card:hover {
+            transform: scale(1.02);
+            border-color: #fff;
+        }
+
+        .branch-card.selected {
+            transform: scale(1.05);
+            background: rgba(0, 20, 40, 0.98);
+            z-index: 5;
+        }
+
+        .branch-card.A.selected {
+            box-shadow: -5px 0 50px rgba(0, 240, 255, 0.3);
+        }
+
+        .branch-card.B.selected {
+            box-shadow: 5px 0 50px rgba(255, 0, 85, 0.3);
+        }
+
+        .branch-label {
+            font-size: 9px;
+            letter-spacing: 2px;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+
+        .branch-choice {
+            font-size: 14px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .thick-section {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+        }
+
+        .thick-label {
+            font-size: 8px;
+            letter-spacing: 1px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .thick-content {
+            font-size: 11px;
+            line-height: 1.5;
+            color: #ddd;
+        }
+
+        .thick-content.dialogue {
+            color: #fff;
+            font-style: italic;
+        }
+
+        .thick-content.monologue {
+            color: #88aacc;
+            border-left: 2px solid #446;
+            padding-left: 8px;
+        }
+
+        .thick-content.sensory {
+            color: #aaa;
+        }
+
+        .consequence {
+            font-size: 10px;
+            color: var(--accent);
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .terminal-badge {
+            display: inline-block;
+            font-size: 8px;
+            padding: 3px 6px;
+            background: var(--accent-alt);
+            color: #fff;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+
+        /* === LEVER === */
+        #lever-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .lever-base {
+            width: 70px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #444;
+            border-radius: 35px;
+            position: relative;
+            transition: border-color 0.3s;
+        }
+
+        .lever-base:hover {
+            border-color: #fff;
+        }
+
+        .lever-stick {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: absolute;
+            left: 8px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .lever-base.A .lever-stick {
+            top: 8px;
+            background: var(--accent);
+        }
+
+        .lever-base.B .lever-stick {
+            top: 58px;
+            background: var(--accent-alt);
+        }
+
+        .lever-label {
+            font-size: 9px;
+            font-weight: 900;
+            background: #000;
+            color: #fff;
+            padding: 4px 8px;
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+
+        /* === TERMINAL PANEL === */
+        #terminal {
+            background: var(--term);
+            border-left: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+        }
+
+        .term-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--line);
+            background: #020406;
+        }
+
+        .term-title {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: #666;
+        }
+
+        .term-scenario {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 5px;
+        }
+
+        #depth-nav {
+            display: flex;
+            gap: 5px;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--line);
+            flex-wrap: wrap;
+        }
+
+        .depth-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+            color: #888;
+            padding: 5px 10px;
+            font-family: inherit;
+            font-size: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .depth-btn:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        .depth-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        #terminal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .term-section {
+            margin-bottom: 20px;
+        }
+
+        .term-section-title {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: #666;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 5px;
+        }
+
+        .term-text {
+            font-size: 11px;
+            line-height: 1.6;
+            color: #bbb;
+        }
+
+        .entity-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .entity-tag {
+            font-size: 9px;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            color: #aaa;
+        }
+
+        .sensory-block {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .sensory-item {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+        }
+
+        .sensory-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sensory-text {
+            flex: 1;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        #history-log {
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .history-item {
+            font-size: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-strand {
+            width: 4px;
+            border-radius: 2px;
+        }
+
+        .history-strand.A {
+            background: var(--accent);
+        }
+
+        .history-strand.B {
+            background: var(--accent-alt);
+        }
+
+        /* === CONTROLS === */
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 440px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .ctrl-btn {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #444;
+            color: #888;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ctrl-btn:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .ctrl-btn.active {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* === MOBILE === */
+        @media (max-width: 900px) {
+            #app {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60vh 40vh;
+            }
+
+            #terminal {
+                border-left: none;
+                border-top: 1px solid var(--line);
+            }
+
+            #branch-display {
+                flex-direction: column;
+                width: 95%;
+                gap: 10px;
+                top: 15%;
+            }
+
+            .branch-card {
+                max-height: 35vh;
+            }
+
+            #controls {
+                right: 20px;
+            }
+
+            #scenario-nav {
+                max-width: 160px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app" class="scanlines">
+        <div id="viewport">
+            <!-- Scenario Selector -->
+            <div id="scenario-nav">
+                <select id="corpus-select"></select>
+                <select id="scenario-select"></select>
+            </div>
+
+            <!-- Controls -->
+            <div id="controls">
+                <button class="ctrl-btn" onclick="toggleTTS()">🔊 TTS</button>
+                <button class="ctrl-btn" onclick="randomScenario()">🎲 RANDOM</button>
+            </div>
+
+            <!-- Scenario HUD -->
+            <div id="scenario-hud">
+                <div class="scenario-id" id="hud-id">SCENARIO 001</div>
+                <div class="scenario-title" id="hud-title">Loading...</div>
+                <div class="scenario-setting" id="hud-setting"></div>
+            </div>
+
+            <!-- Branch Cards -->
+            <div id="branch-display">
+                <div class="branch-card A" id="card-A" onclick="selectBranch('A')">
+                    <div class="branch-label">STRAND ALPHA</div>
+                    <div class="branch-choice" id="choice-A">Option A</div>
+                    <div id="thick-A"></div>
+                </div>
+                <div class="branch-card B" id="card-B" onclick="selectBranch('B')">
+                    <div class="branch-label">STRAND BETA</div>
+                    <div class="branch-choice" id="choice-B">Option B</div>
+                    <div id="thick-B"></div>
+                </div>
+            </div>
+
+            <!-- Lever -->
+            <div id="lever-container" onclick="confirmChoice()">
+                <div class="lever-base A" id="lever">
+                    <div class="lever-stick"></div>
+                </div>
+                <div class="lever-label">CONFIRM</div>
+            </div>
+        </div>
+
+        <!-- Terminal -->
+        <div id="terminal">
+            <div class="term-header">
+                <div class="term-title">THICK DESCRIPTION</div>
+                <div class="term-scenario" id="term-scenario">--</div>
+            </div>
+
+            <div id="depth-nav"></div>
+
+            <div id="terminal-content">
+                <div class="term-section">
+                    <div class="term-section-title">ENTITIES</div>
+                    <div class="entity-list" id="entity-list"></div>
+                </div>
+
+                <div class="term-section">
+                    <div class="term-section-title">SENSORY FIELD</div>
+                    <div class="sensory-block" id="sensory-block"></div>
+                </div>
+
+                <div class="term-section">
+                    <div class="term-section-title">INTERNAL MONOLOGUE</div>
+                    <div class="term-text" id="monologue-text" style="color: #88aacc; font-style: italic;"></div>
+                </div>
+
+                <div class="term-section">
+                    <div class="term-section-title">DECISION HISTORY</div>
+                    <div id="history-log"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === CORPUS FILES ===
+        const CORPUS_FILES = [
+            { id: 'thick-6', label: 'Batch 1: Scenarios 001-006', file: 'fork-paradox-cascade-thick-6.json' },
+            { id: 'thick-12', label: 'Batch 2: Scenarios 007-012', file: 'fork-paradox-cascade-thick-12.json' },
+            { id: 'thick-18', label: 'Batch 3: Scenarios 013-018', file: 'fork-paradox-cascade-thick-18.json' },
+            { id: 'thick-24', label: 'Batch 4: Scenarios 019-024', file: 'fork-paradox-cascade-thick-24.json' },
+            { id: 'thick-30', label: 'Batch 5: Scenarios 025-030', file: 'fork-paradox-cascade-thick-30.json' },
+            { id: 'thick-36', label: 'Batch 6: Scenarios 031-036', file: 'fork-paradox-cascade-thick-36.json' },
+            { id: 'thick-42', label: 'Batch 7: Scenarios 037-042', file: 'fork-paradox-cascade-thick-42.json' },
+            { id: 'thick-48', label: 'Batch 8: Scenarios 043-048', file: 'fork-paradox-cascade-thick-48.json' },
+        ];
+
+        // === STATE ===
+        const STATE = {
+            corpus: null,
+            scenarios: [],
+            currentScenario: null,
+            currentNode: null,
+            selectedStrand: 'A',
+            history: [],
+            tts: false
+        };
+
+        // === THREE.JS SETUP ===
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000203);
+        scene.fog = new THREE.FogExp2(0x000203, 0.008);
+
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const viewport = document.getElementById('viewport');
+        viewport.appendChild(renderer.domElement);
+
+        // Lighting
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.5));
+
+        // Stars
+        const starsGeo = new THREE.BufferGeometry();
+        const starsCount = 3000;
+        const posArray = new Float32Array(starsCount * 3);
+        for (let i = 0; i < starsCount * 3; i++) posArray[i] = (Math.random() - 0.5) * 600;
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ size: 0.4, color: 0x444444 }));
+        scene.add(stars);
+
+        // Helix tracks
+        const helixGroup = new THREE.Group();
+        scene.add(helixGroup);
+
+        function createHelix() {
+            helixGroup.clear();
+
+            const radius = 12;
+            const twist = 0.08;
+            const length = 200;
+
+            for (let z = -50; z < length; z += 2) {
+                const angleA = z * twist;
+                const angleB = angleA + Math.PI;
+
+                // Strand A
+                const meshA = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 0.15, 2),
+                    new THREE.MeshBasicMaterial({ color: 0x00f0ff })
+                );
+                meshA.position.set(Math.cos(angleA) * radius, Math.sin(angleA) * radius, z);
+                helixGroup.add(meshA);
+
+                // Strand B
+                const meshB = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 0.15, 2),
+                    new THREE.MeshBasicMaterial({ color: 0xff0055 })
+                );
+                meshB.position.set(Math.cos(angleB) * radius, Math.sin(angleB) * radius, z);
+                helixGroup.add(meshB);
+
+                // Bridge
+                if (z % 12 === 0) {
+                    const bridge = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.3, 0.3, radius * 2),
+                        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 })
+                    );
+                    bridge.position.set(0, 0, z);
+                    bridge.rotation.z = angleA + Math.PI / 2;
+                    helixGroup.add(bridge);
+                }
+            }
+        }
+
+        createHelix();
+
+        // Camera animation
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.002;
+
+            const camZ = 30 + Math.sin(time * 0.5) * 20;
+            const camX = Math.cos(time) * 25;
+            const camY = Math.sin(time * 0.7) * 15;
+
+            camera.position.set(camX, camY, camZ);
+            camera.lookAt(0, 0, 80);
+
+            helixGroup.rotation.z = time * 0.1;
+
+            resizeRenderer();
+            renderer.render(scene, camera);
+        }
+
+        function resizeRenderer() {
+            const w = viewport.clientWidth;
+            const h = viewport.clientHeight;
+            if (renderer.domElement.width !== w || renderer.domElement.height !== h) {
+                renderer.setSize(w, h);
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+            }
+        }
+
+        animate();
+
+        // === CORPUS LOADING ===
+        async function loadCorpus(file) {
+            try {
+                const res = await fetch(file);
+                STATE.corpus = await res.json();
+                STATE.scenarios = STATE.corpus.scenarios || [];
+                populateScenarioSelect();
+                if (STATE.scenarios.length) loadScenario(0);
+            } catch (err) {
+                console.error('Failed to load corpus:', err);
+            }
+        }
+
+        function populateCorpusSelect() {
+            const sel = document.getElementById('corpus-select');
+            sel.innerHTML = CORPUS_FILES.map((c, i) =>
+                `<option value="${c.file}">${c.label}</option>`
+            ).join('');
+            sel.onchange = () => loadCorpus(sel.value);
+        }
+
+        function populateScenarioSelect() {
+            const sel = document.getElementById('scenario-select');
+            sel.innerHTML = STATE.scenarios.map((s, i) =>
+                `<option value="${i}">${s.scenario_id}: ${s.title}</option>`
+            ).join('');
+            sel.onchange = () => loadScenario(parseInt(sel.value));
+        }
+
+        // === SCENARIO DISPLAY ===
+        function loadScenario(index) {
+            if (!STATE.scenarios[index]) return;
+
+            STATE.currentScenario = STATE.scenarios[index];
+            STATE.currentNode = STATE.currentScenario.root;
+            STATE.history = [];
+            STATE.selectedStrand = 'A';
+
+            updateHUD();
+            updateBranchCards();
+            updateTerminal();
+            updateDepthNav();
+            updateHistoryLog();
+            updateLever();
+        }
+
+        function updateHUD() {
+            const s = STATE.currentScenario;
+            document.getElementById('hud-id').textContent = s.scenario_id;
+            document.getElementById('hud-title').textContent = s.title;
+            document.getElementById('hud-setting').textContent = STATE.currentNode?.setting || s.root?.setting || '';
+            document.getElementById('term-scenario').textContent = s.title;
+        }
+
+        function updateBranchCards() {
+            const node = STATE.currentNode;
+            if (!node || !node.branches || node.branches.length === 0) {
+                // Terminal node
+                document.getElementById('branch-display').style.opacity = '0.5';
+                renderTerminalState(node);
+                return;
+            }
+
+            document.getElementById('branch-display').style.opacity = '1';
+
+            // Find branch data
+            const allBranches = STATE.currentScenario.branches || [];
+            const branchA = allBranches.find(b => b.branch_id === node.branches[0]);
+            const branchB = allBranches.find(b => b.branch_id === node.branches[1]);
+
+            renderBranchCard('A', branchA);
+            renderBranchCard('B', branchB);
+
+            // Update selection
+            document.getElementById('card-A').classList.toggle('selected', STATE.selectedStrand === 'A');
+            document.getElementById('card-B').classList.toggle('selected', STATE.selectedStrand === 'B');
+        }
+
+        function renderBranchCard(strand, branch) {
+            if (!branch) {
+                document.getElementById(`choice-${strand}`).textContent = '--';
+                document.getElementById(`thick-${strand}`).innerHTML = '';
+                return;
+            }
+
+            document.getElementById(`choice-${strand}`).innerHTML =
+                branch.label + (branch.terminal ? '<span class="terminal-badge">TERMINAL</span>' : '');
+
+            const thick = branch.thick_description || {};
+            let html = '';
+
+            // Render all thick description fields
+            const dialogueFields = ['what_he_says', 'what_she_says', 'what_he_does', 'what_she_does',
+                'what_he_shouts', 'what_the_guard_says', 'what_braun_says',
+                'what_happens', 'what_you_do', 'what_you_choose'];
+
+            for (const field of dialogueFields) {
+                if (thick[field]) {
+                    html += `<div class="thick-section">
+                <div class="thick-label">${field.replace(/_/g, ' ').toUpperCase()}</div>
+                <div class="thick-content dialogue">${thick[field]}</div>
+            </div>`;
+                }
+            }
+
+            // Sensory
+            if (thick.sensory) {
+                html += `<div class="thick-section">
+            <div class="thick-label">SENSORY</div>`;
+                for (const [sense, desc] of Object.entries(thick.sensory)) {
+                    html += `<div class="thick-content sensory">👁 ${sense}: ${desc}</div>`;
+                }
+                html += `</div>`;
+            }
+
+            if (thick.what_he_sees || thick.what_she_sees) {
+                html += `<div class="thick-section">
+            <div class="thick-label">PERCEPTION</div>
+            <div class="thick-content sensory">${thick.what_he_sees || thick.what_she_sees}</div>
+        </div>`;
+            }
+
+            // Internal monologue
+            if (thick.internal_monologue) {
+                html += `<div class="thick-section">
+            <div class="thick-label">INTERNAL MONOLOGUE</div>
+            <div class="thick-content monologue">${thick.internal_monologue}</div>
+        </div>`;
+            }
+
+            // Consequence
+            if (branch.consequence) {
+                html += `<div class="consequence">${branch.consequence}</div>`;
+            }
+
+            document.getElementById(`thick-${strand}`).innerHTML = html;
+        }
+
+        function renderTerminalState(node) {
+            if (!node || !node.terminal_state) return;
+
+            const ts = node.terminal_state;
+            let html = `<div class="thick-section" style="background: rgba(255,0,85,0.1); border: 1px solid var(--accent-alt);">
+        <div class="thick-label" style="color: var(--accent-alt);">TERMINAL STATE: ${ts.outcome || 'UNKNOWN'}</div>`;
+
+            for (const [key, val] of Object.entries(ts)) {
+                if (key !== 'outcome') {
+                    html += `<div class="thick-content" style="margin-top: 8px;">
+                <strong style="color: #fff;">${key.replace(/_/g, ' ').toUpperCase()}:</strong> ${val}
+            </div>`;
+                }
+            }
+            html += `</div>`;
+
+            document.getElementById('thick-A').innerHTML = html;
+            document.getElementById('thick-B').innerHTML = '<div style="opacity:0.3; text-align:center; padding:20px;">END OF BRANCH</div>';
+        }
+
+        function updateTerminal() {
+            const root = STATE.currentScenario?.root;
+            const node = STATE.currentNode;
+
+            // Entities
+            const entities = root?.entities || [];
+            document.getElementById('entity-list').innerHTML = entities.map(e =>
+                `<span class="entity-tag">${e}</span>`
+            ).join('');
+
+            // Sensory
+            const thick = node?.thick_description || root?.thick_description || {};
+            const sensory = thick.sensory || {};
+            const icons = { sight: '👁', sound: '👂', smell: '👃', touch: '✋', taste: '👅' };
+
+            document.getElementById('sensory-block').innerHTML = Object.entries(sensory).map(([sense, desc]) => `
+        <div class="sensory-item">
+            <span class="sensory-icon">${icons[sense] || '🔮'}</span>
+            <span class="sensory-text"><strong>${sense}:</strong> ${desc}</span>
+        </div>
+    `).join('');
+
+            // Monologue
+            document.getElementById('monologue-text').textContent = thick.internal_monologue || '...';
+        }
+
+        function updateDepthNav() {
+            const allBranches = STATE.currentScenario?.branches || [];
+            const depths = [...new Set(allBranches.map(b => b.depth))].sort();
+
+            document.getElementById('depth-nav').innerHTML =
+                `<button class="depth-btn ${STATE.currentNode === STATE.currentScenario.root ? 'active' : ''}" 
+                 onclick="goToRoot()">ROOT</button>` +
+                depths.map(d => `
+            <button class="depth-btn" onclick="filterByDepth(${d})">DEPTH ${d}</button>
+        `).join('');
+        }
+
+        function updateHistoryLog() {
+            document.getElementById('history-log').innerHTML = STATE.history.map((h, i) => `
+        <div class="history-item">
+            <div class="history-strand ${h.strand}"></div>
+            <div>${i + 1}. ${h.label}</div>
+        </div>
+    `).join('') || '<div style="color:#666; font-size:10px;">No decisions yet</div>';
+        }
+
+        function updateLever() {
+            const lever = document.getElementById('lever');
+            lever.className = `lever-base ${STATE.selectedStrand}`;
+        }
+
+        // === INTERACTIONS ===
+        function selectBranch(strand) {
+            STATE.selectedStrand = strand;
+            updateBranchCards();
+            updateLever();
+
+            // TTS
+            if (STATE.tts) {
+                const node = STATE.currentNode;
+                const allBranches = STATE.currentScenario.branches || [];
+                const branchIndex = strand === 'A' ? 0 : 1;
+                const branch = allBranches.find(b => b.branch_id === node.branches[branchIndex]);
+                if (branch?.thick_description?.internal_monologue) {
+                    speak(branch.thick_description.internal_monologue);
+                }
+            }
+        }
+
+        function confirmChoice() {
+            const node = STATE.currentNode;
+            if (!node || !node.branches || node.branches.length === 0) return;
+
+            const branchIndex = STATE.selectedStrand === 'A' ? 0 : 1;
+            const branchId = node.branches[branchIndex];
+            const allBranches = STATE.currentScenario.branches || [];
+            const nextBranch = allBranches.find(b => b.branch_id === branchId);
+
+            if (!nextBranch) return;
+
+            // Record history
+            STATE.history.push({
+                strand: STATE.selectedStrand,
+                label: nextBranch.label,
+                branchId: branchId
+            });
+
+            // Move to next node
+            STATE.currentNode = nextBranch;
+            STATE.selectedStrand = 'A';
+
+            updateHUD();
+            updateBranchCards();
+            updateTerminal();
+            updateHistoryLog();
+            updateLever();
+
+            // TTS for consequence
+            if (STATE.tts && nextBranch.consequence) {
+                speak(nextBranch.consequence);
+            }
+        }
+
+        function goToRoot() {
+            STATE.currentNode = STATE.currentScenario.root;
+            STATE.history = [];
+            STATE.selectedStrand = 'A';
+            updateHUD();
+            updateBranchCards();
+            updateTerminal();
+            updateHistoryLog();
+            updateLever();
+        }
+
+        function filterByDepth(depth) {
+            const allBranches = STATE.currentScenario.branches || [];
+            const branchesAtDepth = allBranches.filter(b => b.depth === depth);
+            if (branchesAtDepth.length > 0) {
+                STATE.currentNode = branchesAtDepth[0];
+                updateHUD();
+                updateBranchCards();
+                updateTerminal();
+            }
+        }
+
+        function randomScenario() {
+            const corpusIndex = Math.floor(Math.random() * CORPUS_FILES.length);
+            const corpusFile = CORPUS_FILES[corpusIndex].file;
+
+            fetch(corpusFile)
+                .then(res => res.json())
+                .then(data => {
+                    STATE.corpus = data;
+                    STATE.scenarios = data.scenarios || [];
+                    const scenarioIndex = Math.floor(Math.random() * STATE.scenarios.length);
+                    document.getElementById('corpus-select').value = corpusFile;
+                    populateScenarioSelect();
+                    document.getElementById('scenario-select').value = scenarioIndex;
+                    loadScenario(scenarioIndex);
+                });
+        }
+
+        function toggleTTS() {
+            STATE.tts = !STATE.tts;
+            document.querySelector('#controls .ctrl-btn').classList.toggle('active', STATE.tts);
+        }
+
+        function speak(text) {
+            if (!window.speechSynthesis || !STATE.tts) return;
+            const utt = new SpeechSynthesisUtterance(text);
+            utt.rate = 0.9;
+            window.speechSynthesis.speak(utt);
+        }
+
+        // === KEYBOARD ===
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') selectBranch('A');
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') selectBranch('B');
+            if (e.key === 'Enter' || e.key === ' ') confirmChoice();
+            if (e.key === 'r' || e.key === 'R') goToRoot();
+        });
+
+        // === INIT ===
+        populateCorpusSelect();
+        loadCorpus(CORPUS_FILES[0].file);
+    </script>
+</body>
+
+</html>

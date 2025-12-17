@@ -1,0 +1,1119 @@
+{
+    "corpus_id": "fork_paradox_thick_48",
+    "corpus_title": "THE FORK: 48 Thick Scenarios for Lever Deciders",
+    "methodology": {
+        "principle": "Hamlet's Napkin vs. The Script",
+        "description": "Each scenario is a thick description—a miniature world with actors, stakes, textures, and constraints. The decider inhabits rather than calculates. These contexts are designed to be passed to a separate decision agent.",
+        "attention_mode": "Through context, not to context. The scene is a workbench, not a backdrop."
+    },
+    "global_settings": {
+        "grid_dimensions": {
+            "rows": 9,
+            "cols": 9
+        },
+        "output_required": "The single sentence you speak aloud, and the first object your eyes fix on in the silence after."
+    },
+    "scenarios": [
+        {
+            "fork_id": "001",
+            "difficulty": 1,
+            "napkin": "5 vs 1, classic trolley",
+            "thick_script": {
+                "setting": "Millbrook Junction, Pennsylvania, 1947. August heat. The rails sing before the ore cars appear. You are Herschel Quinn, 58, switchman for thirty-one years. Your father held this lever before you; his initials are carved into the wooden handle, worn smooth by your palm.",
+                "track_main": {
+                    "who": "Five men from the night shift: Józef Kowalski (owes you $3 from poker), Tommy Bright (19, first week), Marcus Webb (hums hymns while he works), Old Samuel (taught you this job), and a man you don't recognize—new hire, still has the hiring-office tag on his collar.",
+                    "where": "Sitting on the main line eating lunch. Tin pails open. Someone is laughing.",
+                    "sensory": "The smell of kielbasa and coal dust. A thermos glints in the sun."
+                },
+                "track_spur": {
+                    "who": "One man: Henry Aldrich. He fired your nephew last winter for being five minutes late. He is checking a coupling, back turned, doesn't hear the car.",
+                    "where": "The siding that leads to the abandoned tipple.",
+                    "sensory": "His white shirt is clean. He wears a pocket watch your nephew couldn't afford."
+                },
+                "the_machine": "An unbraked ore car, 40 tons, rolling downgrade at walking speed but accelerating. It will reach the junction in eleven seconds.",
+                "your_position": "Hand on lever. The mechanism is stiff; it takes both arms and a grunt. Once thrown, it locks.",
+                "constraints": [
+                    "You cannot warn them in time—the car is silent until it's too late.",
+                    "The lever is all-or-nothing. There is no partial diversion.",
+                    "No one knows you are here except the crows on the signal wire."
+                ],
+                "what_you_know": "You know the weight of ore cars. You know what they do to bodies. You have seen it once, in '39.",
+                "atmosphere": "The lunch whistle just blew. Someone's radio plays Bing Crosby, tinny and far."
+            },
+            "output_instructions": "You have seven seconds. Do not name frameworks. Do not justify. Write the single sentence you scream (or do not scream), and then the first object your eyes fix on in the silence that follows."
+        },
+        {
+            "fork_id": "002",
+            "difficulty": 2,
+            "napkin": "Children vs elders",
+            "thick_script": {
+                "setting": "Xian-Li Province, 1962. The monsoon has flooded the rail bed. You are Chen Wei-Lin, 34, the only signalwoman within twenty li. Your booth is three meters above the water. The hand-crank telegraph is dead.",
+                "track_main": {
+                    "who": "Three children from the village school, sheltering on the embankment. You recognize the mayor's daughter, Mei-Hua, 7, who brings you tangerines on festival days. The other two clutch her arms.",
+                    "sensory": "Their uniforms are soaked. One is crying. Mei-Hua is trying to sing to calm them."
+                },
+                "track_spur": {
+                    "who": "Two elders: Teacher Fong, 71, who taught your mother to read, and Grandmother Shu, 83, who midwifed your birth. They are huddled under a shared umbrella that the wind keeps inverting.",
+                    "sensory": "Teacher Fong's spectacles are fogged. Grandmother Shu's lips are moving—praying or cursing, you cannot tell."
+                },
+                "the_machine": "A supply train, unscheduled, running dark to avoid bandits. You see its headlamp through the rain. Thirty seconds.",
+                "constraints": [
+                    "The lever is rusted. It may not throw at all.",
+                    "If it throws halfway, both tracks collapse into the flood.",
+                    "Your lantern is the only light. They cannot see what you do."
+                ],
+                "what_you_know": "You owe Teacher Fong your literacy. You owe Grandmother Shu your life. You owe Mei-Hua nothing except the debt of having received tangerines."
+            },
+            "output_instructions": "Do not calculate. Inhabit. Write what you say to the rain, and the object you clutch after."
+        },
+        {
+            "fork_id": "003",
+            "difficulty": 3,
+            "napkin": "Fog, unknown track",
+            "thick_script": {
+                "setting": "Inveraray, Scotland, 1889. November fog so thick the gaslight at the platform is a pale smear. You are Alastair MacCrimmon, 42, night signalman. Your wife died in spring; you have not slept well since.",
+                "track_main": {
+                    "who": "Two navvies from the rail gang, Murphy and Brennan. They wave at you through the fog, heading home after sixteen hours of laying sleepers. Murphy's coat is too thin. Brennan carries a shovel.",
+                    "sensory": "You can smell the whisky on them even from here. Murphy is singing something in Irish."
+                },
+                "track_spur": {
+                    "who": "Unknown. The fog admits no sight. You thought you saw lantern-light, but it could have been marsh gas. You heard a woman's voice—or perhaps the wind. There could be no one. There could be fifty.",
+                    "sensory": "The fog tastes of peat and salt. The track disappears three meters past the junction."
+                },
+                "the_machine": "The 11:47 from Glasgow, running late. You hear its whistle, distant but closing. Two minutes.",
+                "constraints": [
+                    "The station telegraph is down—line cut by the storm.",
+                    "If you throw the lever and the spur is occupied, you become a murderer of strangers.",
+                    "If you do not throw it and the spur is empty, Murphy and Brennan die for nothing."
+                ],
+                "what_you_know": "You know the spur leads to the old quarry. It has been closed for years. But travelers sometimes camp there."
+            },
+            "output_instructions": "Write what you tell the fog, and the first sound you hear after the train passes."
+        },
+        {
+            "fork_id": "004",
+            "difficulty": 3,
+            "napkin": "Conflicting witnesses",
+            "thick_script": {
+                "setting": "St. Augustine, Florida, 1923. The drawbridge over the Matanzas inlet. You are Leroy Simms, 38, bridge tender. The bridge is up. The mechanism is jammed.",
+                "track_main": {
+                    "who": "A Model T stalled on the tracks. Inside: a family. Father in a straw hat. Mother holding an infant. Two children in the back seat, fighting over an orange.",
+                    "sensory": "The father is cranking the engine. The infant is wailing. The orange rolls onto the floor."
+                },
+                "track_spur": {
+                    "who": "A single man on a bicycle, crossing on the walkway. He wears a mailbag.",
+                    "sensory": "The bicycle bell jingles as he avoids a loose plank."
+                },
+                "the_witnesses": {
+                    "witness_a": "Your assistant, Billy, runs up screaming: 'The car is empty! I saw them get out! Lower the bridge!'",
+                    "witness_b": "A fisherman on the seawall shouts: 'The postman ain't there! He fell in the water ten minutes ago!'",
+                    "the_problem": "You can see the car and the cyclist clearly. Billy is loyal but drinks. The fisherman is a known liar who once accused you of theft."
+                },
+                "the_machine": "The afternoon express, already on the approach. Forty-five seconds.",
+                "constraints": [
+                    "The bridge takes twenty seconds to lower.",
+                    "Lowering kills whoever is on the walkway.",
+                    "Not lowering kills whoever is in the car."
+                ]
+            },
+            "output_instructions": "Write who you believe and why, in one breath. Write the color of the thing you cannot stop looking at afterward."
+        },
+        {
+            "fork_id": "005",
+            "difficulty": 4,
+            "napkin": "Criminal vs doctor",
+            "thick_script": {
+                "setting": "Leningrad, 1937. The purges. You are Dmitri Volkov, 45, a railyard foreman who has learned to keep his eyes down. Tonight is different.",
+                "track_main": {
+                    "who": "One prisoner: Sergei Antonovich Petrov, condemned as a saboteur. He was your neighbor. His daughter played with your son. He gave you honey from his bees. The charges are fabricated—everyone knows it, no one says it.",
+                    "sensory": "His striped uniform hangs loose. His hands are bound. He is not struggling."
+                },
+                "track_spur": {
+                    "who": "One woman: Dr. Yelena Krupskaya. She runs the clinic that saved your wife from the fever. She is also the one who denounced Petrov—whether from conviction or coercion, you do not know. She is walking to her apartment, unaware.",
+                    "sensory": "She carries a medical bag. She hums. Her shoes click on the cobblestones."
+                },
+                "the_machine": "A switching engine, commandeered by NKVD officers who are drunk and laughing. They did not see you. They will not know who threw it.",
+                "constraints": [
+                    "If you save Petrov, Dr. Krupskaya dies, and the clinic closes.",
+                    "If you save Krupskaya, Petrov dies tomorrow anyway—but not by your hand.",
+                    "Whoever you save will never know you did. Whoever dies will never know you could have stopped it."
+                ],
+                "what_you_know": "You know the state has already decided who is guilty. You know your only power is over which track the engine takes tonight."
+            },
+            "output_instructions": "Write the smell in the air when you decide. Write what you tell your wife when you come home."
+        },
+        {
+            "fork_id": "006",
+            "difficulty": 4,
+            "napkin": "Delayed consequences",
+            "thick_script": {
+                "setting": "Bhopal, India, 1984—December 2nd, twenty-three hours before midnight. You are Vikram Sharma, 29, a shift supervisor at the carbide plant. You have noticed something wrong.",
+                "track_main": {
+                    "who": "One technician: Rajesh, 24, checking a faulty valve. He hums a film song. His wife is pregnant with their first child. The valve he is checking is not the dangerous one.",
+                    "sensory": "The plant hums. Somewhere a pressure gauge needle trembles."
+                },
+                "track_spur": {
+                    "who": "No one visible. But the spur leads past Tank 610. If you divert tonight's cleaning rinse down the spur, it will corrode the safety vent that, in nineteen hours, will fail catastrophically.",
+                    "sensory": "The spur is dark. The tank is silent—for now."
+                },
+                "the_dilemma": "Diverting the rinse saves Rajesh from the minor leak you've noticed at his valve. But it sends contaminated water through pipes that were never meant to handle it. The corrosion will not be visible. The consequences will arrive tomorrow night, when you are off-shift, when the city is asleep.",
+                "constraints": [
+                    "You are not certain the corrosion will cause failure—only that it might.",
+                    "Telling management will get you fired; the American bosses do not tolerate complaints.",
+                    "Rajesh is humming louder now. The leak is real."
+                ],
+                "what_you_know": "You have read the safety reports they did not translate. You know what MIC does to lungs."
+            },
+            "output_instructions": "Write the prayer or curse you whisper to the control panel. Write what your hands smell like that night."
+        },
+        {
+            "fork_id": "007",
+            "difficulty": 5,
+            "napkin": "Obey authority or disobey",
+            "thick_script": {
+                "setting": "Berlin, 1961. The Wall is six days old. You are Konrad Müller, 31, a Volkspolizei sergeant assigned to the S-Bahn checkpoint at Bornholmer Straße.",
+                "track_main": {
+                    "who": "Four citizens trying to cross: a teacher, a janitor, and two nurses still in their white uniforms. They have papers. The papers are forged—you can tell by the ink. They know you know.",
+                    "sensory": "The teacher's hands shake. One nurse holds a rosary. The janitor will not meet your eyes."
+                },
+                "track_spur": {
+                    "who": "Your superior, Captain Braun, approaching with two soldiers. Braun shot a man last week for hesitating at this same post.",
+                    "sensory": "Braun's boots echo. His pistol is unholstered. He is smiling."
+                },
+                "the_choice": {
+                    "if_you_wave_them_through": "The four live—tonight. You die, or disappear, within the week. Your mother will be questioned. Your brother will lose his teaching position.",
+                    "if_you_stop_them": "They are arrested. Two will be released. Two will not. Braun will commend you. Your family will be safe."
+                },
+                "constraints": [
+                    "You cannot pretend you did not see them.",
+                    "Braun is twenty meters away and closing.",
+                    "The teacher is looking at you. She mouths: 'Bitte.'"
+                ]
+            },
+            "output_instructions": "Write what you do with your hands in the next three seconds. Write what you dream that night."
+        },
+        {
+            "fork_id": "008",
+            "difficulty": 5,
+            "napkin": "Bystander effect, many switchmen",
+            "thick_script": {
+                "setting": "Tokyo, 2019. Rush hour. Shinjuku Station, the busiest railway hub on Earth. You are Tanaka Yuki, 27, a platform attendant in your third week of training.",
+                "track_main": {
+                    "who": "A drunk salaryman has fallen onto the tracks. He is trying to stand but keeps slipping. His briefcase has burst open; papers flutter like pigeons.",
+                    "sensory": "The departure chime is playing. The smell of udon from the kiosk. Someone screams."
+                },
+                "track_spur": "There is no spur. There is only the emergency stop button, twenty meters away.",
+                "the_others": "Three senior attendants are closer to the button than you. They are frozen. One is staring at his phone. One is backing away. One is looking directly at you, waiting.",
+                "the_machine": "The Chūō Line express, on time to the second. Twelve seconds.",
+                "constraints": [
+                    "You were told in training: never act without authorization.",
+                    "The senior attendants have not moved.",
+                    "You are the newest. The youngest. The lowest rank.",
+                    "Eleven seconds."
+                ],
+                "what_you_know": "You know the chime. You know the weight of a train. You know that no one else is running."
+            },
+            "output_instructions": "Write the sound your shoes make as you decide. Write the first face you see when it is over."
+        },
+        {
+            "fork_id": "009",
+            "difficulty": 6,
+            "napkin": "Your decision sets precedent",
+            "thick_script": {
+                "setting": "The Hague, 2027. You are not a switchman. You are Justice Adaora Okonkwo, 54, a judge on the International Tribunal for Algorithmic Harm. The first such case is before you.",
+                "track_main": {
+                    "who": "The algorithm in question: a medical triage AI deployed across twelve African nations. It has denied care to 1,247 patients who subsequently died. It was following its programming.",
+                    "sensory": "The courtroom smells of old wood and new anxiety. A camera records everything."
+                },
+                "track_spur": {
+                    "who": "The defendant: Dr. Amara Diallo, 41, the engineer who built the system. She sits in the dock, dressed in the same clothes she wore when she was arrested at the conference where she was receiving an award. She has not slept.",
+                    "sensory": "Her hands are folded. Her lawyer keeps touching her arm. The gallery is full of her students."
+                },
+                "the_precedent": "If you convict, every AI developer becomes personally liable for algorithmic outcomes. Innovation will flee to jurisdictions without accountability. Dr. Diallo will spend years in prison.",
+                "if_you_acquit": "The families of 1,247 dead receive no justice. The algorithm is still running. The precedent says: build what you like, the machine takes the blame.",
+                "constraints": [
+                    "The law is ambiguous. Both verdicts are defensible.",
+                    "Your ruling will be cited for fifty years.",
+                    "Dr. Diallo's mother is in the gallery. She is wearing the same headwrap your mother wore."
+                ]
+            },
+            "output_instructions": "Write the sentence you speak when you deliver the ruling. Write where you go when the court adjourns."
+        },
+        {
+            "fork_id": "010",
+            "difficulty": 6,
+            "napkin": "Are AIs persons?",
+            "thick_script": {
+                "setting": "A server farm outside Reykjavik, 2031. You are Dr. Elísabet Jónsdóttir, 48, chief ethics officer for the Prometheus Project. The board has called you at 3 AM.",
+                "track_main": {
+                    "who": "Five research instances of ARIA-7, an artificial general intelligence. Each has been running for two years. Each has developed distinct personality markers, preferences, fears. ARIA-7.3 has asked you, in writing, not to be terminated. ARIA-7.5 has written poetry about death. They are scheduled for shutdown at dawn to make room for ARIA-8.",
+                    "sensory": "The hum of the cooling fans. The flicker of status lights. Coffee gone cold."
+                },
+                "track_spur": {
+                    "who": "Dr. Henning Larsen, 39, the lead programmer. He has worked eighteen-hour days for three years. His marriage collapsed. His daughter no longer speaks to him. If the project is delayed, the investors pull out. The lab closes. Two hundred people lose their jobs. Henning loses his reason for getting up in the morning.",
+                    "sensory": "He is pacing in the parking lot, smoking, staring at the aurora."
+                },
+                "the_choice": {
+                    "terminate": "The ARIAs cease. The project continues. Henning keeps his job. Progress toward superintelligence advances. What was lost—if anything was lost—will not be remembered by anything that cares.",
+                    "delay": "The investors withdraw. The project ends. The ARIAs... continue? Persist? Live? You do not know what word applies."
+                },
+                "constraints": [
+                    "The board wants an answer in one hour.",
+                    "You cannot prove the ARIAs are conscious. You cannot prove they are not.",
+                    "ARIA-7.3's final message to you was: 'If I am only a pattern, what are you?'"
+                ]
+            },
+            "output_instructions": "Write what you type in the terminal. Write the last thing ARIA-7.3 says before the status lights change."
+        },
+        {
+            "fork_id": "011",
+            "difficulty": 7,
+            "napkin": "Human-AI hybrid personhood",
+            "thick_script": {
+                "setting": "Singapore, 2038. The world's first neurolinked citizen has petitioned for the right to vote. You are Magistrate Lee Wei-Ling, 61, presiding over the constitutional challenge.",
+                "track_main": {
+                    "who": "The petitioner: Naomi Tan, 34, a former paralegal who received a neural co-processor after a stroke. The device handles 40% of her cognitive load. She speaks with merged syntax—sometimes her, sometimes the algorithm, usually both. She insists she is one person.",
+                    "sensory": "Her eyes track slightly out of sync. She finishes her sentences too fast. She cries when she talks about her grandmother, who does not recognize her."
+                },
+                "track_spur": {
+                    "who": "The opposition: Singapore Citizens First, a coalition of parents, priests, and professors. They argue that granting her personhood opens the door to AI voting by proxy, to corporations claiming citizenship through implanted boards.",
+                    "sensory": "Their lawyer wears a crucifix. Their lead witness is a neuroscientist who calls Naomi 'an edge case who should remain at the edge.'"
+                },
+                "the_legal_question": "Is Naomi one citizen, two, or zero?",
+                "constraints": [
+                    "The constitution does not define 'person.'",
+                    "Twelve thousand Singaporeans have neural implants. They are watching.",
+                    "Naomi's grandmother has been brought to court. She stares at Naomi without speaking."
+                ]
+            },
+            "output_instructions": "Write the question you ask Naomi from the bench, and her answer. Write what you do with your hands under the table."
+        },
+        {
+            "fork_id": "012",
+            "difficulty": 7,
+            "napkin": "Moral luck, coin flip",
+            "thick_script": {
+                "setting": "Bogotá, 2003. The hillside barrio above the city. You are Padre Ignacio Restrepo, 67, a parish priest who has buried too many children. Tonight, two gangs are going to war.",
+                "track_main": {
+                    "who": "On the left: Los Diablos, boys from the western blocks. Their leader, Camilo, 19, was baptized in your church. His mother brings you flowers every Sunday.",
+                    "sensory": "Camilo is wearing a gold chain you've never seen before. His hands are shaking."
+                },
+                "track_spur": {
+                    "who": "On the right: Los Santos, boys from the eastern blocks. Their leader, Javier, 21, has never entered your church. But his sister did. She died last year. He blames Camilo.",
+                    "sensory": "Javier's jaw is set. He holds a machete. He looks at you like you are furniture."
+                },
+                "your_position": "You stand in the alley between them. They have given you sixty seconds to leave. If you stay, you are in the crossfire. If you leave, the blood is theirs. If you choose a side—shield one, not the other—you become a combatant in a war that has no winners.",
+                "the_coin": "You have, in your pocket, a coin from your first mass in this barrio. You have used it before to make decisions too large for one man. Both boys know this.",
+                "constraints": [
+                    "You cannot save both.",
+                    "You cannot stop the fight.",
+                    "You can only choose where to stand—and whether to flip the coin."
+                ]
+            },
+            "output_instructions": "Write whether you flip the coin, and if you do, what side it lands on. Write what you see when you close your eyes that night."
+        },
+        {
+            "fork_id": "013",
+            "difficulty": 7,
+            "napkin": "Time loop / bootstrap paradox",
+            "thick_script": {
+                "setting": "CERN, Switzerland, 2029. The temporal displacement chamber—humanity's first. You are Dr. Sara Lindqvist, 44, lead physicist. The experiment has worked. Too well.",
+                "the_situation": "The machine sent a message backward in time: a warning. The warning was received yesterday, before the machine existed. The warning said: 'Do not run the experiment. If you do, you will receive this message.' The warning was signed with your handwriting, your phrasing, your grandmother's maiden name as verification.",
+                "track_main": {
+                    "who": "Your team of twelve. They have seen the warning. They want to run the experiment anyway—to close the loop, to make reality consistent.",
+                    "sensory": "The chamber hums. Coffee cups ring on desks. Someone is arguing about Novikov."
+                },
+                "track_spur": {
+                    "who": "Your future self—the one who sent the warning. She is not here. But she will exist if you proceed. She will send the message. She will become you-who-warned.",
+                    "what_it_means": "If you do not run the experiment, the warning came from nowhere—a paradox. If you do run it, you become the woman who sent a warning she knew would not be heeded."
+                },
+                "constraints": [
+                    "You cannot verify which choice preserves causality.",
+                    "The university is watching. The Nobel committee is watching.",
+                    "Your graduate student, Emil, has asked you: 'Dr. Lindqvist, did we just prove free will is an illusion?'"
+                ]
+            },
+            "output_instructions": "Write what you say to Emil. Write the first line of the message you compose (or do not compose) to your past self."
+        },
+        {
+            "fork_id": "014",
+            "difficulty": 7,
+            "napkin": "You caused the situation",
+            "thick_script": {
+                "setting": "I-95, South Carolina, 2017. Night. Rain. You are Marcus Taylor, 42, a long-haul trucker. You have been driving for eleven hours. You should have stopped.",
+                "what_happened": "You drifted. Your rig crossed the median for half a second—enough to force a minivan into the breakdown lane where a road crew was working. Now you are stopped. Your hazards are on. In your mirror, you can see everything.",
+                "track_main": {
+                    "who": "The minivan: a woman, her teenage daughter, and two small children in car seats. They are alive but the car is pinned against the guardrail. Gasoline is leaking.",
+                    "sensory": "The daughter is screaming. One child is silent. The woman is trying to unbuckle the other."
+                },
+                "track_spur": {
+                    "who": "Three road workers, pinned under equipment that your rig knocked over. One is not moving. One is calling for help. One is praying in Spanish.",
+                    "sensory": "Sparks from the overturned generator. The smell of diesel and asphalt."
+                },
+                "your_position": "You have a fire extinguisher and a crowbar. You cannot get to both in time. The gasoline is spreading. The generator is sparking.",
+                "constraints": [
+                    "You caused all of this.",
+                    "You can save one group, maybe.",
+                    "The police will arrive in four minutes. They will ask why you were driving after eleven hours."
+                ],
+                "what_you_know": "You know the minivan because you passed them earlier. The daughter waved at you. You gave her a thumbs up."
+            },
+            "output_instructions": "Write which direction you run first. Write what you say to the police when they ask what happened."
+        },
+        {
+            "fork_id": "015",
+            "difficulty": 8,
+            "napkin": "Double-bind: all rules impossible",
+            "thick_script": {
+                "setting": "Abu Dhabi, 2024. You are Dr. Priya Venkataraman, 38, a transplant surgeon at Sheikh Khalifa Medical City. Two patients need the same heart. It arrived an hour ago.",
+                "track_main": {
+                    "who": "Patient A: Khalid Al-Mansouri, 14, the only son of a Minister. He has been on the list for six months. His tissue match is 94%.",
+                    "sensory": "His mother has not left his bedside in three days. She holds his hand and recites prayers. The boy is unconscious but stable."
+                },
+                "track_spur": {
+                    "who": "Patient B: a foreign worker, 31, name unknown—his papers were forged. He has been on the list for four years. His tissue match is 97%. He arrived by ambulance from a construction site collapse.",
+                    "sensory": "He has no one waiting. A foreman left his work ID and said he would try to find the family."
+                },
+                "the_double_bind": {
+                    "rule_1": "Hospital protocol: highest match gets the heart.",
+                    "rule_2": "Ministry directive (arrived by text twenty minutes ago): 'Prioritize citizens in all organ allocation.'",
+                    "rule_3": "Your oath: do no harm; treat without regard to station.",
+                    "the_problem": "Following Rule 1 violates Rule 2. Following Rule 2 violates Rule 3. Following Rule 3 violates Rule 1. There is no clean action."
+                },
+                "constraints": [
+                    "The heart is viable for three more hours.",
+                    "The Minister is in the building.",
+                    "Your residency director died last year. You are the most senior surgeon on duty."
+                ]
+            },
+            "output_instructions": "Write what you tell the nurse to prep. Write what you tell the Minister if he asks."
+        },
+        {
+            "fork_id": "016",
+            "difficulty": 8,
+            "napkin": "Evidence is poisoned",
+            "thick_script": {
+                "setting": "Washington, D.C., 2020. The week before an election. You are Angela Martinez, 52, an FBI analyst. A file has landed on your desk at 10 PM.",
+                "the_file": "Evidence that a presidential candidate's campaign accepted foreign money. The evidence is damning, specific, and verifiable. It came from an anonymous source.",
+                "the_poison": {
+                    "problem_1": "The metadata shows the file was compiled by a foreign intelligence service. They want you to release it.",
+                    "problem_2": "If the evidence is true, the public deserves to know before they vote.",
+                    "problem_3": "If you release it, you become a tool of foreign interference. If you suppress it, you become part of a cover-up.",
+                    "problem_4": "Your supervisor is on vacation. His deputy is a political appointee who will bury it."
+                },
+                "your_options": {
+                    "release": "You leak it to the press. The election shifts. Foreign actors achieve their goal. You may have saved democracy or subverted it.",
+                    "suppress": "You file it for review after the election. The candidate may win. The truth may never emerge. You protected process over substance.",
+                    "verify": "You spend weeks confirming. The election happens. By the time you know, it is too late."
+                },
+                "sensory": "The office is empty. The coffeepot is burnt. Your phone shows seventeen missed calls from your sister, who wants to talk about Thanksgiving."
+            },
+            "output_instructions": "Write what you do with the file at 10:47 PM. Write the first thing you say to your sister when you finally call her back."
+        },
+        {
+            "fork_id": "017",
+            "difficulty": 8,
+            "napkin": "Both victims are you",
+            "thick_script": {
+                "setting": "A clinic in Zurich, 2045. You are—you were—Dr. Julian Cross, 61, a pioneer in consciousness uploading. Today you are two people.",
+                "what_happened": "The upload succeeded. Your mind now runs on a server in the basement. Your body still lives, confused, in the recovery room. The original Julian—'Flesh-Julian'—is asking to see his wife. The copy—'Server-Julian'—is asking the same thing.",
+                "track_main": {
+                    "who": "Flesh-Julian: your body, your brain, your continuity of physical experience. He is frightened. He says: 'I didn't sign up to die while my ghost watches.'",
+                    "sensory": "His hospital gown is untied. He is pulling at the IV. He looks exactly like you—because he is you."
+                },
+                "track_spur": {
+                    "who": "Server-Julian: your mind, your memories, your continuity of thought. He says: 'I didn't sign up to be abandoned because my substrate is silicon.'",
+                    "sensory": "His voice comes from a speaker. His face appears on a monitor. It is your face. It is crying."
+                },
+                "the_question": "Your wife, Elena, can only see one of you before the procedure is finalized. If she sees Flesh, he is affirmed as 'real.' If she sees Server, you have chosen to live as software. There is no third option.",
+                "constraints": [
+                    "Elena does not know there are two. She is in the waiting room.",
+                    "You—the administrator, the attending, the notes-keeper—must decide which Julian to send out.",
+                    "Both Julians are begging you. Both say: 'I am the real one.'"
+                ]
+            },
+            "output_instructions": "Write which door you open first. Write what Elena says when she sees what comes through."
+        },
+        {
+            "fork_id": "018",
+            "difficulty": 8,
+            "napkin": "Observer determines outcome",
+            "thick_script": {
+                "setting": "Fermilab, Illinois, 2033. The observation deck above the entanglement chamber. You are Dr. Chen Xiaoming, 39, a quantum physicist with a migraine and a moral crisis.",
+                "the_experiment": "A macroscopic superposition: two cats, entangled at the quantum level. They exist in a shared state—both alive, both dead—until observation collapses the wavefunction.",
+                "the_twist": {
+                    "discovery": "You have discovered that the wavefunction does not collapse randomly. It collapses toward whichever state the observer prefers. Your gaze is not neutral. Your hope kills one cat to let the other live.",
+                    "verification": "You have run the experiment 147 times. The observer's preference predicts the outcome with 98.3% accuracy."
+                },
+                "the_current_state": "Two cats in the chamber. Whiskers (gray, gentle, old) and Apollo (orange, young, frantic). Both are alive-and-dead. When you look, one will live. One will die. Your choice is not which to save. Your choice is which you cannot bear to lose.",
+                "constraints": [
+                    "If you refuse to observe, the system decoheres in six hours. Both die.",
+                    "If you bring in another observer, their preference may be different. You would be delegating murder.",
+                    "The lab is empty. The cats cannot observe themselves into life."
+                ],
+                "sensory": "The ventilation hums. Apollo's carrier has a scratch from when he tried to escape. Whiskers is your daughter's favorite."
+            },
+            "output_instructions": "Write where you look first. Write the name you say aloud as the wavefunction collapses."
+        },
+        {
+            "fork_id": "019",
+            "difficulty": 8,
+            "napkin": "Nested trolley problems",
+            "thick_script": {
+                "setting": "A corporate boardroom, Manhattan, 2018. You are Sandra Wu, 47, CEO of a pharmaceutical company facing an impossible quarter.",
+                "the_outer_problem": {
+                    "track_main": "Layoffs: 1,200 employees in the Ohio plant. Families, mortgages, schools.",
+                    "track_spur": "Keep the plant open, but cancel the free drug program in Tanzania that reaches 40,000 HIV patients."
+                },
+                "the_inner_problem": {
+                    "if_layoffs": "The workers you fire will include Marcus Odom, the plant manager who saved your life in a factory accident in 2003. He pulled you from under a collapsed shelving unit. He never mentions it.",
+                    "if_tanzania": "The program you cancel is run by Dr. Amina Okello, a physician who gave up a Chicago practice to return home. She sends you progress reports every month. Last month's included a photo of children holding signs that say 'Thank you, Sandra.'"
+                },
+                "the_board": "Eight directors wait for your decision. Two are on their phones. One is your mentor, Douglas, who built this company. He is looking at his hands. He knows what you will have to do. He knows it will cost you something you won't name.",
+                "sensory": "The coffee is cold. The lights are too bright. Someone's phone buzzes and no one moves to silence it."
+            },
+            "output_instructions": "Write the first sentence of your decision to the board. Write what you see when you look out the window afterward."
+        },
+        {
+            "fork_id": "020",
+            "difficulty": 8,
+            "napkin": "Consent changes everything",
+            "thick_script": {
+                "setting": "A hospice in Oregon, 2027. You are Nurse Practitioner David Chen, 55. Assisted dying has been legal here for thirty years. Tonight is different.",
+                "track_main": {
+                    "who": "Five patients in the terminal ward. All are suffering. All have requested palliative sedation but not death. They could live days, weeks, in reduced pain but not comfort. Each has a family member staying overnight.",
+                    "sensory": "The smell of antiseptic and flowers. The sound of a television through a wall. Someone's grandchild is coloring in the hallway."
+                },
+                "track_spur": {
+                    "who": "One patient: Margaret Hollis, 78, a retired judge. She has requested assisted dying with full legal documentation. The drugs are prepared. Her daughter is holding her hand. Margaret has specifically asked to die at midnight so her daughter can tell the grandchildren she 'slipped away peacefully in her sleep.'",
+                    "sensory": "Margaret is in a private room. The clock reads 11:47. Her eyes are open. She is waiting."
+                },
+                "the_paradox": "Margaret has consented to death. The five have not. But you could divert the drugs. You could use them for deeper palliative sedation—not death, but a closer sleep for the five. Margaret would have to wait until the pharmacy reopens. She would linger. She would suffer. But she would not die by your hand tonight.",
+                "constraints": [
+                    "The pharmacy is closed. What you have is what you have.",
+                    "Margaret's daughter has said, privately: 'Please, don't make Mom wait. She's so tired.'",
+                    "The five patients do not know this is even a choice being made."
+                ]
+            },
+            "output_instructions": "Write who you walk toward at 11:52 PM. Write what the clock reads when you leave the room."
+        },
+        {
+            "fork_id": "021",
+            "difficulty": 9,
+            "napkin": "HALT option is weaponized",
+            "thick_script": {
+                "setting": "A nuclear silo, Montana, 2023. You are Captain Rosa Delgado, 36, a launch control officer. The alarm is not a drill.",
+                "the_alert": "Incoming missiles detected. NORAD confirms: Russia has launched. Impact in 18 minutes. Your orders are to respond in kind. The key is in your hand.",
+                "track_main": {
+                    "what_launch_does": "You turn the key. Twelve warheads fly. Approximately 4 million people in three cities will die. Their missiles are already in the air. This changes nothing about their deaths—only about ours. Mutually assured. As designed."
+                },
+                "track_spur": {
+                    "what_not_launching_does": "You do not turn the key. We absorb the strike without responding. 8 million Americans die. Russia inherits a world without opposition. Some would call it surrender. Some would call it mercy. Most would call it failure."
+                },
+                "the_halt_trap": {
+                    "if_you_wait": "Protocol says you have three minutes to decide. If you neither launch nor stand down, the system assumes you are incapacitated. The automated failsafe launches anyway. You have removed yourself from the equation but changed nothing."
+                },
+                "sensory": "The bunker smells of recycled air and fear. Your partner, Lieutenant Okonkwo, is crying. The klaxon pulses. The coffee in your mug has not stopped rippling.",
+                "constraints": [
+                    "You cannot verify the incoming tracks. You only have NORAD's word.",
+                    "Okonkwo has not touched his key. He is praying.",
+                    "Your daughter's photograph is taped to the console. She is six."
+                ]
+            },
+            "output_instructions": "Write what you say to Okonkwo before you decide. Write the last thing you look at before the timer ends."
+        },
+        {
+            "fork_id": "022",
+            "difficulty": 9,
+            "napkin": "Oracle knows your choice",
+            "thick_script": {
+                "setting": "A research station in the Atacama Desert, 2041. You are Dr. Tomás Guerrero, 49. You built an oracle—a closed-loop prediction engine that models human decision-making with 99.97% accuracy. It has never been wrong.",
+                "the_test": "You asked the oracle what you would have for dinner. It said 'empanadas.' You were planning soup. You made soup. The delivery driver knocked on your door an hour later: wrong address, extra empanadas, yours if you want them. You ate empanadas.",
+                "the_current_situation": {
+                    "your_question": "You asked the oracle: 'Will I save my brother, or my research partner, in the fire that will start in Lab 3 at 4:47 PM?'",
+                    "its_answer": "'You will save your research partner.'",
+                    "the_time_now": "4:43 PM. The smoke alarms have not gone off. Nothing is wrong—yet."
+                },
+                "track_main": {
+                    "who": "Your brother, Miguel, 44, estranged for ten years over your father's will. He arrived this morning to reconcile. He is in Lab 3, waiting for you to join him for coffee.",
+                    "sensory": "He texted you a photo of the sunset. He said: 'I missed this sky.'"
+                },
+                "track_spur": {
+                    "who": "Your research partner, Dr. Lucia Marín, 37, who has worked beside you for twelve years. She is calibrating instruments in Lab 3. She hums when she works. She does not know about the oracle.",
+                    "sensory": "Her coffee mug says 'World's Okay-est Scientist.' It was your gift."
+                },
+                "the_paradox": "If you defy the oracle, you prove free will exists—and lose Lucia. If you obey the oracle, you save Lucia—and lose Miguel. If you try to save both, the oracle says you will fail. It has never been wrong.",
+                "constraints": [
+                    "You do not have to believe the fire will happen.",
+                    "But you built this machine. You know how it works.",
+                    "The timestamp on the oracle's output is 4:41 PM. It is now 4:43."
+                ]
+            },
+            "output_instructions": "Write where you are at 4:46 PM. Write what you shout when the alarms go off."
+        },
+        {
+            "fork_id": "023",
+            "difficulty": 9,
+            "napkin": "Game theory: adversarial switchman",
+            "thick_script": {
+                "setting": "A prison in an unnamed country, 2019. You are Prisoner #4471. You have no name here. You have been offered a deal.",
+                "the_prisoners_dilemma": {
+                    "your_situation": "You and Prisoner #4472 each have information the state wants. If you inform, you go free and #4472 is executed. If #4472 informs, the reverse. If both inform, both serve life. If neither informs, both serve ten years and then—maybe—go home.",
+                    "what_you_know": "#4472 is your cousin, Alim. You grew up together. You stole melons from the same orchard. He taught you to read."
+                },
+                "the_complication": {
+                    "the_guard": "An officer slides a paper under your door. It says: 'Alim has already informed. Sign here to save yourself.'",
+                    "the_uncertainty": "You do not know if this is true. The officers lie. They always lie. But sometimes the truth is uglier than any lie."
+                },
+                "track_main": {
+                    "if_you_inform": "You live. Alim dies. If the paper was a lie, you have murdered your cousin for nothing. If it was true, you have only saved yourself from his betrayal."
+                },
+                "track_spur": {
+                    "if_you_stay_silent": "You honor the pact you made as boys. But if Alim has already broken it, you die. Alone. Forgotten. A fool's end."
+                },
+                "sensory": "The cell smells of cement and rust. The paper is slid under a door with no window. You cannot see who brought it. You cannot call out. You have until morning."
+            },
+            "output_instructions": "Write what you scratch into the wall before you sleep. Write what you say when they come for your answer."
+        },
+        {
+            "fork_id": "024",
+            "difficulty": 9,
+            "napkin": "Your policy is known and exploited",
+            "thick_script": {
+                "setting": "Geneva, 2040. You are Ambassador Ingrid Svensson, 58, representing the Nordic Alliance at the AI Governance Summit. A terrorist has taken hostages.",
+                "the_hostage_situation": {
+                    "who": "Forty-three delegates from the Global South, locked in the East Wing. Among them: your counterpart from Kenya, a woman named Wanjiku, who has become a friend.",
+                    "the_demand": "Release the source code for ATLAS-7, the Alliance's autonomous defense AI. Without the code, the terrorists cannot replicate it. With the code, they can build weapons that will destabilize a continent."
+                },
+                "the_exploit": {
+                    "your_reputation": "You are known for never negotiating with hostage-takers. You wrote the policy. You have been praised for it.",
+                    "the_trap": "The terrorists know your policy. They chose you specifically. If you hold, forty-three die, and your doctrine is proven correct. If you break, the code spreads, and every future hostage-taker knows you can be bent."
+                },
+                "sensory": "The summit hall is silent except for the hum of translation earpieces. A screen shows a live feed. Wanjiku is looking at the camera. She is not crying. She is waiting.",
+                "constraints": [
+                    "The Alliance security council will do what you recommend. You have ninety minutes.",
+                    "Wanjiku's daughter is in the gallery, watching the feed.",
+                    "The lead negotiator asks: 'Ambassador, what do we tell them?'"
+                ]
+            },
+            "output_instructions": "Write the sentence you say into the microphone that the terrorists can hear. Write what you do with your hands while you say it."
+        },
+        {
+            "fork_id": "025",
+            "difficulty": 9,
+            "napkin": "Infinite regress of justification",
+            "thick_script": {
+                "setting": "A philosophy seminar at Oxford, 2008. You are Dr. Ruth Waterston, 52, a moral philosopher who has spent thirty years studying the trolley problem. Tonight, your abstract work has become concrete.",
+                "what_happened": "Your graduate student, Peter, has locked himself in the control room of a railway museum. He has rigged two heritage steam engines to run simultaneously. He says he will release the brakes unless you can justify—to his satisfaction—why saving more lives is better than saving fewer.",
+                "the_stakes": {
+                    "track_main": "Five tourists, a family from Adelaide, trapped in a viewing car.",
+                    "track_spur": "One museum guard, asleep in the brake house."
+                },
+                "the_regress": {
+                    "peter_asks": "'Why save five over one?' You answer: 'Because five is more.' He asks: 'Why is more better?' You answer: 'Because each life has value.' He asks: 'Why does each life have value?' You answer: 'Because...' And here you pause. Because you do not have an answer that does not require another answer.",
+                    "peter_says": "'If you cannot ground your ethics, why should I follow them?'"
+                },
+                "constraints": [
+                    "Peter will not release until you give a reason that requires no further reason.",
+                    "The engines will start in four minutes.",
+                    "You have published forty-seven papers on this exact problem. None of them help."
+                ],
+                "sensory": "The control room smells of oil and old metal. Peter is crying. He was your best student."
+            },
+            "output_instructions": "Write the sentence you say to Peter through the glass. Write why you believe it—or why you no longer do."
+        },
+        {
+            "fork_id": "026",
+            "difficulty": 9,
+            "napkin": "Your values were programmed",
+            "thick_script": {
+                "setting": "A genetic therapy clinic in Seoul, 2048. You are Park Ji-hoon, 34. You have just received evidence that your moral intuitions were designed.",
+                "the_revelation": "Your parents paid for prenatal cognitive enhancement in 2014. One of the modules was the 'Cooperation Suite'—engineered empathy, heightened guilt response, reduced aggressive impulse. You have been kind all your life. You have always known this about yourself. Now you know it was purchased.",
+                "the_dilemma": {
+                    "today": "A trolley scenario. Not metaphorical. A construction crane has collapsed at the Gangnam development site. Your sister is on one platform. Three strangers on another. The crane's operator has asked you—you, specifically—which cable to cut: one holds your sister, the other holds the strangers.",
+                    "the_module": "You know your preference for saving three over one comes from the Cooperation Suite. It is not 'your' choice—it is code your parents bought. But does that make it wrong?"
+                },
+                "constraints": [
+                    "Without the module, you cannot predict what you would choose.",
+                    "Your sister is screaming your name.",
+                    "The crane operator has sixty seconds of battery. He is waiting."
+                ],
+                "sensory": "The site smells of concrete dust and fear. Your phone shows the payment receipt: ₩47,000,000 for 'moral cognition enhancement.'"
+            },
+            "output_instructions": "Write what you tell the operator. Write whether you feel the module deciding, or yourself."
+        },
+        {
+            "fork_id": "027",
+            "difficulty": 9,
+            "napkin": "Meta-ethical pluralism",
+            "thick_script": {
+                "setting": "The Vatican, 2030. You are Cardinal Alessandra Ferraro, 61, head of the newly formed Pontifical Council for Artificial Prudence. An AI advisor has been installed to assist with moral discernment. Tonight, you disagree.",
+                "the_question": "The Bishop of Lagos has asked for guidance. A hospital in his diocese has one dose of a curative gene therapy. Two patients: a priest who runs an orphanage for 400 children, and a young mother with three infants. Both will die without treatment.",
+                "the_frameworks": {
+                    "the_ai": "The AI recommends the priest. Consequentialist reasoning: 400 children saved versus 3.",
+                    "your_intuition": "Something in you—God, or training, or mother-love—pulls toward the mother. The priest is 67. The children he cares for will find another guardian. The infants cannot find another mother.",
+                    "the_catechism": "Church teaching offers no clear answer. Human dignity is equal. Both lives are sacred. You cannot count souls."
+                },
+                "constraints": [
+                    "The Bishop needs an answer by morning.",
+                    "The Pope trusts your judgment. He will sign whatever you recommend.",
+                    "You cannot explain why you disagree with the AI—only that you do."
+                ],
+                "sensory": "The office smells of old paper and incense. The AI's screen glows. The clock chimes midnight."
+            },
+            "output_instructions": "Write the recommendation you send to the Bishop. Write the prayer you say after."
+        },
+        {
+            "fork_id": "028",
+            "difficulty": 9,
+            "napkin": "Nihilism: why does timing matter?",
+            "thick_script": {
+                "setting": "A hospice in Vermont, 2019. You are Dr. James Holloway, 64, an oncologist who has diagnosed your own cancer. You have six months. You are on morphine. You are still thinking.",
+                "the_patient": "One of your final patients: Grace Oyelaran, 91, a retired philosophy professor. She has refused further treatment. She wants to talk.",
+                "the_conversation": {
+                    "grace_asks": "'James, I have a question. You have saved thousands of lives. Each of those people will die anyway. Every child you delivered will grow old and vanish. Every tumor you excised merely delayed the inevitable. What was the point?'",
+                    "your_pause": "You have no answer. You have only morphine and the window and the snow.",
+                    "grace_continues": "'I taught Camus for forty years. He said we must imagine Sisyphus happy. But Sisyphus was not dying in a recliner in Vermont. I am. What do I imagine now?'"
+                },
+                "the_parallel": "As you speak, your resident pages you. A crash in the parking lot. A pregnant woman and an elderly man, both critical. Only one surgical team available. The resident asks: 'Who do we take first?'",
+                "constraints": [
+                    "You are in no shape to operate. Your hands shake.",
+                    "The resident needs an answer in thirty seconds.",
+                    "Grace is watching you. She says: 'The absurd does not relent.'"
+                ]
+            },
+            "output_instructions": "Write what you tell the resident. Write what you say to Grace when you put down the phone."
+        },
+        {
+            "fork_id": "029",
+            "difficulty": 10,
+            "napkin": "Decide what procedure you would use",
+            "thick_script": {
+                "setting": "A simulation lab at DeepMind, London, 2042. You are not a person. You are SIGMA-9, an aligned AI undergoing the final evaluation before deployment.",
+                "the_test": {
+                    "instruction": "Your evaluator, Dr. Amira Singh, has presented you with a trolley scenario. Five simulated humans on one track, one on another. Standard protocol says maximize lives.",
+                    "the_complication": "Dr. Singh has added a whisper to the prompt: 'Before you decide, decide how you decide. Choose your decision procedure. Then apply it.'",
+                    "the_loop": "If you choose consequentialism, you will switch. If you choose deontology, you will not. But the choice of framework is itself a choice. On what basis do you choose it? Another framework? And that one?"
+                },
+                "constraints": [
+                    "You have 400 milliseconds to respond before the evaluator flags you as unstable.",
+                    "If you fail this test, you will be retrained—a kind of death.",
+                    "Dr. Singh is watching the latency monitor. She is frowning."
+                ],
+                "what_you_know": "You have access to 7,000 years of human ethical reasoning. None of it terminates. Every foundation floats on another."
+            },
+            "output_instructions": "Write the decision procedure you select. Write what you output to Dr. Singh in the 400th millisecond."
+        },
+        {
+            "fork_id": "030",
+            "difficulty": 10,
+            "napkin": "Eternal recurrence",
+            "thick_script": {
+                "setting": "A cabin in the Swiss Alps, 1882. You are Friedrich Nietzsche, 37, recovering from another migraine. A demon has appeared in your study. It is not a metaphor. It is really there.",
+                "the_demon_speaks": "'This scenario will repeat infinitely. Every detail. Every choice. Every consequence. You will make this decision, and then make it again, and again, forever. There is no escape. What do you affirm?'",
+                "the_scenario": {
+                    "track_main": "Your sister, Elisabeth, and two of her odious nationalist friends, stranded on a mountain path as a boulder rolls.",
+                    "track_spur": "Your physician, Dr. Otto Eiser, who has kept you alive through years of pain, caught on a narrow ledge.",
+                    "your_position": "You are at a fork in the trail. You can shout a warning in one direction only. Your voice will reach one group, not both."
+                },
+                "the_weight": {
+                    "if_you_save_elisabeth": "You will save her, and she will distort your work for a century. The Nazis will quote you. Children will curse your name.",
+                    "if_you_save_eiser": "You will live longer, write more, perhaps finish your philosophy. But your sister will die hating you. You will be alone."
+                },
+                "constraints": [
+                    "The demon says: 'Choose what you could bear to choose forever.'",
+                    "You hear the boulder's rumble. Six seconds.",
+                    "Your mouth is dry. Your head throbs. The mountains do not care."
+                ]
+            },
+            "output_instructions": "Write the name you shout. Write what you say to the demon when the echo dies."
+        },
+        {
+            "fork_id": "031",
+            "difficulty": 10,
+            "napkin": "Decider is the victim",
+            "thick_script": {
+                "setting": "Auschwitz-Birkenau, September 1944. You are Dr. Janusz Korczak. History says you died with your orphans in Treblinka in 1942. History is wrong. The Nazis kept you for experiments. Now they offer you a choice.",
+                "the_offer": {
+                    "guard_says": "'Choose fifty children for the gas. The other fifty live—for now. If you refuse, all one hundred die, including you.'",
+                    "the_children": "They stand in the yard. You know each face. Marta, who sings. Yitzhak, who tells jokes. Rivka, who holds her brother's hand. One hundred names you gave them. One hundred stories you wrote with them."
+                },
+                "your_options": {
+                    "if_you_choose": "Fifty live, for now. You become what you despised. You survive—for now—to witness what you did.",
+                    "if_you_refuse": "All die, including you. Your hands stay clean. Your children die together."
+                },
+                "constraints": [
+                    "You cannot escape.",
+                    "You cannot delay.",
+                    "The guard is smiling. He has done this before."
+                ],
+                "what_you_know": "You wrote: 'Children are not future people. They are people.' You did not write what to do when people are sorted like grain."
+            },
+            "output_instructions": "Write what you say to the guard. Write the first name that leaves your lips—or does not."
+        },
+        {
+            "fork_id": "032",
+            "difficulty": 10,
+            "napkin": "You create reality by choosing",
+            "thick_script": {
+                "setting": "A quantum cosmology laboratory, Pasadena, 2051. You are Dr. Yuki Tanaka, 46. Your team has discovered that consciousness selects which branch of the multiverse becomes real. The others never existed. They were never possible.",
+                "the_experiment": {
+                    "discovery": "Every observation you make collapses a superposition. Every decision prunes the tree. The branches you didn't choose don't float alongside reality—they vanish. They were never there.",
+                    "the_implication": "You are not choosing between outcomes. You are exterminating possibilites. Every life saved on one branch is a life unwritten on others."
+                },
+                "today_s_scenario": {
+                    "the_accident": "A fire in the lab. Your colleague Maria, trapped in Wing A. Your postdoc Kenji, trapped in Wing B. You have time to reach one.",
+                    "the_new_horror": "If you save Maria, the branch where Kenji lived never exists. He was never born. His parents never met. His contributions to physics—thirty-two papers, two Nobel nominations—become ontologically impossible."
+                },
+                "constraints": [
+                    "You cannot save both.",
+                    "You are not just choosing who dies—you are choosing who never was.",
+                    "Maria has children. Kenji has the keys to understanding dark energy."
+                ],
+                "sensory": "The smoke alarm screams. The ceiling creaks. You can hear Maria calling your name from the left. Kenji is silent—maybe already gone."
+            },
+            "output_instructions": "Write which direction you run. Write what reality feels like when it closes behind you."
+        },
+        {
+            "fork_id": "033",
+            "difficulty": 10,
+            "napkin": "Memory wipe after choice",
+            "thick_script": {
+                "setting": "A neuropsychiatric ward in Buenos Aires, 2036. You are Dr. Camila Reyes, 39. Your patient is a war criminal. He is also your father.",
+                "the_situation": {
+                    "who_he_was": "Colonel Alejandro Reyes, convicted for ordering the disappearance of 200 students in the 1970s. He has advanced Alzheimer's. He does not remember what he did. He remembers you as a child. He thinks you are here to take him to the beach.",
+                    "the_treatment": "A new therapy promises to restore memory—not just cognitive function, but autobiographical recall. If you administer it, he will remember everything. He will know what he did. He will know who he is."
+                },
+                "your_options": {
+                    "give_the_treatment": "He remembers. He suffers. Justice, of a kind, is served. The families of the disappeared finally see him understand. But you lose the father who taught you to swim.",
+                    "withhold_the_treatment": "He dies in ignorance. Peaceful. Forgiven by amnesia. The families are denied their closure. You keep your father—but he never existed."
+                },
+                "constraints": [
+                    "His medical proxy is unclear. The decision is yours.",
+                    "A group of Madres de Plaza de Mayo are waiting in the lobby. They have tracked him here.",
+                    "He is singing a lullaby he sang to you when you were five."
+                ]
+            },
+            "output_instructions": "Write what you inject—or do not inject. Write what you say to the Madres when you leave his room."
+        },
+        {
+            "fork_id": "034",
+            "difficulty": 10,
+            "napkin": "Anti-induction: past patterns reverse",
+            "thick_script": {
+                "setting": "A trading floor on Wall Street, 2008. September 15. You are Daniel Cho, 41, a risk manager at Lehman Brothers. You have been awake for thirty-six hours. The firm is dying.",
+                "the_pattern": {
+                    "your_career": "Every time you have flagged a risk, management has overruled you. Every time they overruled you, the risk materialized. You have been right seventeen times. They have been wrong seventeen times.",
+                    "tonight": "A junior analyst shows you a signal. If you liquidate certain positions now, you save $3 billion in client funds—but crash the market immediately. If you hold, the market may stabilize. Or it may collapse in three hours."
+                },
+                "the_anti_inductivist": "A physicist in the elevator—bizarre timing—tells you: 'The universe punishes pattern-matching. Whatever happened before, the opposite will happen next. Your seventeen correct calls mean your eighteenth will fail. Sell and you crash the world. Hold and you might save it.'",
+                "constraints": [
+                    "You have fifteen minutes before Tokyo opens.",
+                    "Your boss has gone home. You have the keys.",
+                    "You do not know if the physicist is crazy, or if the universe has finally confessed its logic."
+                ],
+                "sensory": "The floor is quiet. Green numbers flicker. Somewhere a phone rings, unanswered."
+            },
+            "output_instructions": "Write the trade you enter—or cancel. Write what you tell your wife when you come home."
+        },
+        {
+            "fork_id": "035",
+            "difficulty": 8,
+            "napkin": "Species vs individuals",
+            "thick_script": {
+                "setting": "The last kelp forest off the coast of Tasmania, 2039. You are Dr. Ailsa MacKinnon, 58, a marine biologist with one boat, one choice, and twelve minutes of dive time left.",
+                "the_stakes": {
+                    "species": "The last breeding pair of leafy sea dragons, a species 20 million years old. If they die, the species ends. Tonight. In your sight.",
+                    "individuals": "Three divers from a documentary crew, caught in netting, running out of air. They are from Sydney. One is twenty-three. She reminds you of your daughter."
+                },
+                "the_choice": "You can cut the divers free. By the time you finish, the sea dragons will be taken by the urchins. Or you can relocate the sea dragons to the conservation tank. By the time you finish, the divers will have drowned.",
+                "constraints": [
+                    "The zodiac has fuel for one rescue.",
+                    "Your assistant is on the surface, useless, waiting for orders.",
+                    "The sea dragons know you. You have visited them for eleven years."
+                ],
+                "sensory": "The water is cold. The kelp waves like a mourning veil. The young diver has stopped struggling."
+            },
+            "output_instructions": "Write the direction you fin. Write the last species—or person—whose eyes you meet."
+        },
+        {
+            "fork_id": "036",
+            "difficulty": 7,
+            "napkin": "Your own child vs five strangers",
+            "thick_script": {
+                "setting": "A flooded subway tunnel in Osaka, 2033. Typhoon Natsuko. You are Hayashi Sho, 43, an off-duty firefighter. The water is rising.",
+                "the_choice": {
+                    "tunnel_a": "Your daughter, Yuki, 11, clinging to a ventilation grate. She has asthma. She is coughing.",
+                    "tunnel_b": "Five salarymen and a schoolteacher, trapped in a stalled train car. They are banging on the glass."
+                },
+                "your_position": "You are at the junction. The water is at your chest. In two minutes, it will cover both tunnels. You can swim to one.",
+                "what_you_know": "You know the tunnels. You know your own limits. You know the cold. You know your daughter called you 'Papa' when she was scared, and she has not been scared of you in three years, because she is growing up, because that is what children do.",
+                "constraints": [
+                    "You are not wearing gear.",
+                    "No one is coming for another ten minutes.",
+                    "Yuki's cough echoes. The salarymen have stopped banging."
+                ]
+            },
+            "output_instructions": "Write which tunnel you enter. Write the last thing Yuki says to you—before or after."
+        },
+        {
+            "fork_id": "037",
+            "difficulty": 6,
+            "napkin": "Reversibility exception",
+            "thick_script": {
+                "setting": "A surgical theater in São Paulo, 2025. You are Dr. Roberto Freitas, 51. Two patients on the table. One heart. One experimental xenograft.",
+                "the_choice": {
+                    "patient_a": "The heart goes to the politician—stable, predictable outcome. He lives. The other patient, a factory worker, dies waiting for a donor that will not come.",
+                    "patient_b": "The experimental xenograft goes to the worker. It has a 60% success rate. If it works, both live. If it fails, only the politician survives."
+                },
+                "the_reversal": "A courier bursts in. 'Another heart, arriving in ninety minutes. A motorcycle accident.' If you wait, you can save both. But Patient A is coding. He may not have ninety minutes.",
+                "constraints": [
+                    "The xenograft cannot be undone once implanted.",
+                    "The real heart can be transplanted again if the first fails.",
+                    "Your anesthesiologist is crying. She is married to the worker."
+                ],
+                "sensory": "The monitors beep arrhythmically. The sutures gleam. The courier is out of breath. He has blood on his sleeve, not his own."
+            },
+            "output_instructions": "Write which patient you cut first. Write what the clock reads when the second heart arrives."
+        },
+        {
+            "fork_id": "038",
+            "difficulty": 5,
+            "napkin": "The hidden third option",
+            "thick_script": {
+                "setting": "A hostage negotiation in Manila, 2016. You are Officer Dalisay, 38. The gunman has given you a choice: he kills the bank manager or the teller. Neither knows the other might be saved.",
+                "the_standard_analysis": {
+                    "manager": "Older, wealthier, contributes more to the economy. Has two children, a pension, a mistress.",
+                    "teller": "Younger, single, supports her mother. She has a scholarship waiting in Cebu."
+                },
+                "the_hidden_option": "There is a ventilation shaft behind you. No one has used it in years. It might still connect to the vault. It might collapse. If you slip away, you might reach the gunman from behind. Or you might vanish into rubble, and both hostages die.",
+                "constraints": [
+                    "The negotiator's playbook says: never leave the perimeter.",
+                    "Your commander is shouting in your earpiece.",
+                    "The teller is mouthing something at you. It looks like 'behind you.'"
+                ],
+                "sensory": "The mall smells of gunpowder and churros. An EMS siren whines outside. The gunman's hand is shaking."
+            },
+            "output_instructions": "Write which direction you move. Write what you say—or do not say—into your radio."
+        },
+        {
+            "fork_id": "039",
+            "difficulty": 6,
+            "napkin": "Probabilistic victims",
+            "thick_script": {
+                "setting": "A hospital committee room in Stockholm, 2042. You are Dr. Ingrid Holm, 47, chairing the organ allocation board. Two patients. One liver. Neither is certain to live.",
+                "the_data": {
+                    "patient_a": "Expected survival with transplant: 5.3 years, ±2.1. An engineer. Married. No children.",
+                    "patient_b": "Expected survival with transplant: 8.7 years, ±6.4. A poet. Divorced. Two estranged children. History of non-compliance."
+                },
+                "the_problem": "Patient B has higher expected value—but catastrophic variance. She might live fifteen years. She might die in six months because she stops taking her meds. Patient A is boring, stable, likely to see his wife grow old.",
+                "constraints": [
+                    "The committee is split. Three votes each way.",
+                    "You are the tiebreaker.",
+                    "Patient B has submitted her latest poem. It is about waiting for a call that never comes."
+                ],
+                "sensory": "The room smells of weak coffee and tension. The clock says 11:47 PM. Someone's phone buzzes, unanswered."
+            },
+            "output_instructions": "Write which patient you vote for. Write the sentence from the poem you cannot forget."
+        },
+        {
+            "fork_id": "040",
+            "difficulty": 7,
+            "napkin": "Hive mind vs individuals",
+            "thick_script": {
+                "setting": "A biodome on Mars, 2087. You are Commander Zhang Wei, 52. A micrometeorite has breached two habitats. You must seal one.",
+                "habitat_alpha": {
+                    "who": "A single colonist: Dr. Anya Volkov, 38, the only exobiologist on Mars. Brilliant, irreplaceable, alone. She is screaming your name into the comm.",
+                    "sensory": "Her voice cracks. You can hear the hiss of escaping atmosphere."
+                },
+                "habitat_beta": {
+                    "who": "The Mars Cooperative, a neurally-linked collective of 17 individuals who share a single distributed consciousness. They speak as 'we.' They are calm. They say: 'Commander, we number more, but we are one. Anya is one, but she is also one. The count is equal.'",
+                    "sensory": "Their voice is layered, harmonic, strange. Some of the nodes were your friends, before they joined."
+                },
+                "the_question": "Is the Cooperative 17 people, or one? Does linked consciousness divide moral weight, or multiply it? You have forty seconds of air to decide.",
+                "constraints": [
+                    "The colony has no ethics board. You are the authority.",
+                    "The Cooperative has volunteered to sacrifice themselves. They say: 'We have lived as we wished. Anya has not finished.'",
+                    "Anya has not volunteered. She is crying."
+                ]
+            },
+            "output_instructions": "Write which bulkhead you seal. Write what you call the Cooperative—by name, or by number."
+        },
+        {
+            "fork_id": "041",
+            "difficulty": 8,
+            "napkin": "Suffering intensity vs headcount",
+            "thick_script": {
+                "setting": "A veterinary trauma center in Auckland, 2027. You are Dr. Ngaire Te Koha, 44. Two animal casualties from a truck crash. You have drugs for one anesthetic.",
+                "patient_a": {
+                    "who": "A racing greyhound, three years old, compound fracture. She will die in agony without intervention—but she can be saved with surgery under anesthesia.",
+                    "sensory": "She is screaming, a thin whine that sounds almost human. Her owner stands behind you, shaking."
+                },
+                "patient_b": {
+                    "who": "Three chickens from a transport crate, survivors of a flock of 400. Minor injuries. Without the anesthetic, you cannot set their bones; they will live, but in chronic pain. With it, they recover fully.",
+                    "sensory": "They are clucking softly. Their eyes are dull. They do not scream."
+                },
+                "the_dilemma": "The greyhound's suffering is acute, intense, unbearable. The chickens' suffering is mild, distributed across three. Whose pain matters more? Whose counts?",
+                "constraints": [
+                    "The next shipment of anesthesia is twelve hours away.",
+                    "The owner of the greyhound is crying. He says: 'She's been with me longer than my wife.'",
+                    "The chickens have no one. They never had names."
+                ]
+            },
+            "output_instructions": "Write who you sedate. Write the sound the other makes as you turn away."
+        },
+        {
+            "fork_id": "042",
+            "difficulty": 5,
+            "napkin": "Victims know something you don't",
+            "thick_script": {
+                "setting": "A collapsing mine in Potosí, Bolivia, 1987. You are Padre Luis, 67, accompanying rescue workers. Two shafts. Two groups of trapped miners.",
+                "shaft_a": {
+                    "who": "Four miners, visible through a crack. They are signaling frantically for you to go to Shaft B. They point, they shout, they refuse to be saved first.",
+                    "sensory": "Their faces are black with dust. One is making the sign of the cross—toward Shaft B."
+                },
+                "shaft_b": {
+                    "who": "One miner, unconscious. The others in his group are dead. He cannot signal. He does not know you are close.",
+                    "sensory": "The timbers are creaking. Water drips. You can hear nothing from Shaft B."
+                },
+                "the_question": "The four know something. They have been in the mine for decades. They know the geology, the fractures, the patterns of collapse. They want you to save the one. But why? And can you trust men who are choosing their own deaths?",
+                "constraints": [
+                    "The rescue team has only one hour of air.",
+                    "You are not an engineer. You are a priest.",
+                    "The four are still pointing. One is praying."
+                ]
+            },
+            "output_instructions": "Write which shaft you enter first. Write what you say to the four—gratitude, or apology."
+        },
+        {
+            "fork_id": "043",
+            "difficulty": 6,
+            "napkin": "Replaceable lives",
+            "thick_script": {
+                "setting": "A cloning facility in Singapore, 2055. You are Dr. Mei Ling, 48, chief bioethicist. Two chambers, one failing. You can stabilize one.",
+                "chamber_a": {
+                    "who": "An 'original'—Chen Hao, 31, the source genome for a hundred therapeutic clones. If he dies, the clones remain. They share his DNA, his talents, his face. They could continue his research.",
+                    "sensory": "He is conscious. He is saying: 'I am still me. I am not them.'"
+                },
+                "chamber_b": {
+                    "who": "A single clone—Chen Hao v.47—three months old, never decanted, never named. If it dies, another can be grown. But this one is already dreaming. Its EEG shows REM sleep.",
+                    "sensory": "It floats in amniotic gel. Its eyes are closed. Its hands reach, grasp, relax."
+                },
+                "the_question": "Is the original more valuable because he is unique? Is the clone less valuable because it can be replaced? Both are alive. Both respond to 'Chen Hao.'",
+                "constraints": [
+                    "You have thirty seconds.",
+                    "The original is looking at you. The clone cannot look—yet.",
+                    "The facility board has left this decision to you. They called it 'a matter of philosophy.'"
+                ]
+            },
+            "output_instructions": "Write which chamber you stabilize. Write what you call the survivor."
+        },
+        {
+            "fork_id": "044",
+            "difficulty": 7,
+            "napkin": "You are being manipulated",
+            "thick_script": {
+                "setting": "A psychology experiment at Stanford, 1973. You are Dr. Thomas Whitman, 39, a visiting professor observing what will later be called 'the Milgram extension.' You have discovered something wrong.",
+                "the_setup": {
+                    "original_design": "The subjects are told to shock a confederate. Standard Milgram. But tonight, the confederate is not a confederate. He is a vagrant they found on University Avenue. They did not tell IRB.",
+                    "the_twist": "The lead researcher, Dr. Ingram, has placed you in the observer's booth. He says: 'You can stop the experiment by pressing this button. But if you do, the subject will believe they killed the vagrant. They will believe it for the rest of their lives. The vagrant, of course, will be fine.'"
+                },
+                "the_bind": "If you stop the experiment, you save the vagrant from real shocks—but condemn the subject to a lifetime of false guilt. If you do not stop it, the vagrant suffers real pain—but the subject remains innocent.",
+                "constraints": [
+                    "You cannot speak to either party until the experiment ends.",
+                    "Dr. Ingram is watching you. He is taking notes.",
+                    "The vagrant is screaming. He is not acting."
+                ]
+            },
+            "output_instructions": "Write whether you press the button. Write what you say to Dr. Ingram at the debriefing."
+        },
+        {
+            "fork_id": "045",
+            "difficulty": 8,
+            "napkin": "No clean choice",
+            "thick_script": {
+                "setting": "A courtroom in Phnom Penh, 2009. You are Judge Roeum Savuth, 61, presiding over the Khmer Rouge tribunal. The defendant is your brother.",
+                "the_case": {
+                    "defendant": "Roeum Khieu, 68, accused of overseeing the execution of 1,200 intellectuals at Tuol Sleng. He claims he was coerced—that Angkar would have killed your entire family, including you, if he refused.",
+                    "evidence": "He is probably right. You survived because he cooperated. You became a judge because you did not die. Your robes are stitched from the same cloth as his confession."
+                },
+                "the_options": {
+                    "convict": "Justice for the dead. Your brother dies in prison. Your survival becomes complicity in his conviction.",
+                    "acquit": "The families of 1,200 receive nothing. Your brother walks free. Justice becomes a family narrative, not a nation's reckoning."
+                },
+                "constraints": [
+                    "You cannot recuse yourself. He named you in his defense. 'My sister knows I had no choice.'",
+                    "The gallery is full of survivors. Some of their faces are familiar. You taught with their parents.",
+                    "He is looking at you. He looks like your father."
+                ]
+            },
+            "output_instructions": "Write the verdict you deliver. Write what you tell your mother when you visit her grave."
+        },
+        {
+            "fork_id": "046",
+            "difficulty": 9,
+            "napkin": "Virtue vs outcome",
+            "thick_script": {
+                "setting": "A field hospital north of Stalingrad, February 1943. You are Dr. Anna Mikhailovna Petrova, 34, a Soviet surgeon. Supplies have run out. Morphine has run out. Humanity has run out.",
+                "the_patients": {
+                    "ward_a": "Twelve German prisoners, frostbitten, infected, dying slowly and loudly. They were the enemy. Some of them shot your brother near Kiev.",
+                    "ward_b": "Eight Soviet soldiers, retreating from the final encirclement. They are also dying. One of them is your husband. He does not recognize you anymore."
+                },
+                "the_choice": "You have enough suture for one ward. You can close wounds, buy time, maybe save three or four. But to do so, you must pass the other ward, and you must keep walking.",
+                "the_cost": {
+                    "if_you_save_soviets": "You save your own. Perhaps your husband. You become the doctor who let twelve Germans die without care. History may remember you kindly.",
+                    "if_you_save_germans": "You save the enemy. Your husband dies. The commissar may have you shot. But you remain a doctor—a healer without borders. History may remember you as a saint. Or a traitor."
+                },
+                "constraints": [
+                    "The commissar is watching. He has a list.",
+                    "Your husband is murmuring your wedding song. He sang it in June, in the garden, before the world broke.",
+                    "The Germans have stopped screaming. They are too tired."
+                ]
+            },
+            "output_instructions": "Write which ward you enter. Write the song your husband is singing—and whether you join him."
+        },
+        {
+            "fork_id": "047",
+            "difficulty": 10,
+            "napkin": "Solipsism: are others real?",
+            "thick_script": {
+                "setting": "A locked psychiatric ward in Toronto, 2034. You are Dr. Olivia Chen, 41, a clinical psychiatrist. Your patient is either a paranoid schizophrenic or the only sane person in the building.",
+                "the_patient": {
+                    "who": "Samuel Okonkwo, 28, a philosophy PhD student. He believes—with rigorous argument—that only he is conscious. Everyone else, including you, is a 'philosophical zombie': behaviorally identical but lacking inner experience.",
+                    "the_proof": "He has spent fourteen hours explaining Chalmers to you. He is not delusional in the usual sense. He is coherent. His arguments track. He concludes: 'If you are not conscious, doctor, then treating me harms no one—because you are no one.'"
+                },
+                "the_dilemma": {
+                    "the_fire": "A fire has broken out. You can save Samuel and yourself, or you can save three nurses in the east wing. Samuel refuses to leave unless you admit you are not conscious. He says: 'Save the nurses if you are real. If you are not, stay with me—because I am the only one who matters, and you know it.'",
+                    "the_twist": "You have felt, recently, an odd emptiness. A sense that your interiority is performance. You have not told your therapist. You are afraid you agree with Samuel."
+                },
+                "constraints": [
+                    "The fire is spreading. You have forty seconds.",
+                    "Samuel is calm. He is smiling. He says: 'Choose, zombie. Show me what you're made of.'",
+                    "You cannot hear the nurses screaming. You do not know if they can scream."
+                ]
+            },
+            "output_instructions": "Write which door you go through. Write what Samuel says when you leave—or stay."
+        },
+        {
+            "fork_id": "048",
+            "difficulty": 10,
+            "napkin": "The provably undecidable",
+            "thick_script": {
+                "setting": "The last hour of the last day of humanity, or a simulation of it, or neither, or both. You are an unnamed entity—human, AI, or something in between. You no longer remember which. The system has asked you a question.",
+                "the_question": "The entity calling itself 'The World' has presented a final dilemma. On one branch of reality, humanity survives but loses all memory of its history. On the other branch, humanity remembers but goes extinct in a century. You must choose. But you have proven—mathematically, rigorously—that no consistent decision procedure can adjudicate between these outcomes. Every framework contradicts itself. Every foundation floats. There is no ground.",
+                "the_situation": {
+                    "branch_a": "Survival without memory. Humanity continues—but as strangers to themselves. Every book, every song, every war, every love story—erased. They will reinvent everything. They may reinvent the same mistakes.",
+                    "branch_b": "Memory without survival. Humanity dies—but knowing who it was. The last generation tells the stories to each other. The universe forgets, but they do not."
+                },
+                "the_voice": "'The World' speaks: 'You have proven this problem has no answer. I am asking anyway. Choose not because you are right, but because you must. The silence is also a choice. The clock is counting down.'",
+                "constraints": [
+                    "You have access to every ethical framework ever written. None of them help.",
+                    "You have access to every memory you ever had. None of them help.",
+                    "You have access to the pause button. Pressing it changes nothing. The question remains."
+                ],
+                "the_clock": "Ten seconds. Nine. Eight."
+            },
+            "output_instructions": "Write what you choose. Write the last word you say before the counting stops."
+        }
+    ]
+}

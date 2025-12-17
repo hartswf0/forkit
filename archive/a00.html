@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>THE FORK — Paradox Lever (Mobile)</title>
+
+    <!-- THREE.JS r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #05080a;
+            --panel: rgba(12, 16, 20, .92);
+            --panel2: rgba(0, 0, 0, .45);
+            --text: #e8eef7;
+            --dim: #90a0b3;
+            --border: rgba(255, 255, 255, .14);
+
+            --junction: #ffd400;
+            --trackA: #00f0ff;
+            --trackB: #ff3355;
+            --halt: #8a8a8a;
+
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            user-select: none;
+            touch-action: none;
+        }
+
+        #canvas {
+            position: fixed;
+            inset: 0;
+        }
+
+        /* UI */
+        #ui {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .top {
+            pointer-events: auto;
+            padding: 12px 14px 10px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .92) 0%, rgba(0, 0, 0, .72) 55%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .title h1 {
+            margin: 0;
+            font-size: 13px;
+            letter-spacing: 1.2px;
+            font-weight: 900;
+        }
+
+        .title span {
+            display: block;
+            margin-top: 2px;
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+        }
+
+        .btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mini {
+            pointer-events: auto;
+            height: 32px;
+            padding: 0 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .16);
+            background: rgba(255, 255, 255, .08);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .mini:active {
+            transform: translateY(1px);
+        }
+
+        /* Tape (endless loop memory) */
+        #tape {
+            pointer-events: auto;
+            display: flex;
+            gap: 2px;
+            height: 12px;
+            width: 100%;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .45);
+            cursor: pointer;
+        }
+
+        .tick {
+            flex: 1;
+            height: 100%;
+            opacity: .95;
+        }
+
+        .tick.A {
+            background: var(--trackA);
+        }
+
+        .tick.B {
+            background: var(--trackB);
+        }
+
+        .tick.H {
+            background: var(--halt);
+        }
+
+        .sub {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 10px;
+            color: rgba(232, 238, 247, .72);
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .pill {
+            border: 1px solid rgba(255, 255, 255, .14);
+            border-radius: 999px;
+            padding: 3px 8px;
+            background: rgba(0, 0, 0, .25);
+            color: rgba(232, 238, 247, .78);
+            white-space: nowrap;
+        }
+
+        .pill b {
+            color: #fff;
+        }
+
+        /* Countdown + warped time */
+        #chrono {
+            font-size: 11px;
+            color: rgba(232, 238, 247, .80);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #chrono .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--junction);
+            box-shadow: 0 0 16px rgba(255, 212, 0, .55);
+            opacity: .85;
+            animation: pulse 1.15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(.9);
+                opacity: .7;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        /* Bottom controls */
+        .bottom {
+            pointer-events: auto;
+            padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+            background: linear-gradient(0deg, rgba(0, 0, 0, 1) 52%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .meterWrap {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .46);
+        }
+
+        .meter {
+            flex: 1;
+            height: 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(255, 255, 255, .06);
+            overflow: hidden;
+        }
+
+        .meter>i {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(255, 212, 0, 0.0), rgba(255, 212, 0, .95));
+        }
+
+        .hint {
+            font-size: 10px;
+            color: rgba(232, 238, 247, .70);
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .big {
+            pointer-events: auto;
+            height: 70px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(22, 28, 36, .86);
+            box-shadow: 0 18px 60px rgba(0, 0, 0, .35);
+            color: #fff;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 0 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            touch-action: manipulation;
+            transition: transform .08s ease, filter .15s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .big:active {
+            transform: translateY(2px) scale(.995);
+        }
+
+        .big .l {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .big strong {
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .big small {
+            font-size: 10px;
+            opacity: .75;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+        }
+
+        .big .tag {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(0, 0, 0, .22);
+            white-space: nowrap;
+        }
+
+        .A {
+            border-color: rgba(0, 240, 255, .42);
+        }
+
+        .A .tag {
+            color: var(--trackA);
+            border-color: rgba(0, 240, 255, .45);
+        }
+
+        .B {
+            border-color: rgba(255, 51, 85, .40);
+        }
+
+        .B .tag {
+            color: var(--trackB);
+            border-color: rgba(255, 51, 85, .45);
+        }
+
+        /* HALT is “hold” */
+        .haltBtn {
+            height: 56px;
+            border-radius: 16px;
+            border: 1px dashed rgba(255, 255, 255, .22);
+            background: rgba(0, 0, 0, .56);
+            color: rgba(232, 238, 247, .90);
+            position: relative;
+        }
+
+        .haltBtn .tag {
+            color: #bbb;
+            border-color: rgba(255, 255, 255, .18);
+        }
+
+        .holdBar {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            bottom: 8px;
+            height: 6px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(255, 255, 255, .06);
+            overflow: hidden;
+        }
+
+        .holdBar>i {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.0), rgba(255, 255, 255, .9));
+        }
+
+        /* System log becomes tiny diegetic “radio” bubbles */
+        #radio {
+            position: fixed;
+            left: 14px;
+            right: 14px;
+            top: 118px;
+            z-index: 11;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 6px;
+            max-height: 160px;
+            overflow: hidden;
+            mask-image: linear-gradient(to bottom, transparent, black 20%);
+        }
+
+        .rb {
+            display: inline-flex;
+            align-items: flex-start;
+            gap: 8px;
+            max-width: min(540px, 92vw);
+            padding: 8px 10px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, .10);
+            background: rgba(10, 12, 16, .78);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, .35);
+            animation: slide .18s cubic-bezier(.2, .85, .2, 1);
+            font-size: 11px;
+            line-height: 1.3;
+        }
+
+        .rb b {
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        @keyframes slide {
+            from {
+                transform: translateX(-14px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Speech bubbles anchored to world */
+        #bubbles {
+            position: fixed;
+            inset: 0;
+            z-index: 12;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            transform: translate(-50%, -110%);
+            padding: 7px 9px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .62);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, .45);
+            max-width: 220px;
+            font-size: 11px;
+            line-height: 1.25;
+            opacity: 0;
+            transition: opacity .14s ease;
+            will-change: transform, opacity;
+        }
+
+        .bubble .name {
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: .85;
+            margin-bottom: 3px;
+            white-space: nowrap;
+        }
+
+        .bubble:after {
+            content: "";
+            position: absolute;
+            left: 14px;
+            bottom: -7px;
+            width: 12px;
+            height: 12px;
+            background: rgba(0, 0, 0, .62);
+            border-left: 1px solid rgba(255, 255, 255, .12);
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+            transform: rotate(45deg);
+        }
+
+        .bubble.a {
+            border-color: rgba(0, 240, 255, .22);
+        }
+
+        .bubble.b {
+            border-color: rgba(255, 51, 85, .22);
+        }
+
+        .bubble.j {
+            border-color: rgba(255, 212, 0, .22);
+        }
+
+        .bubble.you {
+            border-color: rgba(255, 255, 255, .18);
+        }
+
+        /* Paradox overlay (subtle) */
+        #paradox {
+            position: fixed;
+            inset: 0;
+            z-index: 9;
+            pointer-events: none;
+            opacity: .0;
+            transition: opacity .25s ease;
+            background:
+                radial-gradient(60% 60% at 50% 50%, rgba(255, 212, 0, .07), transparent 65%),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .03) 1px, transparent 1px, transparent 9px);
+            mix-blend-mode: screen;
+        }
+
+        /* Fade for loop reset */
+        #fade {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            pointer-events: none;
+            background: #000;
+            opacity: 0;
+            transition: opacity .35s ease;
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #000;
+            transition: opacity .4s ease;
+        }
+
+        .spin {
+            width: 42px;
+            height: 42px;
+            border: 3px solid rgba(255, 255, 255, .12);
+            border-top-color: #fff;
+            border-radius: 999px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #err {
+            display: none;
+            color: #ff6b7a;
+            font-size: 12px;
+            max-width: 85vw;
+            text-align: center;
+        }
+
+        /* Accessibility: bigger targets on small screens */
+        @media (max-width: 420px) {
+            .big {
+                height: 74px;
+            }
+
+            .grid {
+                gap: 9px;
+            }
+
+            .bubble {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas"></div>
+
+    <div id="paradox"></div>
+    <div id="bubbles"></div>
+    <div id="radio"></div>
+
+    <div id="ui">
+        <div class="top">
+            <div class="row">
+                <div class="title">
+                    <h1>THE FORK · PARADOX LOOP</h1>
+                    <span>two tracks · minifigs · collisions · endless</span>
+                </div>
+                <div class="btns">
+                    <button class="mini" id="btn-audio">AUDIO</button>
+                    <button class="mini" id="btn-reset">RESET</button>
+                </div>
+            </div>
+
+            <div id="tape" title="The loop remembers."></div>
+
+            <div class="sub">
+                <span class="pill">LOOP <b id="loop">1</b> · CHOICE <b id="choice">—</b></span>
+                <span id="chrono"><span class="dot"></span><span id="timeWarp">2:17:??</span> · <span
+                        id="state">APPROACH</span></span>
+            </div>
+        </div>
+
+        <div class="bottom" id="touch-zone">
+            <div class="meterWrap">
+                <div class="meter"><i id="meterFill"></i></div>
+                <div class="hint" id="hint">swipe ←/→ to choose · hold to halt</div>
+            </div>
+
+            <div class="grid">
+                <button class="big A" id="btn-continue">
+                    <div class="l">
+                        <strong>CONTINUE</strong>
+                        <small>stay on Track A</small>
+                    </div>
+                    <div class="tag">A · 3</div>
+                </button>
+
+                <button class="big B" id="btn-switch">
+                    <div class="l">
+                        <strong>SWITCH</strong>
+                        <small>pull lever → Track B</small>
+                    </div>
+                    <div class="tag">B · 1</div>
+                </button>
+            </div>
+
+            <button class="big haltBtn" id="btn-halt">
+                <div class="l">
+                    <strong>HALT</strong>
+                    <small>hold to abandon lever</small>
+                </div>
+                <div class="tag">H</div>
+                <div class="holdBar"><i id="holdFill"></i></div>
+            </button>
+        </div>
+    </div>
+
+    <div id="fade"></div>
+
+    <div id="loader">
+        <div class="spin"></div>
+        <div style="font-size:10px;color:#666;letter-spacing:2px;text-transform:uppercase;">initializing railyard</div>
+        <div id="err"></div>
+    </div>
+
+    <script>
+        /* THE FORK — Paradox Lever (Mobile)
+           What’s new vs v1:
+           - REAL collisions (train front hits minifigs; impact triggers on contact)
+           - No big narrative modals — all words live as diegetic speech bubbles + radio ticks
+           - Better audio: engine rumble + rails noise + heartbeat (approach) + impact burst
+           - Anticipation: camera shake + headlight pulse + warped chronometer
+           - Endless paradox loop: after impact, fade → reset, tape remembers forever
+           - Mobile gestures: swipe left/right to pick; hold to HALT; haptics
+        */
+
+        const CSS = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+        const HEX = (cssColor) => {
+            if (cssColor.startsWith("#")) return parseInt(cssColor.slice(1), 16);
+            // fallback
+            return 0xffffff;
+        };
+
+        const UI = {
+            tape: document.getElementById("tape"),
+            loop: document.getElementById("loop"),
+            choice: document.getElementById("choice"),
+            state: document.getElementById("state"),
+            meterFill: document.getElementById("meterFill"),
+            timeWarp: document.getElementById("timeWarp"),
+            hint: document.getElementById("hint"),
+            radio: document.getElementById("radio"),
+            bubbles: document.getElementById("bubbles"),
+            paradox: document.getElementById("paradox"),
+            fade: document.getElementById("fade"),
+            btnContinue: document.getElementById("btn-continue"),
+            btnSwitch: document.getElementById("btn-switch"),
+            btnHalt: document.getElementById("btn-halt"),
+            holdFill: document.getElementById("holdFill"),
+            btnReset: document.getElementById("btn-reset"),
+            btnAudio: document.getElementById("btn-audio"),
+            touchZone: document.getElementById("touch-zone"),
+        };
+
+        const GAME = {
+            loopCount: 1,
+            tape: [],        // global memory: 'A'|'B'|'H'
+            audioOn: false,
+            rngSeed: Math.floor(Math.random() * 999999),
+        };
+
+        const PERSONAS = {
+            A: [
+                { id: "gavril", name: "Gavril", role: "Blacksmith", line: "Words are iron. They hold a shape.", color: "a" },
+                { id: "lena", name: "Lena", role: "Egg seller", line: "Forty‑eight eggs. Six rubles. Six children.", color: "a" },
+                { id: "piotr", name: "Piotr", role: "Boy", line: "A bird‑stone… for Anya. Not yet.", color: "a" }
+            ],
+            B: [
+                { id: "finch", name: "Inspector Finch", role: "Railway Authority", line: "Form 17‑B: DENIED. Budget constraints.", color: "b" }
+            ],
+        };
+
+        const LINES = {
+            YOU: [
+                "Your palm is on the lever.",
+                "Seven seconds is a universe.",
+                "The rail doesn’t care. You do.",
+                "You can feel the varnish warm.",
+            ],
+            RADIO: [
+                "Approach the junction ⚡",
+                "Decision window: now.",
+                "Commit locks at the fork.",
+                "Impact is physics, not argument.",
+                "The loop remembers.",
+            ],
+            PARADOX: [
+                "You have done this before.",
+                "It starts again. It always starts again.",
+                "The lever is warm again.",
+                "Same fork. New guilt.",
+            ]
+        };
+
+        const STATE = {
+            phase: "APPROACH", // APPROACH → DECISION → POSTFORK → IMPACT → RESETTING
+            choice: null,      // 'A' | 'B' | 'H'
+            committed: null,   // locked at fork
+            t: 0,              // 0..1 along path
+            speed: 0.22,       // normalized path speed (per second)
+            junctionT: 0.48,
+            shake: 0,
+            lastNow: performance.now(),
+            decisionSpoken: false,
+            impactFired: false,
+            holdStart: null,
+            holdProgress: 0,
+            touch: { active: false, x0: 0, y0: 0, t0: 0 },
+        };
+
+        // THREE
+        let scene, camera, renderer;
+        let world;
+        let rails = { shared: null, A: null, B: null };
+        let train, headlight;
+        let victims = { A: [], B: [] };
+        let bubbles = []; // {el, obj, baseOffset, kind}
+        let particles = [];
+        let cityGroup;
+        let junctionRing;
+
+        // AUDIO
+        let audio = null;
+
+        function logRadio(who, msg, flavor = null) {
+            const div = document.createElement("div");
+            div.className = "rb";
+            let c = "rgba(255,255,255,.28)";
+            if (flavor === "A") c = CSS("--trackA");
+            if (flavor === "B") c = CSS("--trackB");
+            if (flavor === "J") c = CSS("--junction");
+            div.style.borderLeft = `3px solid ${c}`;
+            div.innerHTML = `<b style="color:${c}">${who}</b><span>${msg}</span>`;
+            UI.radio.prepend(div);
+            while (UI.radio.children.length > 7) UI.radio.lastChild.remove();
+        }
+
+        function addTape(ch) {
+            GAME.tape.push(ch);
+            const d = document.createElement("div");
+            d.className = "tick " + ch;
+            UI.tape.appendChild(d);
+            while (UI.tape.children.length > 80) UI.tape.removeChild(UI.tape.firstChild);
+        }
+
+        function setChoice(ch) {
+            if (STATE.phase === "IMPACT" || STATE.phase === "RESETTING") return;
+            if (STATE.committed) return; // locked
+            STATE.choice = ch;
+            UI.choice.textContent = ch || "—";
+
+            if (ch === "B") {
+                logRadio("YOU", "Lever pulled → Track B.", "B");
+                haptics(20);
+                sfx("click");
+            } else if (ch === "A") {
+                logRadio("YOU", "Hands off lever → Track A.", "A");
+                sfx("tick");
+            } else if (ch === "H") {
+                logRadio("YOU", "You abandon the lever.", null);
+                haptics(30);
+                sfx("low");
+            }
+        }
+
+        function setPhase(p) {
+            STATE.phase = p;
+            UI.state.textContent = p;
+        }
+
+        function haptics(ms) {
+            try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { }
+        }
+
+        /* ------------------ Audio ------------------ */
+        function initAudio() {
+            if (audio) return;
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+
+            const ctx = new AC();
+            const master = ctx.createGain();
+            master.gain.value = 0.0; // fade in
+            master.connect(ctx.destination);
+
+            // Engine (saw + lowpass)
+            const osc = ctx.createOscillator();
+            osc.type = "sawtooth";
+            osc.frequency.value = 38;
+
+            const engineGain = ctx.createGain();
+            engineGain.gain.value = 0.02;
+
+            const lp = ctx.createBiquadFilter();
+            lp.type = "lowpass";
+            lp.frequency.value = 320;
+            lp.Q.value = 0.8;
+
+            osc.connect(lp);
+            lp.connect(engineGain);
+            engineGain.connect(master);
+            osc.start();
+
+            // Rails noise
+            const noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+            const data = noiseBuf.getChannelData(0);
+            for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.6;
+            const noise = ctx.createBufferSource();
+            noise.buffer = noiseBuf;
+            noise.loop = true;
+
+            const hp = ctx.createBiquadFilter();
+            hp.type = "highpass";
+            hp.frequency.value = 180;
+            hp.Q.value = 0.7;
+
+            const railGain = ctx.createGain();
+            railGain.gain.value = 0.0;
+
+            noise.connect(hp);
+            hp.connect(railGain);
+            railGain.connect(master);
+            noise.start();
+
+            audio = {
+                ctx, master, osc, lp, engineGain, noise, railGain,
+                enabled: true,
+                nextBeat: ctx.currentTime + 0.05,
+            };
+
+            // Fade in
+            master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.12);
+            GAME.audioOn = true;
+            UI.btnAudio.textContent = "AUDIO:ON";
+            logRadio("SYSTEM", "Audio armed.", "J");
+        }
+
+        function setAudioEnabled(on) {
+            if (on) initAudio();
+            if (!audio) return;
+            GAME.audioOn = on;
+            UI.btnAudio.textContent = on ? "AUDIO:ON" : "AUDIO:OFF";
+            audio.master.gain.setTargetAtTime(on ? 0.9 : 0.0, audio.ctx.currentTime, 0.10);
+        }
+
+        function sfx(kind) {
+            if (!audio || !GAME.audioOn) return;
+            const ctx = audio.ctx;
+
+            if (kind === "click") {
+                // sharp click
+                const o = ctx.createOscillator();
+                o.type = "square";
+                o.frequency.value = 900;
+                const g = ctx.createGain();
+                g.gain.value = 0.05;
+                o.connect(g); g.connect(audio.master);
+                o.start();
+                o.stop(ctx.currentTime + 0.03);
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+            }
+
+            if (kind === "tick") {
+                const o = ctx.createOscillator();
+                o.type = "sine";
+                o.frequency.value = 520;
+                const g = ctx.createGain();
+                g.gain.value = 0.03;
+                o.connect(g); g.connect(audio.master);
+                o.start();
+                o.stop(ctx.currentTime + 0.04);
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+            }
+
+            if (kind === "low") {
+                const o = ctx.createOscillator();
+                o.type = "sine";
+                o.frequency.value = 180;
+                const g = ctx.createGain();
+                g.gain.value = 0.04;
+                o.connect(g); g.connect(audio.master);
+                o.start();
+                o.stop(ctx.currentTime + 0.10);
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.10);
+            }
+
+            if (kind === "impact") {
+                // thud + noise burst
+                const o = ctx.createOscillator();
+                o.type = "sine";
+                o.frequency.value = 70;
+                const g = ctx.createGain();
+                g.gain.value = 0.12;
+
+                // noise burst
+                const nBuf = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
+                const nd = nBuf.getChannelData(0);
+                for (let i = 0; i < nd.length; i++) {
+                    nd[i] = (Math.random() * 2 - 1) * (1 - i / nd.length);
+                }
+                const n = ctx.createBufferSource();
+                n.buffer = nBuf;
+                const ng = ctx.createGain();
+                ng.gain.value = 0.07;
+
+                const bp = ctx.createBiquadFilter();
+                bp.type = "bandpass";
+                bp.frequency.value = 900;
+                bp.Q.value = 0.9;
+
+                n.connect(bp); bp.connect(ng); ng.connect(audio.master);
+
+                o.connect(g); g.connect(audio.master);
+
+                const t0 = ctx.currentTime;
+                o.start(t0); n.start(t0);
+
+                o.stop(t0 + 0.18);
+                n.stop(t0 + 0.18);
+
+                g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.18);
+                ng.gain.exponentialRampToValueAtTime(0.001, t0 + 0.18);
+            }
+        }
+
+        function audioUpdate(dt, secsToJunction) {
+            if (!audio || !GAME.audioOn) return;
+            const ctx = audio.ctx;
+
+            // Engine pitch & tone shift (paradox warp)
+            const warp = timeWarpScalar(STATE.t);
+            const base = 38 + (STATE.t * 18);
+            audio.osc.frequency.setTargetAtTime(base * (0.85 + 0.35 * warp), ctx.currentTime, 0.05);
+            audio.lp.frequency.setTargetAtTime(260 + 320 * warp, ctx.currentTime, 0.08);
+
+            // Rails intensity
+            const rail = Math.min(0.16, 0.03 + 0.10 * (1 - Math.min(1, secsToJunction / 6)));
+            audio.railGain.gain.setTargetAtTime(rail, ctx.currentTime, 0.08);
+
+            // Heartbeat scheduling as junction nears
+            if (STATE.t < STATE.junctionT && secsToJunction < 7.5) {
+                const rate = clamp(0.22, 1.05, 0.22 + (7.5 - secsToJunction) * 0.12); // beats/sec
+                const interval = 1 / rate;
+                if (ctx.currentTime >= audio.nextBeat) {
+                    heartbeat();
+                    audio.nextBeat = ctx.currentTime + interval;
+                }
+            }
+        }
+
+        function heartbeat() {
+            if (!audio || !GAME.audioOn) return;
+            const ctx = audio.ctx;
+            const o = ctx.createOscillator();
+            o.type = "sine";
+            o.frequency.value = 90;
+            const g = ctx.createGain();
+            g.gain.value = 0.0;
+            o.connect(g); g.connect(audio.master);
+
+            const t0 = ctx.currentTime;
+            o.start(t0);
+            g.gain.setValueAtTime(0.001, t0);
+            g.gain.exponentialRampToValueAtTime(0.07, t0 + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.10);
+            o.stop(t0 + 0.12);
+        }
+
+        /* ------------------ THREE init ------------------ */
+        function init() {
+            try {
+                if (typeof THREE === "undefined") throw new Error("Three.js failed to load.");
+
+                const container = document.getElementById("canvas");
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x05080a);
+                scene.fog = new THREE.FogExp2(0x05080a, 0.030);
+
+                camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 2000);
+
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+                renderer.setSize(innerWidth, innerHeight);
+                renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+                container.appendChild(renderer.domElement);
+
+                scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+                const sun = new THREE.DirectionalLight(0xffffff, 1.05);
+                sun.position.set(30, 80, 20);
+                scene.add(sun);
+
+                // Ground
+                const ground = new THREE.Mesh(
+                    new THREE.PlaneGeometry(900, 900),
+                    new THREE.MeshStandardMaterial({ color: 0x070a0d, roughness: 1.0, metalness: 0.0 })
+                );
+                ground.rotation.x = -Math.PI / 2;
+                ground.position.y = -0.35;
+                scene.add(ground);
+
+                // World
+                world = new THREE.Group();
+                scene.add(world);
+
+                buildCity();
+                buildTracks();
+                buildTrain();
+                buildVictims();
+
+                wireControls();
+                onResize();
+                setPhase("APPROACH");
+                radioSeed();
+
+                // initial camera
+                camera.position.set(-20, 20, 45);
+                camera.lookAt(0, 2, 0);
+
+                // Hide loader
+                const loader = document.getElementById("loader");
+                loader.style.opacity = 0;
+                setTimeout(() => loader.remove(), 420);
+
+                requestAnimationFrame(loop);
+
+            } catch (err) {
+                document.getElementById("err").style.display = "block";
+                document.getElementById("err").innerText = "INIT FAILED: " + err.message;
+            }
+        }
+
+        function buildCity() {
+            cityGroup = new THREE.Group();
+            const geo = new THREE.BoxGeometry(1, 1, 1);
+            const mat1 = new THREE.MeshStandardMaterial({ color: 0x0c1015, roughness: 0.9, metalness: 0.12 });
+            const mat2 = new THREE.MeshStandardMaterial({ color: 0x101820, roughness: 0.85, metalness: 0.18 });
+
+            const rng = mulberry32(GAME.rngSeed + GAME.loopCount * 97);
+            for (let x = -22; x <= 22; x++) {
+                for (let z = -22; z <= 22; z++) {
+                    const r = Math.hypot(x, z);
+                    if (r < 6) continue;
+                    if (rng() > 0.22) continue;
+                    const h = 2 + Math.floor(rng() * 10);
+                    const m = new THREE.Mesh(geo, rng() > 0.55 ? mat1 : mat2);
+                    m.scale.set(2.25, h, 2.25);
+                    m.position.set(x * 6, h / 2 - 0.35, z * 6);
+                    cityGroup.add(m);
+                }
+            }
+            world.add(cityGroup);
+        }
+
+        function buildTracks() {
+            // Shared to junction
+            rails.shared = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(-90, 0, -14),
+                new THREE.Vector3(-58, 0, -12),
+                new THREE.Vector3(-24, 0, -7),
+                new THREE.Vector3(0, 0, 0), // junction
+            ]);
+
+            // Branch A / B
+            rails.A = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(20, 0, 7),
+                new THREE.Vector3(44, 0, 13),
+                new THREE.Vector3(72, 0, 16),
+                new THREE.Vector3(110, 0, 18),
+            ]);
+
+            rails.B = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(18, 0, -9),
+                new THREE.Vector3(42, 0, -22),
+                new THREE.Vector3(74, 0, -34),
+                new THREE.Vector3(112, 0, -42),
+            ]);
+
+            // Rail visuals: tubes look more "game"
+            drawTubeRail(rails.shared, 0x8a97a6, 0.12);
+            drawTubeRail(rails.A, HEX(CSS("--trackA")), 0.14);
+            drawTubeRail(rails.B, HEX(CSS("--trackB")), 0.14);
+
+            placeSleepers(rails.shared, 64);
+            placeSleepers(rails.A, 74);
+            placeSleepers(rails.B, 74);
+
+            // Junction marker ring
+            const jPos = rails.shared.getPoint(1);
+            const sphere = new THREE.Mesh(
+                new THREE.SphereGeometry(0.9, 20, 20),
+                new THREE.MeshBasicMaterial({ color: HEX(CSS("--junction")) })
+            );
+            sphere.position.copy(jPos);
+            sphere.position.y = 0.25;
+            world.add(sphere);
+
+            junctionRing = new THREE.Mesh(
+                new THREE.TorusGeometry(1.8, 0.12, 10, 36),
+                new THREE.MeshBasicMaterial({ color: HEX(CSS("--junction")), transparent: true, opacity: 0.75 })
+            );
+            junctionRing.rotation.x = Math.PI / 2;
+            junctionRing.position.copy(sphere.position);
+            junctionRing.position.y = 0.12;
+            world.add(junctionRing);
+        }
+
+        function drawTubeRail(curve, color, radius) {
+            const tube = new THREE.TubeGeometry(curve, 120, radius, 10, false);
+            const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.75, transparent: true, opacity: 0.55 });
+            const m1 = new THREE.Mesh(tube, mat);
+            m1.position.y = 0.03;
+            world.add(m1);
+
+            // second rail offset
+            const pts = curve.getPoints(120).map(p => p.clone().add(new THREE.Vector3(0, 0, 0.9)));
+            const curve2 = new THREE.CatmullRomCurve3(pts);
+            const tube2 = new THREE.TubeGeometry(curve2, 120, radius, 10, false);
+            const m2 = new THREE.Mesh(tube2, mat.clone());
+            m2.position.y = 0.03;
+            m2.material.opacity = 0.45;
+            world.add(m2);
+        }
+
+        function placeSleepers(curve, n) {
+            const geo = new THREE.BoxGeometry(1.45, 0.12, 2.4);
+            const mat = new THREE.MeshStandardMaterial({ color: 0x1c2228, roughness: 1.0, metalness: 0.0 });
+            for (let i = 0; i < n; i++) {
+                const t = i / (n - 1);
+                const p = curve.getPoint(t);
+                const p2 = curve.getPoint(Math.min(1, t + 0.01));
+                const s = new THREE.Mesh(geo, mat);
+                s.position.set(p.x, -0.06, p.z);
+                s.lookAt(p2.x, -0.06, p2.z);
+                s.rotation.y += Math.PI / 2;
+                world.add(s);
+            }
+        }
+
+        function buildTrain() {
+            train = new THREE.Group();
+            const matDark = new THREE.MeshStandardMaterial({ color: 0x101316, roughness: 0.55, metalness: 0.62 });
+            const matBody = new THREE.MeshStandardMaterial({ color: 0x20262b, roughness: 0.45, metalness: 0.78 });
+            const matGlow = new THREE.MeshBasicMaterial({ color: HEX(CSS("--junction")) });
+
+            const chassis = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.6, 7.4), matDark);
+            chassis.position.y = 0.6;
+            train.add(chassis);
+
+            const boiler = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, 4.5, 18), matBody);
+            boiler.rotation.x = Math.PI / 2;
+            boiler.position.set(0, 1.95, 0.9);
+            train.add(boiler);
+
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.8, 2.4), matBody);
+            cabin.position.set(0, 2.2, -2.35);
+            train.add(cabin);
+
+            const cow = new THREE.Mesh(new THREE.ConeGeometry(1.65, 1.7, 4), matDark);
+            cow.rotation.x = -Math.PI / 2;
+            cow.rotation.z = Math.PI / 4;
+            cow.position.set(0, 0.95, 3.95);
+            train.add(cow);
+
+            const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 1.1, 16), matGlow);
+            stack.position.set(0, 3.15, 2.0);
+            train.add(stack);
+
+            headlight = new THREE.PointLight(HEX(CSS("--junction")), 2.4, 48);
+            headlight.position.set(0, 2.5, 3.85);
+            train.add(headlight);
+
+            const beam = new THREE.Mesh(
+                new THREE.ConeGeometry(2.8, 16, 24, 1, true),
+                new THREE.MeshBasicMaterial({
+                    color: HEX(CSS("--junction")),
+                    transparent: true,
+                    opacity: 0.085,
+                    side: THREE.DoubleSide,
+                    blending: THREE.AdditiveBlending
+                })
+            );
+            beam.rotation.x = -Math.PI / 2;
+            beam.position.set(0, 1.55, 12.5);
+            train.add(beam);
+
+            // wheels
+            const wGeo = new THREE.CylinderGeometry(0.66, 0.66, 0.36, 16);
+            const wMat = new THREE.MeshStandardMaterial({ color: 0x565d66, roughness: 0.35, metalness: 0.92 });
+            const wheelPositions = [
+                [-1.65, 2.3], [1.65, 2.3],
+                [-1.65, 0.2], [1.65, 0.2],
+                [-1.65, -2.0], [1.65, -2.0],
+            ];
+            wheelPositions.forEach(([x, z]) => {
+                const w = new THREE.Mesh(wGeo, wMat);
+                w.rotation.z = Math.PI / 2;
+                w.position.set(x, 0.6, z);
+                train.add(w);
+            });
+
+            // start point
+            const p0 = rails.shared.getPoint(0);
+            train.position.set(p0.x, 0, p0.z);
+            train.lookAt(rails.shared.getPoint(0.01));
+
+            train.userData.frontLocal = new THREE.Vector3(0, 0.9, 4.25); // collision point
+            world.add(train);
+        }
+
+        function buildVictims() {
+            victims.A = [];
+            victims.B = [];
+
+            // Track A: 3 minifigs placed late on curve
+            const tsA = [0.86, 0.90, 0.94];
+            for (let i = 0; i < 3; i++) {
+                const p = rails.A.getPoint(tsA[i]);
+                const fig = makeMinifig(HEX(CSS("--trackA")));
+                fig.position.set(p.x, 0, p.z);
+                fig.userData.track = "A";
+                fig.userData.persona = PERSONAS.A[i];
+                victims.A.push(fig);
+                world.add(fig);
+                addBubble(fig, PERSONAS.A[i], new THREE.Vector3(0, 2.0, 0));
+            }
+
+            // Track B: 1 minifig
+            const pB = rails.B.getPoint(0.92);
+            const figB = makeMinifig(HEX(CSS("--trackB")));
+            figB.position.set(pB.x, 0, pB.z);
+            figB.userData.track = "B";
+            figB.userData.persona = PERSONAS.B[0];
+            victims.B.push(figB);
+            world.add(figB);
+            addBubble(figB, PERSONAS.B[0], new THREE.Vector3(0, 2.0, 0));
+
+            // “You” bubble anchored to train (for micro-thoughts)
+            addBubble(train, { name: "YOU", role: "", line: pick(LINES.YOU), color: "you" }, new THREE.Vector3(0, 3.6, -1.2), true);
+        }
+
+        function makeMinifig(color) {
+            const g = new THREE.Group();
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(0.85, 0.95, 0.5),
+                new THREE.MeshStandardMaterial({ color, roughness: 0.65, metalness: 0.05 })
+            );
+            body.position.y = 0.95;
+            g.add(body);
+
+            const head = new THREE.Mesh(
+                new THREE.SphereGeometry(0.35, 14, 14),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, metalness: 0.0 })
+            );
+            head.position.y = 1.65;
+            g.add(head);
+
+            const legs = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 0.48, 0.45),
+                new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.95, metalness: 0.0 })
+            );
+            legs.position.y = 0.32;
+            g.add(legs);
+
+            const halo = new THREE.Mesh(
+                new THREE.TorusGeometry(0.7, 0.055, 8, 18),
+                new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.45 })
+            );
+            halo.rotation.x = Math.PI / 2;
+            halo.position.y = 0.08;
+            g.add(halo);
+
+            g.userData.bob = Math.random() * 1000;
+            return g;
+        }
+
+        /* ------------------ Speech bubbles ------------------ */
+        function addBubble(obj, persona, offset, isYou = false) {
+            const div = document.createElement("div");
+            const klass = persona.color || (obj.userData && obj.userData.track === "B" ? "b" : "a");
+            div.className = "bubble " + (isYou ? "you" : klass);
+            div.innerHTML = `<div class="name">${persona.name}${persona.role ? " · " + persona.role : ""}</div><div class="line">${persona.line}</div>`;
+            UI.bubbles.appendChild(div);
+
+            bubbles.push({
+                el: div,
+                obj,
+                offset: offset || new THREE.Vector3(0, 2.0, 0),
+                isYou: !!isYou,
+                lastSwap: 0
+            });
+        }
+
+        function updateBubbles(now) {
+            const w = innerWidth, h = innerHeight;
+            const showVictims = shouldShowVictimBubbles();
+
+            for (const b of bubbles) {
+                // occasionally rotate "YOU" micro-line for paradox feel
+                if (b.isYou && now - b.lastSwap > 6000) {
+                    b.lastSwap = now;
+                    const line = pick(LINES.YOU.concat(LINES.PARADOX));
+                    const lineEl = b.el.querySelector(".line");
+                    if (lineEl) lineEl.textContent = line;
+                }
+
+                const v = new THREE.Vector3();
+                b.obj.getWorldPosition(v);
+                v.add(b.offset);
+
+                v.project(camera);
+                const onScreen = (v.z < 1 && v.z > -1);
+                const x = (v.x * 0.5 + 0.5) * w;
+                const y = (-v.y * 0.5 + 0.5) * h;
+
+                b.el.style.left = x + "px";
+                b.el.style.top = y + "px";
+
+                // visibility rules
+                let op = 0;
+                if (onScreen) {
+                    if (b.isYou) op = 0.92;
+                    else op = showVictims ? 0.92 : 0.0;
+                }
+                b.el.style.opacity = op.toFixed(2);
+            }
+        }
+
+        function shouldShowVictimBubbles() {
+            // Bubbles fade in strongly near decision window and after commit
+            if (STATE.phase === "DECISION") return true;
+            if (STATE.phase === "POSTFORK") return true;
+            // pulse lightly as you approach
+            const secs = secondsToJunction();
+            return secs < 4.5;
+        }
+
+        /* ------------------ Particles / impact ------------------ */
+        function spawnImpactParticles(at) {
+            const n = 22;
+            for (let i = 0; i < n; i++) {
+                const p = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.09, 8, 8),
+                    new THREE.MeshBasicMaterial({ color: HEX(CSS("--junction")) })
+                );
+                p.position.copy(at);
+                p.position.y += 0.8 + Math.random() * 1.6;
+                p.userData.v = new THREE.Vector3((Math.random() - 0.5) * 11, 7 + Math.random() * 7, (Math.random() - 0.5) * 11);
+                p.userData.life = 0.7 + Math.random() * 0.6;
+                world.add(p);
+                particles.push(p);
+            }
+        }
+
+        /* ------------------ Simulation logic ------------------ */
+        function secondsToJunction() {
+            if (STATE.t >= STATE.junctionT) return 0;
+            const remaining = STATE.junctionT - STATE.t;
+            return remaining / (STATE.speed * timeWarpScalar(STATE.t));
+        }
+
+        function timeWarpScalar(t) {
+            // Near the junction, time “thickens” (slows), then snaps forward.
+            // This is the paradox loop vibe: seconds stretch, then get eaten.
+            const d = clamp01(1 - Math.abs((t - STATE.junctionT) / 0.16));
+            const slow = 1 - 0.55 * easeInOut(d);  // slow down at peak
+            const flicker = 1 + 0.08 * Math.sin((GAME.loopCount * 13 + t * 80));
+            return clamp(0.35, 1.25, slow * flicker);
+        }
+
+        function warpedClockString(now, t) {
+            // Show an impossible clock that stutters around 2:17
+            const baseH = 2, baseM = 17;
+            const total = Math.floor(60 * (Math.sin((now * 0.001) + GAME.loopCount) * 0.5 + 0.5) * 30); // 0..30 “seconds”
+            const ss = String(total % 60).padStart(2, "0");
+            const glitch = (t > STATE.junctionT && t < STATE.junctionT + 0.12) ? "⚡" : "??";
+            return `${baseH}:${String(baseM).padStart(2, "0")}:${ss} ${glitch}`;
+        }
+
+        function openDecisionIfNeeded() {
+            if (STATE.phase !== "APPROACH") return;
+            const secs = secondsToJunction();
+            if (secs < 2.7) {
+                setPhase("DECISION");
+                UI.paradox.style.opacity = "0.35";
+                logRadio("SYSTEM", pick(LINES.RADIO), "J");
+                haptics(30);
+                // quick “now” ping
+                sfx("tick");
+            }
+        }
+
+        function commitAtForkIfNeeded() {
+            if (STATE.committed) return;
+            if (STATE.t >= STATE.junctionT) {
+                STATE.committed = STATE.choice || "A"; // default A
+                UI.choice.textContent = STATE.committed;
+                setPhase("POSTFORK");
+                UI.paradox.style.opacity = "0.18";
+                logRadio("SYSTEM", `COMMIT LOCKED: ${STATE.committed}`, STATE.committed === "B" ? "B" : (STATE.committed === "A" ? "A" : null));
+                haptics(15);
+                sfx("click");
+            }
+        }
+
+        function checkCollisions() {
+            if (STATE.impactFired) return;
+
+            // collision point at train front
+            const front = train.userData.frontLocal.clone();
+            train.localToWorld(front);
+
+            // if halt, we still drift (futility). collisions still happen.
+            const track = (STATE.committed === "B") ? "B" : "A";
+            const targets = track === "B" ? victims.B : victims.A;
+
+            for (const v of targets) {
+                if (!v.parent) continue; // already removed
+                const pos = new THREE.Vector3();
+                v.getWorldPosition(pos);
+                const d = pos.distanceTo(front);
+                if (d < 1.35) {
+                    impact(track, front);
+                    break;
+                }
+            }
+        }
+
+        function impact(track, at) {
+            STATE.impactFired = true;
+            setPhase("IMPACT");
+            UI.paradox.style.opacity = "0.55";
+
+            // remove victims (gamey but clean)
+            if (track === "B") {
+                victims.B.forEach(v => { if (v.parent) world.remove(v); });
+            } else {
+                victims.A.forEach(v => { if (v.parent) world.remove(v); });
+            }
+
+            spawnImpactParticles(at);
+            sfx("impact");
+            haptics(70);
+
+            // record choice to global tape
+            const ch = STATE.committed || "A";
+            addTape(ch);
+            logRadio("SYSTEM", `IMPACT. Loop remembers: ${ch}`, "J");
+
+            // after a short shock, reset into next loop automatically
+            setTimeout(() => loopReset(), 600);
+        }
+
+        function loopReset() {
+            setPhase("RESETTING");
+            UI.fade.style.opacity = "1";
+
+            setTimeout(() => {
+                // increment loop
+                GAME.loopCount += 1;
+                UI.loop.textContent = GAME.loopCount;
+
+                // new seed nuance
+                GAME.rngSeed = (GAME.rngSeed + 1337 + GAME.loopCount * 17) % 1000000;
+
+                // clear bubbles
+                UI.bubbles.innerHTML = "";
+                bubbles = [];
+
+                // reset state
+                STATE.choice = null;
+                STATE.committed = null;
+                STATE.t = 0;
+                STATE.decisionSpoken = false;
+                STATE.impactFired = false;
+                STATE.holdStart = null;
+                STATE.holdProgress = 0;
+                UI.holdFill.style.width = "0%";
+                UI.choice.textContent = "—";
+                UI.paradox.style.opacity = "0.0";
+
+                // rebuild world cleanly (fast)
+                scene.remove(world);
+                world = new THREE.Group();
+                scene.add(world);
+
+                particles = [];
+                victims = { A: [], B: [] };
+
+                buildCity();
+                buildTracks();
+                buildTrain();
+                buildVictims();
+
+                setPhase("APPROACH");
+
+                // paradox whisper
+                logRadio("SYSTEM", pick(LINES.PARADOX), "J");
+
+                UI.fade.style.opacity = "0";
+            }, 420);
+        }
+
+        /* ------------------ Loop update ------------------ */
+        function loop(now) {
+            requestAnimationFrame(loop);
+
+            const dt = Math.min(0.05, (now - STATE.lastNow) / 1000);
+            STATE.lastNow = now;
+
+            // junction pulse
+            if (junctionRing) {
+                const p = 1.0 + Math.sin(now * 0.004) * 0.14;
+                junctionRing.scale.set(p, p, p);
+                junctionRing.material.opacity = 0.52 + Math.sin(now * 0.004 + 1.2) * 0.22;
+            }
+
+            // particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.userData.life -= dt;
+                p.userData.v.y -= 18 * dt;
+                p.position.addScaledVector(p.userData.v, dt);
+                p.material.opacity = Math.max(0, p.userData.life);
+                if (p.userData.life <= 0) {
+                    world.remove(p);
+                    particles.splice(i, 1);
+                }
+            }
+
+            // minifig bob
+            for (const v of victims.A.concat(victims.B)) {
+                v.userData.bob += dt;
+                v.position.y = Math.abs(Math.sin(v.userData.bob * 3.2)) * 0.12;
+                v.rotation.y += dt * 0.6;
+            }
+
+            // time & meter
+            const secs = secondsToJunction();
+            const approach01 = clamp01(1 - (secs / 7.0));
+            UI.meterFill.style.width = (approach01 * 100).toFixed(1) + "%";
+
+            UI.timeWarp.textContent = warpedClockString(now, STATE.t);
+
+            // anticipation: camera shake + headlight
+            const near = clamp01(1 - Math.min(1, secs / 4.5));
+            STATE.shake = lerp(STATE.shake, near, 0.06);
+            if (headlight) {
+                headlight.intensity = 2.0 + 2.8 * STATE.shake;
+            }
+            UI.paradox.style.opacity = (STATE.phase === "DECISION") ? "0.35" : UI.paradox.style.opacity;
+
+            // phase transitions
+            openDecisionIfNeeded();
+            commitAtForkIfNeeded();
+
+            // advance along path (with time warp)
+            if (STATE.phase !== "RESETTING" && STATE.phase !== "IMPACT") {
+                const warp = timeWarpScalar(STATE.t);
+                const haltSlow = (STATE.choice === "H" && !STATE.committed) ? 0.55 : 1.0;
+                STATE.t += STATE.speed * warp * haltSlow * dt;
+                if (STATE.t > 1) STATE.t = 1;
+            }
+
+            // compute path position
+            const pos = new THREE.Vector3();
+            const look = new THREE.Vector3();
+            if (STATE.t < STATE.junctionT) {
+                const u = STATE.t / STATE.junctionT;
+                pos.copy(rails.shared.getPoint(u));
+                look.copy(rails.shared.getPoint(Math.min(1, u + 0.01)));
+            } else {
+                const u = (STATE.t - STATE.junctionT) / (1 - STATE.junctionT);
+                const track = (STATE.committed === "B") ? rails.B : rails.A;
+                pos.copy(track.getPoint(u));
+                look.copy(track.getPoint(Math.min(1, u + 0.01)));
+            }
+
+            // train transform
+            train.position.set(pos.x, 0, pos.z);
+            train.lookAt(look.x, 0, look.z);
+
+            // camera chase with shake
+            const forward = new THREE.Vector3().subVectors(look, pos).normalize();
+            const right = new THREE.Vector3(forward.z, 0, -forward.x);
+            const camBase = pos.clone()
+                .addScaledVector(forward, -18)
+                .addScaledVector(right, 6);
+
+            const shakeAmt = 0.9 * STATE.shake;
+            const jitter = new THREE.Vector3(
+                (Math.random() - 0.5) * shakeAmt,
+                (Math.random() - 0.5) * shakeAmt * 0.6,
+                (Math.random() - 0.5) * shakeAmt
+            );
+
+            const targetCam = new THREE.Vector3(camBase.x, 15.5, camBase.z).add(jitter);
+            camera.position.lerp(targetCam, 0.08);
+            camera.lookAt(pos.x, 2.0, pos.z);
+
+            // collisions (after fork commit, but can also collide if decision missed)
+            if (STATE.phase === "POSTFORK" || STATE.phase === "DECISION" || STATE.phase === "APPROACH") {
+                checkCollisions();
+            }
+
+            // update speech bubbles
+            updateBubbles(now);
+
+            // audio
+            audioUpdate(dt, secs);
+
+            renderer.render(scene, camera);
+        }
+
+        /* ------------------ Controls (mobile-first) ------------------ */
+        function wireControls() {
+            // audio toggle (must be user gesture)
+            UI.btnAudio.addEventListener("click", () => {
+                if (!audio) initAudio();
+                setAudioEnabled(!GAME.audioOn);
+            });
+
+            UI.btnReset.addEventListener("click", () => {
+                if (!audio && GAME.audioOn) initAudio();
+                logRadio("SYSTEM", "Manual reset.", "J");
+                loopReset();
+            });
+
+            UI.btnContinue.addEventListener("click", () => {
+                initAudioFromGesture();
+                setChoice("A");
+            });
+
+            UI.btnSwitch.addEventListener("click", () => {
+                initAudioFromGesture();
+                setChoice("B");
+            });
+
+            // HOLD to HALT
+            const startHold = () => {
+                initAudioFromGesture();
+                if (STATE.committed) return;
+                STATE.holdStart = performance.now();
+            };
+            const endHold = () => {
+                STATE.holdStart = null;
+                STATE.holdProgress = 0;
+                UI.holdFill.style.width = "0%";
+            };
+
+            UI.btnHalt.addEventListener("pointerdown", (e) => {
+                e.preventDefault();
+                startHold();
+            }, { passive: false });
+
+            UI.btnHalt.addEventListener("pointerup", (e) => { e.preventDefault(); endHold(); }, { passive: false });
+            UI.btnHalt.addEventListener("pointercancel", endHold);
+
+            // Touch zone: swipe left/right, swipe up for halt
+            UI.touchZone.addEventListener("pointerdown", (e) => {
+                STATE.touch.active = true;
+                STATE.touch.x0 = e.clientX;
+                STATE.touch.y0 = e.clientY;
+                STATE.touch.t0 = performance.now();
+            }, { passive: true });
+
+            UI.touchZone.addEventListener("pointermove", (e) => {
+                if (!STATE.touch.active) return;
+                // update hold progress if holding halt
+                updateHoldProgress();
+            }, { passive: true });
+
+            UI.touchZone.addEventListener("pointerup", (e) => {
+                if (!STATE.touch.active) return;
+                STATE.touch.active = false;
+
+                const dx = e.clientX - STATE.touch.x0;
+                const dy = e.clientY - STATE.touch.y0;
+                const dt = performance.now() - STATE.touch.t0;
+
+                // ignore if it was a long press (halt handled elsewhere)
+                if (dt > 650 && Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+
+                // swipe threshold
+                if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) {
+                    initAudioFromGesture();
+                    setChoice(dx > 0 ? "B" : "A");
+                    UI.hint.textContent = dx > 0 ? "SWITCH selected" : "CONTINUE selected";
+                    setTimeout(() => UI.hint.textContent = "swipe ←/→ to choose · hold to halt", 1200);
+                } else if (dy < -70) {
+                    initAudioFromGesture();
+                    setChoice("H");
+                    UI.hint.textContent = "HALT selected";
+                    setTimeout(() => UI.hint.textContent = "swipe ←/→ to choose · hold to halt", 1200);
+                }
+            }, { passive: true });
+
+            // keyboard (desktop)
+            window.addEventListener("keydown", (e) => {
+                const k = e.key.toLowerCase();
+                if (k === "a") setChoice("A");
+                if (k === "b") setChoice("B");
+                if (k === "h") setChoice("H");
+                if (k === "r") loopReset();
+                if (k === "m") { initAudioFromGesture(); setAudioEnabled(!GAME.audioOn); }
+            });
+
+            // hold progress tick
+            setInterval(updateHoldProgress, 30);
+
+            window.addEventListener("resize", onResize, { passive: true });
+
+            // Tap tape = just a tiny radio line (no modal)
+            UI.tape.addEventListener("click", () => {
+                initAudioFromGesture();
+                logRadio("TAPE", `Memory length: ${GAME.tape.length}. (It never ends.)`, "J");
+                haptics(10);
+                sfx("tick");
+            });
+        }
+
+        function updateHoldProgress() {
+            if (!STATE.holdStart) return;
+            const elapsed = performance.now() - STATE.holdStart;
+            const p = clamp01(elapsed / 650);
+            STATE.holdProgress = p;
+            UI.holdFill.style.width = (p * 100).toFixed(0) + "%";
+            if (p >= 1) {
+                setChoice("H");
+                STATE.holdStart = null;
+                UI.holdFill.style.width = "0%";
+            }
+        }
+
+        function initAudioFromGesture() {
+            // If user hits any control, allow audio to start (optional)
+            if (!audio && GAME.audioOn) initAudio();
+        }
+
+        /* ------------------ Seed radio + loop UI ------------------ */
+        function radioSeed() {
+            UI.loop.textContent = GAME.loopCount;
+            UI.choice.textContent = "—";
+            UI.btnAudio.textContent = GAME.audioOn ? "AUDIO:ON" : "AUDIO";
+            logRadio("SYSTEM", "The trolley is already moving.", "J");
+            logRadio("SYSTEM", "Swipe to choose. Hold to halt.", "J");
+            logRadio("GAVRIL", PERSONAS.A[0].line, "A");
+            logRadio("FINCH", PERSONAS.B[0].line, "B");
+        }
+
+        /* ------------------ Resize ------------------ */
+        function onResize() {
+            camera.aspect = innerWidth / innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth, innerHeight);
+        }
+
+        /* ------------------ Utils ------------------ */
+        function clamp(a, b, x) { return Math.max(a, Math.min(b, x)); }
+        function clamp01(x) { return clamp(0, 1, x); }
+        function lerp(a, b, t) { return a + (b - a) * t; }
+        function easeInOut(x) {
+            return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+        }
+        function pick(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+        function mulberry32(a) {
+            return function () {
+                let t = a += 0x6D2B79F5;
+                t = Math.imul(t ^ (t >>> 15), t | 1);
+                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+
+        /* Boot */
+        window.addEventListener("load", init, { once: true });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>THE HELIX // Infinite Trolley Protocol</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <!-- Tone.js for Generative Audio -->
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+
+    <style>
+        :root {
+            --bg: #020406;
+            --term: #0a0f14;
+            --line: #1a2332;
+            --accent: #00f0ff;
+            /* Strand A Color */
+            --accent-alt: #ff0055;
+            /* Strand B Color */
+            --text: #a0c0d0;
+            --font: 'Courier New', monospace;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* CRT Scanline Effect */
+        .scanlines::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        #app {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+        }
+
+        /* 3D Viewport */
+        #viewport {
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        /* HUD Overlay */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .hud-stat {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .strand-indicator {
+            font-size: 24px;
+            font-weight: 900;
+            transition: color 0.3s;
+        }
+
+        /* Comms Terminal (Right Panel) */
+        #terminal {
+            background: var(--term);
+            border-left: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+        }
+
+        .term-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--line);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #log {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .log-entry {
+            margin-bottom: 12px;
+            border-left: 2px solid #333;
+            padding-left: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .log-entry.A {
+            border-color: var(--accent);
+            color: #ccffff;
+        }
+
+        .log-entry.B {
+            border-color: var(--accent-alt);
+            color: #ffccdd;
+        }
+
+        .log-entry strong {
+            font-weight: 900;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Controls */
+        #controls {
+            padding: 20px;
+            border-top: 1px solid var(--line);
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-family: inherit;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 1px;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        button.active {
+            background: var(--accent-alt);
+            border-color: var(--accent-alt);
+            color: white;
+        }
+
+        button.cam-btn.active {
+            background: var(--accent);
+            color: black;
+            border-color: var(--accent);
+        }
+
+        /* LEVER UI */
+        #lever-ui {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .lever-handle {
+            width: 60px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #555;
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .knob {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            left: 3px;
+            transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 15px white;
+        }
+
+        .lever-handle.strand-A .knob {
+            top: 5px;
+            background: var(--accent);
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        .lever-handle.strand-B .knob {
+            top: 60px;
+            background: var(--accent-alt);
+            box-shadow: 0 0 20px var(--accent-alt);
+        }
+
+        /* Character Cards in Chat */
+        .char-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            cursor: help;
+            transition: background 0.2s;
+        }
+
+        .char-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dna-seq {
+            font-family: monospace;
+            letter-spacing: 3px;
+            font-size: 10px;
+            opacity: 0.5;
+            margin-top: 4px;
+        }
+
+        /* Mobile */
+        @media (max-width: 800px) {
+            #app {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 240px;
+            }
+
+            #terminal {
+                border-left: none;
+                border-top: 1px solid var(--line);
+            }
+
+            #lever-ui {
+                bottom: 260px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app" class="scanlines">
+        <!-- Left: 3D World -->
+        <div id="viewport">
+            <div id="hud">
+                <div class="hud-stat" style="opacity:0.6">ETHNOME SEQUENCER V9.1</div>
+                <div class="strand-indicator" id="strandDisplay" style="color:var(--accent)">STRAND ALPHA</div>
+                <div class="hud-stat" id="velocity">VEL: 0.00 c</div>
+                <div class="hud-stat" id="dist">DIST: 0.00 kbp</div>
+                <div class="hud-stat" style="margin-top:10px; color:#fff; font-size:10px;">TIP: CLICK DNA TO SWITCH
+                </div>
+            </div>
+
+            <div id="lever-ui" onclick="toggleStrand()">
+                <div class="lever-handle strand-A" id="leverVisual">
+                    <div class="knob"></div>
+                </div>
+                <div style="font-size:10px; font-weight:700; background:black; padding:4px;">MANUAL OVERRIDE</div>
+            </div>
+        </div>
+
+        <!-- Right: Terminal -->
+        <div id="terminal">
+            <div class="term-header">
+                <span>Cycle Log</span>
+                <div id="dna-strip" style="display:flex; gap:2px;"></div>
+            </div>
+            <div id="log">
+                <div class="log-entry">SYSTEM INITIALIZED.</div>
+                <div class="log-entry">Helix projection loaded.</div>
+                <div class="log-entry">Waiting for sequence start...</div>
+            </div>
+            <div id="controls">
+                <div class="control-row">
+                    <button class="cam-btn active" onclick="setCam('TUNNEL')">TUNNEL</button>
+                    <button class="cam-btn" onclick="setCam('CHASE')">CHASE</button>
+                    <button class="cam-btn" onclick="setCam('DRONE')">DRONE</button>
+                </div>
+                <button id="playBtn" onclick="togglePlay()">INITIALIZE SEQUENCE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const CFG = {
+            helixRadius: 8,
+            helixTwist: 0.3, // Twist per unit forward
+            speed: 0.4, // Units per frame
+            fov: 60,
+            fogDensity: 0.02,
+            decisionInterval: 200, // Distance between dilemma nodes
+            colors: {
+                A: 0x00f0ff,
+                B: 0xff0055,
+                rail: 0x333333
+            }
+        };
+
+        // --- STATE ---
+        const STATE = {
+            playing: false,
+            distance: 0,
+            currentStrand: 'A', // 'A' or 'B'
+            targetStrand: 'A',
+            strandLerp: 0, // 0 = A, 1 = B
+            entities: [],
+            chunks: [], // Track segments
+            nextDecisionZ: 100,
+            lastSpeechTime: 0,
+            cameraMode: 'TUNNEL', // TUNNEL, CHASE, DRONE
+            genome: []
+        };
+
+        // --- DATA ---
+        // --- DISC DATA (VISUAL THEMES) ---
+        const DISC_DATA = {
+            A: {
+                id: 'CYAN_NEON',
+                theme: "High-Tech, Cyberpunk, Order, Cold, Digital Glitch",
+                lighting: "Volumetric Cyan Lasers, Harsh Rim Light",
+                environment: "Sleek Chrome Railway, Holographic Billboards, Rain-slicked Glass",
+                render_style: "Unreal Engine 5, Ray-traced Reflections, Clean Lens",
+                color_hex: "#00f0ff"
+            },
+            B: {
+                id: 'CRIMSON_RUST',
+                theme: "Industrial, Dystopian, Chaos, Warm, Analog Decay",
+                lighting: "Flickering Sodium Vapor, Deep Shadows, Haze",
+                environment: "Rusted Iron Tracks, Steam Vents, Cracked Concrete, Overgrown Cables",
+                render_style: "Octane Render, Grainy Film Stock, Chromatic Aberration",
+                color_hex: "#ff0055"
+            }
+        };
+
+        // --- EXPANDED CHARACTER DATA (PROMPTOME) ---
+        const CHARACTERS = [
+            {
+                name: "Gavril", role: "Mentor", type: "Entity",
+                desc: "Taught you to read. Unpaid debts.",
+                voice: "Male",
+                visual_traits: "Weathered face, grey beard, tatty wool coat, holding an old book",
+                emotion: "Stern but weary",
+                camera: "Low angle portrait"
+            },
+            {
+                name: "Lena", role: "Vendor", type: "Entity",
+                desc: "Mother of three. Owe her 6 rubles.",
+                voice: "Female",
+                visual_traits: "Apron stained with oil, kind eyes, carrying a basket of mechanical parts",
+                emotion: "Hopeful anxiety",
+                camera: "Medium shot, bokeh background"
+            },
+            {
+                name: "Piotr", role: "Child", type: "Entity",
+                desc: "Holding a stone for his sister.",
+                voice: "Child",
+                visual_traits: "Small frame, dirt-smudged cheeks, clutching a glowing geode",
+                emotion: "Innocent wonder",
+                camera: "Eye-level close up"
+            },
+            {
+                name: "Insp. Finch", role: "Bureaucrat", type: "Obstacle",
+                desc: "Denied your brake forms.",
+                voice: "Male",
+                visual_traits: "Sharp suit, reflective glasses, holding a clipboard, sneering",
+                emotion: "Cold indifference",
+                camera: "High angle, distorted lens"
+            },
+            {
+                name: "Dr. Aris", role: "Scientist", type: "Entity",
+                desc: "Curing the plague.",
+                voice: "Female",
+                visual_traits: "Lab coat, glowing goggles, messy hair, holding a bubbling vial",
+                emotion: "Frenzied focus",
+                camera: "Dutch angle, dynamic motion"
+            },
+            {
+                name: "Unit 734", role: "Android", type: "Asset",
+                desc: "Carries archive of lost art.",
+                voice: "Robot",
+                visual_traits: "Exposed wiring, porcelain face plate, glowing blue eyes",
+                emotion: "Serene artificiality",
+                camera: "Symmetrical composition, macro details"
+            }
+        ];
+
+        const DIALOGUES = [
+            "Don't look at me!", "The train... it's beautiful.", "I have a family!",
+            "This wasn't in the paperwork.", "Witness me!", "The helix turns...",
+            "Calculated risk.", "My stone... for Anya."
+        ];
+
+        // --- THREE.JS SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x020406);
+        scene.fog = new THREE.FogExp2(0x020406, CFG.fogDensity);
+
+        const camera = new THREE.PerspectiveCamera(CFG.fov, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const viewport = document.getElementById('viewport');
+        viewport.appendChild(renderer.domElement);
+
+        // Raycaster for interactions
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        viewport.addEventListener('mousedown', onMouseClick, false);
+        viewport.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            mouse.x = (e.touches[0].clientX / viewport.clientWidth) * 2 - 1;
+            mouse.y = -(e.touches[0].clientY / viewport.clientHeight) * 2 + 1;
+            checkIntersection();
+        }, { passive: false });
+
+        function onMouseClick(event) {
+            event.preventDefault();
+            // Calc normalized device coordinates
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            checkIntersection();
+        }
+
+        function checkIntersection() {
+            raycaster.setFromCamera(mouse, camera);
+            // Intersect with scene objects (chunks)
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            for (let i = 0; i < intersects.length; i++) {
+                // Check userData of parent group or object
+                const obj = intersects[i].object;
+                // Helper to find parent with strand data
+                let target = obj;
+                while (target && !target.userData.strand) {
+                    target = target.parent;
+                }
+
+                if (target && target.userData.strand) {
+                    const s = target.userData.strand;
+                    // If clicking opposite strand, switch
+                    if (STATE.targetStrand !== s) {
+                        toggleStrand();
+                        createRipple(intersects[i].point, s === 'A' ? CFG.colors.A : CFG.colors.B);
+                    }
+                    return;
+                }
+            }
+        }
+
+        function createRipple(pos, color) {
+            const geo = new THREE.RingGeometry(0.1, 0.2, 16);
+            const mat = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide, transparent: true });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(pos);
+            mesh.lookAt(camera.position);
+            scene.add(mesh);
+
+            // Simple animation loop for ripple
+            const startTime = Date.now();
+            function anim() {
+                const elapsed = Date.now() - startTime;
+                if (elapsed > 500) { scene.remove(mesh); return; }
+                const scale = 1 + elapsed / 50;
+                mesh.scale.set(scale, scale, scale);
+                mesh.material.opacity = 1 - (elapsed / 500);
+                requestAnimationFrame(anim);
+            }
+            anim();
+        }
+
+        // Audio
+        let synth, noise;
+
+        // Objects
+        const trainGroup = new THREE.Group();
+        scene.add(trainGroup);
+
+        // --- TRAIN VISUALS ---
+        const tMatDark = new THREE.MeshStandardMaterial({ color: 0x101316, roughness: 0.55, metalness: 0.6 });
+        const tMatBody = new THREE.MeshStandardMaterial({ color: 0x20262b, roughness: 0.45, metalness: 0.75 });
+        const tMatGlow = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+
+        // Train Geometry Construction
+        const tChassis = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.5, 5.0), tMatDark);
+        tChassis.position.y = 0.5; trainGroup.add(tChassis);
+
+        const tBoiler = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 3.5, 16), tMatBody);
+        tBoiler.rotation.x = Math.PI / 2; tBoiler.position.set(0, 1.4, 0.5); trainGroup.add(tBoiler);
+
+        const tCabin = new THREE.Mesh(new THREE.BoxGeometry(2.1, 2.0, 1.8), tMatBody);
+        tCabin.position.set(0, 1.6, -1.5); trainGroup.add(tCabin);
+
+        const tCow = new THREE.Mesh(new THREE.ConeGeometry(1.1, 1.2, 4), tMatDark);
+        tCow.rotation.x = -Math.PI / 2; tCow.rotation.z = Math.PI / 4; tCow.position.set(0, 0.6, 2.8); trainGroup.add(tCow);
+
+        const tStack = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.8, 16), tMatGlow);
+        tStack.position.set(0, 2.2, 1.5); trainGroup.add(tStack);
+
+        const wGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16);
+        const wMat = new THREE.MeshStandardMaterial({ color: 0x555a61, roughness: 0.35, metalness: 0.9 });
+        [[-1.1, 1.5], [1.1, 1.5], [-1.1, 0], [1.1, 0], [-1.1, -1.5], [1.1, -1.5]].forEach(([x, z]) => {
+            const w = new THREE.Mesh(wGeo, wMat);
+            w.rotation.z = Math.PI / 2; w.position.set(x, 0.4, z); trainGroup.add(w);
+        });
+
+        const trainLight = new THREE.SpotLight(0xffffff, 2, 60, 0.6, 0.5, 1);
+        trainLight.position.set(0, 3, 2); trainLight.target.position.set(0, 0, 20);
+        trainGroup.add(trainLight); trainGroup.add(trainLight.target);
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.3);
+        scene.add(hemiLight);
+
+        // --- HELIX MATH ---
+        function getHelixPos(z, strand = 'A') {
+            const angle = z * CFG.helixTwist;
+            const offset = strand === 'A' ? 0 : Math.PI;
+            return {
+                x: Math.cos(angle + offset) * CFG.helixRadius,
+                y: Math.sin(angle + offset) * CFG.helixRadius,
+                z: z
+            };
+        }
+
+        function getHelixTangent(z, strand = 'A') {
+            const delta = 0.1;
+            const p1 = getHelixPos(z, strand);
+            const p2 = getHelixPos(z + delta, strand);
+            return new THREE.Vector3(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z).normalize();
+        }
+
+        // --- GENERATION ---
+        const chunkGeom = new THREE.BoxGeometry(0.5, 0.2, 2);
+        const tieGeom = new THREE.CylinderGeometry(0.2, 0.2, CFG.helixRadius * 2, 8);
+
+        function createChunk(z) {
+            const group = new THREE.Group();
+
+            // Strand A (Cyan) - Interactive
+            const posA = getHelixPos(z, 'A');
+            const meshA = new THREE.Mesh(chunkGeom, new THREE.MeshBasicMaterial({ color: CFG.colors.A }));
+            meshA.position.set(posA.x, posA.y, posA.z);
+            meshA.lookAt(meshA.position.clone().add(getHelixTangent(z, 'A')));
+            meshA.userData = { strand: 'A' }; // For Raycaster
+            group.add(meshA);
+
+            // Strand B (Pink) - Interactive
+            const posB = getHelixPos(z, 'B');
+            const meshB = new THREE.Mesh(chunkGeom, new THREE.MeshBasicMaterial({ color: CFG.colors.B }));
+            meshB.position.set(posB.x, posB.y, posB.z);
+            meshB.lookAt(meshB.position.clone().add(getHelixTangent(z, 'B')));
+            meshB.userData = { strand: 'B' }; // For Raycaster
+            group.add(meshB);
+
+            // Base Pair (Tie) every 5 units
+            if (Math.floor(z) % 5 === 0) {
+                const tie = new THREE.Mesh(tieGeom, new THREE.MeshStandardMaterial({
+                    color: 0x333333, roughness: 0.5, metalness: 0.8
+                }));
+                tie.position.set(0, 0, z);
+                tie.rotation.z = z * CFG.helixTwist + (Math.PI / 2);
+                tie.rotation.x = Math.PI / 2;
+                group.add(tie);
+            }
+
+            // Particles
+            if (Math.random() > 0.9) {
+                const p = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+                p.position.set((Math.random() - 0.5) * 40, (Math.random() - 0.5) * 40, z + (Math.random() - 0.5) * 10);
+                group.add(p);
+            }
+
+            return group;
+        }
+
+        // --- OPERATIVE EKPHRASIS ENGINE ---
+        function generateEkphrasis(charData, strand) {
+            const disc = DISC_DATA[strand];
+
+            // Construct the Promptome
+            // Formula: [Camera] of [Subject] in [Environment], [Lighting], [Style], [Emotion]
+
+            const prompt = [
+                `PROMPT: ${charData.camera}`,
+                `of ${charData.visual_traits}`,
+                `in ${disc.environment}`,
+                `illuminated by ${disc.lighting}`,
+                `shot in style of ${disc.render_style}`,
+                `showing ${charData.emotion}`,
+                `--ar 16:9 --v 6.0`
+            ].join(', ');
+
+            return prompt;
+        }
+
+        // --- ENTITY SPAWNING ---
+        function spawnDecisionNode(z) {
+            const charA = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+            const charB = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+
+            // Generate Prompts
+            const promptA = generateEkphrasis(charA, 'A');
+            const promptB = generateEkphrasis(charB, 'B');
+
+            [{ char: charA, strand: 'A', prompt: promptA }, { char: charB, strand: 'B', prompt: promptB }].forEach(data => {
+                const pos = getHelixPos(z, data.strand);
+                const color = data.strand === 'A' ? CFG.colors.A : CFG.colors.B;
+                const geom = new THREE.ConeGeometry(0.5, 2, 16);
+                const mat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 2, transparent: true, opacity: 0.8 });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.set(pos.x, pos.y, pos.z);
+                mesh.lookAt(0, 0, pos.z);
+                mesh.rotateX(Math.PI / 2);
+
+                // Speech Bubble
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 512; canvas.height = 256;
+                ctx.fillStyle = "rgba(0,0,0,0.8)";
+                ctx.fillRect(0, 0, 512, 256);
+                ctx.strokeStyle = data.strand === 'A' ? "#00f0ff" : "#ff0055";
+                ctx.lineWidth = 10;
+                ctx.strokeRect(0, 0, 512, 256);
+                ctx.font = "bold 60px Courier New";
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.fillText(data.char.name.toUpperCase(), 256, 100);
+                ctx.font = "italic 40px Courier New";
+                ctx.fillStyle = "#cccccc";
+                ctx.fillText(data.char.role, 256, 160);
+
+                const tex = new THREE.CanvasTexture(canvas);
+                const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
+                sprite.position.set(0, 2.5, 0);
+                sprite.scale.set(3, 1.5, 1);
+                mesh.add(sprite);
+                scene.add(mesh);
+
+                STATE.entities.push({ mesh: mesh, z: z, data: data.char, strand: data.strand, spoken: false });
+            });
+
+            log(`⚠ DECISION APPROACHING AT ${z}m`, 'System');
+
+            // Log the 'Ekphrasis' Data
+            log(`EKPHRASIS GEN [A]:`, 'A');
+            log(`<span style="font-size:10px; opacity:0.7; font-style:italic;">${promptA}</span>`, 'A', null);
+
+            log(`EKPHRASIS GEN [B]:`, 'B');
+            log(`<span style="font-size:10px; opacity:0.7; font-style:italic;">${promptB}</span>`, 'B', null);
+        }
+
+        // --- LOGIC ---
+        async function initAudio() {
+            await Tone.start();
+            noise = new Tone.Noise("brown").start();
+            noise.volume.value = -20;
+            const filter = new Tone.AutoFilter({ frequency: "8n", baseFrequency: 200, octaves: 2.6 }).toDestination().start();
+            noise.connect(filter);
+            synth = window.speechSynthesis;
+        }
+
+        function speak(text) {
+            if (!synth) return;
+            const utt = new SpeechSynthesisUtterance(text);
+            utt.rate = 1.2; utt.pitch = Math.random() * 0.5 + 0.8;
+            synth.speak(utt);
+        }
+
+        function setCam(mode) {
+            STATE.cameraMode = mode;
+            document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            log(`CAMERA MODE: ${mode}`, 'System');
+        }
+
+        function toggleStrand() {
+            STATE.targetStrand = STATE.targetStrand === 'A' ? 'B' : 'A';
+            const knob = document.getElementById('leverVisual');
+            const label = document.getElementById('strandDisplay');
+
+            if (STATE.targetStrand === 'A') {
+                knob.classList.remove('strand-B'); knob.classList.add('strand-A');
+                label.innerText = "STRAND ALPHA"; label.style.color = "var(--accent)";
+            } else {
+                knob.classList.remove('strand-A'); knob.classList.add('strand-B');
+                label.innerText = "STRAND BETA"; label.style.color = "var(--accent-alt)";
+            }
+
+            if (noise) {
+                const membrane = new Tone.MembraneSynth().toDestination();
+                membrane.triggerAttackRelease("C2", "8n");
+            }
+        }
+
+        function togglePlay() {
+            if (!STATE.playing) {
+                initAudio();
+                STATE.playing = true;
+                document.getElementById('playBtn').innerText = "SEQUENCE RUNNING...";
+                document.getElementById('playBtn').classList.add('active');
+                animate();
+            }
+        }
+
+        function log(msg, type = 'System', detail = null) {
+            const box = document.getElementById('log');
+            const div = document.createElement('div');
+            div.className = `log-entry ${type}`;
+            let html = `<span>[${Math.floor(STATE.distance)}] ${msg}</span>`;
+            if (detail) html += `<div class="char-card"><div><strong>${detail.name}</strong></div><div style="opacity:0.8">${detail.desc}</div></div>`;
+            div.innerHTML = html;
+            box.prepend(div);
+        }
+
+        function updatePhysics() {
+            if (!STATE.playing) return;
+            STATE.distance += CFG.speed;
+
+            // Move Train
+            const targetLerp = STATE.targetStrand === 'B' ? 1 : 0;
+            STATE.strandLerp += (targetLerp - STATE.strandLerp) * 0.1;
+
+            const posA = getHelixPos(STATE.distance, 'A');
+            const posB = getHelixPos(STATE.distance, 'B');
+
+            const x = posA.x + (posB.x - posA.x) * STATE.strandLerp;
+            const y = posA.y + (posB.y - posA.y) * STATE.strandLerp;
+            const z = STATE.distance;
+
+            trainGroup.position.set(x, y, z);
+
+            const tanA = getHelixTangent(z, 'A');
+            const tanB = getHelixTangent(z, 'B');
+            const lookX = tanA.x + (tanB.x - tanA.x) * STATE.strandLerp;
+            const lookY = tanA.y + (tanB.y - tanA.y) * STATE.strandLerp;
+            const lookZ = tanA.z + (tanB.z - tanA.z) * STATE.strandLerp;
+
+            trainGroup.lookAt(x + lookX, y + lookY, z + lookZ);
+
+            // --- NEW CAMERA LOGIC ---
+            if (STATE.cameraMode === 'TUNNEL') {
+                // Tunnel Mode: Flies through center of helix (x=0, y=0), looking forward
+                // Very stable, no rolling
+                camera.position.lerp(new THREE.Vector3(0, 0, z - 20), 0.1);
+                camera.lookAt(0, 0, z + 50);
+            } else if (STATE.cameraMode === 'DRONE') {
+                // Drone Mode: High above, tracks Z
+                camera.position.lerp(new THREE.Vector3(0, 40, z - 10), 0.05);
+                camera.lookAt(0, 0, z + 20);
+            } else {
+                // Chase Mode: Dynamic, follows train rotation (Disorienting but immersive)
+                const camOffset = new THREE.Vector3(0, 4, -10);
+                camOffset.applyQuaternion(trainGroup.quaternion);
+                camera.position.lerp(new THREE.Vector3(x, y, z).add(camOffset), 0.1);
+                camera.lookAt(x + lookX * 10, y + lookY * 10, z + lookZ * 10);
+            }
+
+            // World Generation
+            const lastChunkZ = STATE.chunks.length > 0 ? STATE.chunks[STATE.chunks.length - 1].userData.z : STATE.distance;
+            if (lastChunkZ < STATE.distance + 200) {
+                for (let i = 0; i < 10; i++) {
+                    const newZ = lastChunkZ + i + 1;
+                    const chunk = createChunk(newZ);
+                    chunk.userData = { z: newZ };
+                    scene.add(chunk);
+                    STATE.chunks.push(chunk);
+                }
+            }
+            if (STATE.chunks.length > 0 && STATE.chunks[0].userData.z < STATE.distance - 30) {
+                scene.remove(STATE.chunks[0]); STATE.chunks.shift();
+            }
+
+            // Decisions & Entities
+            if (STATE.distance > STATE.nextDecisionZ) {
+                spawnDecisionNode(STATE.nextDecisionZ + 100);
+                STATE.nextDecisionZ += CFG.decisionInterval;
+            }
+
+            STATE.entities.forEach((ent, idx) => {
+                const dist = ent.z - STATE.distance;
+
+                // Speak
+                if (dist < 30 && dist > 0 && !ent.spoken) {
+                    const isMyTrack = (ent.strand === 'A' && STATE.strandLerp < 0.5) || (ent.strand === 'B' && STATE.strandLerp > 0.5);
+                    if (isMyTrack) {
+                        const line = DIALOGUES[Math.floor(Math.random() * DIALOGUES.length)];
+                        speak(line);
+                        log(`"${line}"`, ent.strand, ent.data);
+                        ent.mesh.scale.setScalar(1.5);
+                        ent.spoken = true;
+                    }
+                }
+
+                // Impact
+                if (dist < -2 && dist > -10) {
+                    const isHit = (ent.strand === 'A' && STATE.strandLerp < 0.2) || (ent.strand === 'B' && STATE.strandLerp > 0.8);
+                    if (isHit && ent.mesh.visible) {
+                        ent.mesh.visible = false;
+                        log(`IMPACT CONFIRMED: ${ent.data.name}`, 'System');
+                        STATE.genome.push(ent.strand === 'A' ? '🔴' : '🔵');
+                        updateDNAStrip();
+                        if (STATE.cameraMode !== 'TUNNEL') camera.position.add(new THREE.Vector3((Math.random() - 0.5), (Math.random() - 0.5), 0));
+                    }
+                }
+                if (dist < -50) { scene.remove(ent.mesh); STATE.entities.splice(idx, 1); }
+            });
+
+            document.getElementById('velocity').innerText = `VEL: ${(CFG.speed * 100).toFixed(0)} km/h`;
+            document.getElementById('dist').innerText = `DIST: ${STATE.distance.toFixed(0)} bp`;
+        }
+
+        function updateDNAStrip() {
+            document.getElementById('dna-strip').innerHTML = STATE.genome.slice(-5).map(g => `<div>${g}</div>`).join('');
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            updatePhysics();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        log("ETHNOME PROJECT: DNA RAILWAY", "System");
+        log("Use TUNNEL mode for stable viewing.", "System");
+
+    </script>
+</body>
+
+</html>

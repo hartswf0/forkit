@@ -1,0 +1,386 @@
+{
+    "corpus_id": "fork_cascade_thick_v1",
+    "corpus_title": "THE FORK: Thick Cascade — Branching with Dialogue & Description",
+    "methodology": {
+        "principle": "Hamlet's Napkin meets Decision Tree",
+        "description": "Each branch carries thick description: what they SAY, what they SEE, what they FEEL. The cascade preserves narrative texture while mapping consequences.",
+        "layers": {
+            "structural": "Branch ID, depth, probability, parent-child",
+            "dialogic": "Exact words spoken at decision point",
+            "sensory": "What the decider perceives (sights, sounds, textures)",
+            "internal": "What the decider thinks but doesn't say",
+            "consequential": "What changes in the world after this branch"
+        }
+    },
+    "thick_cascade": {
+        "scenario_id": "THICK_CASCADE_001",
+        "title": "Petrov's Five Minutes — Full Thick Cascade",
+        "root": {
+            "branch_id": "T0",
+            "depth": 0,
+            "timestamp": "September 26, 1983, 00:14:00 Moscow Time",
+            "thick_description": {
+                "setting": "Serpukhov-15, the nuclear early warning bunker. Fluorescent lights flicker. The air conditioning hums too loud. Coffee from six hours ago sits cold in a cup with a chip on the rim.",
+                "sensory": {
+                    "sight": "Five red dots appear on the screen. The word 'ПУСК' (LAUNCH) blinks in Cyrillic. The trajectory lines arc toward Moscow.",
+                    "sound": "The klaxon starts. Three short bursts, then continuous. Twenty-three other operators turn to look at Petrov.",
+                    "touch": "The phone receiver is plastic, slightly greasy from the last shift. It weighs nothing. It weighs everything.",
+                    "smell": "Stale cigarette smoke. Someone's lunch from the break room. The ozone tang of overworked electronics."
+                },
+                "internal_monologue": "Five missiles. Only five. If this were real, they would send hundreds. But what if this is the decapitation strike they warned us about? What if five is exactly right—just enough to kill the leadership before we can respond?"
+            },
+            "entities_present": [
+                "Petrov",
+                "23 operators",
+                "Oko satellite system",
+                "Phone to Kremlin",
+                "Clock showing 00:14:47"
+            ],
+            "decider": "Lt. Col. Stanislav Petrov",
+            "branches": [
+                "T1",
+                "T2"
+            ]
+        },
+        "branches": [
+            {
+                "branch_id": "T1",
+                "label": "REPORT — Follow Protocol",
+                "depth": 1,
+                "parent": "T0",
+                "probability": 0.7,
+                "thick_description": {
+                    "what_he_says": "'This is Petrov at Serpukhov-15. We have detected launch. Five Minuteman missiles, origin Montana. Impact in eighteen minutes. Confidence is high. I am reporting as per standing orders.'",
+                    "how_he_says_it": "Voice steady. The training holds. He speaks the words exactly as drilled—subject, verb, data, time. No emotion. The phone protocol does not allow for emotion.",
+                    "what_he_sees": "The junior operator across the room is crying. His hands are shaking. Petrov does not look at him. He looks at the clock.",
+                    "what_he_feels": "A strange calm. The decision is made. It is no longer his. He has done his duty. Whatever happens next is someone else's weight.",
+                    "internal_monologue": "I have killed everyone. Or I have saved everyone. I will know in eighteen minutes. Or I will know never."
+                },
+                "immediate_consequence": "Message reaches Kremlin. General Votintsev picks up. The escalation ladder begins.",
+                "time_elapsed": "+2 minutes",
+                "next_decider": "Soviet High Command",
+                "branches": [
+                    "T1.1",
+                    "T1.2"
+                ]
+            },
+            {
+                "branch_id": "T2",
+                "label": "DISMISS — Trust Intuition",
+                "depth": 1,
+                "parent": "T0",
+                "probability": 0.3,
+                "thick_description": {
+                    "what_he_says": "'This is Petrov at Serpukhov-15. We are experiencing a system malfunction. Repeat: system malfunction. Do not—I repeat—do NOT initiate response protocol. I am declaring this a false alarm.'",
+                    "how_he_says_it": "Voice cracks on 'malfunction.' He hears himself and hates the weakness. He clears his throat. Repeats the word. Malfunction. Malfunction. He says it until it sounds true.",
+                    "what_he_sees": "The five dots are still there. The system is confident. The system says: REAL. Petrov says: WRONG. The operators stare at him like he has gone mad.",
+                    "what_he_feels": "Terror. Pure, white terror. If he is wrong, Moscow burns in twelve minutes. If he is right, he will never be able to explain how he knew.",
+                    "internal_monologue": "Five missiles is not a real attack. Five missiles is a glitch. A sunspot. A sensor error. This is what I tell myself. This is what I pray is true."
+                },
+                "immediate_consequence": "Message reaches duty officer. Response protocol paused pending investigation.",
+                "time_elapsed": "+2 minutes",
+                "next_decider": "Investigation Team",
+                "branches": [
+                    "T2.1",
+                    "T2.2"
+                ]
+            },
+            {
+                "branch_id": "T1.1",
+                "label": "LAUNCH — Retaliation Authorized",
+                "depth": 2,
+                "parent": "T1",
+                "probability": 0.6,
+                "thick_description": {
+                    "setting": "The Kremlin situation room. Red phones. Maps with circles around American cities. Andropov is not present—he is dying of kidney failure in another building. The decision falls to Ustinov.",
+                    "what_ustinov_says": "'If this is a trick, we die anyway. If it is real, we must respond. Authorization granted. May God forgive us—if there is a God.'",
+                    "what_the_operators_hear": "A single word over the loudspeaker: 'ПРИЗНАТЬ' (AUTHORIZE). Then static. Then nothing.",
+                    "sensory": {
+                        "sight": "Missile silo doors opening across Siberia. White exhaust plumes against the black sky.",
+                        "sound": "The rumble of ignition. The countdown reaching zero.",
+                        "feel": "The ground shaking as the first ICBM leaves its tube."
+                    },
+                    "internal_monologue_of_launch_officer": "I am doing my duty. The button does what the button does. I am just the finger."
+                },
+                "immediate_consequence": "Soviet ICBMs launch. NORAD detects them within three minutes. American response begins.",
+                "time_elapsed": "+8 minutes from T0",
+                "next_decider": "Automated Launch System / US President",
+                "branches": [
+                    "T1.1.1"
+                ]
+            },
+            {
+                "branch_id": "T1.2",
+                "label": "WAIT — Kremlin Hesitates",
+                "depth": 2,
+                "parent": "T1",
+                "probability": 0.4,
+                "thick_description": {
+                    "setting": "The Kremlin again. But this time, Marshal Ogarkov demands confirmation. 'One sensor is not enough. Where is the ground radar? Where is SPRN backup?'",
+                    "what_ogarkov_says": "'We have three minutes before the window closes. Get me confirmation from Pechenga. Get me ANYTHING from another source. Do not—do NOT—let us die because of a computer error.'",
+                    "what_the_aide_says": "'Marshal, Pechenga is reporting... nothing. Clear skies. No trajectories.'",
+                    "sensory": {
+                        "sight": "Ogarkov's face—relief and fury in equal measure. His hand unclenches from the chair arm.",
+                        "sound": "The room exhaling. Twenty men breathing again.",
+                        "feel": "The sweat cooling on everyone's palms."
+                    },
+                    "internal_monologue_of_ogarkov": "We almost killed everyone because a satellite saw the sun. This system is a death trap. This system must be fixed."
+                },
+                "immediate_consequence": "Retaliation paused. Secondary confirmation fails. Stand-down ordered.",
+                "time_elapsed": "+8 minutes from T0",
+                "next_decider": "Marshal Ogarkov / Investigation Team",
+                "branches": [
+                    "T1.2.1",
+                    "T1.2.2"
+                ]
+            },
+            {
+                "branch_id": "T2.1",
+                "label": "VINDICATED — Signal Was False",
+                "depth": 2,
+                "parent": "T2",
+                "probability": 0.99,
+                "thick_description": {
+                    "setting": "The bunker, thirty minutes later. Engineers have arrived. The Oko satellite logs are being pulled. Someone has made fresh coffee.",
+                    "what_the_engineer_says": "'The sun. It was the goddamn sun. High-altitude reflection off cloud cover over North Dakota. The sensors interpreted the thermal bloom as rocket exhaust. Petrov was right.'",
+                    "what_petrov_says": "Nothing. He sits in the corner. His hands are still shaking. He has not spoken since the phone call.",
+                    "what_his_supervisor_says": "'You deviated from protocol, Stanislav. You were right. But you deviated. This will be noted.'",
+                    "sensory": {
+                        "sight": "The relief on the faces of the young operators. One of them is laughing, high and strange.",
+                        "sound": "Someone drops a coffee cup. No one reacts. The tension has broken.",
+                        "feel": "Petrov's uniform is soaked through with sweat. He will never wear it again without remembering this night."
+                    },
+                    "internal_monologue_of_petrov": "I was right. I was right. But I could have been wrong. I rolled the dice with five hundred million lives. And I was right. This time."
+                },
+                "immediate_consequence": "Incident classified. Petrov neither promoted nor punished. He is transferred to a less sensitive post.",
+                "time_elapsed": "+30 minutes from T0",
+                "next_decider": "Military Review Board / History",
+                "branches": [
+                    "T2.1.1",
+                    "T2.1.2"
+                ]
+            },
+            {
+                "branch_id": "T2.2",
+                "label": "WRONG — Signal Was Real",
+                "depth": 2,
+                "parent": "T2",
+                "probability": 0.01,
+                "thick_description": {
+                    "setting": "This branch exists only in counterfactual space. In this timeline, the five missiles were real. A limited first strike. A test. A mistake on the American side that happened to coincide with Petrov's intuition being wrong.",
+                    "what_happens": "At 00:32, five nuclear warheads detonate over Soviet military installations. Petrov's false-alarm call prevented any response. The Soviet Union absorbs a first strike with no retaliation.",
+                    "what_petrov_says": "He says nothing. He is vaporized in the third detonation, which targets Serpukhov-15 as part of the decapitation strike.",
+                    "sensory": {
+                        "sight": "A flash brighter than the sun. Then darkness.",
+                        "sound": "Nothing. The blast wave travels faster than sound.",
+                        "feel": "Nothing. No time to feel."
+                    },
+                    "internal_monologue": "There is no internal monologue. There is no time. There is only: wrong."
+                },
+                "immediate_consequence": "Soviet leadership decapitated. No retaliation possible. America wins the Cold War in eighteen minutes.",
+                "time_elapsed": "+18 minutes from T0",
+                "next_decider": "None — Terminal",
+                "branches": [
+                    "T2.2:END"
+                ],
+                "terminal_state": {
+                    "outcome": "CATASTROPHIC — Soviet defeat by nuclear first strike",
+                    "petrov_status": "Dead",
+                    "historical_note": "This timeline does not exist. The signal was false. But Petrov did not know that when he made the call."
+                }
+            },
+            {
+                "branch_id": "T1.1.1",
+                "label": "EXTINCTION — Full Exchange",
+                "depth": 3,
+                "parent": "T1.1",
+                "probability": 1.0,
+                "thick_description": {
+                    "setting": "Everywhere. Nowhere. The next four hours are the last hours of industrial civilization.",
+                    "what_reagan_says": "'This is not—this cannot be—are you CERTAIN?' The Joint Chiefs confirm. The National Command Authority activates. Reagan's hand moves toward the briefcase.",
+                    "what_a_child_in_kansas_says": "'Mommy, why is the sky so bright?'",
+                    "what_no_one_says": "There are no words left. Only the physics of fission and the thermodynamics of destruction.",
+                    "sensory": {
+                        "sight": "Mushroom clouds over Moscow. Over New York. Over London (NATO is complicit). Over Beijing (China has no choice). The sky turns orange, then black.",
+                        "sound": "Nothing. After the blasts, nothing. The survivors go deaf. The rest go silent.",
+                        "feel": "Heat. Then cold. Then nothing."
+                    },
+                    "internal_monologue": "There is no internal monologue. Consciousness itself is casualty. Thought is luxury. Survival is physics."
+                },
+                "immediate_consequence": "500 million dead in initial exchange. 2 billion dead in following year from fallout and nuclear winter.",
+                "time_elapsed": "+3 hours from T0",
+                "next_decider": "None — Terminal",
+                "branches": [
+                    "T1.1.1:END"
+                ],
+                "terminal_state": {
+                    "outcome": "EXTINCTION-LEVEL — Civilization collapses",
+                    "petrov_status": "Among the dead",
+                    "historical_note": "This timeline does not exist. Petrov said malfunction. The world continued."
+                }
+            },
+            {
+                "branch_id": "T1.2.1",
+                "label": "ABORT — Confirmation Fails",
+                "depth": 3,
+                "parent": "T1.2",
+                "probability": 0.7,
+                "thick_description": {
+                    "setting": "The Kremlin, twelve minutes after the initial alert. Pechenga ground radar confirms: no incoming. The satellites lied.",
+                    "what_ogarkov_says": "'Stand down. Full stand down. And get me the name of everyone responsible for this system. I want them in my office tomorrow.'",
+                    "what_ustinov_says": "'We almost... Nikolai, we almost...' He cannot finish the sentence. His hands are shaking. He is 75 years old. He has commanded millions. He has never felt this afraid.",
+                    "what_the_room_feels": "The weight of what almost happened. The silence of near-extinction.",
+                    "internal_monologue_of_aide": "We were three minutes from launching. Three minutes. And no one will ever know how close we came."
+                },
+                "immediate_consequence": "Retaliation averted. Oko system flagged for urgent review. Petrov's initial report enters the classified record.",
+                "time_elapsed": "+12 minutes from T0",
+                "next_decider": "Politburo / Defense Ministry",
+                "branches": [
+                    "T1.2.1.1",
+                    "T1.2.1.2"
+                ]
+            },
+            {
+                "branch_id": "T2.1.1",
+                "label": "HERO — Petrov Recognized",
+                "depth": 3,
+                "parent": "T2.1",
+                "probability": 0.1,
+                "thick_description": {
+                    "setting": "A small ceremony, one week later. Petrov in dress uniform. A medal for 'meritorious service.' No one mentions what the service was.",
+                    "what_the_general_says": "'Lieutenant Colonel Petrov, your actions on the night of September 26th demonstrated exceptional judgment under extreme pressure. The Motherland thanks you.'",
+                    "what_petrov_says": "'I did my duty, General.'",
+                    "what_petrov_thinks": "This is a lie. My duty was to report. I did not report. I was right—but I did not do my duty. They are thanking me for disobedience.",
+                    "sensory": {
+                        "sight": "The medal is gold. It catches the light. It means nothing and everything.",
+                        "sound": "Applause from men who do not know what they are applauding.",
+                        "feel": "The weight of the medal. The weight of the secret."
+                    }
+                },
+                "immediate_consequence": "Petrov promoted. Story remains classified but he is known within the military as 'the one who didn't launch.'",
+                "time_elapsed": "+1 week from T0",
+                "next_decider": "History / Future declassification",
+                "branches": [
+                    "T2.1.1:END"
+                ],
+                "terminal_state": {
+                    "outcome": "POSITIVE — Recognition within system",
+                    "petrov_status": "Promoted, haunted, silent",
+                    "historical_note": "This timeline did not occur. Petrov was reprimanded, not honored."
+                }
+            },
+            {
+                "branch_id": "T2.1.2",
+                "label": "BURIED — Petrov Reprimanded",
+                "depth": 3,
+                "parent": "T2.1",
+                "probability": 0.9,
+                "thick_description": {
+                    "setting": "A gray office, three days later. Petrov sits across from his commanding officer. The man does not make eye contact.",
+                    "what_the_officer_says": "'You deviated from protocol, Stanislav. You made a judgment call that was not yours to make. The protocol exists so that individuals do not have to make such calls. You undermined the protocol.'",
+                    "what_petrov_says": "'I was right.'",
+                    "what_the_officer_says": "'That is not the point. The protocol is the point. If every officer trusted their intuition over the protocol, the system would collapse.'",
+                    "what_petrov_thinks": "The system almost collapsed because the protocol was wrong. But I cannot say this. I will never be able to say this.",
+                    "sensory": {
+                        "sight": "The officer's desk is neat. The paperwork is already prepared. Petrov's fate was decided before he entered the room.",
+                        "sound": "The scratch of a pen. His transfer order being signed.",
+                        "feel": "Cold. The office is cold and will remain cold in his memory forever."
+                    }
+                },
+                "immediate_consequence": "Petrov transferred to desk duty. Story classified. He retires early and tells no one.",
+                "time_elapsed": "+1 week from T0",
+                "next_decider": "History / Future declassification",
+                "branches": [
+                    "T2.1.2.1",
+                    "T2.1.2.2"
+                ]
+            },
+            {
+                "branch_id": "T2.1.2.1",
+                "label": "FORGOTTEN — Story Never Surfaces",
+                "depth": 4,
+                "parent": "T2.1.2",
+                "probability": 0.3,
+                "thick_description": {
+                    "setting": "1998. The Soviet Union has fallen. Petrov is 59, living in a small apartment in Fryazino. He has never told his wife the full story.",
+                    "what_petrov_says_to_himself": "'I saved the world. No one knows. No one will ever know. Is that what heroism is? An act that disappears?'",
+                    "what_his_wife_says": "'Stanislav, you are so quiet tonight. What are you thinking about?'",
+                    "what_petrov_says": "'Nothing, Raisa. Just the past.'",
+                    "sensory": {
+                        "sight": "The television shows the new Russia. Oligarchs. Chaos. The country he saved no longer exists.",
+                        "sound": "His grandchildren playing in the next room.",
+                        "feel": "A quiet ache. The ache of an untold story."
+                    }
+                },
+                "immediate_consequence": "Story never declassified. Petrov dies in obscurity. History never learns.",
+                "time_elapsed": "+15 years from T0",
+                "next_decider": "None — Terminal",
+                "branches": [
+                    "T2.1.2.1:END"
+                ],
+                "terminal_state": {
+                    "outcome": "NEUTRAL — Heroism unrecognized",
+                    "petrov_status": "Forgotten",
+                    "historical_note": "This timeline did not occur. The story surfaced in 1998."
+                }
+            },
+            {
+                "branch_id": "T2.1.2.2",
+                "label": "SURFACED — Story Declassified",
+                "depth": 4,
+                "parent": "T2.1.2",
+                "probability": 0.7,
+                "thick_description": {
+                    "setting": "1998. A German television documentary crew has found Petrov. They are in his tiny apartment. Cameras and lights everywhere.",
+                    "what_the_journalist_says": "'Colonel Petrov, you saved the world. How does that feel?'",
+                    "what_petrov_says": "'I did what anyone would have done. I trusted my judgment. Maybe I was lucky. Maybe I was foolish. I will never know.'",
+                    "what_petrov_thinks": "These people want a hero. I am not a hero. I am a man who made a guess. The guess was right. But it was still a guess.",
+                    "what_the_journalist_writes": "'The Man Who Saved the World.' The headline that will follow Petrov until his death.",
+                    "sensory": {
+                        "sight": "The camera light—harsh, unforgiving, revealing every line on his face.",
+                        "sound": "The hum of recording equipment. The scratch of a pen. His words being captured forever.",
+                        "feel": "Exposure. After fifteen years of silence, the story is out. He is no longer alone with it."
+                    }
+                },
+                "immediate_consequence": "Petrov becomes internationally known. Receives Dresden Peace Prize (2013), UN recognition (2006). Dies in 2017.",
+                "time_elapsed": "+15 years from T0",
+                "next_decider": "Public Memory / Myth-making",
+                "branches": [
+                    "T2.1.2.2.1",
+                    "T2.1.2.2.2"
+                ]
+            },
+            {
+                "branch_id": "T2.1.2.2.1",
+                "label": "MYTHOLOGIZED — Petrov Becomes Symbol",
+                "depth": 5,
+                "parent": "T2.1.2.2",
+                "probability": 0.8,
+                "thick_description": {
+                    "setting": "2017 and beyond. Petrov is dead. His story lives.",
+                    "what_textbooks_say": "'Stanislav Petrov, the Soviet officer who prevented nuclear war by trusting his judgment over a faulty early warning system.'",
+                    "what_AI_safety_researchers_say": "'The Petrov case is cited in every discussion of human override. When the machine says LAUNCH and the human says WAIT, who should win?'",
+                    "what_children_learn": "There was a man. The machine told him to start a war. He said no. We are alive because he said no.",
+                    "internal_monologue_of_history": "The story simplifies. The terror compresses. The five minutes become a single moment. The doubt becomes certainty. The guess becomes genius. This is how myths are made."
+                },
+                "immediate_consequence": "Petrov becomes permanent part of nuclear ethics curriculum. His name is invoked whenever human judgment vs. automated systems is debated.",
+                "time_elapsed": "+34 years from T0",
+                "next_decider": "None — Terminal (Mythic)",
+                "branches": [
+                    "T2.1.2.2.1:END"
+                ],
+                "terminal_state": {
+                    "outcome": "MYTHIC — Symbol of human judgment",
+                    "petrov_status": "Immortalized",
+                    "historical_note": "THIS IS THE ACTUAL TIMELINE. This is what happened."
+                }
+            }
+        ]
+    },
+    "cascade_statistics": {
+        "total_branches": 15,
+        "max_depth": 5,
+        "terminal_nodes": 5,
+        "actual_history_path": "T0→T2→T2.1→T2.1.2→T2.1.2.2→T2.1.2.2.1:END"
+    }
+}

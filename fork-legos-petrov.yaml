@@ -1,0 +1,725 @@
+# FORK-LEGOS: Modular Paradox Architecture
+# Format: LEGOS Grammar for narrative cascade retrieval
+# Principle: Every branch is a retrievable block with timestamp
+
+---
+title: "Petrov False Alarm — LEGOS Cascade"
+description: "Five-minute nuclear decision decomposed into modular LEGOS blocks"
+corpus_id: fork_legos_petrov_v1
+retrieval_mode: timestamp_indexed
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# SCENE T0: THE DETECTION
+# ═══════════════════════════════════════════════════════════════
+
+scene:
+  id: T0
+  name: "Five ICBMs Detected"
+  timestamp: "1983-09-26T00:14:00+03:00"
+  duration_seconds: 120
+  location: <Serpukhov-15 Bunker>
+
+entities:
+  - id: petrov
+    type: character
+    name: "Lt. Col. Stanislav Petrov"
+    traits: [engineer_background, doubt_prone, father_of_dmitri]
+    location: <Serpukhov-15 Bunker>
+    
+  - id: oko_system
+    type: system
+    name: "Oko Satellite Early Warning"
+    traits: [new_deployment, sun_angle_vulnerable, high_confidence]
+    location: <geosynchronous_orbit>
+    
+  - id: signal
+    type: object
+    name: "5 ICBM Detection Signal"
+    traits: [montana_origin, 18_min_to_impact, confidence_high]
+    
+  - id: phone
+    type: object
+    name: "Kremlin Hotline Phone"
+    traits: [direct_line, irreversible_once_used]
+    
+  - id: protocol_book
+    type: object
+    name: "Standing Response Protocol"
+    traits: [mandatory, trained_since_academy]
+
+goals:
+  - id: goal_duty
+    name: "Follow Protocol — Report Attack"
+    owner: petrov
+    status: pending
+    
+  - id: goal_survive
+    name: "Prevent Civilization Destruction"
+    owner: petrov
+    status: pending
+    
+  - id: goal_system
+    name: "Trigger Retaliation If Attack Real"
+    owner: oko_system
+    status: pending
+
+obstacles:
+  - id: obs_uncertainty
+    name: "Cannot Know If Signal True"
+    affects: goal_duty
+    type: epistemic
+    
+  - id: obs_five_missiles
+    name: "Only 5 ICBMs — Illogical First Strike"
+    affects: goal_system
+    type: inferential
+    
+  - id: obs_time
+    name: "5 Minutes to Decide"
+    affects: [goal_duty, goal_survive]
+    type: temporal
+
+shifts:
+  - id: shift_detection
+    name: "Signal Appears"
+    from: <routine_night_shift>
+    to: <existential_crisis>
+    causes: [oko_system]
+    timestamp: "1983-09-26T00:14:00+03:00"
+
+relations:
+  - [displays] <oko_system> -> <signal>
+  - [must_use] <petrov> -> <phone>
+  - [constrains] <protocol_book> -> <petrov>
+  - [perceives] <petrov> -> <obs_five_missiles>
+  - [weighs] <petrov> -> [goal_duty vs goal_survive]
+
+dialogue:
+  petrov_internal: |
+    "Five missiles. Only five. If this were real, they would send hundreds.
+     But what if this is the decapitation strike? What if five is exactly right?"
+  
+  operator_spoken: |
+    "Colonel, the system says LAUNCH. What do we report?"
+  
+  petrov_spoken: |
+    [PENDING — branches to T1 or T2]
+
+sensory:
+  sight: "Five red dots. ПУСК blinking. Trajectory arcs toward Moscow."
+  sound: "Klaxon: three short bursts, then continuous."
+  touch: "Phone receiver — plastic, greasy, weightless yet infinite."
+  smell: "Stale cigarettes. Cold coffee. Ozone from overworked electronics."
+
+void_state:
+  description: "Petrov stands in the void between protocol and intuition"
+  unresolved: [obs_uncertainty, obs_time]
+  emergent_taxonomy: ["human_override", "machine_trust", "epistemic_crisis"]
+
+branches: [T1, T2]
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# SCENE T1: REPORT — FOLLOW PROTOCOL
+# ═══════════════════════════════════════════════════════════════
+
+scene:
+  id: T1
+  name: "Petrov Reports Attack"
+  timestamp: "1983-09-26T00:16:00+03:00"
+  parent: T0
+  probability: 0.7
+  duration_seconds: 60
+  location: <Serpukhov-15 Bunker>
+
+entities:
+  - id: petrov
+    state: decided_report
+    
+  - id: votintsev
+    type: character
+    name: "General Votintsev"
+    traits: [kremlin_duty_officer, protocol_bound]
+    location: <Kremlin Situation Room>
+
+goals:
+  - id: goal_duty
+    status: achieved
+    resolution: "Protocol followed — attack reported"
+
+shifts:
+  - id: shift_report
+    name: "Attack Reported to Kremlin"
+    from: <petrov_deciding>
+    to: <kremlin_deciding>
+    causes: [petrov]
+    timestamp: "1983-09-26T00:16:00+03:00"
+
+relations:
+  - [reports_to] <petrov> -> <votintsev>
+  - [escalates] <phone> -> <Kremlin Situation Room>
+  - [transfers_burden] <petrov> -> <Soviet High Command>
+
+dialogue:
+  petrov_spoken: |
+    "This is Petrov at Serpukhov-15. We have detected launch.
+     Five Minuteman missiles, origin Montana. Impact in eighteen minutes.
+     Confidence is high. I am reporting as per standing orders."
+  
+  petrov_internal: |
+    "I have killed everyone. Or I have saved everyone.
+     I will know in eighteen minutes. Or I will know never."
+  
+  votintsev_spoken: |
+    "Confirmed, Serpukhov. Escalating to full command. Stay on the line."
+
+sensory:
+  sight: "Junior operator crying. Petrov does not look at him."
+  sound: "Click of phone transfer. Static. Waiting."
+  feel: "Strange calm. Decision is made. Weight is elsewhere now."
+
+void_state:
+  description: "Void transferred from Petrov to Kremlin"
+  emergent_taxonomy: ["escalation_ladder", "distributed_responsibility"]
+
+branches: [T1.1, T1.2]
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# SCENE T2: DISMISS — TRUST INTUITION
+# ═══════════════════════════════════════════════════════════════
+
+scene:
+  id: T2
+  name: "Petrov Declares Malfunction"
+  timestamp: "1983-09-26T00:16:00+03:00"
+  parent: T0
+  probability: 0.3
+  duration_seconds: 60
+  location: <Serpukhov-15 Bunker>
+
+entities:
+  - id: petrov
+    state: decided_malfunction
+    
+  - id: investigation_team
+    type: system
+    name: "Bunker Investigation Team"
+    traits: [engineers, log_analysts]
+
+goals:
+  - id: goal_survive
+    status: partially_achieved
+    resolution: "Immediate retaliation avoided"
+    
+  - id: goal_verify
+    name: "Determine If Signal True"
+    owner: investigation_team
+    status: pending
+
+obstacles:
+  - id: obs_deviation
+    name: "Petrov Deviated from Protocol"
+    affects: goal_duty
+    type: institutional
+
+shifts:
+  - id: shift_malfunction
+    name: "False Alarm Declared"
+    from: <petrov_deciding>
+    to: <investigation_pending>
+    causes: [petrov, obs_five_missiles]
+    timestamp: "1983-09-26T00:16:00+03:00"
+
+relations:
+  - [overrides] <petrov> -> <protocol_book>
+  - [triggers] <shift_malfunction> -> <investigation_team>
+  - [suspends] <petrov> -> <goal_system>
+
+dialogue:
+  petrov_spoken: |
+    "This is Petrov at Serpukhov-15. We are experiencing a system malfunction.
+     Repeat: system malfunction. Do not — I repeat — do NOT initiate response protocol.
+     I am declaring this a false alarm."
+  
+  petrov_internal: |
+    "Five missiles is not a real attack. Five missiles is a glitch.
+     A sunspot. A sensor error. This is what I tell myself. This is what I pray is true."
+  
+  operator_spoken: |
+    "Colonel... are you certain? The system shows HIGH CONFIDENCE."
+  
+  petrov_spoken: |
+    "I am certain the system can be wrong. Report malfunction. Now."
+
+sensory:
+  sight: "Operators staring like he has gone mad. Five dots still blinking."
+  sound: "Voice cracks on 'malfunction.' He repeats. Malfunction. Malfunction."
+  feel: "Pure white terror. If wrong, Moscow burns in twelve minutes."
+
+void_state:
+  description: "Petrov holds the void alone — no transfer, no distribution"
+  emergent_taxonomy: ["intuition_over_protocol", "lone_judgment", "epistemic_courage"]
+
+branches: [T2.1, T2.2]
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# SCENE T1.1: LAUNCH — RETALIATION AUTHORIZED
+# ═══════════════════════════════════════════════════════════════
+
+scene:
+  id: T1.1
+  name: "Soviet ICBMs Launch"
+  timestamp: "1983-09-26T00:22:00+03:00"
+  parent: T1
+  probability: 0.6
+  duration_seconds: 180
+  location: <Kremlin Situation Room>
+
+entities:
+  - id: ustinov
+    type: character
+    name: "Marshal Ustinov"
+    traits: [defense_minister, andropov_absent, must_decide]
+    
+  - id: icbm_silos
+    type: system
+    name: "Soviet ICBM Launch Infrastructure"
+    traits: [automated, siberia_based, 1400_warheads]
+
+goals:
+  - id: goal_retaliate
+    name: "Destroy America Before Destroyed"
+    owner: ustinov
+    status: achieved
+
+shifts:
+  - id: shift_launch
+    name: "Retaliation Authorized"
+    from: <kremlin_deciding>
+    to: <mutual_destruction>
+    causes: [ustinov, petrov_T1]
+    timestamp: "1983-09-26T00:22:00+03:00"
+
+relations:
+  - [authorizes] <ustinov> -> <icbm_silos>
+  - [causes] <shift_launch> -> <extinction>
+
+dialogue:
+  ustinov_spoken: |
+    "If this is a trick, we die anyway. If it is real, we must respond.
+     Authorization granted. May God forgive us — if there is a God."
+  
+  launch_officer_internal: |
+    "I am doing my duty. The button does what the button does.
+     I am just the finger."
+
+sensory:
+  sight: "Silo doors opening across Siberia. White exhaust against black sky."
+  sound: "Rumble of ignition. Countdown reaching zero."
+  feel: "Ground shaking as first ICBM leaves its tube."
+
+void_state:
+  description: "Void collapses — no more decisions possible"
+  emergent_taxonomy: ["point_of_no_return", "cascade_completion"]
+
+branches: [T1.1.1]
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# SCENE T1.1.1: EXTINCTION — TERMINAL
+# ═══════════════════════════════════════════════════════════════
+
+scene:
+  id: "T1.1.1:END"
+  name: "Full Nuclear Exchange"
+  timestamp: "1983-09-26T03:00:00+03:00"
+  parent: T1.1
+  probability: 1.0
+  terminal: true
+  location: <Global>
+
+entities:
+  - id: civilization
+    type: system
+    name: "Industrial Civilization"
+    state: destroyed
+    
+  - id: casualties
+    type: abstract
+    name: "500 Million Dead (Initial)"
+    
+  - id: nuclear_winter
+    type: system
+    name: "Climate Collapse"
+    state: active
+
+shifts:
+  - id: shift_extinction
+    name: "Civilization Ends"
+    from: <retaliation>
+    to: <extinction>
+    causes: [shift_launch]
+    timestamp: "1983-09-26T03:00:00+03:00"
+    irreversible: true
+
+dialogue:
+  reagan_spoken: |
+    "This is not — this cannot be — are you CERTAIN?"
+  
+  child_in_kansas: |
+    "Mommy, why is the sky so bright?"
+  
+  no_one: |
+    [There are no words left. Only physics.]
+
+sensory:
+  sight: "Mushroom clouds over Moscow. New York. London. Beijing."
+  sound: "Nothing. Survivors go deaf. The rest go silent."
+  feel: "Heat. Then cold. Then nothing."
+
+void_state:
+  description: "Total void — consciousness ceases as casualty"
+  emergent_taxonomy: ["extinction_event", "cascade_terminal", "counterfactual_only"]
+
+terminal_state:
+  outcome: EXTINCTION
+  petrov_status: "Among the dead"
+  historical_note: "THIS TIMELINE DOES NOT EXIST. Petrov said malfunction."
+
+branches: []
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# SCENE T2.1: VINDICATED — SIGNAL WAS FALSE
+# ═══════════════════════════════════════════════════════════════
+
+scene:
+  id: T2.1
+  name: "Engineers Confirm Sun Reflection"
+  timestamp: "1983-09-26T00:44:00+03:00"
+  parent: T2
+  probability: 0.99
+  duration_seconds: 1800
+  location: <Serpukhov-15 Bunker>
+
+entities:
+  - id: engineer
+    type: character
+    name: "Oko System Engineer"
+    traits: [log_analyst, relieved]
+    
+  - id: sun_reflection
+    type: object
+    name: "Solar Thermal Bloom"
+    traits: [cloud_reflection, north_dakota, mistaken_for_exhaust]
+
+goals:
+  - id: goal_verify
+    status: achieved
+    resolution: "Signal was sun reflection on clouds"
+
+shifts:
+  - id: shift_vindication
+    name: "Petrov Proven Correct"
+    from: <investigation_pending>
+    to: <false_alarm_confirmed>
+    causes: [engineer, sun_reflection]
+    timestamp: "1983-09-26T00:44:00+03:00"
+
+relations:
+  - [explains] <sun_reflection> -> <signal>
+  - [vindicates] <shift_vindication> -> <petrov>
+  - [creates] <obs_deviation> -> <institutional_problem>
+
+dialogue:
+  engineer_spoken: |
+    "The sun. It was the goddamn sun. High-altitude reflection off cloud cover
+     over North Dakota. The sensors interpreted the thermal bloom as rocket exhaust.
+     Petrov was right."
+  
+  petrov_spoken: |
+    [Nothing. He sits in the corner. Hands still shaking. Silent since the call.]
+  
+  supervisor_spoken: |
+    "You deviated from protocol, Stanislav. You were right. But you deviated.
+     This will be noted."
+
+sensory:
+  sight: "Relief on young operators' faces. One laughing, high and strange."
+  sound: "Coffee cup drops. No one reacts. Tension broken."
+  feel: "Uniform soaked with sweat. He will never wear it without remembering."
+
+void_state:
+  description: "Void resolved — but institutional void remains"
+  emergent_taxonomy: ["protocol_vs_judgment", "right_for_wrong_reasons"]
+
+branches: [T2.1.1, T2.1.2]
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# SCENE T2.1.2: BURIED — PETROV REPRIMANDED
+# ═══════════════════════════════════════════════════════════════
+
+scene:
+  id: T2.1.2
+  name: "Petrov Transferred to Desk Duty"
+  timestamp: "1983-09-29T10:00:00+03:00"
+  parent: T2.1
+  probability: 0.9
+  location: <Military Administration Office>
+
+entities:
+  - id: commanding_officer
+    type: character
+    name: "Petrov's Commanding Officer"
+    traits: [bureaucrat, protocol_defender, uncomfortable]
+
+goals:
+  - id: goal_institutional
+    name: "Maintain Protocol Authority"
+    owner: commanding_officer
+    status: achieved
+
+obstacles:
+  - id: obs_confession
+    name: "Petrov's Success Undermines Protocol"
+    affects: goal_institutional
+    type: systemic
+
+shifts:
+  - id: shift_burial
+    name: "Incident Classified — Petrov Marginalized"
+    from: <vindicated>
+    to: <buried>
+    causes: [obs_confession, commanding_officer]
+    timestamp: "1983-09-29T10:00:00+03:00"
+
+relations:
+  - [transfers] <commanding_officer> -> <petrov>
+  - [classifies] <Soviet_bureaucracy> -> <incident>
+  - [silences] <shift_burial> -> <petrov>
+
+dialogue:
+  officer_spoken: |
+    "You deviated from protocol, Stanislav. You made a judgment call
+     that was not yours to make. The protocol exists so that individuals
+     do not have to make such calls. You undermined the protocol."
+  
+  petrov_spoken: |
+    "I was right."
+  
+  officer_spoken: |
+    "That is not the point. The protocol is the point. If every officer
+     trusted their intuition over the protocol, the system would collapse."
+  
+  petrov_internal: |
+    "The system almost collapsed because the protocol was wrong.
+     But I cannot say this. I will never be able to say this."
+
+sensory:
+  sight: "Neat desk. Paperwork already prepared. Fate decided before he entered."
+  sound: "Scratch of pen signing transfer order."
+  feel: "Cold office. Will remain cold in memory forever."
+
+void_state:
+  description: "Institutional void — truth exists but cannot be spoken"
+  emergent_taxonomy: ["bureaucratic_silencing", "right_but_punished"]
+
+branches: [T2.1.2.1, T2.1.2.2]
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# SCENE T2.1.2.2: SURFACED — STORY DECLASSIFIED (1998)
+# ═══════════════════════════════════════════════════════════════
+
+scene:
+  id: T2.1.2.2
+  name: "German Documentary Finds Petrov"
+  timestamp: "1998-05-15T14:00:00+03:00"
+  parent: T2.1.2
+  probability: 0.7
+  location: <Petrov's Apartment, Fryazino>
+
+entities:
+  - id: journalist
+    type: character
+    name: "German Documentary Crew"
+    traits: [investigative, persistent]
+    
+  - id: petrov_1998
+    type: character
+    name: "Stanislav Petrov (59 years old)"
+    traits: [retired, quiet, never_told_full_story]
+
+goals:
+  - id: goal_truth
+    name: "Document the Near-Miss"
+    owner: journalist
+    status: achieved
+
+shifts:
+  - id: shift_surface
+    name: "Story Becomes Public"
+    from: <classified_15_years>
+    to: <international_knowledge>
+    causes: [journalist, soviet_collapse]
+    timestamp: "1998-05-15T14:00:00+03:00"
+
+relations:
+  - [discovers] <journalist> -> <petrov_1998>
+  - [transforms] <shift_surface> -> <petrov> [obscure -> symbol]
+  - [creates] <story> -> <myth>
+
+dialogue:
+  journalist_spoken: |
+    "Colonel Petrov, you saved the world. How does that feel?"
+  
+  petrov_spoken: |
+    "I did what anyone would have done. I trusted my judgment.
+     Maybe I was lucky. Maybe I was foolish. I will never know."
+  
+  petrov_internal: |
+    "These people want a hero. I am not a hero. I am a man who made a guess.
+     The guess was right. But it was still a guess."
+  
+  headline: |
+    "THE MAN WHO SAVED THE WORLD"
+
+sensory:
+  sight: "Camera light — harsh, unforgiving, revealing every line on his face."
+  sound: "Recording equipment humming. Words captured forever."
+  feel: "Exposure. After fifteen years of silence, no longer alone with it."
+
+void_state:
+  description: "Void transferred to public memory — myth begins"
+  emergent_taxonomy: ["delayed_recognition", "hero_narrative", "historical_revision"]
+
+branches: [T2.1.2.2.1]
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# SCENE T2.1.2.2.1: MYTHOLOGIZED — PETROV BECOMES SYMBOL (ACTUAL HISTORY)
+# ═══════════════════════════════════════════════════════════════
+
+scene:
+  id: "T2.1.2.2.1:END"
+  name: "Petrov Enters Canon of Human Judgment"
+  timestamp: "2017-09-19T00:00:00+03:00"
+  parent: T2.1.2.2
+  probability: 0.8
+  terminal: true
+  actual_history: true
+  location: <Global Memory>
+
+entities:
+  - id: petrov_legacy
+    type: abstract
+    name: "Petrov as Symbol"
+    traits: [nuclear_ethics, human_override, machine_skepticism]
+    
+  - id: ai_safety_discourse
+    type: system
+    name: "AI Safety Research Community"
+    traits: [cites_petrov, human_in_loop_debates]
+
+goals:
+  - id: goal_remembered
+    name: "Become Permanent Lesson"
+    owner: petrov_legacy
+    status: achieved
+
+shifts:
+  - id: shift_myth
+    name: "Transformation to Myth"
+    from: <individual_story>
+    to: <universal_lesson>
+    causes: [journalist, time, repetition]
+    timestamp: "2017-09-19T00:00:00+03:00"
+    irreversible: true
+
+relations:
+  - [cites] <ai_safety_discourse> -> <petrov_legacy>
+  - [teaches] <shift_myth> -> <future_generations>
+  - [simplifies] <myth> -> <five_minute_moment>
+
+dialogue:
+  textbooks: |
+    "Stanislav Petrov, the Soviet officer who prevented nuclear war
+     by trusting his judgment over a faulty early warning system."
+  
+  ai_researchers: |
+    "The Petrov case is cited in every discussion of human override.
+     When the machine says LAUNCH and the human says WAIT, who should win?"
+  
+  children_learn: |
+    "There was a man. The machine told him to start a war.
+     He said no. We are alive because he said no."
+  
+  history_internal: |
+    "The story simplifies. The terror compresses. The five minutes become
+     a single moment. The doubt becomes certainty. The guess becomes genius.
+     This is how myths are made."
+
+void_state:
+  description: "Void fully resolved — lesson crystallized"
+  emergent_taxonomy: ["canonical_example", "human_override_archetype", "uncertainty_heroism"]
+
+terminal_state:
+  outcome: MYTHIC
+  petrov_status: "Immortalized"
+  historical_note: "THIS IS THE ACTUAL TIMELINE. T0→T2→T2.1→T2.1.2→T2.1.2.2→T2.1.2.2.1:END"
+  death_date: "2017-05-19"
+  recognition:
+    - "Dresden Peace Prize (2013)"
+    - "UN Recognition (2006)"
+    - "Documentary: 'The Man Who Saved the World' (2014)"
+
+branches: []
+
+---
+
+# ═══════════════════════════════════════════════════════════════
+# RETRIEVAL INDEX
+# ═══════════════════════════════════════════════════════════════
+
+retrieval_index:
+  by_timestamp:
+    "1983-09-26T00:14:00": T0
+    "1983-09-26T00:16:00": [T1, T2]
+    "1983-09-26T00:22:00": T1.1
+    "1983-09-26T00:44:00": T2.1
+    "1983-09-26T03:00:00": "T1.1.1:END"
+    "1983-09-29T10:00:00": T2.1.2
+    "1998-05-15T14:00:00": T2.1.2.2
+    "2017-09-19T00:00:00": "T2.1.2.2.1:END"
+    
+  by_entity:
+    petrov: [T0, T1, T2, T2.1, T2.1.2, T2.1.2.2, "T2.1.2.2.1:END"]
+    oko_system: [T0]
+    kremlin: [T1, T1.1, T1.2]
+    
+  by_taxonomy:
+    human_override: [T2, T2.1, "T2.1.2.2.1:END"]
+    machine_trust: [T1, T1.1]
+    epistemic_crisis: [T0]
+    extinction_event: ["T1.1.1:END"]
+    
+  by_void_state:
+    unresolved: [T0, T1, T2]
+    transferred: [T1.1, T2.1.2.2]
+    collapsed: ["T1.1.1:END"]
+    resolved: ["T2.1.2.2.1:END"]
+
+actual_path: "T0 → T2 → T2.1 → T2.1.2 → T2.1.2.2 → T2.1.2.2.1:END"

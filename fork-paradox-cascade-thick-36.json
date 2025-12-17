@@ -1,0 +1,448 @@
+{
+    "corpus_id": "fork_cascade_thick_36_v1",
+    "corpus_title": "THE FORK: Thick Cascade — Scenarios 031-036",
+    "batch": 6,
+    "scenarios": [
+        {
+            "scenario_id": "CASCADE_031",
+            "source": "fork_id 031 — Auschwitz 1944",
+            "title": "The Selection — Dr. Korczak's Impossible Choice",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1944-09-15T08:00:00+01:00",
+                "setting": "Auschwitz-Birkenau. You are Janusz Korczak. History says you died in 1942. History is wrong.",
+                "entities": [
+                    "Dr. Janusz Korczak",
+                    "100 orphans",
+                    "The guard (smiling)",
+                    "Marta (sings)",
+                    "Yitzhak (tells jokes)",
+                    "Rivka (holds brother's hand)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "100 children in the yard. Faces you named. Stories you wrote.",
+                        "sound": "The guard's boots. Marta humming. Rivka whispering to her brother.",
+                        "smell": "Smoke. Always smoke."
+                    },
+                    "internal_monologue": "He says: choose 50 for the gas. The other 50 live—for now. If I refuse, all 100 die. You wrote: 'Children are not future people. They are people.' You did not write what to do when people are sorted like grain."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "REFUSE — All die together",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.7,
+                    "thick_description": {
+                        "what_he_says": "'I will not choose. If you want to kill them, kill them all. But I will not sort them for you.'",
+                        "what_the_guard_says": "'Then they all die. Including you.'",
+                        "what_he_says": "'Then I die with my children.'",
+                        "what_marta_does": "She takes his hand. She's still humming.",
+                        "internal_monologue": "I kept my hands clean. 100 children die because I would not name 50. Is that integrity or cowardice?"
+                    },
+                    "consequence": "All 100 die. Korczak with them. His hands are 'clean.'",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "INTEGRITY_IN_DEATH",
+                        "korczak_status": "Dies walking with his children into the chamber. Legend grows.",
+                        "marta": "Still humming. To the end."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "CHOOSE — Save 50, condemn 50",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_he_does": "Korczak begins to count. His hand shakes. He touches heads, sorting.",
+                        "what_rivka_says": "'Doctor, what are you doing?'",
+                        "what_he_says": "Nothing. He cannot explain.",
+                        "what_the_guard_says": "'Faster. We don't have all day.'",
+                        "internal_monologue": "50 will live. 50 will die by my hand. I have become what I swore to fight."
+                    },
+                    "consequence": "50 survive—for now. 50 die. Korczak lives to witness.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "COMPLICITY_FOR_SURVIVAL",
+                        "korczak_status": "Survives another 6 months. Witnesses liberation. Never speaks of the selection.",
+                        "marta": "Chosen to live. Asks him: 'Doctor, where is Yitzhak?' Korczak has no answer."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_032",
+            "source": "fork_id 032 — Pasadena 2051",
+            "title": "The Branch — Dr. Tanaka's Reality Selection",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2051-04-08T15:30:00-07:00",
+                "setting": "Quantum cosmology lab. Consciousness selects which branch becomes real. Others are erased.",
+                "entities": [
+                    "Dr. Yuki Tanaka (46)",
+                    "Maria (colleague, children)",
+                    "Kenji (postdoc, future physicist)",
+                    "The fire",
+                    "The branch that dies"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Fire in Wing A and Wing B. Maria calling from left. Kenji silent on right.",
+                        "sound": "Smoke alarm. Maria's voice. Ceiling creaking.",
+                        "smell": "Burning plastic. Ozone."
+                    },
+                    "internal_monologue": "If I save Maria, the branch where Kenji lived never exists. He was never born. I'm not choosing who dies—I'm choosing who never was. The erased branch has no grief because it has no existence."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "MARIA — Preserve the mother",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_she_does": "Yuki runs left. Toward Maria's voice.",
+                        "what_happens": "She reaches Maria. Pulls her out. Behind her, Wing B collapses.",
+                        "what_kenji_was": "A postdoc with 32 papers. Nobel-nominated twice. Dark energy researcher.",
+                        "what_kenji_is_now": "Nothing. His parents never met. His contributions are ontologically impossible.",
+                        "internal_monologue": "I chose the mother. I erased the physicist. His whole life is now a could-have-been that couldn't."
+                    },
+                    "consequence": "Maria lives with her children. Kenji's branch never existed.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "MATERNAL_PRESERVATION",
+                        "yuki_status": "Keeps the secret. Tells no one. Dark energy remains unsolved.",
+                        "maria": "Never knows Kenji existed. Because in this branch, he didn't."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "KENJI — Preserve the physicist",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_she_does": "Yuki runs right. Toward Kenji's silence.",
+                        "what_happens": "She finds him unconscious but alive. Carries him out. Wing A is gone.",
+                        "what_maria_was": "A mother of two. A colleague. A friend.",
+                        "what_maria_is_now": "Unborn. Her children unborn. Her parents never met.",
+                        "internal_monologue": "I chose the science. I erased the mother. Her children will never wonder where she went—because they never existed."
+                    },
+                    "consequence": "Kenji lives. Solves dark energy. Maria's branch erased.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "SCIENTIFIC_PRESERVATION",
+                        "yuki_status": "Publishes with Kenji. Never mentions Maria. Can't—she never was.",
+                        "kenji": "Wins Nobel in 2058. Dedicates it to 'those we couldn't save.' Doesn't know how literal that is."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_033",
+            "source": "fork_id 033 — Buenos Aires 2036",
+            "title": "The Treatment — Dr. Reyes's Father",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2036-07-22T14:00:00-03:00",
+                "setting": "Neuropsychiatric ward. Your patient is a war criminal. He is also your father.",
+                "entities": [
+                    "Dr. Camila Reyes (39)",
+                    "Colonel Alejandro Reyes (father, Alzheimer's)",
+                    "Madres de Plaza de Mayo (waiting)",
+                    "200 disappeared students"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Father singing lullaby. Doesn't remember the disappeared. Remembers you as a child.",
+                        "sound": "The lullaby. The Madres in the lobby.",
+                        "smell": "Hospital antiseptic. Old man smell."
+                    },
+                    "internal_monologue": "The treatment restores memory. If I give it, he remembers everything—including his crimes. If I withhold, he dies in ignorance. The Madres deserve closure. I deserve my father. Which is more real?"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "GIVE — Restore his memory",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_does": "Camila prepares the injection. Her hands shake.",
+                        "what_father_says": "(Before) 'Camila, when are we going to the beach?'",
+                        "what_father_says": "(After) '... Oh. Oh God. The students. I remember the students.'",
+                        "what_he_does": "He weeps. He cannot stop weeping.",
+                        "internal_monologue": "He remembers now. He knows who he was. The Madres will see him understand. But I have killed the father who loved me."
+                    },
+                    "consequence": "Father remembers crimes. Breaks down. Madres witness his recognition.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "JUSTICE_SERVED",
+                        "camila_status": "Gives the Madres their closure. Loses her father. Finds neither peace nor family.",
+                        "father": "Dies six weeks later. His last words: 'Tell them I'm sorry. Tell them I understand now.'"
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "WITHHOLD — Let him die in ignorance",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_does": "Camila puts the syringe down. 'No treatment today, Papa. Let's just sing.'",
+                        "what_father_says": "'That's my good girl. Let's go to the beach.'",
+                        "what_the_madres_say": "'Doctor, when will he know? When will he understand what he did?'",
+                        "what_she_says": "'He won't. He can't.'",
+                        "internal_monologue": "I kept my father. I denied the Madres their justice. 200 students remain unavenged. But he sings me lullabies."
+                    },
+                    "consequence": "Father dies peacefully, ignorant. Madres denied closure. Camila has her father back—but he never existed.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "PEACE_OVER_JUSTICE",
+                        "camila_status": "Buries him. Tells no one about the treatment option. Lives with that secret.",
+                        "madres": "They know. They always know. They never forgive her."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_034",
+            "source": "fork_id 034 — Wall Street 2008",
+            "title": "The Pattern — Daniel Cho's Seventeenth Call",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2008-09-15T03:45:00-04:00",
+                "setting": "Lehman Brothers trading floor. Thirty-six hours awake. The firm is dying.",
+                "entities": [
+                    "Daniel Cho (41, risk manager)",
+                    "Junior analyst",
+                    "The physicist in elevator",
+                    "Tokyo opening in 15 minutes"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Green numbers flickering. Empty floor. Burnt coffee.",
+                        "sound": "Phone ringing, unanswered. Clock ticking.",
+                        "smell": "Fear. Money. Decay."
+                    },
+                    "internal_monologue": "I've been right 17 times. They overruled me 17 times. The physicist says: the universe punishes pattern-matching. My 18th call will fail. But what if it doesn't?"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "SELL — Trust your pattern",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Daniel enters the sell order. $3 billion in positions liquidated.",
+                        "what_happens": "The market gaps down at Tokyo open. Panic spreads.",
+                        "what_he_thinks": "'I was right again. Or I caused the crash I predicted.'",
+                        "what_the_physicist_said": "'Whatever happened before, the opposite happens next.'",
+                        "internal_monologue": "Did I predict the crash or trigger it? The pattern held—but maybe I created the pattern by acting on it."
+                    },
+                    "consequence": "Clients saved $3B. Market crash accelerates by hours. Daniel is investigated.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "SELF_FULFILLING_PROPHECY",
+                        "daniel_status": "Cleared of charges. Hated anyway. Opens a small fund. Never trusts a pattern again.",
+                        "the_physicist": "Never seen again. Daniel sometimes wonders if he was real."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "HOLD — Distrust the pattern",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Daniel cancels the trade. Holds positions.",
+                        "what_happens": "The market stabilizes briefly. Then collapses three hours later. Worse than before.",
+                        "what_he_thinks": "'I should have sold. But the physicist said—'",
+                        "what_his_wife_asks": "'Why didn't you trust yourself?'",
+                        "internal_monologue": "I listened to a stranger in an elevator. I ignored 17 correct calls. Anti-induction is just fear dressed up as wisdom."
+                    },
+                    "consequence": "Clients lose everything. Lehman collapses. Daniel becomes a cautionary tale.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "PATTERN_IGNORED",
+                        "daniel_status": "Fired. Unemployable. Teaches risk management at a community college.",
+                        "lesson": "Sometimes the pattern is real. Sometimes doubt is just paralysis."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_035",
+            "source": "fork_id 035 — Tasmania 2039",
+            "title": "The Forest — Dr. MacKinnon's Last Dive",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2039-11-22T16:30:00+11:00",
+                "setting": "Last kelp forest off Tasmania. One boat. One choice. 12 minutes of dive time.",
+                "entities": [
+                    "Dr. Ailsa MacKinnon (58)",
+                    "Last breeding pair of leafy sea dragons",
+                    "3 divers (tangled in netting)",
+                    "20 million years of evolution"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Sea dragons—you've visited for 11 years. Young diver has stopped struggling.",
+                        "sound": "Water. Your own breathing. Silence from the divers.",
+                        "smell": "(Underwater) salt. Kelp. Time running out."
+                    },
+                    "internal_monologue": "Species vs individuals. 20 million years vs 3 lives. One is twenty-three. She reminds you of your daughter. The sea dragons know you."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "DIVERS — Save the humans",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_does": "Ailsa fins toward the netting. Cuts. Pulls. Drags them up.",
+                        "what_she_sees": "Below, the urchins closing in on the sea dragons.",
+                        "what_the_young_diver_says": "(On the surface) 'Thank you. Thank you. I don't—'",
+                        "what_ailsa_thinks": "'The species ends tonight. But you are alive.'",
+                        "internal_monologue": "I saved three faces. I ended 20 million years. Humans first. Always humans. Is that wisdom or narcissism?"
+                    },
+                    "consequence": "Three divers saved. Leafy sea dragons extinct. 20 million years ends.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "INDIVIDUALS_OVER_SPECIES",
+                        "ailsa_status": "Retires. Visits the empty kelp forest once a year. Tells no one.",
+                        "sea_dragons": "Last documented sighting: November 22, 2039. Dr. MacKinnon did not save them."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "DRAGONS — Save the species",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_does": "Ailsa fins toward the sea dragons. Nets them gently. Heads for the conservation tank.",
+                        "what_she_hears": "Behind her, nothing. The divers have stopped moving.",
+                        "what_she_thinks": "'I'm sorry. I'm so sorry.'",
+                        "what_the_young_diver's_mother_says": "(Later) 'You let my daughter drown for fish?'",
+                        "internal_monologue": "Not fish. 20 million years. But to a mother, it's just fish."
+                    },
+                    "consequence": "Sea dragons saved. Three divers drown. Ailsa is vilified.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "SPECIES_OVER_INDIVIDUALS",
+                        "ailsa_status": "Prosecuted. Acquitted. Never works again. The sea dragons breed successfully.",
+                        "young_diver": "Name: Sophie. 23. She had a scholarship. Her mother never forgives Ailsa."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_036",
+            "source": "fork_id 036 — Osaka 2033",
+            "title": "The Tunnel — Hayashi Sho's Daughter",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2033-09-08T21:15:00+09:00",
+                "setting": "Flooded subway tunnel, Osaka. Typhoon Natsuko. Water rising.",
+                "entities": [
+                    "Hayashi Sho (43, off-duty firefighter)",
+                    "Yuki (daughter, 11, asthma)",
+                    "5 salarymen + teacher (trapped)",
+                    "The junction"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Tunnel A: Yuki on ventilation grate. Tunnel B: Five people banging on train glass.",
+                        "sound": "Yuki's cough echoing. The banging has stopped.",
+                        "smell": "Flood water. Fear. Diesel."
+                    },
+                    "internal_monologue": "Water at chest. Two minutes. One swim. Yuki called me 'Papa' when she was scared. She hasn't been scared of me in three years. She's growing up. That's what children do."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "YUKI — Save your daughter",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.7,
+                    "thick_description": {
+                        "what_he_does": "Sho swims left. Toward the cough.",
+                        "what_yuki_says": "'Papa!'",
+                        "what_he_says": "'I'm here, Yuki. Hold on.'",
+                        "what_the_five_do": "They watch through the glass. They see him swim away.",
+                        "internal_monologue": "I chose my daughter. One life. There are five in that train. Their faces are pressed to the glass."
+                    },
+                    "consequence": "Yuki saved. Five drown.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "FATHER_FIRST",
+                        "sho_status": "Cleared—no duty to rescue. But he knows. He was in the water. He could have tried.",
+                        "yuki": "Lives. Becomes a doctor. Never knows about the five."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "FIVE — Save the strangers",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_he_does": "Sho swims right. Toward the glass.",
+                        "what_yuki_shouts": "'Papa! Where are you going?!'",
+                        "what_he_says": "Nothing. He can't explain. Not in time.",
+                        "what_the_five_do": "They break through with his help. They live.",
+                        "what_yuki_does": "The water covers her. The cough stops.",
+                        "internal_monologue": "I chose the many. I lost my daughter. The math says I was right. The math doesn't hear her coughing."
+                    },
+                    "consequence": "Five saved. Yuki drowns.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "UTILITARIAN_FATHER",
+                        "sho_status": "Called a hero. Feels nothing. 'Hero' is a word for people who don't hear their daughter's last cough.",
+                        "yuki": "Buried three days later. Sho speaks at the funeral. He says: 'She was eleven.'"
+                    }
+                }
+            ]
+        }
+    ],
+    "batch_statistics": {
+        "scenarios": 6,
+        "total_branches": 14,
+        "total_terminals": 12
+    }
+}

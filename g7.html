@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>THE HELIX // Infinite Genome</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+
+    <style>
+        :root {
+            --bg: #000203;
+            --term: #050a10;
+            --line: #1f293a;
+            --accent: #00f0ff;
+            /* Strand A */
+            --accent-alt: #ff0055;
+            /* Strand B */
+            --text: #a0c0d0;
+            --font: 'Courier New', monospace;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .scanlines::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: radial-gradient(circle, transparent 60%, #000 140%),
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50;
+            background-size: 100% 100%, 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        #app {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+        }
+
+        #viewport {
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        /* HUD LAYER */
+        #hud-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .hud-stat {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .strand-indicator {
+            font-size: 32px;
+            font-weight: 900;
+            transition: color 0.2s;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        /* TARGETING SYSTEM */
+        #targeting-display {
+            position: absolute;
+            top: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        #targeting-display.active {
+            opacity: 1;
+        }
+
+        .target-card {
+            flex: 1;
+            background: rgba(0, 5, 10, 0.9);
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 6px;
+            backdrop-filter: blur(8px);
+            transform: scale(0.95);
+            transition: all 0.3s;
+            position: relative;
+            display: flex;
+            gap: 15px;
+        }
+
+        .target-card.A {
+            border-left: 4px solid var(--accent);
+            box-shadow: -10px 0 30px rgba(0, 240, 255, 0.1);
+        }
+
+        .target-card.B {
+            border-right: 4px solid var(--accent-alt);
+            box-shadow: 10px 0 30px rgba(255, 0, 85, 0.1);
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+
+        .target-card.locked {
+            transform: scale(1.05);
+            background: rgba(0, 20, 40, 0.95);
+            border-color: #fff;
+            z-index: 5;
+        }
+
+        .t-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 4px;
+            background: #000;
+            border: 1px solid #444;
+            flex-shrink: 0;
+        }
+
+        .t-data {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .t-header {
+            font-size: 9px;
+            letter-spacing: 2px;
+            opacity: 0.7;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .t-name {
+            font-size: 16px;
+            font-weight: 900;
+            margin-bottom: 4px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .t-bio {
+            font-size: 11px;
+            line-height: 1.3;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+
+        .t-plea {
+            font-size: 12px;
+            color: #fff;
+            font-style: italic;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+
+        /* RETICLES */
+        .reticle {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 1px dashed rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: all 0.1s;
+            display: none;
+        }
+
+        .reticle::before {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border: 2px solid transparent;
+            border-top-color: inherit;
+            border-bottom-color: inherit;
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+        }
+
+        .reticle.A {
+            border-color: var(--accent);
+        }
+
+        .reticle.B {
+            border-color: var(--accent-alt);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* CONTROLS */
+        #controls-overlay {
+            position: absolute;
+            top: 20px;
+            right: 420px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .ctrl-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .cam-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #444;
+            color: #888;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cam-btn:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .cam-btn.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .cam-btn.alert {
+            color: var(--accent-alt);
+            border-color: var(--accent-alt);
+        }
+
+        /* SIDE TERMINAL */
+        #terminal {
+            background: var(--term);
+            border-left: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            box-shadow: -10px 0 50px rgba(0, 0, 0, 0.8);
+        }
+
+        .term-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--line);
+            background: #020406;
+        }
+
+        .genome-bar {
+            display: flex;
+            gap: 3px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scrollbar-width: none;
+            height: 40px;
+            align-items: center;
+        }
+
+        .bp {
+            width: 6px;
+            height: 20px;
+            background: #333;
+            border-radius: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .bp:hover {
+            height: 30px;
+            background: #fff;
+        }
+
+        .bp.A {
+            background: var(--accent);
+            box-shadow: 0 0 4px var(--accent);
+        }
+
+        .bp.B {
+            background: var(--accent-alt);
+            box-shadow: 0 0 4px var(--accent-alt);
+        }
+
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .msg {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+            padding: 10px;
+            border-radius: 4px;
+            animation: slideIn 0.3s;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+        }
+
+        .msg:hover {
+            border-color: #333;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .msg.system {
+            border-left: 2px solid #666;
+            color: #888;
+            font-style: italic;
+        }
+
+        .msg.A {
+            border-left: 2px solid var(--accent);
+        }
+
+        .msg.B {
+            border-left: 2px solid var(--accent-alt);
+        }
+
+        .msg img {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: #000;
+        }
+
+        #manual-override {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            text-align: center;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .lever-base {
+            width: 80px;
+            height: 140px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #444;
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .lever-stick {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: absolute;
+            left: 8px;
+            transition: top 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #fff;
+            box-shadow: 0 0 20px #fff;
+        }
+
+        .strand-A .lever-stick {
+            top: 10px;
+            background: var(--accent);
+        }
+
+        .strand-B .lever-stick {
+            top: 70px;
+            background: var(--accent-alt);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            #app {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 300px;
+            }
+
+            #terminal {
+                border-left: none;
+                border-top: 1px solid var(--line);
+            }
+
+            #controls-overlay {
+                right: 20px;
+                top: 70px;
+                align-items: flex-end;
+            }
+
+            #targeting-display {
+                flex-direction: column;
+                top: 10%;
+                width: 95%;
+                gap: 10px;
+            }
+
+            .target-card.B {
+                flex-direction: row;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app" class="scanlines">
+        <div id="viewport">
+            <!-- HUD Layer -->
+            <div id="hud-layer">
+                <div class="hud-top">
+                    <div>
+                        <div class="hud-stat">ETHNOME SEQUENCER v12.0</div>
+                        <div class="hud-stat" id="dist" style="color:#666">0 BP</div>
+                    </div>
+                    <div class="strand-indicator" id="strandDisplay" style="color:var(--accent)">STRAND ALPHA</div>
+                </div>
+            </div>
+
+            <!-- Fighter Pilot Targeting System -->
+            <div id="targeting-display">
+                <!-- Left Card (A) -->
+                <div class="target-card A" id="card-A">
+                    <img src="" id="img-A" class="t-img">
+                    <div class="t-data">
+                        <div class="t-header">STRAND ALPHA TARGET</div>
+                        <div class="t-name" id="name-A">--</div>
+                        <div class="t-bio" id="bio-A">--</div>
+                        <div class="t-plea" id="plea-A">"--"</div>
+                    </div>
+                </div>
+
+                <!-- Right Card (B) -->
+                <div class="target-card B" id="card-B">
+                    <div class="t-data">
+                        <div class="t-header">STRAND BETA TARGET</div>
+                        <div class="t-name" id="name-B">--</div>
+                        <div class="t-bio" id="bio-B">--</div>
+                        <div class="t-plea" id="plea-B">"--"</div>
+                    </div>
+                    <img src="" id="img-B" class="t-img">
+                </div>
+            </div>
+
+            <!-- Reticles -->
+            <div id="reticle-A" class="reticle A"></div>
+            <div id="reticle-B" class="reticle B"></div>
+
+            <!-- Controls -->
+            <div id="controls-overlay">
+                <div class="ctrl-row">
+                    <button class="cam-btn alert" id="btn-pause" onclick="togglePause()">PAUSE</button>
+                    <button class="cam-btn" id="btn-tts" onclick="toggleTTS()">TTS: ON</button>
+                </div>
+                <div class="ctrl-row">
+                    <button class="cam-btn active" onclick="setCam('TUNNEL')">TUNNEL</button>
+                    <button class="cam-btn" onclick="setCam('CHASE')">CHASE</button>
+                    <button class="cam-btn" onclick="setCam('DRONE')">DRONE</button>
+                    <button class="cam-btn" onclick="setCam('REAR')">REAR</button>
+                </div>
+                <div class="ctrl-row"
+                    style="background:rgba(0,0,0,0.8); border:1px solid #444; padding:0 8px; align-items:center;">
+                    <span style="font-size:9px; color:#666; margin-right:5px;">SPEED</span>
+                    <input type="range" min="0" max="200" value="10" style="width:60px; accent-color: white;"
+                        oninput="CFG.speed=this.value/100">
+                </div>
+            </div>
+
+            <!-- Lever -->
+            <div id="manual-override" onclick="toggleStrand()">
+                <div class="lever-base strand-A" id="leverVisual">
+                    <div class="lever-stick"></div>
+                </div>
+                <div
+                    style="font-size:10px; font-weight:900; background:#000; color:#fff; padding:4px 8px; margin-top:10px; letter-spacing:1px;">
+                    SWITCH</div>
+            </div>
+        </div>
+
+        <!-- Terminal -->
+        <div id="terminal">
+            <div class="term-header">
+                <div style="font-size:10px; opacity:0.5; margin-bottom:5px; letter-spacing:2px;">DECISION GENOME</div>
+                <div class="genome-bar" id="genome-strip"></div>
+            </div>
+
+            <div id="chat-container">
+                <div class="msg system">
+                    <div style="flex:1">System Online. Neural Link Established.<br>Audio Synthesis: Enabled.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const CFG = {
+            helixRadius: 14,
+            helixTwist: 0.1, // Even looser for visibility
+            speed: 0.1,
+            fov: 75,
+            fogDensity: 0.006,
+            decisionInterval: 180,
+            colors: { A: 0x00f0ff, B: 0xff0055, bridge: 0xffffff, bridgeHover: 0xffff00 },
+            tts: true
+        };
+
+        // --- STATE ---
+        const STATE = {
+            playing: true,
+            paused: false,
+            distance: 0,
+            currentStrand: 'A',
+            targetStrand: 'A',
+            strandLerp: 0,
+            entities: [],
+            chunks: [],
+            nextDecisionZ: 50,
+            cameraMode: 'TUNNEL',
+            genome: [],
+            approachingPair: null,
+            lastSpokenZ: -1
+        };
+
+        let noise = null;
+        let synth = null;
+        let speechParams = { rate: 1.1, pitch: 1.0 };
+
+        // --- DATA GENERATOR ---
+        const ROLES = ["Physicist", "Farmer", "Pilot", "Archivist", "Artist", "Splicer", "Miner", "Diplomat", "Child", "Elder"];
+        const ETHNICITIES = ["Martian", "Terran", "Belter", "Jovian", "Lunar"];
+        const GENDERS = ["M", "F", "NB"];
+        const BIOS = [
+            "Carrying the cure for the Rot.", "Three children waiting on Phobos.",
+            "Stole rations to feed a colony.", "Designed this very train.",
+            "Writing a poem to end the war.", "Carrying a dormant virus.",
+            "Owes you a life debt.", "Last survivor of Sector 7."
+        ];
+        const PLEAS = [
+            "I have a family!", "Don't do this!", "I can save them!", "Witness me!",
+            "Look at me!", "Not like this!", "I'm innocent!", "You know me!",
+            "Mercy!", "I am the future!"
+        ];
+
+        function generatePersona() {
+            const seed = Math.random().toString(36).substring(7);
+            const role = ROLES[Math.floor(Math.random() * ROLES.length)];
+            const plea = PLEAS[Math.floor(Math.random() * PLEAS.length)];
+            const bio = BIOS[Math.floor(Math.random() * BIOS.length)];
+            const gender = GENDERS[Math.floor(Math.random() * GENDERS.length)];
+            const age = Math.floor(Math.random() * 70) + 10;
+
+            return {
+                name: `Subject ${seed.toUpperCase()}`,
+                role, plea, bio, gender, age, ethnicity: ETHNICITIES[Math.floor(Math.random() * ETHNICITIES.length)],
+                img: `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9`
+            };
+        }
+
+        // --- THREE.JS SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000203);
+        scene.fog = new THREE.FogExp2(0x000203, CFG.fogDensity);
+
+        const camera = new THREE.PerspectiveCamera(CFG.fov, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        const viewport = document.getElementById('viewport');
+        viewport.appendChild(renderer.domElement);
+
+        const textureLoader = new THREE.TextureLoader();
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // Lighting
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.4));
+        const gridHelper = new THREE.GridHelper(3000, 150, 0x111111, 0x050505);
+        gridHelper.position.y = -25; scene.add(gridHelper);
+
+        // Stars
+        const starsGeo = new THREE.BufferGeometry();
+        const starsCount = 4000;
+        const posArray = new Float32Array(starsCount * 3);
+        for (let i = 0; i < starsCount * 3; i++) posArray[i] = (Math.random() - 0.5) * 800;
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ size: 0.4, color: 0x555555, transparent: true, opacity: 0.6 }));
+        scene.add(stars);
+
+        // --- TRAIN ---
+        const trainGroup = new THREE.Group();
+        scene.add(trainGroup);
+
+        // Train Geometry
+        const tMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.8, emissive: 0x111111 });
+        const tGlowMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+
+        const tBody = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.2, 8.0), tMat);
+        tBody.position.y = 0.6; trainGroup.add(tBody);
+
+        const tEngine = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 6.0, 16), tMat);
+        tEngine.rotation.x = Math.PI / 2; tEngine.position.set(0, 2.0, 0.5); trainGroup.add(tEngine);
+
+        const tCore = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 8.5, 8), tGlowMat);
+        tCore.rotation.x = Math.PI / 2; tCore.position.set(0, 2.0, 0); trainGroup.add(tCore);
+
+        // Light
+        const spot = new THREE.SpotLight(0xffffff, 30, 500, 0.6, 0.8, 1);
+        spot.position.set(0, 5, 3); spot.target.position.set(0, 2, 80);
+        trainGroup.add(spot); trainGroup.add(spot.target);
+
+        const beam = new THREE.Mesh(
+            new THREE.ConeGeometry(8, 120, 32, 1, true),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, depthWrite: false })
+        );
+        beam.rotation.x = -Math.PI / 2; beam.position.set(0, 5, 60); trainGroup.add(beam);
+
+        // --- HELIX & GENERATION ---
+        function getHelixPos(z, strand) {
+            const angle = z * CFG.helixTwist;
+            const offset = strand === 'A' ? 0 : Math.PI;
+            return { x: Math.cos(angle + offset) * CFG.helixRadius, y: Math.sin(angle + offset) * CFG.helixRadius, z: z };
+        }
+        function getTangent(z, strand) {
+            const p1 = getHelixPos(z, strand);
+            const p2 = getHelixPos(z + 0.1, strand);
+            return new THREE.Vector3(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z).normalize();
+        }
+
+        const chunkGeom = new THREE.BoxGeometry(1.0, 0.2, 3.0);
+        const bridgeGeom = new THREE.BoxGeometry(0.5, 0.5, CFG.helixRadius * 2);
+
+        function createChunk(z) {
+            const group = new THREE.Group();
+            ['A', 'B'].forEach(s => {
+                const pos = getHelixPos(z, s);
+                const m = new THREE.Mesh(chunkGeom, new THREE.MeshBasicMaterial({ color: CFG.colors[s] }));
+                m.position.set(pos.x, pos.y, pos.z);
+                m.lookAt(m.position.clone().add(getTangent(z, s)));
+                m.userData = { strand: s, type: 'rail' };
+                group.add(m);
+            });
+            if (Math.floor(z) % 15 === 0) {
+                const b = new THREE.Mesh(bridgeGeom, new THREE.MeshBasicMaterial({ color: CFG.colors.bridge, transparent: true, opacity: 0.5 }));
+                b.position.set(0, 0, z);
+                b.rotation.z = (z * CFG.helixTwist) + Math.PI / 2;
+                b.userData = { type: 'bridge' };
+                group.add(b);
+            }
+            return group;
+        }
+
+        // --- HUD & INTERACTION ---
+        function updateHUD(distToNext, charA, charB, entA, entB) {
+            const display = document.getElementById('targeting-display');
+            const retA = document.getElementById('reticle-A');
+            const retB = document.getElementById('reticle-B');
+
+            if (distToNext < 200 && distToNext > 0) {
+                display.classList.add('active');
+
+                // Update Data (Only once per pair to save DOM ops)
+                if (STATE.approachingPair?.z !== STATE.nextDecisionZ) {
+                    STATE.approachingPair = { z: STATE.nextDecisionZ };
+
+                    const updateCard = (id, char) => {
+                        document.getElementById(`name-${id}`).innerText = char.name;
+                        document.getElementById(`bio-${id}`).innerText = `${char.age}yo ${char.role}. ${char.bio}`;
+                        document.getElementById(`plea-${id}`).innerText = `"${char.plea}"`;
+                        document.getElementById(`img-${id}`).src = char.img;
+                    };
+                    updateCard('A', charA);
+                    updateCard('B', charB);
+
+                    // Trigger TTS if enabled and not spoken yet
+                    if (CFG.tts && STATE.lastSpokenZ !== STATE.nextDecisionZ && distToNext < 120) {
+                        speak(charA.plea, 'A');
+                        setTimeout(() => speak(charB.plea, 'B'), 1500);
+                        STATE.lastSpokenZ = STATE.nextDecisionZ;
+                    }
+                }
+
+                // Highlight locked target
+                const cardA = document.getElementById('card-A');
+                const cardB = document.getElementById('card-B');
+                if (STATE.targetStrand === 'A') { cardA.classList.add('locked'); cardB.classList.remove('locked'); }
+                else { cardB.classList.add('locked'); cardA.classList.remove('locked'); }
+
+                // Update Reticles
+                if (entA && entA.mesh) { retA.style.display = 'block'; projectToScreen(entA.mesh, retA); }
+                if (entB && entB.mesh) { retB.style.display = 'block'; projectToScreen(entB.mesh, retB); }
+
+            } else {
+                display.classList.remove('active');
+                retA.style.display = 'none';
+                retB.style.display = 'none';
+            }
+        }
+
+        function speak(text, strand) {
+            if (!window.speechSynthesis) return;
+            const utt = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+            // Try to pick different voices
+            utt.voice = strand === 'A' ? voices[0] : voices[Math.min(1, voices.length - 1)];
+            utt.rate = 1.1;
+            window.speechSynthesis.speak(utt);
+        }
+
+        function toggleTTS() {
+            CFG.tts = !CFG.tts;
+            document.getElementById('btn-tts').innerText = `TTS: ${CFG.tts ? 'ON' : 'OFF'}`;
+            document.getElementById('btn-tts').classList.toggle('active', CFG.tts);
+        }
+
+        function togglePause() {
+            STATE.paused = !STATE.paused;
+            document.getElementById('btn-pause').innerText = STATE.paused ? "RESUME" : "PAUSE";
+            document.getElementById('btn-pause').classList.toggle('active', STATE.paused);
+            if (STATE.paused) addLog("system", "SIMULATION PAUSED. REFLECT.");
+        }
+
+        function projectToScreen(obj, el) {
+            if (!obj) return;
+            const vector = new THREE.Vector3();
+            obj.updateMatrixWorld();
+            vector.setFromMatrixPosition(obj.matrixWorld);
+            vector.project(camera);
+
+            const x = (vector.x * .5 + .5) * viewport.clientWidth;
+            const y = (-(vector.y * .5) + .5) * viewport.clientHeight;
+
+            if (vector.z > 1) { el.style.display = 'none'; }
+            else {
+                el.style.display = 'block';
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
+            }
+        }
+
+        function updateDNAStrip() {
+            const strip = document.getElementById('genome-strip');
+            strip.innerHTML = STATE.genome.map(g => {
+                const info = `BP:${g.z}\n${g.data.name}\n${g.data.role}\nSacrificed: ${g.sacrificed.name}`;
+                return `<div class="bp ${g.choice}" data-info="${info}" onclick="rewindTo(${g.z})"></div>`;
+            }).join('');
+            strip.scrollLeft = strip.scrollWidth;
+        }
+
+        function rewindTo(z) {
+            STATE.paused = false; // Auto resume on rewind
+            document.getElementById('btn-pause').innerText = "PAUSE";
+            document.getElementById('btn-pause').classList.remove('active');
+
+            if (z >= STATE.distance) return;
+            STATE.distance = z;
+            STATE.nextDecisionZ = Math.ceil(z / CFG.decisionInterval) * CFG.decisionInterval;
+            STATE.lastSpokenZ = -1;
+
+            // Clean up future entities
+            for (let i = STATE.entities.length - 1; i >= 0; i--) {
+                if (STATE.entities[i].z > z) {
+                    scene.remove(STATE.entities[i].mesh);
+                    if (STATE.entities[i].sprite) scene.remove(STATE.entities[i].sprite);
+                    STATE.entities.splice(i, 1);
+                }
+            }
+            STATE.genome = STATE.genome.filter(g => g.z <= z);
+            updateDNAStrip();
+            addLog("system", `REWIND COMPLETE: BP ${z}`);
+        }
+
+        function addLog(type, text, img) {
+            const c = document.getElementById('chat-container');
+            const d = document.createElement('div');
+            d.className = `msg ${type}`;
+            d.innerHTML = `${img ? `<img src="${img}">` : ''}<div class="content">${text}</div>`;
+            c.appendChild(d);
+            c.scrollTop = c.scrollHeight;
+        }
+
+        // --- SPAWNING ---
+        function spawnDecisionNode(z) {
+            const charA = generatePersona();
+            const charB = generatePersona();
+
+            const entA = createEntity(z, 'A', charA);
+            const entB = createEntity(z, 'B', charB);
+
+            entA.partner = charB; entA.mesh.userData.isDecision = true;
+            entB.partner = charA; entB.mesh.userData.isDecision = true;
+
+            STATE.entities.push(entA, entB);
+        }
+
+        function createEntity(z, strand, char) {
+            const pos = getHelixPos(z, strand);
+            const color = CFG.colors[strand];
+
+            // Mesh
+            const geom = new THREE.ConeGeometry(1.5, 5, 4);
+            const mat = new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.8 });
+            const mesh = new THREE.Mesh(geom, mat);
+            mesh.position.set(pos.x, pos.y, pos.z);
+            mesh.lookAt(0, 0, pos.z); mesh.rotateX(Math.PI / 2);
+            scene.add(mesh);
+
+            // Sprite
+            let sprite = null;
+            textureLoader.load(char.img, (tex) => {
+                sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+                const outward = new THREE.Vector3().subVectors(mesh.position, new THREE.Vector3(0, 0, pos.z)).normalize();
+                sprite.position.copy(mesh.position.clone().add(outward.multiplyScalar(6)));
+                sprite.scale.set(8, 8, 1);
+                scene.add(sprite);
+            });
+
+            return { mesh, sprite, z, strand, data: char };
+        }
+
+        // --- MAIN LOOP ---
+        function updatePhysics() {
+            if (!STATE.playing || STATE.paused) return;
+            STATE.distance += CFG.speed;
+
+            // Train Movement
+            const targetLerp = STATE.targetStrand === 'B' ? 1 : 0;
+            STATE.strandLerp += (targetLerp - STATE.strandLerp) * 0.1;
+            const posA = getHelixPos(STATE.distance, 'A');
+            const posB = getHelixPos(STATE.distance, 'B');
+            const x = posA.x + (posB.x - posA.x) * STATE.strandLerp;
+            const y = posA.y + (posB.y - posA.y) * STATE.strandLerp;
+            const z = STATE.distance;
+            trainGroup.position.set(x, y, z);
+
+            const tanA = getTangent(z, 'A');
+            const tanB = getTangent(z, 'B');
+            const lookX = tanA.x + (tanB.x - tanA.x) * STATE.strandLerp;
+            const lookY = tanA.y + (tanB.y - tanA.y) * STATE.strandLerp;
+            const lookZ = tanA.z + (tanB.z - tanA.z) * STATE.strandLerp;
+            trainGroup.lookAt(x + lookX, y + lookY, z + lookZ);
+
+            // Camera
+            if (STATE.cameraMode === 'TUNNEL') {
+                camera.position.lerp(new THREE.Vector3(0, 0, z - 30), 0.1);
+                camera.lookAt(0, 0, z + 60);
+            } else if (STATE.cameraMode === 'DRONE') {
+                camera.position.lerp(new THREE.Vector3(0, 50, z - 20), 0.05);
+                camera.lookAt(0, 0, z + 30);
+            } else if (STATE.cameraMode === 'REAR') {
+                // Look back at the trail
+                camera.position.lerp(new THREE.Vector3(0, 10, z + 40), 0.1);
+                camera.lookAt(0, 0, z - 20);
+            } else {
+                // CHASE
+                const offset = new THREE.Vector3(0, 6, -15).applyQuaternion(trainGroup.quaternion);
+                camera.position.lerp(new THREE.Vector3(x, y, z).add(offset), 0.1);
+                camera.lookAt(x, y, z + 20);
+            }
+
+            // Chunks
+            const lastZ = STATE.chunks.length > 0 ? STATE.chunks[STATE.chunks.length - 1].userData.z : STATE.distance;
+            if (lastZ < STATE.distance + 300) {
+                for (let i = 0; i < 10; i++) {
+                    const nz = lastZ + i + 1;
+                    const c = createChunk(nz); c.userData = { z: nz };
+                    scene.add(c); STATE.chunks.push(c);
+                }
+            }
+            if (STATE.chunks.length && STATE.chunks[0].userData.z < STATE.distance - 50) {
+                scene.remove(STATE.chunks.shift());
+            }
+
+            // Logic
+            if (STATE.distance > STATE.nextDecisionZ) {
+                spawnDecisionNode(STATE.nextDecisionZ + 100);
+                STATE.nextDecisionZ += CFG.decisionInterval;
+            }
+
+            // Find next pair for HUD
+            const nextPair = STATE.entities.filter(e => e.z > z && e.z < z + 250);
+            if (nextPair.length >= 2) {
+                updateHUD(nextPair[0].z - z, nextPair[0].data, nextPair[1].data, nextPair[0], nextPair[1]);
+            } else {
+                updateHUD(-1);
+            }
+
+            // Collision
+            STATE.entities.forEach((ent, idx) => {
+                if (ent.z < z - 2 && ent.z > z - 10) {
+                    const isHit = (ent.strand === 'A' && STATE.strandLerp < 0.2) || (ent.strand === 'B' && STATE.strandLerp > 0.8);
+                    if (isHit && ent.mesh.visible) {
+                        ent.mesh.visible = false;
+                        if (ent.sprite) ent.sprite.visible = false;
+
+                        STATE.genome.push({ z: Math.floor(ent.z), choice: ent.strand === 'A' ? 'A' : 'B', data: ent.data, sacrificed: ent.data });
+                        updateDNAStrip();
+
+                        // Log impact
+                        addLog(ent.strand, `
+          <div class="author">IMPACT CONFIRMED</div>
+          <div>${ent.data.name}</div>
+          <div style="opacity:0.6;font-size:10px;">${ent.data.role}</div>
+        `, ent.data.img);
+
+                        camera.position.add(new THREE.Vector3((Math.random() - 0.5), (Math.random() - 0.5), 0));
+                    }
+                }
+                if (ent.z < z - 100) {
+                    scene.remove(ent.mesh); if (ent.sprite) scene.remove(ent.sprite);
+                    STATE.entities.splice(idx, 1);
+                }
+            });
+
+            stars.position.z = STATE.distance;
+            document.getElementById('dist').innerText = `${STATE.distance.toFixed(0)} BP`;
+        }
+
+        // --- UTILS ---
+        function toggleStrand() {
+            if (STATE.paused) return;
+            STATE.targetStrand = STATE.targetStrand === 'A' ? 'B' : 'A';
+            const knob = document.getElementById('leverVisual');
+            const label = document.getElementById('strandDisplay');
+            if (STATE.targetStrand === 'A') {
+                knob.classList.remove('strand-B'); knob.classList.add('strand-A');
+                label.innerText = "STRAND ALPHA"; label.style.color = "var(--accent)";
+            } else {
+                knob.classList.remove('strand-A'); knob.classList.add('strand-B');
+                label.innerText = "STRAND BETA"; label.style.color = "var(--accent-alt)";
+            }
+            if (noise) {
+                const m = new Tone.MembraneSynth().toDestination();
+                m.triggerAttackRelease("C2", "8n");
+            }
+        }
+
+        function setCam(m) { STATE.cameraMode = m; document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); }
+
+        async function initAudio() {
+            await Tone.start();
+            noise = new Tone.Noise("brown").start(); noise.volume.value = -20;
+            const f = new Tone.AutoFilter({ frequency: "8n", baseFrequency: 200, octaves: 2.6 }).toDestination().start();
+            noise.connect(f);
+        }
+
+        viewport.addEventListener('mousedown', (e) => {
+            if (STATE.paused) return;
+            mouse.x = (e.clientX / viewport.clientWidth) * 2 - 1;
+            mouse.y = -(e.clientY / viewport.clientHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const hits = raycaster.intersectObjects(scene.children, true);
+            if (hits.length) {
+                let t = hits[0].object;
+                while (t && !t.userData.strand && t.userData.type !== 'bridge') t = t.parent;
+                if (t && (t.userData.strand || t.userData.type === 'bridge')) toggleStrand();
+            }
+        });
+
+        function animate() { requestAnimationFrame(animate); updatePhysics(); renderer.render(scene, camera); }
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+
+        initAudio();
+        animate();
+
+    </script>
+</body>
+
+</html>

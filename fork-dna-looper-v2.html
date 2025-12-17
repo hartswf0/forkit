@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FORK DNA LOOPER v2 — Enhanced Legibility</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #030306;
+            color: #e8e8e8;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 2, 4, 0.97);
+            z-index: 100;
+        }
+
+        #overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s;
+        }
+
+        h1 {
+            color: #fff;
+            letter-spacing: 8px;
+            font-weight: 300;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #555;
+            font-size: 10px;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+        }
+
+        .corpus-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .corpus-btn {
+            padding: 10px 18px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            font-family: inherit;
+            font-size: 10px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        .corpus-btn:hover,
+        .corpus-btn.active {
+            border-color: #00f0ff;
+            color: #00f0ff;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        .btn-start {
+            padding: 15px 50px;
+            background: transparent;
+            border: 1px solid #00f0ff;
+            color: #00f0ff;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            letter-spacing: 4px;
+            margin-top: 30px;
+        }
+
+        .btn-start:hover {
+            background: rgba(0, 240, 255, 0.08);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        #load-status {
+            color: #666;
+            font-size: 10px;
+            margin-top: 20px;
+            height: 20px;
+        }
+
+        /* ══════════════════════════════════════════════════════════════ */
+        /* TEXT PANELS — LEGIBLE OUTSIDE THE HELIX */
+        /* ══════════════════════════════════════════════════════════════ */
+
+        .text-panel {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            z-index: 10;
+            max-width: 320px;
+            backdrop-filter: blur(10px);
+        }
+
+        #panel-left {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left: 3px solid #00f0ff;
+        }
+
+        #panel-right {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-right: 3px solid #ff0055;
+            text-align: right;
+        }
+
+        .panel-label {
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .panel-desc {
+            font-size: 11px;
+            color: #999;
+            line-height: 1.6;
+        }
+
+        .cyan {
+            color: #00f0ff;
+        }
+
+        .magenta {
+            color: #ff0055;
+        }
+
+        /* ══════════════════════════════════════════════════════════════ */
+        /* TOP + BOTTOM HUD */
+        /* ══════════════════════════════════════════════════════════════ */
+
+        #hud-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: linear-gradient(rgba(0, 0, 0, 0.9), transparent);
+            z-index: 10;
+        }
+
+        #hud-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.95));
+            z-index: 10;
+        }
+
+        .scenario-id {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .scenario-napkin {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .stats {
+            text-align: right;
+            font-size: 10px;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        .stats b {
+            color: #fff;
+        }
+
+        #setting-text {
+            font-size: 13px;
+            color: #ccc;
+            max-width: 800px;
+            margin: 0 auto 15px;
+            line-height: 1.6;
+        }
+
+        #sensory-text {
+            font-size: 11px;
+            color: #666;
+            font-style: italic;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Controls hint */
+        #controls-hint {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            z-index: 10;
+            opacity: 0.6;
+        }
+
+        .control-key {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .key-icon {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* CRT effect */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.08) 50%);
+            background-size: 100% 3px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @media (max-width: 768px) {
+            .text-panel {
+                display: none;
+            }
+
+            #hud-top,
+            #hud-bottom {
+                padding: 15px;
+            }
+
+            .scenario-id {
+                font-size: 18px;
+            }
+
+            #setting-text {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="overlay">
+        <h1>FORK DNA LOOPER</h1>
+        <div class="subtitle">THICK PARADOX NAVIGATOR // ENHANCED LEGIBILITY</div>
+
+        <div class="corpus-selector">
+            <button class="corpus-btn active" data-file="fork-paradox-thick.json">THICK (48)</button>
+            <button class="corpus-btn" data-file="fork-paradox-cybernetics.json">CYBERNETICS (24)</button>
+            <button class="corpus-btn" data-file="fork-paradox-midnight.json">MIDNIGHT (24)</button>
+            <button class="corpus-btn" data-file="fork-paradox-cascade-thick-6.json">CASCADE (6)</button>
+        </div>
+
+        <button class="btn-start" id="startBtn">BEGIN SEQUENCE</button>
+        <div id="load-status"></div>
+    </div>
+
+    <!-- TEXT PANELS — OUTSIDE THE HELIX -->
+    <div id="panel-left" class="text-panel" style="display:none;">
+        <div class="panel-label">◀ TRACK A — CYAN</div>
+        <div class="panel-title cyan" id="left-title">—</div>
+        <div class="panel-desc" id="left-desc">—</div>
+    </div>
+
+    <div id="panel-right" class="text-panel" style="display:none;">
+        <div class="panel-label">TRACK B — MAGENTA ▶</div>
+        <div class="panel-title magenta" id="right-title">—</div>
+        <div class="panel-desc" id="right-desc">—</div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud-top" style="display:none;">
+        <div>
+            <div class="scenario-id" id="scenario-id">—</div>
+            <div class="scenario-napkin" id="scenario-napkin">—</div>
+        </div>
+        <div class="stats">
+            <div><span class="cyan">◀ A</span> | <span class="magenta">B ▶</span></div>
+            <div><b id="counter">0/0</b> SCENARIOS</div>
+            <div><b id="choice-count">0</b> DECISIONS</div>
+        </div>
+    </div>
+
+    <div id="hud-bottom" style="display:none;">
+        <div id="setting-text">—</div>
+        <div id="sensory-text">—</div>
+    </div>
+
+    <div id="controls-hint" style="display:none;">
+        <div class="control-key">
+            <div class="key-icon cyan">←</div>
+            <span>or A</span>
+        </div>
+        <div class="control-key">
+            <div class="key-icon magenta">→</div>
+            <span>or D</span>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        /**
+         * FORK DNA LOOPER v2
+         * Enhanced legibility with text panels outside the helix
+         */
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const state = {
+            corpus: [],
+            corpusName: '',
+            currentIndex: 0,
+            cameraZ: 0,
+            speed: 3,
+            nodes: [],
+            history: [],
+            trackPos: 0,
+            targetTrackPos: 0,
+            rotation: 0,
+            pulse: 0,
+            frame: 0,
+            activeNode: null
+        };
+
+        const config = {
+            colors: { strandA: '#00f0ff', strandB: '#ff0055' },
+            physics: { baseSpeed: 3, dampening: 0.06 }
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // CORPUS LOADING
+        // ═══════════════════════════════════════════════════════════════
+
+        let selectedFile = 'fork-paradox-thick.json';
+
+        document.querySelectorAll('.corpus-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.corpus-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedFile = btn.dataset.file;
+            });
+        });
+
+        async function loadCorpus(filename) {
+            const status = document.getElementById('load-status');
+            status.textContent = `Loading ${filename}...`;
+
+            try {
+                const response = await fetch(filename);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+
+                state.corpus = normalizeCorpus(data, filename);
+                state.corpusName = data.corpus_title || filename;
+                state.currentIndex = 0;
+
+                status.textContent = `Loaded ${state.corpus.length} scenarios`;
+                return true;
+            } catch (err) {
+                status.textContent = `ERROR: ${err.message}`;
+                console.error(err);
+                return false;
+            }
+        }
+
+        function normalizeCorpus(data, filename) {
+            if (data.scenarios) {
+                return data.scenarios.map(s => ({
+                    id: s.fork_id || s.id,
+                    napkin: s.napkin || s.case || 'PARADOX',
+                    setting: s.thick_script?.setting || s.setting || '—',
+                    trackA: {
+                        title: s.thick_script?.track_main?.who || s.thick?.main || 'Track A',
+                        desc: s.thick_script?.track_main?.sensory || s.thick_script?.what_you_know || ''
+                    },
+                    trackB: {
+                        title: s.thick_script?.track_spur?.who || s.thick?.spur || 'Track B',
+                        desc: s.thick_script?.track_spur?.sensory || ''
+                    },
+                    sensory: s.thick_script?.atmosphere || s.thick?.sensory || s.thick_script?.track_main?.sensory || ''
+                }));
+            }
+            if (data.episodes) {
+                return data.episodes.map(e => ({
+                    id: e.episode_id || e.id,
+                    napkin: e.title || 'EPISODE',
+                    setting: e.visual_world?.landscape || e.frame || '—',
+                    trackA: { title: e.guest?.name || 'Guest', desc: e.guest?.expertise || '' },
+                    trackB: { title: e.philosophical_core?.paradox || 'Paradox', desc: '' },
+                    sensory: e.visual_world?.atmosphere || ''
+                }));
+            }
+            if (data.thick_cascade?.branches) {
+                return data.thick_cascade.branches.map(b => ({
+                    id: b.branch_id,
+                    napkin: b.label || 'BRANCH',
+                    setting: b.thick_description?.setting || b.timestamp || '—',
+                    trackA: {
+                        title: b.label || 'Branch',
+                        desc: b.thick_description?.what_he_says?.substring(0, 150) || ''
+                    },
+                    trackB: {
+                        title: 'Internal',
+                        desc: b.thick_description?.internal_monologue?.substring(0, 150) || ''
+                    },
+                    sensory: b.thick_description?.sensory?.sight || b.thick_description?.sensory?.sound || ''
+                }));
+            }
+            return [];
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // AUDIO
+        // ═══════════════════════════════════════════════════════════════
+
+        const Audio = {
+            ctx: null, master: null, nodes: [],
+            init() {
+                try {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    this.master = this.ctx.createGain();
+                    this.master.gain.value = 0.2;
+                    this.master.connect(this.ctx.destination);
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                    this.drone(55, 0.08);
+                    this.drone(82.5, 0.04);
+                    this.drone(110, 0.03);
+                } catch (e) { console.warn('Audio init failed:', e); }
+            },
+            drone(freq, vol) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.value = freq;
+                gain.gain.value = vol;
+                osc.connect(gain);
+                gain.connect(this.master);
+                osc.start();
+                this.nodes.push({ osc, gain, base: freq });
+            },
+            tick(isA) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.value = isA ? 880 : 660;
+                gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(this.master);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.1);
+            },
+            chord(isA) {
+                if (!this.ctx) return;
+                const root = isA ? 440 : 370;
+                [1, 1.25, 1.5].forEach(ratio => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.value = root * ratio;
+                    osc.type = 'triangle';
+                    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.015, this.ctx.currentTime + 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 2.5);
+                    osc.connect(gain);
+                    gain.connect(this.master);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 2.6);
+                });
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // NODES
+        // ═══════════════════════════════════════════════════════════════
+
+        function createNode(z, idx) {
+            const data = idx < state.corpus.length
+                ? state.corpus[idx]
+                : { id: 'END', napkin: 'CORPUS COMPLETE', setting: 'You have reached the end.', trackA: { title: 'Restart?', desc: '' }, trackB: { title: 'Continue?', desc: '' }, sensory: '' };
+            return { z, idx, data, resolved: false, choice: null };
+        }
+
+        function populateNodes() {
+            state.nodes = [];
+            for (let i = 0; i < Math.min(40, state.corpus.length + 3); i++) {
+                state.nodes.push(createNode(i * 500, i));
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RENDERING
+        // ═══════════════════════════════════════════════════════════════
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function project(x, y, z) {
+            const scale = 500 / (500 + (z - state.cameraZ));
+            return { x: x * scale + canvas.width / 2, y: y * scale + canvas.height / 2, scale };
+        }
+
+        function draw() {
+            const cx = canvas.width / 2, cy = canvas.height / 2;
+
+            // Deep space background
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, canvas.height);
+            grad.addColorStop(0, '#0a0a12');
+            grad.addColorStop(0.5, '#050508');
+            grad.addColorStop(1, '#000002');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Stars
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            for (let i = 0; i < 50; i++) {
+                const x = (i * 137.5 + state.frame * 0.1) % canvas.width;
+                const y = (i * 73.3 + state.frame * 0.05) % canvas.height;
+                ctx.beginPath();
+                ctx.arc(x, y, 0.5 + Math.sin(state.frame * 0.02 + i) * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            const trainZ = 250;
+            const startZ = Math.floor((state.cameraZ + 2000) / 25) * 25;
+            const endZ = state.cameraZ - 300;
+
+            // Draw helix
+            for (let z = startZ; z > endZ; z -= 25) {
+                const localZ = z - state.cameraZ;
+                const scale = 500 / (500 + localZ);
+                if (scale < 0.02) continue;
+
+                const twist = z * 0.005 + state.rotation;
+                const rad = 100;
+
+                const ax = Math.cos(twist) * rad;
+                const ay = Math.sin(twist) * rad;
+                const bx = Math.cos(twist + Math.PI) * rad;
+                const by = Math.sin(twist + Math.PI) * rad;
+
+                const pA = project(ax, ay, z);
+                const pB = project(bx, by, z);
+
+                const node = state.nodes.find(n => Math.abs(n.z - z) < 15);
+
+                let cA = '#222', cB = '#222', alpha = 0.15;
+
+                if (localZ < trainZ) {
+                    const prevNode = state.nodes.find(n => n.z < z + 300 && n.z > z - 800 && n.resolved);
+                    if (prevNode) {
+                        if (prevNode.choice === 'A') { cA = config.colors.strandA; alpha = 0.7; }
+                        else { cB = config.colors.strandB; alpha = 0.7; }
+                    }
+                } else {
+                    cA = config.colors.strandA;
+                    cB = config.colors.strandB;
+                    alpha = 0.4 + Math.max(0, 1 - localZ / 1000) * 0.4;
+                    if (state.targetTrackPos > 0.3) cA = '#151515';
+                    if (state.targetTrackPos < -0.3) cB = '#151515';
+                }
+
+                // Connection rungs at nodes
+                if (node) {
+                    ctx.strokeStyle = node.resolved ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.15)';
+                    ctx.lineWidth = Math.max(1, 2 * scale);
+                    ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.stroke();
+                }
+
+                // Strand dots
+                ctx.fillStyle = cA;
+                ctx.globalAlpha = alpha;
+                ctx.beginPath(); ctx.arc(pA.x, pA.y, (node ? 6 : 2) * scale, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = cB;
+                ctx.beginPath(); ctx.arc(pB.x, pB.y, (node ? 6 : 2) * scale, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 1;
+
+                // Draw train at trainZ
+                if (Math.abs(localZ - trainZ) < 15) {
+                    drawTrain(ax, ay, bx, by, z);
+                }
+            }
+
+            // Vignette
+            const vig = ctx.createRadialGradient(cx, cy, canvas.height * 0.3, cx, cy, canvas.height * 0.9);
+            vig.addColorStop(0, 'rgba(0,0,0,0)');
+            vig.addColorStop(1, 'rgba(0,0,0,0.95)');
+            ctx.fillStyle = vig;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawTrain(ax, ay, bx, by, z) {
+            const t = (state.trackPos + 1) / 2;
+            const tx = ax + (bx - ax) * t;
+            const ty = ay + (by - ay) * t;
+            const p = project(tx, ty, z);
+
+            const glow = 50 + state.pulse * 80;
+            const grad = ctx.createRadialGradient(p.x, p.y, 3, p.x, p.y, glow);
+            grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+            grad.addColorStop(0.3, 'rgba(255,255,255,0.3)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(p.x, p.y, glow, 0, Math.PI * 2); ctx.fill();
+
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 12, 0, Math.PI * 2); ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x, p.y + 50);
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.stroke();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // UPDATE
+        // ═══════════════════════════════════════════════════════════════
+
+        function updateHUD() {
+            const node = state.nodes.find(n => n.z > state.cameraZ + 200 && n.z < state.cameraZ + 700 && !n.resolved);
+
+            if (node && node !== state.activeNode) {
+                state.activeNode = node;
+                const d = node.data;
+
+                document.getElementById('scenario-id').textContent = `#${d.id}`;
+                document.getElementById('scenario-napkin').textContent = d.napkin.toUpperCase();
+                document.getElementById('setting-text').textContent = d.setting.substring(0, 200);
+                document.getElementById('sensory-text').textContent = d.sensory ? `"${d.sensory}"` : '';
+
+                document.getElementById('left-title').textContent = d.trackA.title.substring(0, 60);
+                document.getElementById('left-desc').textContent = d.trackA.desc.substring(0, 120);
+
+                document.getElementById('right-title').textContent = d.trackB.title.substring(0, 60);
+                document.getElementById('right-desc').textContent = d.trackB.desc.substring(0, 120);
+            }
+
+            document.getElementById('counter').textContent = `${state.history.length}/${state.corpus.length}`;
+            document.getElementById('choice-count').textContent = state.history.length;
+        }
+
+        function update() {
+            state.cameraZ += state.speed;
+            state.rotation += 0.003;
+            state.pulse *= 0.93;
+            state.trackPos += (state.targetTrackPos - state.trackPos) * config.physics.dampening;
+
+            const node = state.nodes[0];
+            const trainZ = 250;
+            const dist = node.z - state.cameraZ;
+
+            if (dist < trainZ && !node.resolved) {
+                node.resolved = true;
+                const choice = state.targetTrackPos < 0 ? 'A' : 'B';
+                node.choice = choice;
+
+                state.history.push({ data: node.data, choice });
+                state.pulse = 1;
+                Audio.chord(choice === 'A');
+
+                const lastZ = state.nodes[state.nodes.length - 1].z;
+                state.nodes.push(createNode(lastZ + 500, state.nodes.length));
+
+                if (state.nodes.length > 25) state.nodes.shift();
+            }
+
+            updateHUD();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // INPUT
+        // ═══════════════════════════════════════════════════════════════
+
+        function switchTrack(dir) {
+            state.targetTrackPos = dir;
+            Audio.tick(dir < 0);
+        }
+
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') switchTrack(-1);
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') switchTrack(1);
+        });
+
+        canvas.addEventListener('mousedown', e => {
+            switchTrack(e.clientX < canvas.width / 2 ? -1 : 1);
+        });
+
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            switchTrack(touch.clientX < canvas.width / 2 ? -1 : 1);
+        }, { passive: false });
+
+        // ═══════════════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════════════
+
+        document.getElementById('startBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            btn.textContent = 'LOADING...';
+
+            const success = await loadCorpus(selectedFile);
+
+            if (success && state.corpus.length > 0) {
+                Audio.init();
+                populateNodes();
+
+                document.getElementById('overlay').classList.add('hidden');
+                document.getElementById('panel-left').style.display = 'block';
+                document.getElementById('panel-right').style.display = 'block';
+                document.getElementById('hud-top').style.display = 'flex';
+                document.getElementById('hud-bottom').style.display = 'block';
+                document.getElementById('controls-hint').style.display = 'flex';
+
+                loop();
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'RETRY';
+            }
+        });
+
+        function loop() {
+            state.frame++;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+    </script>
+</body>
+
+</html>

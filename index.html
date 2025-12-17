@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORKIT // Manifest</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --line: #1a1a1a;
+            --text: #ccc;
+            --dim: #555;
+            --accent: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        header {
+            border-bottom: 1px solid var(--line);
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        h1 {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: var(--accent);
+        }
+
+        .meta {
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 1px;
+        }
+
+        main {
+            padding: 0;
+        }
+
+        .section {
+            border-bottom: 1px solid var(--line);
+        }
+
+        .section-header {
+            display: grid;
+            grid-template-columns: 80px 1fr 60px;
+            padding: 12px 24px;
+            background: #0d0d0d;
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 80px 1fr 200px 60px;
+            padding: 10px 24px;
+            border-bottom: 1px solid var(--line);
+            cursor: pointer;
+            transition: background 0.15s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .row:hover {
+            background: #111;
+        }
+
+        .row:hover .file {
+            color: var(--accent);
+        }
+
+        .track {
+            color: var(--dim);
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .file {
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: color 0.15s;
+        }
+
+        .desc {
+            color: var(--dim);
+            font-size: 11px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .status {
+            text-align: right;
+            font-size: 10px;
+            color: var(--dim);
+        }
+
+        .status.active {
+            color: #0f0;
+        }
+
+        .category-label {
+            padding: 16px 24px 8px;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--dim);
+            text-transform: uppercase;
+            background: var(--bg);
+        }
+
+        #preview {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        #preview.visible {
+            display: flex;
+        }
+
+        #preview-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: #0a0a0a;
+            border-bottom: 1px solid var(--line);
+            font-size: 11px;
+        }
+
+        #preview-title {
+            letter-spacing: 2px;
+        }
+
+        #preview-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        #preview-actions a,
+        #preview-actions button {
+            background: none;
+            border: 1px solid var(--line);
+            color: var(--text);
+            padding: 6px 14px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-decoration: none;
+        }
+
+        #preview-actions a:hover,
+        #preview-actions button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        #preview-frame {
+            flex: 1;
+            border: none;
+            background: #000;
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                grid-template-columns: 60px 1fr 50px;
+            }
+
+            .desc {
+                display: none;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>FORKIT MANIFEST</h1>
+        <span class="meta">28 FILES // UPDATED 2024-12-17</span>
+    </header>
+
+    <main id="main"></main>
+
+    <div id="preview">
+        <div id="preview-bar">
+            <span id="preview-title">--</span>
+            <div id="preview-actions">
+                <a id="preview-open" href="#" target="_blank">OPEN</a>
+                <button onclick="closePreview()">CLOSE [ESC]</button>
+            </div>
+        </div>
+        <iframe id="preview-frame"></iframe>
+    </div>
+
+    <script>
+        const MANIFEST = [
+            // HELIX
+            { track: 'HX-01', file: 'fork-dna-trail.html', desc: 'Thick cascade with train, stable cameras' },
+            { track: 'HX-02', file: 'fork-thick-helix.html', desc: 'Thick cascade helix with branch cards' },
+            { track: 'HX-03', file: 'fork-dna-looper.html', desc: 'Continuous helix looper' },
+            { track: 'HX-04', file: 'fork-dna-looper-v2.html', desc: 'Enhanced looper with external panels' },
+            { track: 'HX-05', file: 'thick-loop.html', desc: '2D thick viewer with choice UI, looping' },
+            { track: 'HX-06', file: 'ETHICS-HELIX-TROLLEY.html', desc: 'Ethics helix with crossover mechanics' },
+            { track: 'HX-07', file: 'gh1.html', desc: 'Helix personas with minimap' },
+            { track: 'HX-08', file: 'g7.html', desc: 'Helix HUD with terminal log' },
+            { track: 'HX-09', file: 'dh0.html', desc: 'Train DNA with entity sprites' },
+            { track: 'HX-10', file: 'fork-lever.html', desc: 'Paradox Lever Mobile' },
+            // VIZ
+            { track: 'VZ-01', file: 'fork-cascade-viz.html', desc: 'Cascade tree visualization' },
+            { track: 'VZ-02', file: 'HOLO-VIEWER.html', desc: 'Holographic viewer' },
+            { track: 'VZ-03', file: 'telo.html', desc: 'Telos visualization' },
+            { track: 'VZ-04', file: 'ethnome.html', desc: 'Ethnographic genome' },
+            // CORE
+            { track: 'CR-01', file: 'a1.html', desc: 'Core module A1' },
+            { track: 'CR-02', file: 'bet.html', desc: 'Decision betting' },
+            { track: 'CR-03', file: 'c1.html', desc: 'Core module C1' },
+            { track: 'CR-04', file: 'd2.html', desc: 'Core module D2' },
+            { track: 'CR-05', file: 'e1.html', desc: 'Core module E1' },
+            { track: 'CR-06', file: 'e3.html', desc: 'Core module E3' },
+            { track: 'CR-07', file: 'eet.html', desc: 'Ethics experiment' },
+            { track: 'CR-08', file: 'f1.html', desc: 'Core module F1' },
+            { track: 'CR-09', file: 'f12.html', desc: 'Core module F12' },
+            { track: 'CR-10', file: 'z1.html', desc: 'Core module Z1' },
+            // DATA
+            { track: 'DT-01', file: 'disc-data-example.html', desc: 'Example data template' },
+            // ARCHIVE
+            { track: 'AR-01', file: 'archive/a0.html', desc: 'Archived A0' },
+            { track: 'AR-02', file: 'archive/a00.html', desc: 'Archived mobile core' },
+            { track: 'AR-03', file: 'archive/a2.html', desc: 'Archived A2' },
+            { track: 'AR-04', file: 'archive/co.html', desc: 'Archived crossover' }
+        ];
+
+        const SECTIONS = {
+            'HX': 'HELIX DISPLAYS',
+            'VZ': 'VISUALIZERS',
+            'CR': 'CORE MODULES',
+            'DT': 'DATA EXAMPLES',
+            'AR': 'ARCHIVE'
+        };
+
+        function init() {
+            const main = document.getElementById('main');
+            let currentSection = '';
+
+            MANIFEST.forEach(item => {
+                const section = item.track.split('-')[0];
+
+                if (section !== currentSection) {
+                    currentSection = section;
+                    const label = document.createElement('div');
+                    label.className = 'category-label';
+                    label.textContent = SECTIONS[section];
+                    main.appendChild(label);
+                }
+
+                const row = document.createElement('a');
+                row.className = 'row';
+                row.href = '#';
+                row.onclick = (e) => { e.preventDefault(); openPreview(item); };
+
+                row.innerHTML = `
+                    <span class="track">${item.track}</span>
+                    <span class="file">${item.file.replace('.html', '')}</span>
+                    <span class="desc">${item.desc}</span>
+                    <span class="status">READY</span>
+                `;
+
+                main.appendChild(row);
+            });
+        }
+
+        function openPreview(item) {
+            document.getElementById('preview-title').textContent = item.track + ' // ' + item.file.toUpperCase();
+            document.getElementById('preview-frame').src = item.file;
+            document.getElementById('preview-open').href = item.file;
+            document.getElementById('preview').classList.add('visible');
+        }
+
+        function closePreview() {
+            document.getElementById('preview').classList.remove('visible');
+            document.getElementById('preview-frame').src = '';
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closePreview();
+        });
+
+        init();
+    </script>
+</body>
+
+</html>

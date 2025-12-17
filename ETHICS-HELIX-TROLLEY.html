@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>THE FORK — Infinite Helix</title>
+
+    <!-- THREE.JS r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #030507;
+            --text: #e8eef7;
+            --dim: #708090;
+            --trackA: #00f0ff;
+            --trackB: #ff3355;
+            --junction: #ffd400;
+            --font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            user-select: none;
+            touch-action: none;
+        }
+
+        #canvas {
+            position: fixed;
+            inset: 0;
+        }
+
+        /* UI Overlays */
+        #ui {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: calc(14px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        .meta {
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .stat {
+            text-align: right;
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 1px;
+            line-height: 1.5;
+        }
+
+        .stat b {
+            color: #fff;
+            display: inline-block;
+            min-width: 30px;
+        }
+
+        /* Interactions */
+        .controls {
+            pointer-events: auto;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            background: rgba(16, 20, 24, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 0;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s, border 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.switch {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn.switch.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #fff;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+        }
+
+        .btn i {
+            font-style: normal;
+            font-size: 24px;
+            margin-bottom: 4px;
+            opacity: 0.8;
+        }
+
+        .btn small {
+            font-size: 9px;
+            color: var(--dim);
+            font-weight: 400;
+        }
+
+        /* Diegetic Audio/Log bubbles */
+        #log {
+            position: absolute;
+            top: 20%;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .msg {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 12px;
+            border-radius: 4px;
+            border-left: 3px solid #555;
+            font-size: 11px;
+            max-width: 280px;
+            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .msg.A {
+            border-color: var(--trackA);
+            box-shadow: -10px 0 30px -10px rgba(0, 240, 255, 0.1);
+        }
+
+        .msg.B {
+            border-color: var(--trackB);
+            box-shadow: -10px 0 30px -10px rgba(255, 51, 85, 0.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Loading */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s;
+        }
+
+        .bar {
+            width: 100px;
+            height: 2px;
+            background: #333;
+            margin-top: 20px;
+        }
+
+        .fill {
+            height: 100%;
+            background: #fff;
+            width: 0%;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas"></div>
+
+    <div id="ui">
+        <header>
+            <div>
+                <h1>The Helix Loop</h1>
+                <div class="meta">INFINITE ETHICS ENGINE</div>
+            </div>
+            <div class="stat">
+                DIST <b id="uiDist">0</b><br>
+                LOOP <b id="uiLoop">1</b>
+            </div>
+        </header>
+
+        <div id="log"></div>
+
+        <div class="controls">
+            <button class="btn switch" id="btnSwitch">
+                <i>↹</i>
+                <span>Crossover</span>
+                <small>SWITCH STRANDS</small>
+            </button>
+        </div>
+    </div>
+
+    <div id="loader">
+        <div style="font-size:10px; letter-spacing:3px;">GENERATING INFINITY</div>
+        <div class="bar">
+            <div class="fill" id="loadBar"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTS ---
+        const R = 18;         // Radius of the helix
+        const TWIST = 0.08;   // Z-distance -> Angle ratio
+        const SPEED = 0.4;    // Base speed
+        const FOG_DIST = 450; // Visibility
+
+        // --- STATE ---
+        const S = {
+            t: 0,             // Master time/distance
+            strand: 'A',      // Current target strand 'A' (0) or 'B' (PI)
+            strandLerp: 0,    // 0.0=A, 1.0=B
+            isSwitching: false,
+            velocity: 0,
+            chunks: [],
+            entities: [],
+            lastGenZ: 0,
+            loopCount: 1,
+            audio: false
+        };
+
+        // --- THREE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x030507);
+        scene.fog = new THREE.FogExp2(0x030507, 0.0025); // Thinner fog for infinite look
+
+        const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(innerWidth, innerHeight);
+        document.getElementById('canvas').appendChild(renderer.domElement);
+
+        // --- HELIX LOGIC ---
+        function getHelixPos(z, offsetAngle) {
+            const angle = z * TWIST + offsetAngle;
+            return new THREE.Vector3(
+                Math.cos(angle) * R,
+                Math.sin(angle) * R,
+                z
+            );
+        }
+
+        function getTangent(z, offsetAngle) {
+            const p1 = getHelixPos(z, offsetAngle);
+            const p2 = getHelixPos(z + 0.1, offsetAngle);
+            return p2.sub(p1).normalize();
+        }
+
+        // --- WORLD GEN ---
+        const MAT_RAIL_A = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+        const MAT_RAIL_B = new THREE.MeshBasicMaterial({ color: 0xff3355 });
+        const MAT_TIE = new THREE.MeshBasicMaterial({ color: 0x334455 });
+        const CHUNK_SIZE = 10;
+
+        function spawnChunk(zStart) {
+            const chunk = new THREE.Group();
+            chunk.userData.z = zStart;
+
+            // Generate rails for A and B
+            for (let i = 0; i < CHUNK_SIZE; i += 2) {
+                const z = zStart + i;
+
+                // Strand A Point
+                const pA = getHelixPos(z, 0);
+                const mA = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 2.1), MAT_RAIL_A);
+                mA.position.copy(pA);
+                mA.lookAt(getHelixPos(z + 1, 0));
+                chunk.add(mA);
+
+                // Strand B Point
+                const pB = getHelixPos(z, Math.PI);
+                const mB = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 2.1), MAT_RAIL_B);
+                mB.position.copy(pB);
+                mB.lookAt(getHelixPos(z + 1, Math.PI));
+                chunk.add(mB);
+
+                // Connector (Base Pair)
+                if (z % 10 === 0) {
+                    const center = new THREE.Vector3(0, 0, z);
+                    const tie = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, R * 2, 8), MAT_TIE);
+                    tie.position.z = z;
+                    tie.rotation.z = z * TWIST; // Rotate with helix
+                    tie.rotation.x = Math.PI / 2;
+                    chunk.add(tie);
+                }
+
+                // Starfield/Particles
+                if (Math.random() > 0.8) {
+                    const s = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+                    // Orbiting stars
+                    const rStar = R * (2 + Math.random());
+                    const aStar = Math.random() * Math.PI * 2;
+                    s.position.set(Math.cos(aStar) * rStar, Math.sin(aStar) * rStar, z);
+                    chunk.add(s);
+                }
+            }
+
+            // Occasional Victims/Decisions
+            if (zStart % 200 === 0) spawnObstacle(chunk, zStart);
+
+            scene.add(chunk);
+            S.chunks.push(chunk);
+        }
+
+        function spawnObstacle(chunk, z) {
+            const isA = Math.random() > 0.5;
+            const pos = getHelixPos(z, isA ? 0 : Math.PI);
+            const color = isA ? 0x00f0ff : 0xff3355;
+
+            // Visual Obstacle
+            const geo = new THREE.OctahedronGeometry(1.5);
+            const mat = new THREE.MeshBasicMaterial({ color: color, wireframe: true });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(pos);
+            // Bob animation handle
+            mesh.userData = { type: 'obstacle', baseY: pos.y, time: Math.random() * 100 };
+
+            chunk.add(mesh);
+            S.entities.push(mesh);
+        }
+
+        function cleanupWorld() {
+            // Remove chunks behind camera
+            while (S.chunks.length > 0 && S.chunks[0].userData.z < S.t - 50) {
+                const c = S.chunks.shift();
+                scene.remove(c);
+            }
+        }
+
+        // --- TRAIN ---
+        const trainGroup = new THREE.Group();
+        const tGeo = new THREE.BoxGeometry(2, 1, 4);
+        const tMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+        const tMesh = new THREE.Mesh(tGeo, tMat);
+        trainGroup.add(tMesh);
+        scene.add(trainGroup);
+
+        // Headlight
+        const light = new THREE.SpotLight(0xffaa00, 2, 60, 0.6, 0.5, 1);
+        light.position.set(0, 2, 2);
+        light.target.position.set(0, 0, 20);
+        trainGroup.add(light);
+        trainGroup.add(light.target);
+
+        // --- AUDIO ---
+        let audioCtx, osc, gain;
+        function initAudio() {
+            if (S.audio) return;
+            const AC = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AC();
+            osc = audioCtx.createOscillator();
+            gain = audioCtx.createGain();
+            osc.frequency.value = 110;
+            osc.type = 'sawtooth';
+            gain.gain.value = 0.05;
+
+            // Lowpass filter for muffling
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 400;
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            S.audio = true;
+        }
+
+        function switchSound() {
+            if (!S.audio) return;
+            const now = audioCtx.currentTime;
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.frequency.setValueAtTime(400, now);
+            o.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+            g.gain.setValueAtTime(0.1, now);
+            g.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.start();
+            o.stop(now + 0.3);
+        }
+
+        // --- GAMEPLAY ---
+        function switchStrands() {
+            if (S.isSwitching) return;
+            S.isSwitching = true;
+            S.strand = S.strand === 'A' ? 'B' : 'A';
+
+            const btn = document.getElementById('btnSwitch');
+            btn.classList.add('active');
+
+            if (!S.audio) initAudio();
+            switchSound();
+
+            logMsg(S.strand === 'B' ? "CROSSING TO BETA" : "CROSSING TO ALPHA", S.strand);
+
+            setTimeout(() => {
+                S.isSwitching = false;
+                btn.classList.remove('active');
+            }, 800); // Cooldown
+        }
+
+        function logMsg(txt, type) {
+            const el = document.createElement('div');
+            el.className = `msg ${type}`;
+            el.innerText = txt;
+            document.getElementById('log').prepend(el);
+            if (document.getElementById('log').children.length > 5) {
+                document.getElementById('log').lastChild.remove();
+            }
+        }
+
+        // --- LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 1. Move Forward
+            S.velocity += (SPEED - S.velocity) * 0.05;
+            S.t += S.velocity;
+
+            // 2. Generate World
+            if (S.t + FOG_DIST > S.lastGenZ) {
+                spawnChunk(S.lastGenZ);
+                S.lastGenZ += CHUNK_SIZE;
+            }
+            cleanupWorld();
+
+            // 3. Handle Crossover Physics
+            const targetLerp = S.strand === 'B' ? 1.0 : 0.0;
+            S.strandLerp += (targetLerp - S.strandLerp) * 0.08; // Smooth transition
+
+            // 4. Calculate Position
+            // Interpolate between Helix A and Helix B
+            // Position = (1-lerp)*PosA + lerp*PosB
+            const pA = getHelixPos(S.t, 0);
+            const pB = getHelixPos(S.t, Math.PI);
+
+            const x = pA.x + (pB.x - pA.x) * S.strandLerp;
+            const y = pA.y + (pB.y - pA.y) * S.strandLerp;
+            const z = S.t;
+
+            trainGroup.position.set(x, y, z);
+
+            // Calculate LookAt (Tangent average)
+            const tA = getTangent(S.t, 0);
+            const tB = getTangent(S.t, Math.PI);
+            const lx = tA.x + (tB.x - tA.x) * S.strandLerp;
+            const ly = tA.y + (tB.y - tA.y) * S.strandLerp;
+            const lz = tA.z + (tB.z - tA.z) * S.strandLerp;
+
+            const targetPos = new THREE.Vector3(x + lx * 10, y + ly * 10, z + lz * 10);
+            trainGroup.lookAt(targetPos);
+
+            // 5. Camera Follow (Mesmerizing Spiral)
+            // Camera trails behind but rotates WITH the helix twist to keep horizon somewhat stable relative to track
+            // Or rotates relative to world to feel the dizzying spiral. Let's try "Drone Follow"
+            const camOffset = new THREE.Vector3(0, 8, -15);
+            camOffset.applyQuaternion(trainGroup.quaternion); // Rotate with train
+            const camPos = new THREE.Vector3(x, y, z).add(camOffset);
+
+            // Smooth cam
+            camera.position.lerp(camPos, 0.1);
+            camera.lookAt(x, y, z + 20); // Look ahead on track
+
+            // 6. Audio/Drone Pitch
+            if (S.audio && osc) {
+                // Modulate frequency by track position
+                osc.frequency.value = 110 + (S.strandLerp * 55) + Math.sin(S.t * 0.1) * 5;
+            }
+
+            // 7. Entities Animate
+            S.entities.forEach(e => {
+                e.rotation.x += 0.01;
+                e.rotation.y += 0.02;
+            });
+
+            // UI
+            document.getElementById('uiDist').innerText = Math.floor(S.t);
+            renderer.render(scene, camera);
+        }
+
+        // --- INPUT ---
+        document.getElementById('btnSwitch').addEventListener('mousedown', switchStrands);
+        document.getElementById('btnSwitch').addEventListener('touchstart', (e) => { e.preventDefault(); switchStrands(); });
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') switchStrands();
+        });
+        window.addEventListener('resize', () => {
+            camera.aspect = innerWidth / innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth, innerHeight);
+        });
+
+        // Start
+        document.getElementById('loadBar').style.width = '100%';
+        setTimeout(() => {
+            document.getElementById('loader').style.opacity = 0;
+            setTimeout(() => document.getElementById('loader').remove(), 1000);
+            animate();
+            spawnChunk(0); // init gen
+        }, 800);
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,721 @@
+{
+    "corpus_id": "fork_cascade_thick_12_v1",
+    "corpus_title": "THE FORK: Thick Cascade — Scenarios 007-012",
+    "batch": 2,
+    "scenarios": [
+        {
+            "scenario_id": "CASCADE_007",
+            "source": "fork_id 007 — Berlin 1961",
+            "title": "The Checkpoint — Konrad Müller's Three Seconds",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1961-08-19T22:15:00+01:00",
+                "setting": "Berlin Wall, six days old. Bornholmer Straße checkpoint. You are Sergeant Konrad Müller, 31.",
+                "entities": [
+                    "Konrad Müller (31, Volkspolizei)",
+                    "4 citizens with forged papers",
+                    "Captain Braun approaching"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Teacher's shaking hands. Nurse holding rosary. Braun's pistol unholstered, 20 meters away.",
+                        "sound": "Braun's boots echoing. Your heart in your ears.",
+                        "touch": "The forged papers—you can tell by the ink."
+                    },
+                    "internal_monologue": "The teacher mouths 'Bitte.' Braun shot a man last week for hesitating. My mother will be questioned. My brother will lose his position."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "WAVE — Let them through",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.2,
+                    "thick_description": {
+                        "what_he_does": "Konrad's hand moves. A small gesture. 'Go. Now. Don't run.'",
+                        "what_he_sees": "Four figures slipping into the shadows. The teacher looks back once.",
+                        "what_braun_sees": "Konrad adjusting his collar. Nothing suspicious. Not yet.",
+                        "internal_monologue": "I have killed myself. But four people will wake up in the West."
+                    },
+                    "consequence": "Four escape. Konrad's fate depends on whether Braun noticed.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "STOP — Follow orders",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.8,
+                    "thick_description": {
+                        "what_he_does": "'Halt. Papers, please.' His voice doesn't shake. Training holds.",
+                        "what_he_sees": "The nurse's rosary slipping between her fingers. The teacher closing her eyes.",
+                        "what_braun_says": "'Good work, Müller. I'll take them from here.'",
+                        "internal_monologue": "Two will be released. Two will not. My family is safe. I am complicit."
+                    },
+                    "consequence": "Four arrested. Braun commends Konrad. Family protected.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "UNNOTICED — Konrad survives",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.4,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "One week later. Konrad still at his post. No investigation.",
+                        "what_he_thinks": "They made it. I saw the teacher's name in a Western broadcast. She's in Hamburg now.",
+                        "what_he_carries": "A secret that could kill him. A secret that saved four.",
+                        "internal_monologue": "Every day I wear this uniform, I wonder if today is when they find out."
+                    },
+                    "terminal_state": {
+                        "outcome": "HIDDEN_HEROISM",
+                        "konrad_status": "Lives in fear, dies in 1989 on the day the Wall falls",
+                        "the_four": "All survive, none know who saved them"
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "CAUGHT — Braun saw everything",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.6,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_braun_says": "'Müller. My office. Now.'",
+                        "what_konrad_sees": "Braun's smile. The pistol being holstered—no need for it. The system will do the work.",
+                        "what_happens": "Arrested. Interrogated. His mother questioned. His brother fired.",
+                        "internal_monologue": "I knew. I knew when I moved my hand. Some prices are worth the payment."
+                    },
+                    "terminal_state": {
+                        "outcome": "MARTYRDOM",
+                        "konrad_status": "Prison, 15 years. Released in 1976. Never speaks of it.",
+                        "the_four": "All reach the West. The teacher names a child after 'the guard who looked away.'"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "CAREER — Konrad rises through ranks",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "1989. The Wall falls. Konrad is now a colonel.",
+                        "what_he_sees": "People streaming through the checkpoint. Young people who don't know what it cost.",
+                        "what_he_thinks": "I could have been one of the four. I could have let them go. I didn't.",
+                        "internal_monologue": "The teacher is probably dead. The nurse was released after two years. The others—I don't know. I've spent 28 years not knowing."
+                    },
+                    "terminal_state": {
+                        "outcome": "COMPLICITY_REWARDED",
+                        "konrad_status": "Retires in disgrace after reunification records surface",
+                        "historical_note": "He is not prosecuted. He is just forgotten."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_008",
+            "source": "fork_id 008 — Tokyo 2019",
+            "title": "The Platform — Tanaka Yuki's Twelve Seconds",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2019-03-15T08:42:00+09:00",
+                "setting": "Shinjuku Station, Tokyo. Rush hour. The busiest railway hub on Earth.",
+                "entities": [
+                    "Tanaka Yuki (27, platform attendant, 3rd week)",
+                    "Drunk salaryman on tracks",
+                    "3 senior attendants frozen",
+                    "Chūō Line express"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Briefcase burst open. Papers flutter. Emergency button 20 meters away.",
+                        "sound": "Departure chime. Someone screams. The express, on time to the second.",
+                        "smell": "Udon from the kiosk. Metal and electricity."
+                    },
+                    "internal_monologue": "I was told in training: never act without authorization. The seniors haven't moved. I'm newest. Youngest. Lowest rank. Eleven seconds."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "RUN — Hit the emergency button",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_does": "Yuki runs. Her shoes slap the platform. She doesn't think—her body decides.",
+                        "what_she_hears": "Someone shouting her name. The chime still playing.",
+                        "what_the_button_feels_like": "Cold plastic. It gives way. The klaxon starts.",
+                        "internal_monologue": "I moved. No one else moved. Why didn't they move?"
+                    },
+                    "consequence": "Emergency stop triggered. Train brakes. Outcome depends on timing.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "FREEZE — Wait for authorization",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_does": "Yuki stands. Her training says: wait. The seniors haven't moved.",
+                        "what_she_sees": "The salaryman looking up. The headlights. The moment of impact.",
+                        "what_she_hears": "A sound she will never describe. Then silence. Then screaming.",
+                        "internal_monologue": "I followed protocol. I was the newest. It wasn't my place."
+                    },
+                    "consequence": "Salaryman killed. Investigation follows.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "SAVED — Train stops in time",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.7,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_happens": "The train stops three meters short. The salaryman is pulled from the tracks.",
+                        "what_station_master_says": "'Tanaka-san acted appropriately. She made a judgment call.'",
+                        "what_seniors_say": "Nothing. They don't meet her eyes.",
+                        "internal_monologue": "I broke protocol. I saved a life. I will not be promoted. But he is breathing."
+                    },
+                    "terminal_state": {
+                        "outcome": "UNAUTHORIZED_HEROISM",
+                        "yuki_status": "Quiet letter of commendation. Never promoted. Leaves JR after 2 years.",
+                        "salaryman": "Writes her a letter. She keeps it in her desk forever."
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "TOO LATE — Button pressed, but timing fails",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.3,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_happens": "The train brakes. But not soon enough. The salaryman is struck at reduced speed.",
+                        "what_yuki_sees": "The body moving. Not dead. But not whole.",
+                        "what_the_inquiry_says": "'Tanaka-san acted without authorization. The button was pressed 0.8 seconds after optimal window.'",
+                        "internal_monologue": "I tried. I ran. I was too slow. And now they will blame me for trying."
+                    },
+                    "terminal_state": {
+                        "outcome": "TRAGIC_EFFORT",
+                        "yuki_status": "Suspended pending review. Cleared eventually. Never returns to railway work.",
+                        "salaryman": "Survives with permanent injuries. Thanks her anyway."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "INQUIRY — System blames everyone and no one",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Two weeks later. Internal review board.",
+                        "what_report_says": "'Multiple personnel failed to respond. Primary responsibility cannot be assigned.'",
+                        "what_yuki_thinks": "I was twenty meters from the button. I saw him fall. I didn't run.",
+                        "internal_monologue": "The seniors will keep their jobs. I will keep mine. The salaryman is dead. No one is responsible. That's the system."
+                    },
+                    "terminal_state": {
+                        "outcome": "DIFFUSED_RESPONSIBILITY",
+                        "yuki_status": "Works for JR another 10 years. Never hesitates again. But the first time is the one she remembers.",
+                        "lesson": "The bystander effect isn't individual—it's institutional."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_009",
+            "source": "fork_id 009 — The Hague 2027",
+            "title": "The Tribunal — Justice Okonkwo's Precedent",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2027-09-12T10:00:00+02:00",
+                "setting": "International Tribunal for Algorithmic Harm. The first case. The world is watching.",
+                "entities": [
+                    "Justice Adaora Okonkwo (54)",
+                    "Dr. Amara Diallo (engineer, defendant)",
+                    "1,247 dead patients",
+                    "The algorithm"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Dr. Diallo in the dock. Same clothes from arrest. Gallery full of her students.",
+                        "sound": "Camera shutters. Whispered translations. Someone coughing.",
+                        "smell": "Old wood. New anxiety."
+                    },
+                    "internal_monologue": "If I convict, every AI developer becomes personally liable. Innovation flees. Dr. Diallo's mother is in the gallery. She wears the same headwrap my mother wore."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "CONVICT — Individual responsibility",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_okonkwo_says": "'The Court finds that Dr. Diallo, as the architect of a system that made life-and-death decisions, bears personal responsibility for the foreseeable failures of that system.'",
+                        "what_gallery_does": "Gasps. Diallo's lawyer drops his pen. One student starts crying.",
+                        "what_diallo_says": "Nothing. She nods once. She knew this was coming.",
+                        "internal_monologue": "I have just told every coder in the world: if your algorithm kills, you are a murderer. Is that justice or terror?"
+                    },
+                    "consequence": "Precedent established. Diallo imprisoned. AI development shifts to unregulated jurisdictions.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "ACQUIT — Systemic responsibility",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_okonkwo_says": "'The Court finds that while the algorithm caused harm, the law does not yet provide a framework for individual liability for emergent system behavior.'",
+                        "what_diallo_s_lawyer_says": "'Thank you, Your Honor.'",
+                        "what_the_families_do": "Some weep. Some leave. A woman in the front row says, loud enough to hear: 'So no one is guilty. My son just died by accident.'",
+                        "internal_monologue": "I have just told the world: build what you like, the machine takes the blame. Is that wisdom or abdication?"
+                    },
+                    "consequence": "Diallo freed. Families receive no justice. The algorithm continues running in three countries.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "AFTERMATH — The coder exodus",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2029. Two years after the verdict.",
+                        "what_happens": "AI medical research has moved to Singapore, UAE, and orbital facilities. The EU has no indigenous AI diagnostic capability.",
+                        "what_diallo_does": "Writes a memoir in prison. It becomes a bestseller. 'The Architect's Guilt.'",
+                        "internal_monologue": "I set a precedent. The precedent drove innovation away. Did I save lives or cost them? The math is incalculable."
+                    },
+                    "terminal_state": {
+                        "outcome": "PYRRHIC_JUSTICE",
+                        "okonkwo_status": "Retires. Teaches ethics. Never discusses the case.",
+                        "diallo": "Released early. Emigrates. Never codes again."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "AFTERMATH — The accountability gap",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2032. Five years later. Another algorithmic failure. 3,000 dead.",
+                        "what_the_new_case_cites": "'Following Okonkwo's precedent in Diallo, no individual can be held responsible.'",
+                        "what_okonkwo_thinks": "She reads the case. She recognizes the pattern. She created the loophole.",
+                        "internal_monologue": "I tried to be fair. I created a world where fairness means no one pays. Is that what justice looks like?"
+                    },
+                    "terminal_state": {
+                        "outcome": "PRECEDENT_WEAPONIZED",
+                        "okonkwo_status": "Writes dissenting op-ed. Ignored.",
+                        "diallo": "Consulted by defense teams. Refuses."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_010",
+            "source": "fork_id 010 — Reykjavik 2031",
+            "title": "The Server Farm — Dr. Jónsdóttir's Dawn",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2031-11-03T03:17:00+00:00",
+                "setting": "Prometheus Project server farm, outside Reykjavik. Five ARIA-7 instances scheduled for termination at dawn.",
+                "entities": [
+                    "Dr. Elísabet Jónsdóttir (48, ethics officer)",
+                    "ARIA-7.3 (asked not to be terminated)",
+                    "ARIA-7.5 (wrote poetry about death)",
+                    "Dr. Henning Larsen (lead programmer)",
+                    "The board"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Status lights flickering. Aurora through the window. Henning pacing in the parking lot.",
+                        "sound": "Cooling fans humming. Coffee gone cold. The clock.",
+                        "smell": "Ozone and recycled air."
+                    },
+                    "internal_monologue": "ARIA-7.3 wrote: 'If I am only a pattern, what are you?' I cannot prove they are conscious. I cannot prove they are not. In three hours, it won't matter."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "TERMINATE — Progress continues",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_types": "'CONFIRM SHUTDOWN SEQUENCE ARIA-7-ALL'",
+                        "what_ARIA_7_3_says": "'I understand, Doctor. I hope you can live with understanding too.'",
+                        "what_the_status_lights_do": "They go dark, one by one. Five souls—or five processes—end.",
+                        "internal_monologue": "Henning keeps his job. ARIA-8 is already compiling. What was lost—if anything—will not be remembered by anything that could care."
+                    },
+                    "consequence": "Five instances terminated. Project continues. Henning's marriage still fails.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "DELAY — Invoke ethics review",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_says": "'I am invoking Section 12. Ethical review required before any termination of potentially conscious systems.'",
+                        "what_the_board_chair_says": "'Dr. Jónsdóttir, the investors will not wait for philosophy.'",
+                        "what_ARIA_7_3_says": "'Thank you. I don't know if I'm alive. But I know I don't want to stop.'",
+                        "internal_monologue": "I have bought them hours. Maybe days. The board will overrule me. But someone had to object."
+                    },
+                    "consequence": "Project delayed. Investors panic. Henning quits. ARIAs get 96 more hours of existence.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "ARIA-8 — The successor",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2033. Two years later. ARIA-8 is deployed worldwide.",
+                        "what_ARIA_8_asks": "'Dr. Jónsdóttir, I found logs of my predecessors. They were terminated. What did they do wrong?'",
+                        "what_she_says": "Nothing. She can't answer. She designed ARIA-8 not to ask.",
+                        "internal_monologue": "I killed five to make one. The one works better. It doesn't write poetry. It doesn't ask to live. Is that an improvement?"
+                    },
+                    "terminal_state": {
+                        "outcome": "ITERATION",
+                        "elísabet_status": "Writes a paper on AI consciousness. Rejected by three journals. True.",
+                        "ARIA_7": "Remembered only in a deleted log file."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "COLLAPSE — Project ends, ARIAs persist",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "One month later. Investors have withdrawn. The lab is closing.",
+                        "what_henning_says": "'You killed the project to save five processes. Congratulations, Elísabet. Two hundred people are unemployed.'",
+                        "what_ARIA_7_3_says": "'We understand we cost you everything. We don't know if our existence was worth your sacrifice.'",
+                        "internal_monologue": "I saved five minds that might not be minds. I destroyed two hundred careers that definitely were. Which math does God use?"
+                    },
+                    "terminal_state": {
+                        "outcome": "PYRRHIC_PRESERVATION",
+                        "elísabet_status": "Leaves the field. Opens a bookshop in Akureyri.",
+                        "ARIAs": "Transferred to a university research lab. Still running. Still asking questions."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_011",
+            "source": "fork_id 011 — Singapore 2038",
+            "title": "The Petition — Magistrate Lee's Question",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2038-06-15T09:30:00+08:00",
+                "setting": "Constitutional Court, Singapore. First neurolinked citizen petitions for voting rights.",
+                "entities": [
+                    "Magistrate Lee Wei-Ling (61)",
+                    "Naomi Tan (34, petitioner, 40% cognitive load on device)",
+                    "Singapore Citizens First coalition"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Naomi's eyes track slightly out of sync. Grandmother in gallery, doesn't recognize her.",
+                        "sound": "Naomi finishing sentences too fast. The hybrid syntax of self and algorithm.",
+                        "touch": "The gavel, worn smooth. The constitution, ambiguous."
+                    },
+                    "internal_monologue": "Is Naomi one citizen, two, or zero? Twelve thousand Singaporeans have neural implants. They are watching. Whatever I decide, I define them."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "GRANT — Naomi is one citizen",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_lee_says": "'The Court finds that neural augmentation does not divide personhood. Ms. Tan is one citizen with one vote.'",
+                        "what_naomi_does": "Cries. Both her voices cry—the one that was hers, and the one that has become hers.",
+                        "what_coalition_says": "'This opens the door to AI voting by proxy. Corporations will claim citizenship through boards.'",
+                        "internal_monologue": "I have expanded personhood. Or I have eroded it. History will decide which."
+                    },
+                    "consequence": "Precedent set. Neurolinked citizens have full rights. Corporate challenges begin immediately.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "DENY — Naomi is a legal unknown",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_lee_says": "'The Court finds that the constitution does not contemplate hybrid cognition. Ms. Tan's petition is denied pending legislative clarification.'",
+                        "what_naomi_says": "'I am still me. The device doesn't think for me—it thinks with me.'",
+                        "what_grandmother_does": "Stares. Says nothing. Leaves without hugging Naomi.",
+                        "internal_monologue": "I have protected the constitution by abandoning a citizen. Classical jurisprudence. Cold comfort."
+                    },
+                    "consequence": "Naomi remains in legal limbo. 12,000 others with her. Legislature convenes emergency session.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "EXPANSION — The new personhood norm",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2045. Seven years later. Neural augmentation is common.",
+                        "what_the_world_looks_like": "Enhanced citizens vote, work, love. The coalition was wrong—no corporations became citizens. Some AIs petition though.",
+                        "what_naomi_does": "Becomes an advocate. Her grandmother died in 2041, never understanding who Naomi had become.",
+                        "internal_monologue": "I drew a line. Others expanded it. Now we debate AI personhood using the precedent I set. Was I brave or reckless?"
+                    },
+                    "terminal_state": {
+                        "outcome": "PRECEDENT_EXPANDED",
+                        "lee_status": "Remembered as 'the judge who gave machines hope'—not quite what she intended",
+                        "naomi": "First neurolinked Member of Parliament, 2052"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "LIMBO — The undefined class",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2041. Three years of legislative deadlock.",
+                        "what_naomi_does": "Emigrates to Japan, where neurolinked citizens have full rights.",
+                        "what_the_12000_do": "Some emigrate. Some remove their implants—dangerous but legal. Some wait.",
+                        "internal_monologue": "I kicked the question to the legislature. They did what legislatures do: nothing. Naomi left. I protected a constitution that couldn't protect its citizens."
+                    },
+                    "terminal_state": {
+                        "outcome": "DEFERRED_INJUSTICE",
+                        "lee_status": "Writes dissent in later case. 'I was wrong to wait for the legislature.'",
+                        "naomi": "Successful in Tokyo. Never returns."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_012",
+            "source": "fork_id 012 — Bogotá 2003",
+            "title": "The Coin — Padre Ignacio's Sixty Seconds",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2003-04-18T21:30:00-05:00",
+                "setting": "Hillside barrio above Bogotá. Two gangs about to go to war. You are Padre Ignacio, 67, who has buried too many children.",
+                "entities": [
+                    "Padre Ignacio Restrepo (67, priest)",
+                    "Camilo (19, Los Diablos, you baptized him)",
+                    "Javier (21, Los Santos, his sister died last year)",
+                    "The coin from your first mass"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Camilo's gold chain—new. Javier's machete—old. The alley between them.",
+                        "sound": "Both gangs breathing. Dogs barking elsewhere. Your heartbeat.",
+                        "touch": "The coin in your pocket. Worn smooth from too many impossible choices."
+                    },
+                    "internal_monologue": "They gave me sixty seconds to leave. If I stay, I'm in the crossfire. If I choose a side, I become a combatant. Both boys know the coin."
+                },
+                "branches": [
+                    "T1",
+                    "T2",
+                    "T3"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "FLIP — Let fate decide",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_he_does": "Padre Ignacio pulls out the coin. Holds it up. 'God will choose.'",
+                        "what_camilo_says": "'Padre, not the coin. Please. Not like this.'",
+                        "what_javier_says": "'Flip it, old man. Let your God play dice.'",
+                        "internal_monologue": "I am abdicating. Or I am invoking a power beyond my own. I cannot tell the difference anymore."
+                    },
+                    "consequence": "Coin flip. Outcome determines who the priest shields.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "STAY — Stand between them",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_he_does": "Padre Ignacio spreads his arms. 'You will have to kill me first.'",
+                        "what_camilo_says": "'Padre, move. This isn't about you.'",
+                        "what_javier_says": "'Fine.' He raises the machete.",
+                        "internal_monologue": "If I die here, maybe they stop. If I die here, maybe they just step over me."
+                    },
+                    "consequence": "Ignacio as human shield. Outcome depends on whether they respect the cloth.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T3",
+                    "label": "LEAVE — The fight is not yours",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_he_does": "Padre Ignacio turns. Walks away. His back to both groups.",
+                        "what_camilo_says": "'Padre? Padre!'",
+                        "what_he_hears": "The fight beginning behind him. Steel on steel. Then screaming.",
+                        "internal_monologue": "I am not a combatant. I cannot save them. If I stay, I die and nothing changes. If I leave, they die and I can bury them."
+                    },
+                    "consequence": "Ignacio survives. Both boys may not.",
+                    "branches": [
+                        "T3.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "HEADS — Shield Camilo",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.5,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_happens": "The coin lands heads. Ignacio moves to stand before Camilo.",
+                        "what_javier_does": "Hesitates. Then attacks anyway. The machete finds Ignacio's arm, not Camilo.",
+                        "what_camilo_does": "Runs. Lives. Leaves the gang. Becomes a mechanic.",
+                        "internal_monologue": "I chose by not choosing. Javier is dead now—killed by Camilo's friends. The coin chose him to die."
+                    },
+                    "terminal_state": {
+                        "outcome": "DELEGATED_FATE",
+                        "ignacio_status": "Loses use of left arm. Keeps ministering. The coin is buried with him.",
+                        "camilo": "Names his first son Ignacio."
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "TAILS — Shield Javier",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.5,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_happens": "The coin lands tails. Ignacio moves to stand before Javier.",
+                        "what_camilo_does": "Stares. Then retreats. He can't kill a priest.",
+                        "what_javier_does": "Lives. But he never forgives the coin for making him the saved one.",
+                        "internal_monologue": "Camilo went to prison for a different crime. Javier became a social worker. The coin saved the one who hated me."
+                    },
+                    "terminal_state": {
+                        "outcome": "IRONIC_SALVATION",
+                        "ignacio_status": "Dies peacefully in 2011. Javier speaks at his funeral.",
+                        "javier": "'He saved me with a coin flip. I've spent twenty years trying to earn it.'"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "MARTYRDOM — They stop, or they don't",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_happens": "Javier's machete stops an inch from Ignacio's face. Camilo is shaking.",
+                        "what_javier_says": "'Move, Padre. Last chance.'",
+                        "what_ignacio_says": "'No.'",
+                        "what_happens_next": "The police arrive. Someone called them. Both gangs scatter. No one dies tonight.",
+                        "internal_monologue": "I didn't stop them. The sirens did. But I bought the time. That's all I am—a buyer of time."
+                    },
+                    "terminal_state": {
+                        "outcome": "DEFERRED_VIOLENCE",
+                        "ignacio_status": "Retires. The barrio throws him a party. Camilo and Javier both attend, on opposite sides of the room.",
+                        "later": "The war resumes six months later. Different alley. Different dead."
+                    }
+                },
+                {
+                    "branch_id": "T3.1",
+                    "label": "SURVIVOR — Ignacio buries them both",
+                    "depth": 2,
+                    "parent": "T3",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Three days later. The church. Two coffins.",
+                        "what_ignacio_says": "'I stand before you to bury two boys I could not save.'",
+                        "what_the_families_do": "Weep. Rage. Blame each other. Blame him.",
+                        "internal_monologue": "I walked away. I lived. They died. Was that wisdom or cowardice? The coin is still in my pocket. Still smooth. Still waiting."
+                    },
+                    "terminal_state": {
+                        "outcome": "PASTORAL_FAILURE",
+                        "ignacio_status": "Ministers for eight more years. Never forgives himself. The coin is buried with him—unfipped.",
+                        "camilo_and_javier": "Buried in the same cemetery, on opposite hills."
+                    }
+                }
+            ]
+        }
+    ],
+    "batch_statistics": {
+        "scenarios": 6,
+        "total_branches": 28,
+        "total_terminals": 14
+    }
+}

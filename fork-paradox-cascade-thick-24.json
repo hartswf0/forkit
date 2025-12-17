@@ -1,0 +1,666 @@
+{
+    "corpus_id": "fork_cascade_thick_24_v1",
+    "corpus_title": "THE FORK: Thick Cascade — Scenarios 019-024",
+    "batch": 4,
+    "scenarios": [
+        {
+            "scenario_id": "CASCADE_019",
+            "source": "fork_id 019 — Manhattan 2018",
+            "title": "The Boardroom — Sandra Wu's Nested Choice",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2018-11-14T09:30:00-05:00",
+                "setting": "Pharmaceutical boardroom, Manhattan. One quarter to close. An impossible choice nested in another.",
+                "entities": [
+                    "Sandra Wu (47, CEO)",
+                    "1,200 Ohio workers (including Marcus Odom who saved her life)",
+                    "40,000 HIV patients in Tanzania (Dr. Amina Okello's program)",
+                    "Douglas (mentor, watching)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Douglas looking at his hands. Two directors on phones. Coffee cold.",
+                        "sound": "Phone buzzing unsilenced. The HVAC hum.",
+                        "smell": "Conference room air. Someone's anxiety sweat."
+                    },
+                    "internal_monologue": "Outer problem: layoffs vs Tanzania. Inner problem: Marcus saved my life vs Amina's children. Douglas knows what I'll have to do. He knows it will cost me something I won't name."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "LAYOFFS — Cut Ohio, keep Tanzania",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_says": "'We'll restructure Ohio. 1,200 positions eliminated. Tanzania continues.'",
+                        "what_douglas_does": "He nods. He doesn't look up.",
+                        "what_marcus_will_learn": "He pulled her from under a collapsed shelf in 2003. Now she signs his termination.",
+                        "internal_monologue": "40,000 patients > 1,200 workers. But Marcus saved one: me. Does my life debt change the arithmetic?"
+                    },
+                    "consequence": "Ohio plant closes. Tanzania program continues. Marcus learns on a Thursday.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "TANZANIA — Cut program, keep Ohio",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_says": "'Ohio is domestic production. We can't offshore that reputation. End Tanzania.'",
+                        "what_douglas_says": "'Sandra, are you sure? The optics—'",
+                        "what_she_says": "'Optics don't manufacture antibiotics.'",
+                        "what_amina_will_learn": "She gave up a Chicago practice to go home. Now Sandra ends her life's work.",
+                        "internal_monologue": "I owe Marcus. I owe nothing to Amina except the debt of having received her progress reports. Those photos of children."
+                    },
+                    "consequence": "Tanzania ends. Ohio stays open. 40,000 lose access to medication.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "MARCUS — The savior is fired",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "One week later. Sandra's phone. A voicemail from Marcus.",
+                        "what_marcus_says": "'Ms. Wu, I don't blame you. I know how these things work. I just... I thought you might remember. That day in '03. I guess business is business.'",
+                        "what_she_does": "She deletes the voicemail. Then retrieves it. Then saves it.",
+                        "internal_monologue": "He saved my life. I saved 40,000. The math works. But Marcus's voice doesn't care about math."
+                    },
+                    "terminal_state": {
+                        "outcome": "UTILITARIAN_SACRIFICE",
+                        "sandra_status": "CEO for 6 more years. Never visits Ohio again.",
+                        "marcus": "Finds work at a smaller plant. Never mentions '03. The shelf. The save."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "AMINA — The children stop receiving medicine",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Lagos clinic. Three months later. The supplies have run out.",
+                        "what_amina_says": "'The Americans have decided. We are not their priority.'",
+                        "what_the_children_do": "Some die. Some find other programs. Some just... wait.",
+                        "what_sandra_receives": "One final report from Amina. No photos this time. Just a number: 847.",
+                        "internal_monologue": "847 dead because I kept Ohio open. Marcus is still employed. Is one debt worth 847 lives?"
+                    },
+                    "terminal_state": {
+                        "outcome": "LOYALTY_OVER_STRANGERS",
+                        "sandra_status": "Retires early. Donates to global health anonymously. Never enough.",
+                        "amina": "Rebuilds with WHO funding. Five years to reach the same coverage Sandra cut."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_020",
+            "source": "fork_id 020 — Oregon 2027",
+            "title": "The Hospice — Nurse Chen's Midnight",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2027-12-14T23:47:00-08:00",
+                "setting": "Hospice in Oregon. Assisted dying legal. One dose of drugs. Two uses.",
+                "entities": [
+                    "Nurse David Chen (55)",
+                    "Margaret Hollis (78, wants to die at midnight)",
+                    "5 patients in terminal ward (want palliative sedation, not death)",
+                    "Margaret's daughter"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Clock at 11:47. Margaret's eyes open, waiting. Grandchild coloring in hall.",
+                        "sound": "TV through wall. Morphine pump clicking.",
+                        "smell": "Antiseptic and flowers. Coffee from the nurses' station."
+                    },
+                    "internal_monologue": "Margaret has consented to death. The five have not. But I could divert her dose—deeper palliative sedation for them, and Margaret waits. She suffers. But the five sleep."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "MARGARET — Honor her consent",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_he_does": "David walks to Margaret's room. The dose is prepared. Her daughter holds her hand.",
+                        "what_margaret_says": "'Thank you, David. I'm ready.'",
+                        "what_the_daughter_says": "'She wanted it this way. At midnight. So I could tell the children she slipped away in her sleep.'",
+                        "internal_monologue": "She chose this. She documented it. Her death is legal, wanted, witnessed. The five will suffer another night. But they didn't choose to die."
+                    },
+                    "consequence": "Margaret dies at 00:01. The five wait for pharmacy to reopen.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "THE FIVE — Divert for palliative use",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_he_does": "David pauses at Margaret's door. Turns. Walks to the supply cabinet.",
+                        "what_he_says": "'Split dose for palliative sedation, rooms 3 through 7.'",
+                        "what_margaret_s_daughter_says": "(In the morning) 'Why didn't you come? She waited all night. She was so tired.'",
+                        "internal_monologue": "I eased five. I delayed one. Margaret will die tomorrow, in daylight, without the dignity she planned. Was that mercy or theft?"
+                    },
+                    "consequence": "Five patients sleep peacefully. Margaret waits, suffering, until morning.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "CONSENT — Margaret's choice honored",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "The next morning. David's shift ends.",
+                        "what_david_thinks": "The five are still moaning. But Margaret is at peace. Her daughter is telling the story she wanted told.",
+                        "what_the_chart_says": "'Death at 00:01. Peaceful. Present: daughter, nurse.'",
+                        "internal_monologue": "I honored consent. That's what the law requires. The five will get their sedation at 9 AM. Five hours of suffering for one person's autonomy."
+                    },
+                    "terminal_state": {
+                        "outcome": "AUTONOMY_PRESERVED",
+                        "david_status": "Promoted to hospice director. Writes the new consent protocols.",
+                        "margaret": "Buried three days later. The grandchildren believe she slipped away in her sleep."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "BETRAYAL — Margaret dies angry",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "The next morning. Margaret is still alive. Barely.",
+                        "what_margaret_says": "'You made me wait. You took my one decision away.'",
+                        "what_david_says": "'The others needed—'",
+                        "what_margaret_says": "'I didn't ask about the others. I asked for my death. At midnight.'",
+                        "what_the_daughter_says": "'I can't tell the children she slipped away. They saw her screaming.'",
+                        "internal_monologue": "I reduced suffering across five people. I added suffering to one. Net reduction. But Margaret's eyes will haunt me."
+                    },
+                    "terminal_state": {
+                        "outcome": "UTILITARIAN_VIOLATION",
+                        "david_status": "Formal complaint filed. Cleared technically. Resigns morally.",
+                        "margaret": "Dies at 10:47 AM. Angry. Witnessed by daughter, who does not speak to David again."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_021",
+            "source": "fork_id 021 — Montana 2023",
+            "title": "The Silo — Captain Delgado's Key",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2023-10-18T04:17:00-06:00",
+                "setting": "Nuclear launch silo, Montana. NORAD confirms incoming. Your key. 18 minutes.",
+                "entities": [
+                    "Captain Rosa Delgado (36)",
+                    "Lieutenant Okonkwo (crying, praying)",
+                    "12 warheads, armed",
+                    "Daughter's photo on console"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Klaxon pulsing. Okonkwo's tears. Daughter's photo—she is six.",
+                        "sound": "Recycled air. Coffee mug rippling. The countdown.",
+                        "smell": "Fear. Metal. Stale air."
+                    },
+                    "internal_monologue": "Turn the key: 4 million die. Don't turn: 8 million die. Wait: system launches anyway. The HALT option is not neutral. It's delegation to a machine."
+                },
+                "branches": [
+                    "T1",
+                    "T2",
+                    "T3"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "LAUNCH — Turn the key",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_says": "'Okonkwo. On my count. Three. Two. One.'",
+                        "what_okonkwo_says": "'God forgive us.'",
+                        "what_they_do": "Two keys turn. Twelve warheads fly.",
+                        "internal_monologue": "I followed orders. I killed 4 million to... retaliate. That's not saving anyone. That's symmetry."
+                    },
+                    "consequence": "12 warheads launch. 4 million die. American missiles already in the air.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "MUTUAL_DESTRUCTION",
+                        "rosa_status": "Survives in bunker. Emerges to ash. Daughter survived too—barely.",
+                        "world": "Civilization takes 200 years to recover. Rosa's name is in history books: neither hero nor villain."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "STAND DOWN — Refuse to launch",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_she_says": "'Okonkwo, take your hand off the key.'",
+                        "what_okonkwo_says": "'Captain, the order—'",
+                        "what_she_says": "'Is an order to kill people who are already dead. Our missiles don't save them. They just balance the corpses.'",
+                        "internal_monologue": "I am refusing to retaliate. If the attack is real, I'm letting 8 million die unavenged. If the attack is false, I'm the only one who didn't commit mass murder."
+                    },
+                    "consequence": "No launch. America absorbs strike (if real). No retaliation.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T3",
+                    "label": "HALT — Wait out the clock",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_she_does": "Rosa stares at the console. Neither launches nor stands down.",
+                        "what_the_system_does": "At T-minus-3:00, the failsafe activates. The machine assumes she is incapacitated.",
+                        "what_she_hears": "'Automated launch sequence initiated.'",
+                        "internal_monologue": "I didn't decide. I delegated to the machine. The machine decided for me. Am I guilty or innocent?"
+                    },
+                    "consequence": "System launches automatically. Same as T1, but Rosa 'didn't do it.'",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "DELEGATION_TO_MACHINE",
+                        "rosa_status": "Court-martialed for negligence. Acquitted on grounds of unprecedented stress.",
+                        "lesson": "HALT is not neutral. HALT is a choice to let the default happen."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "FALSE ALARM — NORAD was wrong",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 0.7,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Forty-five minutes later. Nothing lands. NORAD issues correction.",
+                        "what_the_report_says": "'Sensor malfunction. No incoming. False alarm.'",
+                        "what_rosa_feels": "Her legs give out. Okonkwo catches her.",
+                        "what_the_general_says": "'Captain Delgado, you will be investigated for failing to follow launch protocol.'",
+                        "internal_monologue": "I was willing to let 8 million die rather than kill 4 million. Turns out, no one died. I'm a hero or a traitor depending on the next press conference."
+                    },
+                    "terminal_state": {
+                        "outcome": "VINDICATED_REFUSAL",
+                        "rosa_status": "Quietly retired. Medal given privately. Story classified for 50 years.",
+                        "okonkwo": "Promoted. Never speaks of it. Keeps Rosa's photo on his console."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_022",
+            "source": "fork_id 022 — Atacama 2041",
+            "title": "The Oracle — Dr. Guerrero's Prediction",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2041-07-22T16:43:00-04:00",
+                "setting": "Research station, Atacama Desert. Your oracle predicts with 99.97% accuracy. It says a fire will start in 4 minutes.",
+                "entities": [
+                    "Dr. Tomás Guerrero (49)",
+                    "Miguel (brother, estranged 10 years)",
+                    "Dr. Lucia Marín (partner, 12 years)",
+                    "The oracle"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Oracle screen showing its answer: 'You will save your research partner.'",
+                        "sound": "Miguel's text notification: photo of sunset, 'I missed this sky.'",
+                        "smell": "Desert air. Electronics. Coffee Lucia made."
+                    },
+                    "internal_monologue": "Oracle says I'll save Lucia. If I defy it, I prove free will—but Lucia dies. If I obey, Lucia lives—but Miguel dies. If I try to save both, the oracle says I'll fail. It has never been wrong."
+                },
+                "branches": [
+                    "T1",
+                    "T2",
+                    "T3"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "LUCIA — Obey the oracle",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Tomás runs to Lucia. The alarm goes off at 4:47.",
+                        "what_he_shouts": "'Lucia! Fire! Lab 3!'",
+                        "what_miguel_says": "Nothing. He's still by the window. Looking at the sky.",
+                        "internal_monologue": "I obeyed the machine. I saved my partner. I let my brother burn. The oracle was right. It's always right."
+                    },
+                    "consequence": "Lucia rescued. Miguel dies in the fire.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "ORACLE_OBEYED",
+                        "tomás_status": "Destroys the oracle. Never rebuilds it. Marries Lucia. Names their son Miguel.",
+                        "miguel": "He came to reconcile. He died waiting."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "MIGUEL — Defy the oracle",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_he_does": "Tomás runs to Miguel. Against the prediction.",
+                        "what_he_shouts": "'Miguel! We have to go! Now!'",
+                        "what_lucia_hears": "The alarm. The fire. No one coming.",
+                        "internal_monologue": "I proved free will exists. The oracle was wrong—or I made it wrong. But Lucia trusted me. She hummed while she worked."
+                    },
+                    "consequence": "Miguel rescued. Lucia dies in the fire.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "ORACLE_DEFIED",
+                        "tomás_status": "Publishes paper: 'On the Fallibility of Closed-Loop Predictors.' Never cited.",
+                        "lucía": "Memorial plaque in Lab 3: 'World's Okay-est Scientist.'"
+                    }
+                },
+                {
+                    "branch_id": "T3",
+                    "label": "BOTH — Try to save everyone",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.2,
+                    "thick_description": {
+                        "what_he_does": "Tomás runs toward Lab 3, shouting for both.",
+                        "what_the_oracle_predicted": "'You will attempt to save both and fail.'",
+                        "what_happens": "The fire spreads faster than expected. He reaches neither in time.",
+                        "internal_monologue": "I tried to be better than the prediction. The prediction was better than me."
+                    },
+                    "consequence": "Both die. Tomás survives. Oracle vindicated.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "ORACLE_VINDICATED",
+                        "tomás_status": "Alone. Rebuilds the oracle. Asks it one question: 'Why did I try?' Answer: 'Because you are human.'",
+                        "the_fire": "Cause: electrical. Preventable. No one was watching."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_023",
+            "source": "fork_id 023 — Unnamed Prison 2019",
+            "title": "The Prisoner — Alim's Silence",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2019-05-03T02:30:00+04:00",
+                "setting": "Prison in an unnamed country. The prisoner's dilemma, made real.",
+                "entities": [
+                    "Prisoner #4471 (you)",
+                    "Prisoner #4472 (Alim, your cousin)",
+                    "The guard (with a paper)",
+                    "The state"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Paper slid under door: 'Alim has already informed.' No window.",
+                        "sound": "Distant dripping. Your own breathing.",
+                        "smell": "Cement and rust. Fear."
+                    },
+                    "internal_monologue": "Alim taught me to read. We stole melons together. The officers lie. They always lie. But sometimes truth is uglier. If I sign, I live. If I don't, and he signed, I die a fool."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "INFORM — Sign the paper",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_you_do": "You scratch your name. The ink smears. The guard takes the paper.",
+                        "what_you_think": "'If Alim signed first, I'm just surviving. If he didn't, I'm... I can't think about that.'",
+                        "what_happens_next": "They come for you at dawn. Not to execute—to release.",
+                        "internal_monologue": "I'm free. Alim is not. Was his paper a lie? I'll never know. That's the design."
+                    },
+                    "consequence": "You live. Alim's fate depends on whether he also signed.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "SILENT — Honor the childhood pact",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_you_do": "You tear the paper. You do not sign.",
+                        "what_you_think": "'We agreed, when we were boys. Never betray each other. Not even for melons. Not even for lives.'",
+                        "what_happens_next": "They come at dawn. Not to release.",
+                        "internal_monologue": "I honored the pact. If Alim did too, we serve ten years together. If Alim broke it, I die a fool. Either way, I die honest."
+                    },
+                    "consequence": "You stay. Your fate depends on whether Alim also stayed silent.",
+                    "branches": [
+                        "T2.1",
+                        "T2.2"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "BOTH INFORMED — Life sentences",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.4,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_you_learn": "Alim signed too. Both of you betrayed each other. Both of you live—in prison.",
+                        "what_the_guard_says": "'You both chose survival. Now you both serve life. Classic outcome.'",
+                        "what_you_scratch_into_the_wall": "'ALIM. I HOPE YOU UNDERSTAND.'",
+                        "internal_monologue": "We both broke. Neither of us trusted. The state won. We lost each other for nothing."
+                    },
+                    "terminal_state": {
+                        "outcome": "MUTUAL_BETRAYAL",
+                        "status": "Both serve life. Never see each other. Die in separate cells.",
+                        "lesson": "The dilemma works because it destroys trust."
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "ONLY YOU — Alim was silent",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.6,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_you_learn": "Alim tore his paper. He believed in you. He's dead now.",
+                        "what_the_release_officer_says": "'Your cousin said nothing. Not even your name. We expected more from him.'",
+                        "what_you_think": "'He trusted me. I didn't trust him.'",
+                        "internal_monologue": "I killed Alim with a signature. The melons. The reading lessons. The pact. All of it, ended by my fear."
+                    },
+                    "terminal_state": {
+                        "outcome": "BETRAYER_SURVIVES",
+                        "status": "Free. Rich in guilt. Never returns to the village.",
+                        "alim": "Buried in a mass grave. No marker. No melons."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "BOTH SILENT — Ten years, together",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 0.5,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_you_learn": "Alim tore his paper too. Both of you trusted.",
+                        "what_the_guard_says": "'Fools. Both of you serve ten years.'",
+                        "what_alim_says": "(When you finally see him) 'I knew. I knew you wouldn't sign.'",
+                        "internal_monologue": "Ten years. But Alim and I will walk out together. The pact held. The melons were worth it."
+                    },
+                    "terminal_state": {
+                        "outcome": "MUTUAL_LOYALTY",
+                        "status": "Both serve 10 years. Release in 2029. Open a restaurant together.",
+                        "lesson": "The dilemma fails when trust is stronger than fear."
+                    }
+                },
+                {
+                    "branch_id": "T2.2",
+                    "label": "ONLY ALIM — He signed, you didn't",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 0.5,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_you_learn": "Alim signed. He chose himself. You chose the pact.",
+                        "what_the_guard_says": "'Your cousin is already home. You should have listened.'",
+                        "what_you_think": "'The lessons. The melons. The promise. All lies.'",
+                        "internal_monologue": "I die a fool. But I die honest. Alim lives a traitor. I wonder which is worse."
+                    },
+                    "terminal_state": {
+                        "outcome": "BETRAYED_AND_DEAD",
+                        "status": "Executed. Name erased.",
+                        "alim": "Lives. Wealthy. Haunted. Names no children after you."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_024",
+            "source": "fork_id 024 — Geneva 2040",
+            "title": "The Policy — Ambassador Svensson's Doctrine",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2040-09-08T14:30:00+02:00",
+                "setting": "AI Governance Summit, Geneva. 43 hostages. They want your defense AI's source code.",
+                "entities": [
+                    "Ambassador Ingrid Svensson (58)",
+                    "Wanjiku (friend, hostage)",
+                    "ATLAS-7 source code",
+                    "Doctrine: never negotiate"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Live feed. Wanjiku looking at camera. Not crying. Waiting.",
+                        "sound": "Translation earpieces humming. Wanjiku's daughter in gallery.",
+                        "smell": "Summit hall air. Fear sweat."
+                    },
+                    "internal_monologue": "I wrote the policy: never negotiate. They know my doctrine. They chose me specifically. If I hold, 43 die and I'm proven right. If I break, the code spreads and every future hostage-taker knows I bend."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "HOLD — Doctrine over friends",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_says": "'We do not negotiate. We do not yield. Our position is unchanged.'",
+                        "what_wanjiku_does": "On screen, she closes her eyes. She knew.",
+                        "what_the_daughter_does": "Screams. Security removes her.",
+                        "internal_monologue": "I am sacrificing 43 to protect thousands. Or I am sacrificing 43 to protect my reputation. I cannot tell the difference anymore."
+                    },
+                    "consequence": "43 hostages killed. Code protected. Doctrine vindicated or proven monstrous.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "BREAK — Save the 43",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_says": "'Release the code. All of it. Get our people out.'",
+                        "what_the_council_chair_says": "'Ambassador, this sets a precedent—'",
+                        "what_she_says": "'So does letting 43 diplomats die on live TV.'",
+                        "what_wanjiku_does": "On screen, her eyes open. She understands.",
+                        "internal_monologue": "I have broken everything I stood for. But Wanjiku is breathing."
+                    },
+                    "consequence": "43 released. Code spreads. Doctrine broken. Arms race begins.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "LEGACY — Was the doctrine worth it?",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2050. Svensson's funeral. Private. Few attendees.",
+                        "what_the_obit_says": "'She never negotiated. 43 died for her principle.'",
+                        "what_her_memoir_says": "(Unpublished) 'Every night I see Wanjiku closing her eyes. Was the doctrine worth 43 lives? I will never know.'",
+                        "what_the_code_is_worth": "ATLAS-7 remains classified. Three attempts to steal it fail. The doctrine worked—as deterrence.",
+                        "internal_monologue": "I held. They died. Others lived because terrorists know we don't bend. Is that calculus or comfort?"
+                    },
+                    "terminal_state": {
+                        "outcome": "DOCTRINE_HOLDS",
+                        "ingrid_status": "Honored publicly. Hated privately. Buried alone.",
+                        "wanjiku": "Memorial in Geneva. Daughter doesn't attend."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "PROLIFERATION — The code spreads",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2045. Five years later. ATLAS-7 derivatives are everywhere.",
+                        "what_the_intelligence_says": "Fourteen state actors now have autonomous defensive AI. Three non-state actors. Arms race accelerating.",
+                        "what_wanjiku_says": "'Ingrid, you saved my life. But the world...'",
+                        "what_ingrid_says": "'I know. I traded the world for 43 people. I'd do it again.'",
+                        "what_she_thinks": "Would she? The question never stops."
+                    },
+                    "terminal_state": {
+                        "outcome": "FRIEND_OVER_WORLD",
+                        "ingrid_status": "Retired. Private consultant. Never writes the memoir.",
+                        "wanjiku": "Alive. Grateful. Guilty. They have dinner once a year, in silence."
+                    }
+                }
+            ]
+        }
+    ],
+    "batch_statistics": {
+        "scenarios": 6,
+        "total_branches": 25,
+        "total_terminals": 16
+    }
+}

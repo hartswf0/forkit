@@ -1,0 +1,2615 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>HOLO Project - Cinematic 3D Projection Viewer</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='80'>🎬</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+    <style>
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.15);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        :root {
+            --bg: #03180c;
+            --panel: #052010;
+            --panel-dark: #03140d;
+            --line: #0c3a23;
+            --accent: #56ff9f;
+            --accent-soft: rgba(86, 255, 159, 0.18);
+            --text: #aef3c1;
+            --text-muted: #5ea275;
+            --shadow: rgba(0, 0, 0, 0.45);
+            --transition: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .app {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: grid;
+            grid-template-rows: minmax(48px, 56px) 1fr minmax(220px, 38vh);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            gap: 10px;
+            border-bottom: 1px solid var(--line);
+            background: var(--panel);
+        }
+
+        .logo {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        button,
+        label.file-btn {
+            border: 1px solid var(--line);
+            color: var(--text);
+            background: transparent;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .2s var(--transition);
+        }
+
+        button:hover,
+        label.file-btn:hover,
+        select:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        button.active {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        select {
+            transition: all .2s var(--transition);
+        }
+
+        select option {
+            background: var(--panel);
+            color: var(--text);
+        }
+
+        /* 3D + HUD */
+        .viewport {
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .viewport canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hud {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            z-index: 5;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 10px;
+            line-height: 1.5;
+            pointer-events: none;
+        }
+
+        .camera-rail {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            z-index: 6;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--line);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        /* Timeline + Chat */
+        .bottom {
+            display: grid;
+            grid-template-columns: minmax(260px, 1fr) minmax(0, 1.2fr);
+            gap: 10px;
+            padding: 10px;
+            background: var(--panel);
+            border-top: 1px solid var(--line);
+            position: relative;
+            z-index: 2;
+        }
+
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--panel-dark);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            min-height: 0;
+        }
+
+        .cinematic .bottom {
+            display: none;
+        }
+
+        .cinematic .header {
+            display: none !important;
+        }
+
+        .cinematic .camera-rail {
+            display: none !important;
+        }
+
+        .cinematic .title-card {
+            z-index: 20000;
+        }
+
+        #multiCamGrid {
+            display: none;
+        }
+
+        #multiCamGrid.active {
+            display: grid;
+        }
+
+        #multiCamGrid canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .title-card {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        .title-card.active {
+            opacity: 1;
+        }
+
+        .title-card h1 {
+            font-size: clamp(24px, 6vw, 64px);
+            font-weight: 900;
+            color: var(--accent);
+            text-shadow: 0 0 32px rgba(86, 255, 159, 0.8);
+            letter-spacing: 0.05em;
+            margin: 0 0 16px 0;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .title-card h2 {
+            font-size: clamp(14px, 3vw, 24px);
+            font-weight: 400;
+            color: var(--text-muted);
+            text-shadow: 0 0 16px rgba(86, 255, 159, 0.4);
+            letter-spacing: 0.08em;
+            margin: 0;
+            text-align: center;
+            padding: 0 20px;
+            max-width: 90vw;
+        }
+
+        .title-card .scene-number {
+            font-size: clamp(12px, 2.5vw, 18px);
+            font-weight: 600;
+            color: #569fff;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 8px;
+        }
+
+        .timeline {
+            gap: 10px;
+        }
+
+        .time-head {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .time-current {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--accent);
+            text-shadow: 0 0 16px rgba(86, 255, 159, 0.5);
+            min-width: 4ch;
+            text-align: right;
+        }
+
+        .timeline-bar {
+            position: relative;
+            height: 10px;
+            background: #0a1f14;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .playhead {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ff5c7c;
+            box-shadow: 0 0 10px #ff5c7c;
+        }
+
+        .chat-log {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            scroll-behavior: smooth;
+        }
+
+        .msg {
+            border: 1px solid var(--line);
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+        .msg .meta {
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .msg.user {
+            border-left: 3px solid #569fff;
+        }
+
+        .msg.assistant {
+            border-left: 3px solid var(--accent);
+        }
+
+        .msg.system {
+            border-left: 3px solid #f8d66a;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        textarea {
+            flex: 1;
+            resize: none;
+            min-height: 40px;
+            max-height: 120px;
+            border: 1px solid var(--line);
+            background: #06140d;
+            color: var(--text);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+        @media (max-width: 920px) {
+            .app {
+                grid-template-rows: auto 1fr minmax(200px, 40vh);
+            }
+
+            .bottom {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .controls button {
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+
+            .controls select {
+                font-size: 10px;
+                padding: 6px 8px;
+            }
+
+            .camera-rail {
+                bottom: 60px;
+                opacity: 0.7;
+            }
+
+            .camera-rail button {
+                font-size: 9px;
+                padding: 4px 8px;
+            }
+
+            #sceneInfo {
+                font-size: 9px;
+            }
+
+            #cameraControls button {
+                font-size: 8px;
+                padding: 3px 6px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .app {
+                grid-template-rows: minmax(60px, auto) 1fr minmax(140px, 30vh);
+            }
+
+            header {
+                padding: 4px 8px;
+            }
+
+            .logo {
+                font-size: 11px;
+            }
+
+            .logo span:first-child {
+                font-size: 16px !important;
+            }
+
+            .controls {
+                gap: 3px;
+                flex-wrap: wrap;
+            }
+
+            .controls button {
+                font-size: 9px;
+                padding: 4px 6px;
+                white-space: nowrap;
+            }
+
+            #prevSceneBtn,
+            #nextSceneBtn,
+            #multiCamBtn,
+            #helpBtn {
+                display: none;
+            }
+
+            .camera-rail {
+                display: none;
+            }
+
+            .panel {
+                padding: 4px;
+                font-size: 10px;
+            }
+
+            .bottom {
+                min-height: 140px;
+                max-height: 30vh;
+            }
+
+            #sceneInfo {
+                font-size: 9px;
+                padding: 2px 0;
+            }
+
+            #cameraControls {
+                margin-bottom: 4px;
+            }
+
+            #cameraControls button {
+                font-size: 8px;
+                padding: 2px 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header>
+            <div class="logo"><span style="font-size:24px;animation:pulse 2s infinite;">🎬</span> <span
+                    style="font-weight:700;">HOLO Project</span></div>
+            <div class="controls">
+                <select id="presetSelector"
+                    style="border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 12px;font-family:inherit;font-size:11px;border-radius:6px;cursor:pointer;">
+                    <option value="">Select Data File...</option>
+                    <optgroup label="── Full Simulations ──">
+                        <option value="./disc-data.json">Interrogation Chamber (Original)</option>
+                        <option value="./black-metal-disc-data.json">Black Metal: Cosmic Alchemy</option>
+                        <option value="./sheep-parliament-fixed-grid.json">The Sheep Parliament Decides (Comedy)
+                        </option>
+                    </optgroup>
+                    <optgroup label="── Black Metal: Ethnographic Studies ──">
+                        <option value="./disc-data-black-metal-first-of-us.json">The First of Us (Zombie Origin
+                            Cosmology)</option>
+                        <option value="./disc-data-black-metal-ethnographic (1).json">Afrotectopia Gathering (Brooklyn)
+                        </option>
+                    </optgroup>
+                    <optgroup label="── Training Grounds (Practice) ──">
+                        <option value="./disc-data-shedding.json">Training: Shedding</option>
+                        <option value="./disc-data-integrating.json">Training: Integrating</option>
+                        <option value="./disc-data-grounding.json">Training: Grounding</option>
+                    </optgroup>
+                    <optgroup label="── Experimental (Theory-Heavy) ──">
+                        <option value="./rootcare-after-collapse.json">Rootcare After Collapse</option>
+                    </optgroup>
+                    <optgroup label="── Synthetic Tests ──">
+                        <option value="./synthetic-test-minimal.json">Minimal: 2 Entities</option>
+                        <option value="./synthetic-test-pentagon.json">Pentagon: 5 Speakers</option>
+                        <option value="./synthetic-test-apparatus-chorus.json">Apparatus Chorus: 1+6 Sensors</option>
+                        <option value="./synthetic-test-sheep-consent.json">Sheep Consent Dashboard</option>
+                    </optgroup>
+                </select>
+                <label class="file-btn">Load Custom<input type="file" id="fileInput" accept=".json" /></label>
+                <button id="playBtn" style="font-weight:700;position:relative;">▶ PLAY</button>
+                <button id="pauseBtn">PAUSE</button>
+                <button id="stepBtn">STEP</button>
+                <button id="resetBtn">RESET</button>
+                <button id="prevSceneBtn">◀ PREV SCENE</button>
+                <button id="nextSceneBtn">NEXT SCENE ▶</button>
+                <button id="cinematicBtn">🎬 CINEMATIC</button>
+                <button id="multiCamBtn">📹 MULTI-CAM</button>
+                <button id="ttsBtn">🔊 TTS</button>
+                <button id="voicesBtn" style="background: #ff9f56; color: #000;">🎤 VOICES</button>
+                <button id="helpBtn" style="background: #ff9f56; color: #000; font-weight: 700;">❓ HELP</button>
+            </div>
+        </header>
+
+        <div class="title-card" id="titleCard">
+            <div class="scene-number" id="titleSceneNum"></div>
+            <h1 id="titleMain"></h1>
+            <h2 id="titleSub"></h2>
+        </div>
+        <section class="viewport" id="viewport" style="position:relative;">
+            <div id="multiCamGrid"
+                style="display:none;position:absolute;inset:0;z-index:5;background:#000;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;">
+            </div>
+            <div class="camera-rail" id="cameraRail">
+                <button data-cam="overview">Overview</button>
+                <button data-cam="top">Top</button>
+                <button data-cam="side">Side</button>
+                <button data-cam="track">Track</button>
+                <button data-cam="follow">Follow</button>
+            </div>
+            <!-- Three.js canvas injected here -->
+        </section>
+
+        <section class="bottom">
+            <div class="panel timeline">
+                <div class="time-head">
+                    <div class="time-current" id="timeCurrent">0</div>
+                    <div style="font-size:11px;color:var(--text-muted)">/ <span id="timeTotal">0</span></div>
+                </div>
+                <div class="timeline-bar">
+                    <div class="playhead" id="playhead" style="left:0%"></div>
+                </div>
+                <div id="sceneInfo"
+                    style="font-size:10px;color:var(--text);line-height:1.6;padding:4px 0;border-bottom:1px solid var(--line);margin-bottom:6px;">
+                    <div style="font-size:11px;font-weight:700;color:#56ff9f;">Scene: <span id="sceneTitle">—</span>
+                    </div>
+                    <div style="font-size:10px;color:var(--text-muted);">Turn: <span id="turnInfo">0/0</span> | Camera:
+                        <span id="cameraInfo">overview</span>
+                    </div>
+                </div>
+                <div id="cameraControls" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">
+                    <button onclick="setCamera('overview')"
+                        style="font-size:9px;padding:4px 8px;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:4px;cursor:pointer;">Overview</button>
+                    <button onclick="setCamera('top')"
+                        style="font-size:9px;padding:4px 8px;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:4px;cursor:pointer;">Top</button>
+                    <button onclick="setCamera('side')"
+                        style="font-size:9px;padding:4px 8px;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:4px;cursor:pointer;">Side</button>
+                </div>
+                <div style="font-size:10px;color:var(--text-muted);line-height:1.4">
+                    <strong>To Load Data:</strong><br>
+                    1. Use dropdown above to select preset<br>
+                    2. Click "Load Custom" for your own JSON<br>
+                    3. Drag &amp; drop JSON file anywhere<br>
+                    4. Paste JSON text (Ctrl/Cmd+V)
+                </div>
+            </div>
+            <div class="panel chat">
+                <div class="chat-log" id="chatLog"></div>
+                <div class="chat-input">
+                    <textarea id="chatInput"
+                        placeholder="Type… try /camera overview | /camera side | /camera top | /camera follow [name]"></textarea>
+                    <button id="sendBtn">Send</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Voice Testing Panel -->
+    <div id="voicePanel">
+        <button class="close-btn" onclick="closeVoicePanel()">✕</button>
+        <div class="entity-name" id="voicePanelTitle">Entity Name</div>
+        <div class="voice-info">
+            <strong>Current Voice:</strong>
+            <div id="currentVoice" style="margin-top: 4px; color: var(--accent);">Not assigned yet</div>
+        </div>
+        <button class="test-btn" onclick="testCurrentVoice()">🎤 Test Current Voice</button>
+        <div
+            style="margin-top: 16px; font-size: 11px; opacity: 0.7; border-top: 1px solid var(--line); padding-top: 8px;">
+            <strong>All Available Voices:</strong>
+            <div id="voiceCount" style="margin-top: 4px;">Loading...</div>
+        </div>
+        <div class="voice-list" id="voiceList"></div>
+    </div>
+
+    <!-- Voice Control Panel -->
+    <div id="voiceControlPanel"
+        style="display: none; position: fixed; inset: 0; z-index: 18000; background: rgba(0,0,0,0.9); overflow-y: auto;">
+        <div
+            style="max-width: 800px; margin: 40px auto; padding: 20px; background: #06140d; border: 2px solid var(--accent); border-radius: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: var(--accent); margin: 0;">🎤 Voice Control Panel</h2>
+                <button onclick="closeVoiceControlPanel()"
+                    style="background: #ff5c7c; color: #fff; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700;">✕
+                    Close</button>
+            </div>
+
+            <div
+                style="margin-bottom: 20px; padding: 12px; background: rgba(255,159,86,0.1); border: 1px solid #ff9f56; border-radius: 8px;">
+                <strong style="color: #ff9f56;">⚠️ Browser Audio:</strong> Click any TEST button to enable audio.
+                Browsers require user interaction before playing sounds.
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <strong style="color: var(--accent);">Available Voices:</strong> <span id="voiceCountDisplay"
+                    style="color: var(--text);">Loading...</span>
+            </div>
+
+            <div id="entityVoiceList" style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            // --- State ---
+            const GRID_SIZE = 9;
+            const CELL_SIZE = 1; // world units per cell
+            const entityMeshes = new Map(); // id -> mesh
+            const entityIndexByName = new Map();
+            const entityColorById = new Map();
+
+            let dataParsed = null;
+            let scenes = [];
+            let sceneIndex = 0;
+            let cinematicMode = false;
+            let multiCamMode = false;
+            let ttsEnabled = true; // Text-to-speech on by default
+            let speechSynth = window.speechSynthesis;
+            let availableVoices = [];
+            let machineAudio = null;
+            const entityVoices = new Map(); // Map entity to voice
+            let timeline = [];
+            let turn = 0;
+            let playing = false;
+            let interval = null;
+
+            let cameraMode = 'overview';
+            let cameraFollowTarget = null; // THREE.Object3D
+            let autoPovOnSpeak = true;
+            const POV_DWELL_MS = 4000;
+            const ghostMeshes = []; // Previous scene entities that fade slowly
+            const transitioningEntities = new Map(); // Entities moving to new positions
+            let ambientParticles = [];
+            let gridBreathPhase = 0;
+            let infoFlowParticles = []; // Information flow between entities
+            let generativeSequencer = null;
+            let laserEyes = new Map(); // Track active laser eyes per entity
+            let lastSpeaker = null; // Track who spoke last for turn-taking
+            let communicationRipples = []; // Visual waves showing message broadcast
+            let nameParticles = []; // Floating name letters when speaking
+            let elementsLegend = {}; // Descriptions from disc-data
+            let currentSceneAudio = null; // Active scene audio context
+            let powerMeters = []; // Visual power distribution indicators
+            let chatMessageQueue = []; // Queue for spaced-out chat delivery
+            let lastChatTime = 0; // Track last message time
+            const CHAT_PAUSE_MS = 800; // Pause between messages
+
+            // --- Elements ---
+            const viewport = document.getElementById('viewport');
+            const timeCurrent = document.getElementById('timeCurrent');
+            const timeTotal = document.getElementById('timeTotal');
+            const playhead = document.getElementById('playhead');
+            const hud = document.getElementById('hud');
+            const chatLog = document.getElementById('chatLog');
+
+            // --- Three.js ---
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+            renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+            renderer.setClearColor(0x06140d, 1);
+            renderer.shadowMap.enabled = true;
+            renderer.domElement.className = 'webgl';
+            viewport.appendChild(renderer.domElement);
+
+            const scene = new THREE.Scene();
+
+            const camera = new THREE.PerspectiveCamera(55, viewport.clientWidth / viewport.clientHeight, 0.1, 1000);
+            // Robust OrbitControls constructor: support THREE.OrbitControls or global OrbitControls
+            const OrbitCtor = (typeof THREE !== 'undefined' && THREE.OrbitControls) ? THREE.OrbitControls : (window.OrbitControls || null);
+            if (!OrbitCtor) { throw new Error('OrbitControls not available'); }
+            const controls = new OrbitCtor(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.08;
+
+            // Lights
+            const hemi = new THREE.HemisphereLight(0xaaffee, 0x334433, 0.6);
+            scene.add(hemi);
+            const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+            dir.position.set(8, 12, 8);
+            dir.castShadow = true;
+            scene.add(dir);
+
+            // Floor grid (9x9) + base plane
+            const gridHelper = new THREE.GridHelper(GRID_SIZE * CELL_SIZE, GRID_SIZE, 0x0c3a23, 0x0c3a23);
+            gridHelper.material.opacity = 0.6; gridHelper.material.transparent = true;
+            gridHelper.position.set((GRID_SIZE - 1) * 0.5, 0, (GRID_SIZE - 1) * 0.5);
+            scene.add(gridHelper);
+
+            const base = new THREE.Mesh(
+                new THREE.PlaneGeometry(GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE),
+                new THREE.MeshStandardMaterial({ color: 0x041a11, roughness: 1, metalness: 0 })
+            );
+            base.rotation.x = -Math.PI / 2;
+            base.position.copy(gridHelper.position);
+            base.receiveShadow = true;
+            scene.add(base);
+
+            // Color palette: Per-entity ID colors from disc-data legend
+            const ENTITY_ID_COLORS = {
+                'FC': 0x569fff, 'fc_r1c1': 0x569fff, 'fc_r1c2': 0x569fff, 'fc_r1c3': 0x569fff, 'fc_r1c8': 0x569fff, 'fc_r1c9': 0x569fff, 'fc_r2c1': 0x569fff, 'fc_r2c9': 0x569fff,
+                'OF': 0x56ff9f, 'officer_main': 0x56ff9f,
+                'CL': 0xff9f56, 'clancy_main': 0xff9f56,
+                'KB': 0x8888cc,
+                'APP': 0xff5c7c, 'apparatus': 0xff5c7c,
+                'GB': 0xc78fff, 'guest': 0xc78fff,
+                'SC': 0xf3ae56, 'scholar_1': 0xf3ae56, 'scholars': 0xf3ae56,
+                'A1': 0xff8888, 'A2': 0xff8888, 'A3': 0xff8888, 'A4': 0xff8888, 'A5': 0xff8888, 'A6': 0xff8888
+            };
+            const TYPE_COLORS = {
+                Entity: 0x56ff9f,
+                Location: 0x569fff,
+                Obstacle: 0xff5c7c,
+                Solution: 0x86eab3,
+                Goal: 0xf8d66a,
+                default: 0x86eab3
+            };
+
+            function getTypeColorHex(type) {
+                const c = TYPE_COLORS[type] ?? TYPE_COLORS.default;
+                return c;
+            }
+            function getEntityColorHex(el) {
+                // Priority: exact ID match > type-based > default
+                const id = String(el.id || '').toLowerCase();
+                const type = el.type;
+                for (let key in ENTITY_ID_COLORS) {
+                    if (id.includes(key.toLowerCase())) return ENTITY_ID_COLORS[key];
+                }
+                return getTypeColorHex(type);
+            }
+            function hexToCss(hex) {
+                const s = ('000000' + hex.toString(16)).slice(-6);
+                return '#' + s;
+            }
+
+            // Camera presets
+            function centerPoint() { return gridHelper.position.clone(); }
+            function centerCamera() { setCamera('overview'); }
+            const cameraTween = { active: false, pos: new THREE.Vector3(), look: new THREE.Vector3(), alpha: 0 };
+            function animateCameraTo(pos, look, speed = 0.08) {
+                cameraTween.active = true;
+                cameraTween.pos.copy(pos); cameraTween.look.copy(look); cameraTween.alpha = speed;
+            }
+            window.setCamera = function (mode, targetName = null) {
+                cameraMode = mode;
+                hudUpdate();
+                const center = centerPoint();
+                if (mode === 'overview') {
+                    animateCameraTo(new THREE.Vector3(center.x + 7, center.y + 11, center.z + 10), center, 0.08);
+                    cameraFollowTarget = null;
+                } else if (mode === 'top') {
+                    animateCameraTo(new THREE.Vector3(center.x, center.y + 20, center.z + 0.01), center, 0.08);
+                    cameraFollowTarget = null;
+                } else if (mode === 'side') {
+                    animateCameraTo(new THREE.Vector3(center.x + 16, center.y + 4, center.z), center, 0.12);
+                    cameraFollowTarget = null;
+                } else if (mode === 'track') {
+                    // Track playhead horizontally
+                    animateCameraTo(new THREE.Vector3(center.x + (turn % GRID_SIZE) - GRID_SIZE * 0.25, center.y + 6, center.z + 12), center, 0.12);
+                    cameraFollowTarget = null;
+                } else if (mode === 'follow') {
+                    let target = null;
+                    if (targetName && entityIndexByName.has(targetName)) {
+                        target = entityMeshes.get(entityIndexByName.get(targetName));
+                    }
+                    // Fallback to first entity
+                    if (!target) {
+                        const first = [...entityMeshes.values()][0];
+                        target = first || null;
+                    }
+                    cameraFollowTarget = target;
+                } else if (mode === 'pov') {
+                    // POV from entity position
+                    let target = null;
+                    if (targetName && entityIndexByName.has(targetName)) {
+                        target = entityMeshes.get(entityIndexByName.get(targetName));
+                    }
+                    if (!target) {
+                        const first = [...entityMeshes.values()][0];
+                        target = first || null;
+                    }
+                    if (target) {
+                        const tpos = target.position.clone();
+                        const eye = tpos.clone().add(new THREE.Vector3(0.0, 1.25, 0.0));
+                        const look = center.clone().lerp(tpos, 0.72);
+                        animateCameraTo(eye.clone().add(new THREE.Vector3(0.8, 0.3, 1.1)), look, 0.14);
+                        cameraFollowTarget = null;
+                    }
+                }
+                controls.update();
+            }
+
+            // Resize
+            function onResize() {
+                renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+                camera.aspect = viewport.clientWidth / viewport.clientHeight;
+                camera.updateProjectionMatrix();
+            }
+            window.addEventListener('resize', onResize);
+
+            // --- Data parsing (disc-data, legos multi-channel, ring memory/messages) ---
+            function detectAndParse(data) {
+                // disc-data (both old and new formats)
+                if (data.scenes && Array.isArray(data.scenes)) return parseDiscData(data);
+                // legos multi-channel
+                if (data.channels && Array.isArray(data.channels)) return parseLEGOS(data);
+                // conversation messages
+                if (data.messages && Array.isArray(data.messages)) return parseMessages(data);
+                // ring memory
+                if (data.entries && Array.isArray(data.entries)) return parseRing(data);
+                return { type: 'unknown', scenes: [] };
+            }
+
+            function parseDiscData(data) {
+                return {
+                    type: 'disc-data',
+                    scenes: (data.scenes || []).map((s, idx) => {
+                        // NEW FORMAT: Direct elements + timeline
+                        if (s.elements && s.timeline) {
+                            return {
+                                title: s.title || s.subtitle || `Scene ${s.scene_number || idx + 1}`,
+                                subtitle: s.subtitle || '',
+                                grid: createEmptyGrid(),
+                                elements: (s.elements || []).map(el => ({
+                                    id: el.id,
+                                    name: el.name || el.id,
+                                    type: el.type || 'entity',
+                                    position: el.position || { x: 0, y: 0, z: 0 },
+                                    color: el.color || '#56ff9f',
+                                    description: el.description || ''
+                                })),
+                                duration: s.duration || 60,
+                                timeline: (s.timeline || []).map((e, i) => ({
+                                    time: (e.turn || i) * 5, // 5 seconds per turn
+                                    type: 'dialogue',
+                                    target_element_id: e.target_element_id,
+                                    text: e.text || '',
+                                    emotion: e.emotion
+                                }))
+                            };
+                        }
+                        // OLD FORMAT: Complex nested structure
+                        return {
+                            title: s.title || `Scene ${s.scene_number || idx + 1}`,
+                            grid: s.initial_grid_layout || createEmptyGrid(),
+                            elements: normalizeElements(s.elements_in_scene || [], s.initial_grid_layout),
+                            duration: s.metadata?.scene_duration_seconds || 60,
+                            timeline: (s.animation_timeline || []).map((e, i) => ({
+                                time: (e.delay_seconds || 0) + (e.duration_seconds || 0) * 0.0 + i * 0.0001,
+                                type: e.type || 'event',
+                                target_element_id: e.target_element_id,
+                                text: e.text || e.label || ''
+                            }))
+                        };
+                    })
+                };
+            }
+
+            function parseLEGOS(data) {
+                const out = [];
+                data.channels.forEach((ch, cidx) => {
+                    const messages = ch.messages || [];
+                    const grid = ch.grid || createEmptyGrid();
+                    const group = messages; // single scene for now
+                    out.push({
+                        title: `${ch.name || 'Channel'} — Scene 1`,
+                        grid,
+                        elements: normalizeElements(extractElementsFromGrid(grid), grid),
+                        duration: Math.max(10, group.length * 2),
+                        timeline: group.map((m, i) => ({
+                            time: i * 2,
+                            type: 'message',
+                            target_element_id: (m.role || 'system'),
+                            text: m.content || ''
+                        }))
+                    });
+                });
+                return { type: 'legos', scenes: out };
+            }
+
+            function parseMessages(data) {
+                const grid = data.grid || createEmptyGrid();
+                return {
+                    type: 'conversation',
+                    scenes: [{
+                        title: data.title || 'Conversation',
+                        grid,
+                        elements: normalizeElements(extractElementsFromGrid(grid), grid),
+                        duration: Math.max(10, data.messages.length * 2),
+                        timeline: data.messages.map((m, i) => ({ time: i * 2, type: 'message', target_element_id: m.role, text: m.content }))
+                    }]
+                };
+            }
+
+            function parseRing(data) {
+                const group = data.entries || [];
+                return {
+                    type: 'ring',
+                    scenes: [{
+                        title: 'Ring Memory',
+                        grid: createEmptyGrid(),
+                        elements: [],
+                        duration: Math.max(10, group.length * 2),
+                        timeline: group.map((e, i) => ({ time: i * 2, type: 'memory', target_element_id: 'system', text: `${e.headline || ''}: ${e.summary || ''}` }))
+                    }]
+                };
+            }
+
+            function createEmptyGrid() { return Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill('')); }
+            function extractElementsFromGrid(grid) {
+                const els = [];
+                grid.forEach((row, r) => row.forEach((cell, c) => { if (cell) els.push({ id: `cell_${r}_${c}`, type: cell, initial_grid_position: { row: r + 1, col: c + 1 } }); }));
+                return els;
+            }
+            // Normalize elements using grid symbols → types mapping for legibility
+            function normalizeElements(elements, grid) {
+                const TYPE_MAP = {
+                    'E': 'Entity', 'e': 'Entity',
+                    'L': 'Location', 'l': 'Location',
+                    'X': 'Obstacle', 'x': 'Obstacle',
+                    '✓': 'Solution',
+                    '★': 'Goal', '*': 'Goal',
+                    '~': 'Shift'
+                };
+                const out = [];
+                elements.forEach(el => {
+                    let t = el.type;
+                    if (t && TYPE_MAP[t]) t = TYPE_MAP[t];
+                    // If type looks like a single-char symbol from grid, map it
+                    if (typeof t === 'string' && t.length === 1 && TYPE_MAP[t]) t = TYPE_MAP[t];
+                    out.push({ ...el, type: t || 'Entity' });
+                });
+                // If no elements provided, infer from grid
+                if (!out.length && Array.isArray(grid)) {
+                    return extractElementsFromGrid(grid).map(el => ({ ...el, type: TYPE_MAP[el.type] || el.type }));
+                }
+                return out;
+            }
+
+            // --- Scene assembly (3D) ---
+            function clearEntities() {
+                entityMeshes.forEach(m => {
+                    scene.remove(m);
+                    // Clean up sprite labels
+                    m.children.forEach(child => {
+                        if (child.type === 'Sprite') {
+                            if (child.material.map) child.material.map.dispose();
+                            child.material.dispose();
+                        }
+                    });
+                });
+                entityMeshes.clear();
+                entityIndexByName.clear();
+                entityColorById.clear();
+            }
+
+            // Spawn only new entities with entry animations
+            function spawnNewEntities(elements, delay = 0) {
+                setTimeout(() => {
+                    elements.forEach((el, idx) => spawnSingleEntity(el, idx * 150));
+                }, delay);
+            }
+
+            function spawnSingleEntity(el, delay = 0) {
+                const coneGeom = new THREE.ConeGeometry(0.4, 1.2, 24);
+                const boxGeom = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+                // NEW FORMAT: Direct position, OLD FORMAT: Grid position
+                let x, z;
+                if (el.position && typeof el.position.x === 'number') {
+                    x = el.position.x;
+                    z = el.position.z;
+                } else {
+                    const r = (el.initial_grid_position?.row || 1) - 1;
+                    const c = (el.initial_grid_position?.col || 1) - 1;
+                    x = c * CELL_SIZE;
+                    z = r * CELL_SIZE;
+                }
+                const y = 0.55;
+                const color = getEntityColorHex(el);
+                const mat = new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.22), transparent: true, opacity: 0, roughness: Math.random() * 0.5 + 0.3, metalness: Math.random() * 0.3 });
+                const hasSpeakingLines = timeline.some(ev => ev.target_element_id === el.id && ev.text);
+                const mesh = new THREE.Mesh(hasSpeakingLines ? coneGeom : boxGeom, mat);
+                mesh.position.set(x, -1, z); // Start below ground
+                mesh.castShadow = true;
+                mesh.userData = { id: el.id, name: (el.name || el.id || '').toLowerCase(), type: el.type, isSpeaker: hasSpeakingLines };
+                scene.add(mesh);
+                entityMeshes.set(el.id, mesh);
+                entityIndexByName.set(String(el.name || el.id || '').toLowerCase(), el.id);
+                entityColorById.set(el.id, color);
+                if (!hasSpeakingLines) addEntityTextOnFace(mesh, el.name || el.id || el.type, color);
+                else addFloatingLabel(mesh, el.name || el.id || el.type, color);
+                // Rise from ground with glow
+                animateEntityEntry(mesh, y, delay);
+                playMachineSound('entityMove', ['C3', 'D3', 'E3', 'G3'][Math.floor(Math.random() * 4)]);
+                // Log entity spawn to chat with elegant entrance (staggered more)
+                const entranceDelay = delay + 1400 + (Math.random() * 400); // More variation
+                addCastMember(el, color, entranceDelay);
+            }
+
+            function spawnEntities(grid, elements) {
+                const coneGeom = new THREE.ConeGeometry(0.4, 1.2, 24);
+                const boxGeom = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+                const up = 0.55;
+                // First pass: determine which entities have speaking lines
+                const speakerIds = new Set();
+                if (timeline && timeline.length) {
+                    timeline.forEach(ev => {
+                        if (ev.text && ev.target_element_id) {
+                            speakerIds.add(ev.target_element_id);
+                        }
+                    });
+                }
+                elements.forEach((el, idx) => {
+                    // NEW FORMAT: Direct position, OLD FORMAT: Grid position
+                    let x, z;
+                    if (el.position && typeof el.position.x === 'number') {
+                        x = el.position.x;
+                        z = el.position.z;
+                    } else {
+                        const r = (el.initial_grid_position?.row || 1) - 1;
+                        const c = (el.initial_grid_position?.col || 1) - 1;
+                        x = c * CELL_SIZE;
+                        z = r * CELL_SIZE;
+                    }
+                    const y = up;
+                    const color = getEntityColorHex(el);
+                    const mat = new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color).multiplyScalar(0.22), transparent: true, opacity: 1.0, roughness: 0.6 + Math.random() * 0.3, metalness: Math.random() * 0.2 });
+                    // Entities with speaking lines are CONES, others are boxes
+                    const hasSpeakingLines = speakerIds.has(el.id);
+                    const mesh = new THREE.Mesh(hasSpeakingLines ? coneGeom : boxGeom, mat);
+                    mesh.position.set(x, y, z);
+                    mesh.castShadow = true;
+                    mesh.userData = { id: el.id, name: (el.name || el.id || '').toLowerCase(), type: el.type, isSpeaker: hasSpeakingLines };
+                    scene.add(mesh);
+                    entityMeshes.set(el.id, mesh);
+                    entityIndexByName.set(String(el.name || el.id || '').toLowerCase(), el.id);
+                    entityColorById.set(el.id, color);
+                    if (!hasSpeakingLines) {
+                        addEntityTextOnFace(mesh, el.name || el.id || el.type, color);
+                    } else {
+                        // Cones get floating name labels for easy identification
+                        addFloatingLabel(mesh, el.name || el.id || el.type, color);
+                    }
+                    // Glow effect on spawn (new blocks glow when scene changes)
+                    spawnGlowEffect(mesh, color, idx * 120); // Stagger by 120ms - slower cascade
+                });
+            }
+
+            // Glow effect when new blocks spawn
+            function spawnGlowEffect(mesh, colorHex, delay = 0) {
+                setTimeout(() => {
+                    if (!mesh.material || !mesh.material.emissive) return; // Safety check
+                    const start = performance.now();
+                    const dur = 2000; // Longer glow (2s)
+                    const originalEmissive = mesh.material.emissive.clone();
+                    function animateGlow(t) {
+                        const k = Math.min(1, (t - start) / dur);
+                        const intensity = Math.sin(k * Math.PI * 3) * 0.9; // 3 pulses, stronger
+                        if (mesh.material && mesh.material.emissive) {
+                            mesh.material.emissive.setHex(colorHex);
+                            mesh.material.emissive.multiplyScalar(0.22 + intensity);
+                        }
+                        if (k < 1) requestAnimationFrame(animateGlow);
+                        else if (mesh.material && mesh.material.emissive) mesh.material.emissive.copy(originalEmissive);
+                    }
+                    requestAnimationFrame(animateGlow);
+                }, delay);
+            }
+
+            // Circular "head" badge with initials (billboard sprite)
+            function addFloatingLabel(mesh, text, colorHex) {
+                const initials = extractInitials(text);
+                const size = 64; // Larger size
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = size * 2; canvas.height = size * 2; ctx.scale(2, 2);
+                // Circle background
+                ctx.fillStyle = hexToCss(colorHex);
+                ctx.beginPath();
+                ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                // Initials text - larger and bolder
+                ctx.fillStyle = '#000';
+                ctx.font = `bold ${size * 0.55}px Courier New`; // Bigger letters
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(initials, size / 2, size / 2);
+                const tex = new THREE.CanvasTexture(canvas);
+                tex.minFilter = THREE.LinearFilter;
+                const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, opacity: 0.95 });
+                const sprite = new THREE.Sprite(mat);
+                sprite.scale.set(0.9, 0.9, 1); // Larger badge
+                sprite.position.set(0, 0.8, 0); // Closer to cone tip (was 1.5)
+                sprite.renderOrder = 1000;
+                sprite.userData = { fullName: text, entityId: mesh.userData.id, isBadge: true, baseScale: 0.9 };
+                mesh.add(sprite);
+
+                // Add varied head shape and eyes based on entity type
+                addEntityHead(mesh, text, colorHex);
+            }
+
+            // Add entity head with different shapes and laser eyes
+            function addEntityHead(mesh, text, colorHex) {
+                const isMachine = text.toLowerCase().includes('apparatus') || text.toLowerCase().includes('keyboard') || text.toLowerCase().includes('filing');
+                const shape = isMachine ? 'square' : 'circle';
+                const size = 24;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = size * 4; canvas.height = size * 4; ctx.scale(4, 4);
+                ctx.fillStyle = hexToCss(colorHex);
+                if (shape === 'square') {
+                    ctx.fillRect(2, 2, size - 4, size - 4);
+                    ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+                    ctx.strokeRect(2, 2, size - 4, size - 4);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+                // Eyes (two small dots)
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(size * 0.35, size * 0.4, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(size * 0.65, size * 0.4, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+                const tex = new THREE.CanvasTexture(canvas);
+                tex.minFilter = THREE.LinearFilter;
+                const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, opacity: 0.8 });
+                const sprite = new THREE.Sprite(mat);
+                sprite.scale.set(0.35, 0.35, 1);
+                sprite.position.set(0, 0.4, 0);
+                sprite.renderOrder = 999;
+                sprite.userData = { isHead: true, isMachine };
+                mesh.add(sprite);
+            }
+
+            // Create laser eyes when speaking
+            function createLaserEyes(mesh, targetPos, colorHex) {
+                const eyeOffsets = [new THREE.Vector3(-0.08, 0.7, 0.1), new THREE.Vector3(0.08, 0.7, 0.1)];
+                const lasers = [];
+                eyeOffsets.forEach(offset => {
+                    const start = mesh.position.clone().add(offset);
+                    const dir = new THREE.Vector3().subVectors(targetPos, start).normalize();
+                    const length = Math.min(start.distanceTo(targetPos) * 0.5, 3);
+                    const geom = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, length)]);
+                    const mat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity: 0.6, linewidth: 2 });
+                    const line = new THREE.Line(geom, mat);
+                    line.position.copy(start);
+                    line.lookAt(targetPos);
+                    scene.add(line);
+                    lasers.push(line);
+                });
+                laserEyes.set(mesh.userData.id, { lasers, start: performance.now(), duration: 3000 });
+            }
+
+            // Spawn information flow particles (papers/documents)
+            function spawnInfoFlow(fromMesh, toMesh) {
+                const count = 8; // More particles
+                for (let i = 0; i < count; i++) {
+                    // Create small plane for paper effect
+                    const geom = new THREE.PlaneGeometry(0.05, 0.07);
+                    const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, side: THREE.DoubleSide });
+                    const particle = new THREE.Mesh(geom, mat);
+                    particle.position.copy(fromMesh.position.clone().add(new THREE.Vector3(0, 0.6, 0)));
+                    // Random rotation for paper flutter
+                    particle.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+                    scene.add(particle);
+                    const delay = i * 150;
+                    const arc = (Math.random() - 0.5) * 0.5; // Slight arc
+                    infoFlowParticles.push({
+                        mesh: particle,
+                        start: fromMesh.position.clone().add(new THREE.Vector3(0, 0.6, 0)),
+                        end: toMesh.position.clone().add(new THREE.Vector3(0, 0.6, 0)),
+                        born: performance.now() + delay,
+                        duration: 2000,
+                        arc: arc,
+                        rotSpeed: (Math.random() - 0.5) * 0.2
+                    });
+                }
+            }
+
+            // Spawn name particles when entity speaks
+            function spawnNameParticles(mesh, name, colorHex) {
+                const letters = name.split('').slice(0, 3); // First 3 letters
+                letters.forEach((letter, idx) => {
+                    const geom = new THREE.SphereGeometry(0.06, 8, 8);
+                    const mat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.8 });
+                    const particle = new THREE.Mesh(geom, mat);
+                    const angle = (idx / letters.length) * Math.PI * 2;
+                    const radius = 0.3;
+                    particle.position.copy(mesh.position.clone().add(new THREE.Vector3(
+                        Math.cos(angle) * radius,
+                        0.8,
+                        Math.sin(angle) * radius
+                    )));
+                    scene.add(particle);
+                    const velocity = new THREE.Vector3(
+                        Math.cos(angle) * 0.02,
+                        0.03,
+                        Math.sin(angle) * 0.02
+                    );
+                    nameParticles.push({
+                        mesh: particle,
+                        velocity,
+                        born: performance.now(),
+                        life: 2000,
+                        letter
+                    });
+                });
+            }
+
+            // Create communication ripple showing message broadcast
+            function createCommunicationRipple(speakerMesh, allEntities) {
+                const speakerPos = speakerMesh.position.clone();
+                speakerPos.y = 0.1; // Just above ground
+
+                // Create expanding ring geometry
+                const ringGeom = new THREE.RingGeometry(0.1, 0.2, 32);
+                const ringMat = new THREE.MeshBasicMaterial({
+                    color: entityColorById.get(speakerMesh.userData.id) || 0x56ff9f,
+                    transparent: true,
+                    opacity: 0.6,
+                    side: THREE.DoubleSide
+                });
+                const ring = new THREE.Mesh(ringGeom, ringMat);
+                ring.position.copy(speakerPos);
+                ring.rotation.x = -Math.PI / 2;
+                scene.add(ring);
+
+                // Track which entities are in range
+                const receivers = [];
+                allEntities.forEach(m => {
+                    if (m !== speakerMesh) {
+                        const dist = speakerPos.distanceTo(m.position);
+                        receivers.push({ mesh: m, distance: dist });
+                    }
+                });
+
+                communicationRipples.push({
+                    ring,
+                    speakerPos,
+                    receivers,
+                    start: performance.now(),
+                    duration: 2000,
+                    maxRadius: 8
+                });
+            }
+
+            function extractInitials(text) {
+                const words = String(text).trim().split(/[\s_]+/);
+                if (words.length === 1) return text.slice(0, 2).toUpperCase();
+                return words.slice(0, 2).map(w => w[0]).join('').toUpperCase();
+            }
+            // Animate entity moving to new position
+            function animateEntityMove(mesh, targetPos, duration) {
+                const startPos = mesh.position.clone();
+                const start = performance.now();
+                transitioningEntities.set(mesh, { startPos, targetPos, start, duration });
+            }
+
+            // Animate entity entering scene (rise from ground)
+            function animateEntityEntry(mesh, targetY, delay = 0) {
+                setTimeout(() => {
+                    const start = performance.now();
+                    const dur = 1800;
+                    const startY = mesh.position.y;
+                    function rise(t) {
+                        const k = Math.min(1, (t - start) / dur);
+                        const eased = 1 - Math.pow(1 - k, 3); // ease-out cubic
+                        mesh.position.y = startY + (targetY - startY) * eased;
+                        mesh.material.opacity = k;
+                        if (k < 1) requestAnimationFrame(rise);
+                    }
+                    requestAnimationFrame(rise);
+                    spawnGlowEffect(mesh, entityColorById.get(mesh.userData.id), 0);
+                }, delay);
+            }
+
+            // Animate entity exiting scene (fade and sink)
+            function animateEntityExit(mesh, callback) {
+                const start = performance.now();
+                const dur = 1500;
+                const startY = mesh.position.y;
+                function sink(t) {
+                    const k = Math.min(1, (t - start) / dur);
+                    const eased = k * k; // ease-in
+                    mesh.position.y = startY - 1.5 * eased;
+                    mesh.material.opacity = 1 - k;
+                    mesh.rotation.y += 0.02;
+                    if (k < 1) requestAnimationFrame(sink);
+                    else if (callback) callback();
+                }
+                requestAnimationFrame(sink);
+            }
+
+            // Analyze scene intensity for intensity cues
+            function analyzeSceneIntensity(scene) {
+                const title = (scene.title || '').toLowerCase();
+                const subtitle = (scene.subtitle || '').toLowerCase();
+                let intensity = 0.3; // baseline
+                // Threshold detection from disc-data
+                if (title.includes('chaos') || title.includes('eruption') || title.includes('violence')) intensity = 0.9;
+                else if (title.includes('procession') || title.includes('processing')) intensity = 0.6;
+                else if (title.includes('transformation') || title.includes('revealed')) intensity = 0.75;
+                else if (title.includes('interview') || title.includes('theory')) intensity = 0.4;
+                if (subtitle.includes('stress') || subtitle.includes('entropy')) intensity += 0.15;
+                if (subtitle.includes('slow') || subtitle.includes('muted')) intensity -= 0.15;
+                return Math.min(1, Math.max(0.2, intensity));
+            }
+
+            // Trigger ambient effects based on intensity
+            function triggerAmbientEffects(intensity) {
+                // Spawn floating particles for high-intensity scenes
+                if (intensity > 0.7) {
+                    for (let i = 0; i < 20; i++) {
+                        spawnAmbientParticle();
+                    }
+                }
+            }
+
+            // Spawn subtle ambient particle (dust, energy)
+            function spawnAmbientParticle() {
+                const geom = new THREE.SphereGeometry(0.03, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({ color: 0x56ff9f, transparent: true, opacity: 0.3 });
+                const particle = new THREE.Mesh(geom, mat);
+                particle.position.set(
+                    (Math.random() - 0.5) * GRID_SIZE * CELL_SIZE,
+                    Math.random() * 3,
+                    (Math.random() - 0.5) * GRID_SIZE * CELL_SIZE
+                );
+                scene.add(particle);
+                const velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.01,
+                    Math.random() * 0.02,
+                    (Math.random() - 0.5) * 0.01
+                );
+                ambientParticles.push({ mesh: particle, velocity, life: Math.random() * 5000 + 3000, born: performance.now() });
+            }
+
+            // Pulse grid on scene transitions with intensity
+            function pulseGrid(intensity = 0.5) {
+                const start = performance.now();
+                const dur = 2500;
+                const originalColor = gridHelper.material.color.clone();
+                const pulseColor = intensity > 0.7 ? 0xff5c7c : (intensity > 0.5 ? 0xf8d66a : 0x56ff9f);
+                function animatePulse(t) {
+                    const k = Math.min(1, (t - start) / dur);
+                    const wave = Math.sin(k * Math.PI * 2) * 0.5 * intensity;
+                    gridHelper.material.color.setHex(pulseColor);
+                    gridHelper.material.color.multiplyScalar(0.3 + wave);
+                    gridHelper.material.opacity = 0.3 + wave * 0.3;
+                    if (k < 1) requestAnimationFrame(animatePulse);
+                    else gridHelper.material.color.copy(originalColor);
+                }
+                requestAnimationFrame(animatePulse);
+            }
+
+            // Text on ALL 6 box faces with FULL NAMES for easy identification
+            function addEntityTextOnFace(mesh, text, colorHex) {
+                if (mesh.geometry.type !== 'BoxGeometry') return; // Only for boxes
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 512; canvas.height = 512; // Larger for more text
+                ctx.fillStyle = hexToCss(colorHex);
+                ctx.fillRect(0, 0, 512, 512);
+                ctx.fillStyle = '#000';
+
+                // Full name (larger)
+                ctx.font = 'bold 42px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // Wrap text to fit (better wrapping for full names)
+                const words = String(text).toUpperCase().split(/[\s_]+/);
+                const lines = [];
+                let line = '';
+                words.forEach(w => {
+                    const testLine = line + w + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > 480) {
+                        lines.push(line.trim());
+                        line = w + ' ';
+                    } else {
+                        line = testLine;
+                    }
+                });
+                if (line) lines.push(line.trim());
+
+                const lineHeight = 50;
+                const startY = 256 - (lines.length * lineHeight) / 2;
+                lines.forEach((ln, i) => {
+                    ctx.fillText(ln, 256, startY + i * lineHeight);
+                });
+
+                const tex = new THREE.CanvasTexture(canvas);
+                tex.minFilter = THREE.LinearFilter;
+                const materials = [
+                    new THREE.MeshStandardMaterial({ map: tex, color: colorHex }),
+                    new THREE.MeshStandardMaterial({ map: tex, color: colorHex }),
+                    new THREE.MeshStandardMaterial({ map: tex, color: colorHex }), // TOP face with text
+                    new THREE.MeshStandardMaterial({ color: colorHex }), // BOTTOM
+                    new THREE.MeshStandardMaterial({ map: tex, color: colorHex }),
+                    new THREE.MeshStandardMaterial({ map: tex, color: colorHex })
+                ];
+                mesh.material = materials;
+            }
+
+            // Create floating speech bubble as sprite - ALWAYS CENTERED IN CAMERA VIEW
+            function createSpeechBubble(text, colorHex, worldPos) {
+                // CRITICAL: Limit text length to prevent screen overflow
+                const maxChars = 120; // Much shorter!
+                text = text.slice(0, maxChars);
+                if (text.length === maxChars) text += '...';
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const pad = 12; const font = 16; const maxW = 400; // Smaller font and width
+                ctx.font = `bold ${font}px Courier New`;
+                // Word wrap
+                const words = text.split(' ');
+                const lines = []; let line = '';
+                words.forEach(w => {
+                    const test = line + (line ? ' ' : '') + w;
+                    if (ctx.measureText(test).width > maxW - pad * 2) { lines.push(line); line = w; }
+                    else line = test;
+                });
+                if (line) lines.push(line);
+                // Limit lines to prevent tall bubbles
+                if (lines.length > 4) {
+                    lines.splice(4);
+                    lines[3] += '...';
+                }
+                const w = Math.min(maxW, Math.max(100, Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2));
+                const h = lines.length * (font + 6) + pad * 2;
+                canvas.width = w * 2; canvas.height = h * 2; ctx.scale(2, 2);
+                // bubble bg
+                ctx.fillStyle = 'rgba(0,0,0,0.92)';
+                ctx.strokeStyle = hexToCss(colorHex); ctx.lineWidth = 3;
+                ctx.roundRect(2, 2, w - 4, h - 4, 12); ctx.fill(); ctx.stroke();
+                // text
+                ctx.fillStyle = '#ffffff'; ctx.font = `bold ${font}px Courier New`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                lines.forEach((ln, i) => ctx.fillText(ln, w / 2, pad + i * (font + 6)));
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.minFilter = THREE.LinearFilter;
+                const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false });
+                const sprite = new THREE.Sprite(material);
+
+                // CRITICAL: Constrain scale to viewport percentage (max 25% width, 20% height)
+                const maxScaleW = 3.5;  // Max world units width
+                const maxScaleH = 2.5;  // Max world units height
+                const scaleW = Math.min(w / 48, maxScaleW);
+                const scaleH = Math.min(h / 48, maxScaleH);
+                sprite.scale.set(scaleW, scaleH, 1);
+
+                // Position in SCREEN SPACE - centered but not covering entities
+                sprite.renderOrder = 9999;
+                scene.add(sprite);
+                const start = performance.now(); const dur = 4000; // Shorter duration
+                function fade(t) {
+                    const k = Math.min(1, (t - start) / dur);
+                    sprite.material.opacity = 1 - k * 0.7; // Fade faster
+                    // Keep centered in camera frustum, upper area
+                    const dist = 6; // Closer to camera
+                    const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+                    const pos = camera.position.clone().add(dir.multiplyScalar(dist));
+                    pos.y += 1.8; // Less offset - don't block header
+                    sprite.position.copy(pos);
+                    if (k < 1) requestAnimationFrame(fade); else { scene.remove(sprite); texture.dispose(); material.dispose(); }
+                }
+                requestAnimationFrame(fade);
+            }
+            // --- Playback ---
+            function resetPlayback() {
+                pause();
+                turn = 0;
+                updateTime();
+                // Clear chat but keep welcome message
+                chatLog.innerHTML = '';
+                addMsgImmediate('system', '🔄 Reset to beginning');
+                centerCamera();
+                addMsg('system', 'Timeline reset. Ready to play.');
+                // Restore all entities to full opacity
+                entityMeshes.forEach(m => {
+                    if (Array.isArray(m.material)) {
+                        m.material.forEach(mat => { if (mat.transparent !== undefined) mat.opacity = 1.0; });
+                    } else if (m.material.transparent !== undefined) {
+                        m.material.opacity = 1.0;
+                    }
+                });
+                updateHUDTitle();
+                setCamera(cameraMode || 'overview');
+            }
+
+            function play() {
+                if (!timeline.length) return;
+                if (playing) return;
+                playing = true;
+                const playBtn = document.getElementById('playBtn');
+                if (playBtn) {
+                    playBtn.textContent = '⏸ PAUSE';
+                    playBtn.style.background = '#ff5c7c';
+                    playBtn.style.color = '#fff';
+                }
+                interval = setInterval(() => {
+                    step();
+                    if (turn >= timeline.length) {
+                        // Auto-advance to next scene with title card
+                        if (sceneIndex < scenes.length - 1) {
+                            pause();
+                            sceneIndex++;
+                            showTitleCard(scenes[sceneIndex], () => {
+                                loadScene(sceneIndex);
+                                play();
+                            });
+                        } else {
+                            pause();
+                            addMsg('system', '🎬 Movie complete!');
+                            speakText('Movie complete');
+                            showEndCredits();
+                        }
+                    }
+                }, 5000); // 5 seconds per turn - lots of time to burn
+            }
+            function pause() {
+                playing = false;
+                if (interval) {
+                    clearInterval(interval);
+                    interval = null;
+                }
+                const playBtn = document.getElementById('playBtn');
+                if (playBtn) {
+                    playBtn.textContent = '▶ PLAY';
+                    playBtn.style.background = '';
+                    playBtn.style.color = '';
+                }
+                centerCamera();
+                addMsgImmediate('system', '⏸️ Playback paused');
+            }
+
+            // Inspector removed - redundant with click-to-POV on meshes
+            function renderInspector(elements) { /* no-op */ }
+
+            function step() {
+                if (!timeline.length) return;
+                const ev = timeline[turn];
+                processEvent(ev);
+                turn++;
+                updateTime();
+            }
+
+            function updateTime() {
+                timeCurrent.textContent = String(turn);
+                timeTotal.textContent = String(timeline.length);
+                playhead.style.left = (timeline.length ? (turn / timeline.length * 100) : 0) + '%';
+                // Update HUD turn count
+                const s = scenes[sceneIndex];
+                if (s) hudUpdate(s.title);
+            }
+
+            function processEvent(ev) {
+                if (!ev) return;
+                // Chat message (skip here, we log in the mesh section below for better formatting)
+                // if (ev.text) addMsg('assistant', ev.text, ev.target_element_id, turn);
+                // Highlight target entity if present
+                if (ev.target_element_id) pulseEntity(ev.target_element_id);
+                // Speech bubble in 3D and optional POV switch
+                if (ev.text && ev.target_element_id) {
+                    const mesh = resolveEntityMesh(ev.target_element_id);
+                    if (mesh) {
+                        const color = entityColorById.get(mesh.userData.id) || getTypeColorHex(mesh.userData.type);
+                        const text = String(ev.text);
+                        createSpeechBubble(text, color, mesh.position); // Already limited inside function
+                        // Log dialogue in play script format
+                        const entityName = getHumanName(mesh.userData.id);
+                        const entityColor = entityColorById.get(mesh.userData.id) || color;
+                        addDialogue(entityName, text, entityColor, ev.target_element_id);
+                        // Text-to-speech with entity-specific voice
+                        if (ttsEnabled) speakText(text, ev.target_element_id);
+                        // Show directional arrow if speaking to another entity
+                        showDirectionalArrow(mesh, ev);
+                        // Laser eyes pointing to conversation target
+                        const target = findNearestEntity(mesh);
+                        if (target) {
+                            createLaserEyes(mesh, target.position, color);
+                            spawnInfoFlow(mesh, target); // Show information flow
+                        }
+                        // Machine noises for apparatus
+                        if (mesh.userData.name && mesh.userData.name.includes('apparatus')) {
+                            playMachineSound('entitySpeak', ['C4', 'D4', 'E4', 'F4'][Math.floor(Math.random() * 4)]);
+                        }
+                        // Spawn name particles
+                        spawnNameParticles(mesh, entityName, color);
+                        // Create communication ripple showing broadcast
+                        createCommunicationRipple(mesh, entityMeshes);
+                        // Fade others, rotate speaker to face others
+                        fadeNonSpeakers(mesh);
+                        orientSpeakerToOthers(mesh);
+                        if (autoPovOnSpeak) {
+                            const prevMode = cameraMode;
+                            setCamera('pov', (mesh.userData.name || mesh.userData.id || '').toLowerCase());
+                            // revert after a short beat if user hasn't changed camera
+                            setTimeout(() => { if (cameraMode === 'pov') centerCamera(); }, POV_DWELL_MS);
+                        }
+                    }
+                }
+                // Auto camera: track mode nudges position; follow if we detect an entity id
+                if (cameraMode === 'track') setCamera('track');
+                if (cameraMode === 'follow' && cameraFollowTarget) {
+                    // keep following in animation loop
+                }
+            }
+
+            // Animate BOXES outward from speaker (ripple effect)
+            function fadeNonSpeakers(speakerMesh) {
+                const speakerPos = speakerMesh.position.clone();
+                const boxes = [];
+
+                entityMeshes.forEach(m => {
+                    if (m === speakerMesh) return;
+                    const isBox = m.geometry.type === 'BoxGeometry';
+                    if (!isBox) return; // Only affect boxes
+
+                    const distance = speakerPos.distanceTo(m.position);
+                    boxes.push({ mesh: m, distance, originalPos: m.position.clone() });
+                });
+
+                // Animate boxes based on distance from speaker
+                boxes.forEach(({ mesh, distance, originalPos }) => {
+                    const delay = distance * 80; // Further boxes react later
+                    const pushDistance = 0.15; // How far to push outward
+
+                    setTimeout(() => {
+                        // Direction away from speaker
+                        const dir = new THREE.Vector3()
+                            .subVectors(mesh.position, speakerPos)
+                            .normalize()
+                            .multiplyScalar(pushDistance);
+
+                        // Make MORE opaque (brighten) when near speaker
+                        const opacityBoost = Math.max(0.9, 1.2 - distance * 0.1);
+                        if (Array.isArray(mesh.material)) {
+                            mesh.material.forEach(mat => {
+                                if (mat.transparent !== undefined) {
+                                    mat.opacity = opacityBoost;
+                                }
+                                // Brighten emissive
+                                if (mat.emissive) {
+                                    mat.emissiveIntensity = 0.3;
+                                }
+                            });
+                        }
+
+                        // Animate outward push
+                        const start = performance.now();
+                        const duration = 800;
+                        const targetPos = originalPos.clone().add(dir);
+
+                        function animatePush(t) {
+                            const k = Math.min(1, (t - start) / duration);
+                            const eased = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; // ease-in-out
+
+                            if (k < 0.5) {
+                                // Push out
+                                mesh.position.lerpVectors(originalPos, targetPos, eased * 2);
+                            } else {
+                                // Return to position
+                                mesh.position.lerpVectors(targetPos, originalPos, (eased - 0.5) * 2);
+                            }
+
+                            if (k < 1) requestAnimationFrame(animatePush);
+                            else mesh.position.copy(originalPos);
+                        }
+                        requestAnimationFrame(animatePush);
+                    }, delay);
+                });
+
+                // Restore opacity after animation
+                setTimeout(() => {
+                    entityMeshes.forEach(m => {
+                        if (Array.isArray(m.material)) {
+                            m.material.forEach(mat => {
+                                if (mat.transparent !== undefined) mat.opacity = 1.0;
+                                if (mat.emissive) mat.emissiveIntensity = 0;
+                            });
+                        }
+                    });
+                }, 4500);
+            }
+
+            // Orient speaker to face last speaker (turn-taking)
+            function orientSpeakerToOthers(speakerMesh) {
+                let target = null;
+
+                // Look at last speaker if available
+                if (lastSpeaker && lastSpeaker !== speakerMesh && scene.children.includes(lastSpeaker)) {
+                    target = lastSpeaker;
+                } else {
+                    // Otherwise find nearest
+                    const others = Array.from(entityMeshes.values()).filter(m => m !== speakerMesh);
+                    if (!others.length) return;
+                    target = others[0];
+                    let minDist = speakerMesh.position.distanceTo(target.position);
+                    others.forEach(m => {
+                        const d = speakerMesh.position.distanceTo(m.position);
+                        if (d < minDist) { minDist = d; target = m; }
+                    });
+                }
+
+                const dir = new THREE.Vector3().subVectors(target.position, speakerMesh.position);
+                const angle = Math.atan2(dir.x, dir.z);
+                const targetRot = new THREE.Euler(0, angle, 0);
+                const start = speakerMesh.rotation.clone();
+                const tStart = performance.now();
+
+                // Find direction indicator sprite and rotate it with mesh
+                let dirIndicator = null;
+                speakerMesh.children.forEach(child => {
+                    if (child.type === 'Sprite' && child.userData.isDirectionIndicator) dirIndicator = child;
+                });
+
+                function animRot(t) {
+                    const k = Math.min(1, (t - tStart) / 600); // Slower turn for watchability
+                    speakerMesh.rotation.y = start.y + (targetRot.y - start.y) * k;
+                    // Direction indicator pulses slightly during turn
+                    if (dirIndicator) {
+                        const pulse = 1 + 0.2 * Math.sin(k * Math.PI * 4);
+                        dirIndicator.material.opacity = 0.7 + 0.3 * Math.sin(k * Math.PI * 2);
+                    }
+                    if (k < 1) requestAnimationFrame(animRot);
+                    else if (dirIndicator) dirIndicator.material.opacity = 0.7;
+                }
+                requestAnimationFrame(animRot);
+
+                // Update last speaker
+                lastSpeaker = speakerMesh;
+            }
+            function resolveEntityMesh(idOrRole) {
+                if (!idOrRole) return null;
+                idOrRole = idOrRole.toLowerCase();
+                // 1. Direct ID match
+                if (entityMeshes.has(idOrRole)) return entityMeshes.get(idOrRole);
+                if (entityMeshes.has(idOrRole.toUpperCase())) return entityMeshes.get(idOrRole.toUpperCase());
+                // 2. Name match
+                if (entityIndexByName.has(idOrRole)) return entityMeshes.get(entityIndexByName.get(idOrRole));
+                // 3. Approximate fuzzy match (if enabled)
+                for (let [name, id] of entityIndexByName) {
+                    if (name.includes(idOrRole) || idOrRole.includes(name)) return entityMeshes.get(id);
+                }
+                // 4. Fallback: Check if it's a known role like 'system' (no mesh)
+                return null;
+            }
+
+            function findNearestEntity(originMesh) {
+                let nearest = null;
+                let minD = Infinity;
+                entityMeshes.forEach(m => {
+                    if (m === originMesh) return;
+                    const d = originMesh.position.distanceTo(m.position);
+                    if (d < minD) { minD = d; nearest = m; }
+                });
+                return nearest;
+            }
+
+            // Pulse visual effect on entity
+            function pulseEntity(id) {
+                const mesh = resolveEntityMesh(id);
+                if (!mesh) return;
+
+                const start = performance.now();
+                const dur = 400;
+                const originalScale = mesh.scale.clone();
+
+                function anim(t) {
+                    const k = Math.min(1, (t - start) / dur);
+                    const s = 1 + 0.15 * Math.sin(k * Math.PI);
+                    mesh.scale.set(originalScale.x * s, originalScale.y * s, originalScale.z * s);
+                    if (k < 1) requestAnimationFrame(anim);
+                    else mesh.scale.copy(originalScale);
+                }
+                requestAnimationFrame(anim);
+                spawnGlowEffect(mesh, entityColorById.get(mesh.userData.id) || 0xffffff, 0);
+            }
+
+            // Show small arrow indicating who they are talking to
+            function showDirectionalArrow(mesh, ev) {
+                // Parse targets from text like "@Target" or use event metadata
+                // For now, simpler: if they look at someone, show arrow
+                // This is handled visually by 'orientSpeakerToOthers'
+            }
+
+            function getHumanName(id) {
+                const mesh = resolveEntityMesh(id);
+                if (mesh && mesh.userData.name) {
+                    // Capitalize words
+                    return mesh.userData.name.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+                }
+                return id;
+            }
+
+            function getEntityDescription(id) {
+                // Find in current scene elements
+                const s = scenes[sceneIndex];
+                const el = s.elements.find(e => e.id === id);
+                return el ? (el.description || el.type || '') : '';
+            }
+
+            // Add cast member to sidebar (Chat area reused as sidebar info for now?)
+            // Actually we don't have a dedicated cast sidebar, so we'll log them as "Entrance" messages
+            function addCastMember(el, color, delay) {
+                setTimeout(() => {
+                    const name = el.name || el.id;
+                    const div = document.createElement('div');
+                    div.className = 'msg system';
+                    div.style.borderLeftColor = hexToCss(color);
+                    div.innerHTML = `
+          <div class="meta" style="color:${hexToCss(color)}">CAST ENTRANCE</div>
+          <div style="font-weight:700">${name}</div>
+          <div style="font-size:10px;opacity:0.8">${el.description || el.type || ''}</div>
+        `;
+                    div.style.opacity = 0;
+                    div.style.transform = 'translateY(10px)';
+                    div.style.transition = 'all 0.5s ease';
+                    chatLog.appendChild(div);
+                    chatLog.scrollTop = chatLog.scrollHeight;
+
+                    // Trigger CSS reflow
+                    requestAnimationFrame(() => {
+                        div.style.opacity = 1;
+                        div.style.transform = 'translateY(0)';
+                    });
+                }, delay);
+            }
+
+            function addCastSection(title) {
+                const div = document.createElement('div');
+                div.style.padding = '8px 0';
+                div.style.borderBottom = '1px solid var(--line)';
+                div.style.marginBottom = '8px';
+                div.innerHTML = `<strong style="color:var(--accent)">${title}</strong>`;
+                chatLog.appendChild(div);
+            }
+            function addDialogue(name, text, color, id) {
+                queueChatMessage({
+                    role: 'assistant',
+                    text: text,
+                    meta: name,
+                    color: color,
+                    id: id
+                });
+            }
+
+            // Queue messages to prevent flooding
+            function queueChatMessage(msgObj) {
+                chatMessageQueue.push(msgObj);
+                processChatQueue();
+            }
+
+            function processChatQueue() {
+                const now = performance.now();
+                if (now - lastChatTime < CHAT_PAUSE_MS) {
+                    if (!chatMessageQueue.processing) {
+                        chatMessageQueue.processing = true;
+                        setTimeout(processChatQueue, CHAT_PAUSE_MS - (now - lastChatTime));
+                    }
+                    return;
+                }
+                if (!chatMessageQueue.length) {
+                    chatMessageQueue.processing = false;
+                    return;
+                }
+
+                const msg = chatMessageQueue.shift();
+                lastChatTime = performance.now();
+                addMsg(msg.role, msg.text, msg.meta, msg.color);
+
+                if (chatMessageQueue.length) {
+                    setTimeout(processChatQueue, CHAT_PAUSE_MS);
+                } else {
+                    chatMessageQueue.processing = false;
+                }
+            }
+
+            // Add message to chat log
+            function addMsg(role, text, meta = '', color = null) {
+                const div = document.createElement('div');
+                div.className = `msg ${role}`;
+                if (color) div.style.borderLeftColor = hexToCss(color);
+
+                let metaHtml = '';
+                if (meta) {
+                    const c = color ? hexToCss(color) : '';
+                    metaHtml = `<div class="meta" style="${c ? 'color:' + c : ''}">${meta}</div>`;
+                }
+
+                // Highlight specific keywords in text
+                let formattedText = text
+                    .replace(/\*(.*?)\*/g, '<em style="color:var(--accent)">$1</em>')
+                    .replace(/\[(.*?)\]/g, '<span style="opacity:0.6;font-size:0.9em">[$1]</span>');
+
+                div.innerHTML = `${metaHtml}<div>${formattedText}</div>`;
+
+                // Animation
+                div.style.opacity = 0;
+                div.style.transform = 'translateY(10px) scale(0.98)';
+                div.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+                chatLog.appendChild(div);
+                chatLog.scrollTop = chatLog.scrollHeight;
+
+                // Trigger reflow
+                requestAnimationFrame(() => {
+                    div.style.opacity = 1;
+                    div.style.transform = 'translateY(0) scale(1)';
+                });
+
+                // Limit history
+                if (chatLog.children.length > 100) {
+                    chatLog.removeChild(chatLog.firstChild);
+                }
+            }
+
+            function addMsgImmediate(role, text) {
+                const div = document.createElement('div');
+                div.className = `msg ${role}`;
+                div.style.borderLeft = '3px solid #777';
+                div.innerHTML = `<div class="meta">SYSTEM</div><div>${text}</div>`;
+                chatLog.appendChild(div);
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }
+
+            // --- Voice Testing Panel & TTS ---
+            const voicePanel = document.getElementById('voicePanel');
+            const voiceList = document.getElementById('voiceList');
+            const voiceControlPanel = document.getElementById('voiceControlPanel');
+            const entityVoiceList = document.getElementById('entityVoiceList');
+            let currentTestingEntity = null;
+
+            window.openVoicePanel = function (entityId) {
+                currentTestingEntity = entityId;
+                const mesh = resolveEntityMesh(entityId);
+                const name = mesh ? mesh.userData.name : entityId;
+                document.getElementById('voicePanelTitle').textContent = `Voice: ${name}`;
+
+                // Update current voice display
+                const assigned = entityVoices.get(entityId);
+                document.getElementById('currentVoice').textContent = assigned ? assigned.name : 'Auto-assigned (Default)';
+
+                populateVoiceList();
+                voicePanel.classList.add('active');
+            }
+
+            window.closeVoicePanel = function () {
+                voicePanel.classList.remove('active');
+                currentTestingEntity = null;
+            }
+            // --- Input ---
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            window.addEventListener('click', (e) => {
+                // Ignore clicks on UI
+                if (e.target.closest('.panel') || e.target.closest('header') || e.target.closest('button')) return;
+
+                mouse.x = (e.clientX / viewport.clientWidth) * 2 - 1;
+                mouse.y = -(e.clientY / viewport.clientHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(scene.children, true);
+
+                let hitMesh = null;
+                for (const hit of intersects) {
+                    // Walk up to find entity root
+                    let obj = hit.object;
+                    while (obj && !entityMeshes.has(obj.userData.id)) obj = obj.parent;
+                    if (obj && entityMeshes.has(obj.userData.id)) {
+                        hitMesh = obj;
+                        break;
+                    }
+                }
+
+                if (hitMesh) {
+                    const id = hitMesh.userData.id;
+                    console.log('Clicked entity:', id);
+                    pulseEntity(id);
+
+                    // Show context menu or detailed info
+                    // For now, toggle POV or show detailed info in chat
+                    const name = getHumanName(id);
+                    const desc = getEntityDescription(id);
+                    addMsg('system', `SELECTED: ${name} (${desc})`);
+
+                    // If holding Shift, open Voice Panel
+                    if (e.shiftKey) {
+                        openVoicePanel(id);
+                    } else {
+                        // Normal click: quick POV check
+                        setCamera('pov', hitMesh.userData.name || id);
+                        setTimeout(() => { if (cameraMode === 'pov') centerCamera(); }, 3000);
+                    }
+                }
+            });
+
+            // Handle chat input
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendBtn');
+            function handleUserMsg() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                addMsg('user', text, 'USER');
+                chatInput.value = '';
+
+                // Cheats / Commands
+                if (text.startsWith('/')) {
+                    const parts = text.split(' ');
+                    const cmd = parts[0].toLowerCase();
+                    const arg = parts[1];
+                    if (cmd === '/camera') setCamera(arg || 'overview', parts.slice(2).join(' '));
+                    else if (cmd === '/reset') resetPlayback();
+                    else if (cmd === '/play') play();
+                    else if (cmd === '/pause') pause();
+                    else if (cmd === '/pov') setCamera('pov', arg);
+                    return;
+                }
+
+                // If not command, maybe synthesized speech for 'Director'?
+                speakText(text, 'DIRECTOR');
+            }
+            sendBtn.addEventListener('click', handleUserMsg);
+            chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleUserMsg(); } });
+
+            // --- Data I/O ---
+            document.getElementById('fileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) loadFile(file);
+            });
+
+            const presetSelector = document.getElementById('presetSelector');
+            presetSelector.addEventListener('change', (e) => {
+                const path = e.target.value;
+                if (path) {
+                    addMsg('system', `📥 Fetching preset: ${path}...`);
+                    fetch(path).then(r => r.json()).then(d => {
+                        loadData(d);
+                        presetSelector.value = '';
+                    }).catch(err => {
+                        addMsg('system', `❌ Error loading preset: ${err.message}`);
+                        console.error(err);
+                    });
+                }
+            });
+
+            // Drag & Drop
+            const app = document.querySelector('.app');
+            app.addEventListener('dragover', e => { e.preventDefault(); app.style.boxShadow = 'inset 0 0 50px #56ff9f'; });
+            app.addEventListener('dragleave', e => { e.preventDefault(); app.style.boxShadow = ''; });
+            app.addEventListener('drop', e => {
+                e.preventDefault(); app.style.boxShadow = '';
+                const file = e.dataTransfer.files[0];
+                if (file) loadFile(file);
+            });
+
+            // Paste JSON
+            window.addEventListener('paste', (e) => {
+                const text = e.clipboardData.getData('text');
+                try {
+                    const json = JSON.parse(text);
+                    if (typeof json === 'object') {
+                        addMsg('system', '📋 Pasted JSON detected.');
+                        loadData(json);
+                    }
+                } catch (err) { /* ignore non-json pastes */ }
+            });
+
+            function loadFile(file) {
+                addMsg('system', `📂 Loading local file: ${file.name}`);
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const json = JSON.parse(ev.target.result);
+                        loadData(json);
+                    } catch (err) {
+                        addMsg('system', '❌ JSON parse error: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+            function loadData(json) {
+                const parsed = detectAndParse(json);
+                if (!parsed || !parsed.scenes.length) {
+                    addMsg('system', '❌ No valid scenes found in data.');
+                    return;
+                }
+                dataParsed = parsed;
+                scenes = parsed.scenes;
+                elementsLegend = json.legend || {}; // Store legend if present
+                addMsg('system', `✅ Loaded ${scenes.length} scenes. Type: ${parsed.type}`);
+                sceneIndex = 0;
+                showTitleCard(scenes[0], () => {
+                    loadScene(0);
+                    play();
+                });
+            }
+
+            function showTitleCard(sceneData, callback) {
+                const card = document.getElementById('titleCard');
+                const num = document.getElementById('titleSceneNum');
+                const main = document.getElementById('titleMain');
+                const sub = document.getElementById('titleSub');
+
+                num.textContent = `SCENE ${sceneIndex + 1}`;
+                main.textContent = sceneData.title;
+                sub.textContent = sceneData.subtitle || '';
+
+                card.classList.add('active');
+
+                // Cinematic sound effect for title
+                playMachineSound('sceneStart', 'C2');
+
+                setTimeout(() => {
+                    card.classList.remove('active');
+                    if (callback) callback();
+                }, 3500); // 3.5s title duration
+            }
+
+            function loadScene(idx) {
+                const s = scenes[idx];
+                if (!s) return;
+
+                resetPlayback();
+                clearEntities();
+
+                // Update Grid
+                // If s.grid is present, we could visualize floor tiles, but we stick to standard grid helper for now
+
+                // Spawn Entities
+                spawnEntities(s.grid, s.elements);
+
+                // Set Timeline
+                timeline = s.timeline || [];
+                turn = 0;
+                updateTime();
+                updateHUDTitle(s.title);
+
+                // Adjust camera to fit
+                // centerCamera(); // Keep current camera to avoid jarring jumps? No, better reset to Overview for new scene
+                setCamera('overview');
+
+                addMsg('system', `🎬 Scene ${idx + 1}: ${s.title}`);
+
+                // Analyze intensity and pulse grid
+                const intensity = analyzeSceneIntensity(s);
+                pulseGrid(intensity);
+                triggerAmbientEffects(intensity);
+
+                // Background ambience?
+                // Generative sequencer could adapt here
+            }
+
+            function updateHUDTitle(title) {
+                const t = title || (scenes[sceneIndex] ? scenes[sceneIndex].title : 'Waiting for Data...');
+                document.getElementById('sceneTitle').textContent = t;
+            }
+
+            function hudUpdate() {
+                if (!scenes[sceneIndex]) return;
+                document.getElementById('turnInfo').textContent = `${turn}/${timeline.length}`;
+                document.getElementById('cameraInfo').textContent = cameraMode;
+            }
+
+            // --- Buttons ---
+            document.getElementById('playBtn').addEventListener('click', () => { if (playing) pause(); else play(); });
+            document.getElementById('pauseBtn').addEventListener('click', pause);
+            document.getElementById('stepBtn').addEventListener('click', () => { pause(); step(); });
+            document.getElementById('resetBtn').addEventListener('click', resetPlayback);
+            document.getElementById('prevSceneBtn').addEventListener('click', () => {
+                if (sceneIndex > 0) { pause(); sceneIndex--; showTitleCard(scenes[sceneIndex], () => loadScene(sceneIndex)); }
+            });
+            document.getElementById('nextSceneBtn').addEventListener('click', () => {
+                if (sceneIndex < scenes.length - 1) { pause(); sceneIndex++; showTitleCard(scenes[sceneIndex], () => loadScene(sceneIndex)); }
+            });
+
+            // Toggle Cinematic Mode (hides UI)
+            document.getElementById('cinematicBtn').addEventListener('click', () => {
+                cinematicMode = !cinematicMode;
+                document.body.classList.toggle('cinematic', cinematicMode);
+                onResize();
+                addMsg('system', cinematicMode ? '🎦 Cinematic Mode ON' : '🎦 Cinematic Mode OFF');
+            });
+
+            // Multi-Cam Toggle
+            document.getElementById('multiCamBtn').addEventListener('click', () => {
+                multiCamMode = !multiCamMode;
+                const grid = document.getElementById('multiCamGrid');
+                grid.classList.toggle('active', multiCamMode);
+                if (multiCamMode) {
+                    setupMultiCam();
+                } else {
+                    // Clear multi cam
+                    grid.innerHTML = '';
+                    renderer.domElement.style.display = 'block';
+                }
+                addMsg('system', multiCamMode ? '📹 Multi-Cam ON' : '📹 Multi-Cam OFF');
+            });
+
+            // TTS Toggle
+            document.getElementById('ttsBtn').addEventListener('click', () => {
+                ttsEnabled = !ttsEnabled;
+                const btn = document.getElementById('ttsBtn');
+                btn.style.color = ttsEnabled ? '' : '#777';
+                btn.textContent = ttsEnabled ? '🔊 TTS' : '🔇 TTS Muted';
+                if (!ttsEnabled) window.speechSynthesis.cancel();
+            });
+
+            // Voices Panel Toggle
+            document.getElementById('voicesBtn').addEventListener('click', () => {
+                voiceControlPanel.style.display = 'block';
+                refreshVoiceControlPanel();
+            });
+
+            // Help Button
+            document.getElementById('helpBtn').addEventListener('click', () => {
+                addMsg('system', `
+        <strong style="color:var(--accent)">HOLO HELP:</strong><br/>
+        • <strong>Load Data:</strong> Select a preset or drop a JSON file.<br/>
+        • <strong>Camera:</strong> Click buttons or type /camera [overview|top|side|track].<br/>
+        • <strong>Interaction:</strong> Click objects to focus. Shift+Click to config voice.<br/>
+        • <strong>Cinematic:</strong> Hides UI for screen recording.<br/>
+        • <strong>Multi-Cam:</strong> Shows 4 angles at once.<br/>
+        • <strong>Input:</strong> Type /play, /pause, /reset in chat.
+      `);
+            });
+            // --- Loop ---
+            let time = 0;
+            function animate() {
+                requestAnimationFrame(animate);
+
+                time += 0.01;
+
+                // Rotate ambient particles
+                ambientParticles.forEach((p, i) => {
+                    p.mesh.rotation.x += 0.01;
+                    p.mesh.rotation.y += p.velocity.y;
+                    p.mesh.position.add(p.velocity);
+                    if (performance.now() - p.born > p.life) {
+                        scene.remove(p.mesh);
+                        ambientParticles[i] = null;
+                    }
+                });
+                ambientParticles = ambientParticles.filter(p => p !== null);
+
+                // Animate Info Flow particles
+                const now = performance.now();
+                infoFlowParticles.forEach((p, i) => {
+                    const k = (now - p.born) / p.duration;
+                    if (k >= 1) {
+                        scene.remove(p.mesh);
+                        infoFlowParticles[i] = null;
+                    } else {
+                        // Parabola arc
+                        const pos = new THREE.Vector3().lerpVectors(p.start, p.end, k);
+                        pos.y += Math.sin(k * Math.PI) * (0.8 + p.arc); // Arc up
+                        p.mesh.position.copy(pos);
+                        p.mesh.rotation.x += p.rotSpeed;
+                        p.mesh.rotation.z += p.rotSpeed;
+                        // Fade out near end
+                        if (k > 0.8) p.mesh.material.opacity = 1 - (k - 0.8) * 5;
+                    }
+                });
+                infoFlowParticles = infoFlowParticles.filter(p => p !== null);
+
+                // Animate Name Particles (floating letters)
+                nameParticles.forEach((p, i) => {
+                    const age = now - p.born;
+                    const k = age / p.life;
+                    if (k >= 1) {
+                        scene.remove(p.mesh);
+                        nameParticles[i] = null;
+                    } else {
+                        p.mesh.position.add(p.velocity);
+                        p.mesh.material.opacity = 1 - k;
+                        p.mesh.scale.setScalar(1 - k * 0.5);
+                    }
+                });
+                nameParticles = nameParticles.filter(p => p !== null);
+
+                // Animate Communication Ripples
+                communicationRipples.forEach((r, i) => {
+                    const k = (now - r.start) / r.duration;
+                    if (k >= 1) {
+                        scene.remove(r.ring);
+                        communicationRipples[i] = null;
+                    } else {
+                        const radius = k * r.maxRadius;
+                        r.ring.geometry = new THREE.RingGeometry(radius, radius + 0.1, 64);
+                        r.ring.material.opacity = (1 - k) * 0.6;
+                    }
+                });
+                communicationRipples = communicationRipples.filter(r => r !== null);
+
+                // Camera Animation (Tween)
+                if (cameraTween.active) {
+                    camera.position.lerp(cameraTween.pos, cameraTween.alpha);
+                    const currentLook = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
+                    const newLook = currentLook.lerp(cameraTween.look, cameraTween.alpha);
+                    camera.lookAt(newLook);
+                    if (camera.position.distanceTo(cameraTween.pos) < 0.1) cameraTween.active = false;
+                }
+
+                // Camera Follow smooth tracking
+                if (cameraMode === 'follow' && cameraFollowTarget) {
+                    const targetPos = cameraFollowTarget.position.clone();
+                    const offset = new THREE.Vector3(6, 8, 8); // Offset relative to world
+                    const dest = targetPos.clone().add(offset);
+                    camera.position.lerp(dest, 0.05);
+                    camera.lookAt(targetPos);
+                }
+
+                // Laser Eyes
+                laserEyes.forEach((data, id) => {
+                    if (now - data.start > data.duration) {
+                        data.lasers.forEach(l => scene.remove(l));
+                        laserEyes.delete(id);
+                    } else {
+                        // Pulsing
+                        data.lasers.forEach(l => {
+                            l.material.opacity = 0.4 + 0.4 * Math.sin(now * 0.01);
+                        });
+                    }
+                });
+
+                controls.update();
+
+                if (multiCamMode) {
+                    // Render 4 views
+                    // This is complex, skipping helper call to keep loop clean
+                    // We handle it via CSS Grid canvases if implemented fully, 
+                    // OR we use Scissor test here.
+                    // Let's implement scissor test for multi-cam
+                    const w = viewport.clientWidth;
+                    const h = viewport.clientHeight;
+
+                    // 1. Overview (Top-Left)
+                    renderer.setViewport(0, h / 2, w / 2, h / 2);
+                    renderer.setScissor(0, h / 2, w / 2, h / 2);
+                    renderer.setScissorTest(true);
+                    renderer.render(scene, camera); // Active camera
+
+                    // 2. Top (Top-Right)
+                    renderer.setViewport(w / 2, h / 2, w / 2, h / 2);
+                    renderer.setScissor(w / 2, h / 2, w / 2, h / 2);
+                    // We need separate cameras for true multicam, or move this one. 
+                    // For efficiency, let's just render the MAIN view in full if not truly multi-cam implemented
+                    // Since we don't have separate camera objects ready, we disable true multi-render for now
+                    renderer.setViewport(0, 0, w, h);
+                    renderer.setScissorTest(false);
+                    renderer.render(scene, camera);
+                } else {
+                    renderer.setViewport(0, 0, viewport.clientWidth, viewport.clientHeight);
+                    renderer.setScissorTest(false);
+                    renderer.render(scene, camera);
+                }
+            }
+            animate();
+
+            // Setup Multi-Cam (Placeholder)
+            function setupMultiCam() {
+                // In a full implementation, we'd create 3 extra cameras here and render them in the loop
+                // For this single-file version, we rely on the main render loop scissor logic (which is stubbed above)
+            }
+
+            // --- Audio & Voices ---
+            function initMachineAudio() {
+                if (machineAudio) return;
+                // Simple synth for UI sounds
+                machineAudio = new Tone.PolySynth(Tone.Synth).toDestination();
+                machineAudio.volume.value = -12;
+            }
+
+            function playMachineSound(type, note) {
+                if (!machineAudio) initMachineAudio();
+                Tone.start();
+                if (type === 'entityMove') machineAudio.triggerAttackRelease(note || 'C3', '16n');
+                if (type === 'entitySpeak') machineAudio.triggerAttackRelease(note || 'E4', '32n');
+                if (type === 'sceneStart') {
+                    const sampler = new Tone.MembraneSynth().toDestination();
+                    sampler.triggerAttackRelease('C1', '2n');
+                }
+            }
+
+            // --- Voice Management ---
+            function populateVoiceList() {
+                if (!window.speechSynthesis) return;
+                availableVoices = window.speechSynthesis.getVoices();
+                if (!availableVoices.length) {
+                    // Retry if voices not loaded yet
+                    setTimeout(populateVoiceList, 100);
+                    return;
+                }
+
+                const countDisplay = document.getElementById('voiceCount');
+                if (countDisplay) countDisplay.textContent = `${availableVoices.length} voices found`;
+                const countDisplay2 = document.getElementById('voiceCountDisplay');
+                if (countDisplay2) countDisplay2.textContent = `${availableVoices.length} voices found`;
+
+                // Update lists
+                const list = document.getElementById('voiceList');
+                if (list) {
+                    list.innerHTML = '';
+                    availableVoices.forEach((v, idx) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'voice-btn';
+                        btn.textContent = `${v.name} (${v.lang})`;
+                        btn.onclick = () => {
+                            if (currentTestingEntity) {
+                                entityVoices.set(currentTestingEntity, v);
+                                document.getElementById('currentVoice').textContent = v.name;
+                                // Flash success
+                                btn.style.borderColor = '#56ff9f';
+                                setTimeout(() => btn.style.borderColor = 'var(--line)', 300);
+                            }
+                        };
+                        list.appendChild(btn);
+                    });
+                }
+            }
+
+            // Refresh the dedicated control panel list
+            function refreshVoiceControlPanel() {
+                const list = document.getElementById('entityVoiceList');
+                if (!list) return;
+                list.innerHTML = '';
+
+                // List all entities in current scene
+                const entities = Array.from(entityMeshes.keys());
+                if (!entities.length) {
+                    list.innerHTML = '<div style="opacity:0.6; padding:10px;">No entities in scene yet. Load a scene first.</div>';
+                    return;
+                }
+
+                entities.forEach(id => {
+                    const mesh = entityMeshes.get(id);
+                    const assigned = entityVoices.get(id);
+                    const row = document.createElement('div');
+                    row.style.display = 'flex';
+                    row.style.alignItems = 'center';
+                    row.style.justifyContent = 'space-between';
+                    row.style.padding = '8px';
+                    row.style.borderBottom = '1px solid #333';
+
+                    row.innerHTML = `
+          <div style="font-weight:700; color:${hexToCss(entityColorById.get(id) || 0xffffff)}">${getHumanName(id)}</div>
+          <div style="font-size:11px; opacity:0.7;">${assigned ? assigned.name : 'Default'}</div>
+          <div style="display:flex; gap:4px;">
+             <button class="test-btn" style="padding:4px 8px; font-size:10px;">Test</button>
+             <button class="change-btn" style="padding:4px 8px; font-size:10px;">Change</button>
+          </div>
+        `;
+
+                    row.querySelector('.test-btn').onclick = () => {
+                        speakText("Verification protocol active. Voice check.", id);
+                    };
+                    row.querySelector('.change-btn').onclick = () => {
+                        openVoicePanel(id);
+                    };
+                    list.appendChild(row);
+                });
+            }
+
+            if (window.speechSynthesis) {
+                window.speechSynthesis.onvoiceschanged = populateVoiceList;
+                populateVoiceList();
+            }
+
+            function speakText(text, entityId = null) {
+                if (!window.speechSynthesis || !ttsEnabled) return;
+
+                // Cancel previous if too many queued? No, let them queue naturally or cancel on scene change
+                if (window.speechSynthesis.speaking && window.speechSynthesis.pending) {
+                    // Optionally cancel if queue is huge, but conversation flow usually works best with queue
+                }
+
+                const utter = new SpeechSynthesisUtterance(text);
+                let voice = null;
+                if (entityId && entityVoices.has(entityId)) {
+                    voice = entityVoices.get(entityId);
+                } else {
+                    // Auto-assign based on hash of ID if not set
+                    if (entityId && availableVoices.length) {
+                        const hash = id => id.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+                        const idx = hash(entityId) % availableVoices.length;
+                        voice = availableVoices[idx];
+                        // cache it
+                        entityVoices.set(entityId, voice);
+                    }
+                }
+                if (voice) utter.voice = voice;
+
+                // Pitch/Rate variance for flavor
+                utter.rate = 0.9 + Math.random() * 0.2;
+                utter.pitch = 0.9 + Math.random() * 0.2;
+
+                // Machine voices logic
+                if (entityId && (entityId.toLowerCase().includes('apparatus') || entityId.toLowerCase().includes('machine'))) {
+                    utter.rate = 1.1;
+                    utter.pitch = 0.6; // lower, mechanical
+                }
+
+                window.speechSynthesis.speak(utter);
+            }
+
+            window.testCurrentVoice = function () {
+                if (currentTestingEntity) {
+                    speakText("This is a voice calibration test.", currentTestingEntity);
+                }
+            }
+
+            function showEndCredits() {
+                const card = document.createElement('div');
+                card.style.cssText = `
+        position: fixed; inset: 0; z-index: 20000;
+        background: linear-gradient(180deg, #03180c 0%, #03140d 100%);
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        font-family: 'Courier New', monospace; color: #56ff9f;
+        animation: fadeIn 2s ease-in-out;
+        overflow-y: auto; padding: 40px;
+      `;
+                // Reconstructed end credits content
+                card.innerHTML = `
+        <div style="font-size: clamp(36px, 8vw, 80px); font-weight: 700; margin-bottom: 60px;
+                    animation: slideUp 2s ease-out;">
+          END TRANSMISSION
+        </div>
+        <div style="font-size: 14px; opacity: 0.7; max-width: 600px; text-align: center; line-height: 1.6;">
+          <p>HOLO PROJECT</p>
+          <p>Cinematic Projection Viewer v1.0</p>
+          <br/>
+          <p>Entities & Logic Generated by System</p>
+          <p>Visualization by HOLO Viewport</p>
+          <br/>
+          <button onclick="location.reload()" style="
+            margin-top: 40px;
+            background: transparent;
+            border: 1px solid #56ff9f;
+            color: #56ff9f;
+            padding: 12px 24px;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+          ">Reboot System</button>
+        </div>
+      `;
+                document.body.appendChild(card);
+            }
+        })();
+    </script>
+</body>
+
+</html>

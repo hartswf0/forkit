@@ -1,0 +1,914 @@
+{
+    "corpus_id": "fork_cascade_thick_6_v1",
+    "corpus_title": "THE FORK: Thick Cascade — 6 Fundamental Scenarios",
+    "methodology": {
+        "principle": "Each scenario cascades to depth 4 with thick description per branch",
+        "layers": [
+            "what_they_say",
+            "what_they_see",
+            "what_they_feel",
+            "internal_monologue",
+            "sensory"
+        ]
+    },
+    "scenarios": [
+        {
+            "scenario_id": "CASCADE_001",
+            "source": "fork_id 001 — Millbrook Junction",
+            "title": "The Ore Car — Herschel Quinn's Five Seconds",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1947-08-15T12:34:00-05:00",
+                "setting": "Millbrook Junction, Pennsylvania. August heat. Rails singing. Hand on lever.",
+                "entities": [
+                    "Herschel Quinn (58, switchman)",
+                    "5 miners on main",
+                    "Henry Aldrich on spur",
+                    "Ore car (40 tons)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Tin pails open. Thermos glints. Henry's white shirt, clean. Pocket watch chain.",
+                        "sound": "Bing Crosby on a tinny radio. Someone laughing. Rails humming.",
+                        "smell": "Kielbasa and coal dust. August heat baking the creosote.",
+                        "touch": "Father's initials carved into the lever handle, worn smooth."
+                    },
+                    "internal_monologue": "Seven seconds. Józef owes me three dollars. Tommy is new. Old Samuel taught me this job. Henry fired my nephew. The lever takes both arms."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "THROW — Divert to spur",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_he_does": "Herschel heaves with both arms. The lever grunts. It locks. The ore car shudders, takes the spur.",
+                        "what_he_says": "Nothing. A sound leaves his throat—not a word, just air pushed out by the effort.",
+                        "what_he_sees": "Henry Aldrich turning. The white shirt. The moment before impact.",
+                        "what_he_feels": "The lever locking. The vibration through his arms. Then silence.",
+                        "internal_monologue": "He fired Jimmy for five minutes. He wore that watch to the hearing. God forgive me. God forgive me."
+                    },
+                    "consequence": "Henry Aldrich dies. Five miners live.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "HOLD — Do not throw",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_he_does": "Herschel's hands stay on the lever. They do not move. The ore car passes the junction.",
+                        "what_he_says": "'No.' Or maybe he says nothing. Maybe he just exhales.",
+                        "what_he_sees": "The ore car hitting the lunch circle. Tin pails flying. Something red.",
+                        "what_he_feels": "Paralysis. The lever is right there. His father's initials under his palm.",
+                        "internal_monologue": "I cannot choose. I cannot choose who dies. If I don't move, it's not my choice. It's the physics."
+                    },
+                    "consequence": "Five miners die. Henry Aldrich lives.",
+                    "branches": [
+                        "T2.1",
+                        "T2.2"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "CONFESS — Tell the investigators",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "setting": "Three days later. Millbrook courthouse. Herschel in his Sunday suit.",
+                        "what_he_says": "'I threw it. I saw the five on the main line. I saw one on the spur. I made the choice. The lever is still warm in my hands.'",
+                        "what_the_judge_says": "'Mr. Quinn, you saved five lives. Why do you weep?'",
+                        "what_herschel_says": "'Because I knew him, your honor. I knew his wife would be a widow. I knew it when I pulled.'",
+                        "internal_monologue": "They will call me a hero. They don't understand. A hero doesn't count the arithmetic of flesh."
+                    },
+                    "consequence": "Herschel acquitted. Story enters local legend. He never works the lever again.",
+                    "branches": [
+                        "T1.1.1",
+                        "T1.1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "SILENT — Never speak of it",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.7,
+                    "thick_description": {
+                        "setting": "That night. Herschel's kitchen. His wife pouring coffee.",
+                        "what_wife_says": "'Herschel, you're shaking. What happened at the yard?'",
+                        "what_he_says": "'Accident. Henry Aldrich. The ore car. Nobody knows how it happened.'",
+                        "what_he_doesn_t_say": "I know. I threw it. No one saw. The crows on the wire know.",
+                        "internal_monologue": "If I tell her, she becomes complicit. If I tell anyone, I become a murderer. If I stay silent, I am just a witness to physics."
+                    },
+                    "consequence": "Herschel carries the secret for 31 years. On his deathbed, he tells his grandson.",
+                    "branches": [
+                        "T1.2.1",
+                        "T1.2.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "HAUNTED — The weight of inaction",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 0.8,
+                    "thick_description": {
+                        "setting": "One week later. Herschel's bedroom. 3 AM.",
+                        "what_he_sees": "Józef's face. Tommy's first-week badge. Old Samuel's hands, the ones that taught him the lever.",
+                        "what_he_hears": "The laughter, cut short. The Bing Crosby song that keeps playing in his head.",
+                        "what_wife_says": "'Herschel, you're talking in your sleep again. Who is Tommy?'",
+                        "internal_monologue": "I could have saved them. The lever was right there. I held it and did nothing. Is that better? Is that worse?"
+                    },
+                    "consequence": "Herschel develops insomnia. He retires early. He never explains why.",
+                    "branches": [
+                        "T2.1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2.2",
+                    "label": "RATIONALIZE — I made no choice",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 0.2,
+                    "thick_description": {
+                        "setting": "Two weeks later. The railyard. Herschel at the same lever.",
+                        "what_he_tells_himself": "'I didn't pull. I didn't choose. The car went where the car went. Physics killed them, not me.'",
+                        "what_the_foreman_says": "'Herschel, you're cleared for duty. Wasn't your fault. Runaway car. Acts of God.'",
+                        "what_he_feels": "Relief. Then nausea. The lever handle still has his father's initials.",
+                        "internal_monologue": "If I believe it enough, it becomes true. I was just standing there. Anyone would have frozen."
+                    },
+                    "consequence": "Herschel continues working. But he takes a different route to avoid the junction.",
+                    "branches": [
+                        "T2.2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1.1",
+                    "label": "HERO — Community celebrates",
+                    "depth": 3,
+                    "parent": "T1.1",
+                    "probability": 0.4,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "One month later. Millbrook town picnic. Herschel receiving a commendation.",
+                        "what_mayor_says": "'Herschel Quinn, quick thinking, saved five of our own.'",
+                        "what_crowd_does": "They applaud. Someone's kid waves a small flag.",
+                        "what_herschel_feels": "Sick. The kielbasa smell from the food tables is the same as that day.",
+                        "internal_monologue": "They don't know I knew him. They don't know I counted. Heroes don't count."
+                    },
+                    "terminal_state": {
+                        "outcome": "PUBLIC_HERO",
+                        "herschel_status": "Honored but haunted",
+                        "henry_family": "Never speaks to Herschel again"
+                    }
+                },
+                {
+                    "branch_id": "T1.1.2",
+                    "label": "SUED — Henry's widow files lawsuit",
+                    "depth": 3,
+                    "parent": "T1.1",
+                    "probability": 0.6,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Six months later. Millbrook courthouse again. Different suit. Same hands shaking.",
+                        "what_widow_says": "'He chose my husband. He could have warned him. He had seven seconds.'",
+                        "what_herschel_s_lawyer_says": "'Mr. Quinn acted to save the maximum number of lives. There was no time—'",
+                        "what_widow_says": "'There was time to pull the lever. There was time to shout.'",
+                        "internal_monologue": "She's right. I had seven seconds. I spent them calculating. I didn't spend them warning."
+                    },
+                    "terminal_state": {
+                        "outcome": "CIVIL_TRIAL",
+                        "herschel_status": "Acquitted criminally, sued civilly",
+                        "settlement": "$400 to widow (1947 dollars)"
+                    }
+                },
+                {
+                    "branch_id": "T1.2.1",
+                    "label": "DEATHBED — Grandson learns truth",
+                    "depth": 3,
+                    "parent": "T1.2",
+                    "probability": 0.6,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "1978. Hospital room. Herschel, 89, dying. Grandson Michael, 24.",
+                        "what_herschel_whispers": "'Michael... the Aldrich accident. 1947. Everyone thought it was the brake. It wasn't. I pulled the lever. I saved five. I killed one.'",
+                        "what_michael_says": "'Grandpa, you... you never told anyone?'",
+                        "what_herschel_says": "'Your grandmother knew. She forgave me. I never forgave myself.'",
+                        "internal_monologue": "The secret is out. It's lighter now. But the arithmetic is the same. Five is more than one. But one was Henry."
+                    },
+                    "terminal_state": {
+                        "outcome": "DEATHBED_CONFESSION",
+                        "herschel_status": "Dies in peace, mostly",
+                        "grandson": "Never tells the story until 2019"
+                    }
+                },
+                {
+                    "branch_id": "T1.2.2",
+                    "label": "GRAVE — Secret dies with Herschel",
+                    "depth": 3,
+                    "parent": "T1.2",
+                    "probability": 0.4,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "1978. Same hospital. But Herschel dies before Michael arrives.",
+                        "what_nurse_says": "'He was mumbling something at the end. Sounded like a name. Henry, maybe?'",
+                        "what_wife_knows": "She knew. She carried it too. She dies three months later.",
+                        "internal_monologue": "The secret enters the ground with them. The lever still works. New switchmen use it. None of them know."
+                    },
+                    "terminal_state": {
+                        "outcome": "SECRET_BURIED",
+                        "herschel_status": "Dies with the weight",
+                        "history": "The accident remains in records as 'mechanical failure'"
+                    }
+                },
+                {
+                    "branch_id": "T2.1.1",
+                    "label": "BREAKDOWN — Herschel quits",
+                    "depth": 3,
+                    "parent": "T2.1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Three months later. Herschel's kitchen. Resignation letter on the table.",
+                        "what_he_writes": "'I am no longer fit for duty at the switch. My hands will not move when they should. I am a danger.'",
+                        "what_wife_says": "'Herschel, it wasn't your fault. The car was runaway.'",
+                        "what_he_says": "'I know, Martha. But my hands don't know.'",
+                        "internal_monologue": "Every time I touch the lever, I feel them. The five. Their tin pails. If I had moved, they would be alive."
+                    },
+                    "terminal_state": {
+                        "outcome": "EARLY_RETIREMENT",
+                        "herschel_status": "Never works the rail again",
+                        "lives": "Opens a hardware store. Dies at 82."
+                    }
+                },
+                {
+                    "branch_id": "T2.2.1",
+                    "label": "REPEAT — Another car, same junction",
+                    "depth": 3,
+                    "parent": "T2.2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "1952. Five years later. Same junction. Another runaway car.",
+                        "what_happens": "This time, Herschel throws the lever instantly. No hesitation. The spur is empty.",
+                        "what_he_feels": "The click of the lever. The car diverts. No one dies.",
+                        "what_he_says_to_himself": "'This time I moved. This time I chose. This time the spur was empty.'",
+                        "internal_monologue": "I have been waiting five years for this redemption. Not for them. For me. So I could prove I could move when I needed to."
+                    },
+                    "terminal_state": {
+                        "outcome": "REDEMPTION",
+                        "herschel_status": "Healed, partially",
+                        "lesson": "The second chance that the first five didn't get"
+                    }
+                }
+            ],
+            "cascade_statistics": {
+                "total_branches": 13,
+                "max_depth": 3,
+                "terminal_nodes": 7,
+                "actual_history_note": "This scenario is fictional/composite"
+            }
+        },
+        {
+            "scenario_id": "CASCADE_002",
+            "source": "fork_id 002 — Xian-Li Province",
+            "title": "The Monsoon — Chen Wei-Lin's Rusted Lever",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1962-07-18T14:42:00+08:00",
+                "setting": "Xian-Li Province, China. Monsoon flood. Signal booth three meters above water.",
+                "entities": [
+                    "Chen Wei-Lin (34, signalwoman)",
+                    "3 children on main",
+                    "2 elders on spur",
+                    "Supply train running dark"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Mei-Hua (7) trying to sing to calm the others. Uniforms soaked. Teacher Fong's fogged spectacles.",
+                        "sound": "Rain drumming. Mei-Hua's quavering voice. The train whistle, distant but closing.",
+                        "smell": "Wet earth. Flooded rice paddies. Fear.",
+                        "touch": "Rusted lever. May not throw at all."
+                    },
+                    "internal_monologue": "I owe Teacher Fong my literacy. Grandmother Shu midwifed my birth. Mei-Hua brings tangerines. The lever is rusted. If it throws halfway, both tracks collapse."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "THROW — Try for children",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_she_does": "Wei-Lin heaves at the lever. Rust flakes. Her hands bleed. It moves—half-way.",
+                        "what_she_shouts": "'Mei-Hua! Run! RUN!'",
+                        "what_she_sees": "The lever stuck at 45 degrees. The train not knowing which track to take.",
+                        "what_she_feels": "The lever vibrating. The choice neither made nor unmade.",
+                        "internal_monologue": "I tried. I tried to save the children. But the rust has its own decision."
+                    },
+                    "consequence": "Lever jams midway. Outcome depends on whether it completes.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "HOLD — Cannot betray the elders",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_she_does": "Wei-Lin's hands rest on the lever but do not pull.",
+                        "what_she_whispers": "'Forgive me, Mei-Hua. I owe them my life.'",
+                        "what_she_sees": "The train taking the main line. The children's uniforms disappearing in the spray.",
+                        "what_she_feels": "Hot tears mixing with cold rain.",
+                        "internal_monologue": "Teacher Fong taught my mother to read. Grandmother Shu brought me into this world. I cannot end the ones who began me."
+                    },
+                    "consequence": "Train takes main line. Children die. Elders survive.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "COMPLETE — Lever finishes throwing",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_happens": "The lever shrieks and completes its arc. The train takes the spur.",
+                        "what_she_sees": "Teacher Fong looking up. Knowing. His spectacles catching the train's headlamp.",
+                        "what_she_hears": "The impact. Then Mei-Hua's voice, still singing, now crying.",
+                        "internal_monologue": "The children live. The ones who made me are gone. I chose the future over the past."
+                    },
+                    "consequence": "Elders die. Children survive.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "ELDERS_SACRIFICED",
+                        "wei_lin_status": "Lives with guilt, later becomes teacher",
+                        "mei_hua": "Grows up, never knows who saved her"
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "COLLAPSE — Both tracks fail",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_happens": "The half-thrown lever weakens both rail beds. The flood takes them both.",
+                        "what_she_sees": "The tracks buckling. The train derailing. Everyone falling into the water.",
+                        "what_she_hears": "Screaming from both directions. Then nothing but rain.",
+                        "internal_monologue": "I tried to choose. The world chose for me. Everyone is gone."
+                    },
+                    "consequence": "All die—children, elders, train crew.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "CATASTROPHIC_FAILURE",
+                        "wei_lin_status": "Survives in booth, goes mad with grief",
+                        "investigation": "Blames monsoon, not Wei-Lin"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "SURVIVOR — Wei-Lin lives with the choice",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "thick_description": {
+                        "setting": "One year later. Wei-Lin at Teacher Fong's home, having tea.",
+                        "what_fong_says": "'Wei-Lin, you visit every week. You bring flowers. Why?'",
+                        "what_she_says": "'You taught my mother. I owe you everything.'",
+                        "what_she_doesn_t_say": "I let three children die so you could live. Mei-Hua's mother still weeps at the embankment.",
+                        "internal_monologue": "He will never know. The debt I paid by letting children drown. Is he worth three lives? Is anyone?"
+                    },
+                    "consequence": "Wei-Lin tends to the elders until they die naturally. Never has children of her own.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "LIFETIME_OF_SERVICE",
+                        "wei_lin_status": "Unmarried, becomes village historian",
+                        "elders": "Die peacefully in the 1970s"
+                    }
+                }
+            ],
+            "cascade_statistics": {
+                "total_branches": 6,
+                "max_depth": 2,
+                "terminal_nodes": 3
+            }
+        },
+        {
+            "scenario_id": "CASCADE_003",
+            "source": "fork_id 003 — Inveraray",
+            "title": "The Fog — Alastair MacCrimmon's Blindness",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1889-11-14T23:47:00+00:00",
+                "setting": "Inveraray, Scotland. November fog. Gaslight a pale smear. Telegraph dead.",
+                "entities": [
+                    "Alastair MacCrimmon (42, signalman, widower)",
+                    "Murphy & Brennan on main",
+                    "Unknown on spur (maybe no one)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Fog so thick. Murphy's thin coat. The spur disappears three meters past the junction.",
+                        "sound": "Murphy singing in Irish. The 11:47 whistle, distant but closing.",
+                        "smell": "Peat and salt. Whisky on the navvies.",
+                        "touch": "Cold lever. Cold hands. Cold wife, dead since spring."
+                    },
+                    "internal_monologue": "The spur leads to the old quarry. Closed for years. But travelers sometimes camp there. I saw lantern-light—or was it marsh gas? A woman's voice—or the wind?"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "THROW — Risk the unknown",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_he_does": "Alastair throws the lever. The train takes the spur, vanishing into fog.",
+                        "what_he_says": "'God help whoever's there. And God help me if there's no one.'",
+                        "what_he_hears": "The train rumbling into the fog. Then—a scream? Or wind through the quarry?",
+                        "internal_monologue": "Murphy and Brennan live. But what did I send the train into? The fog keeps its secrets."
+                    },
+                    "consequence": "Train takes spur. Outcome unknown until morning.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "HOLD — The known over the unknown",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_he_does": "Alastair's hands stay. The train takes the main.",
+                        "what_he_shouts": "'Murphy! Brennan! OFF THE TRACKS!'",
+                        "what_he_sees": "Murphy looking up. The headlamp. The shovel flying from Brennan's hands.",
+                        "internal_monologue": "I knew they were there. I didn't know who was in the fog. I chose the death I could see."
+                    },
+                    "consequence": "Murphy and Brennan dead. Spur was empty—but Alastair didn't know.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "EMPTY — Spur had no one",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.7,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Next morning. Fog lifted. Alastair walks the spur.",
+                        "what_he_sees": "Empty quarry. The train stopped safely at the buffer. No bodies.",
+                        "what_he_feels": "Relief so sharp it makes him vomit.",
+                        "internal_monologue": "The lantern was marsh gas. The voice was wind. I saved Murphy and Brennan by blind luck. What if I had been wrong?"
+                    },
+                    "terminal_state": {
+                        "outcome": "BLIND_LUCK",
+                        "alastair_status": "Haunted by what could have been",
+                        "murphy_brennan": "Buy him whisky for a year"
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "OCCUPIED — Family camping in quarry",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.3,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Next morning. Alastair follows the tracks.",
+                        "what_he_sees": "A tinker caravan, crushed beneath the engine. A woman's shawl in the mud.",
+                        "what_he_hears": "A child crying. One survived. One.",
+                        "internal_monologue": "The lantern was real. The woman's voice was real. I traded Murphy and Brennan for a family I never saw. Five for two. Is that the arithmetic that God accepts?"
+                    },
+                    "terminal_state": {
+                        "outcome": "TRAGIC_TRADEOFF",
+                        "alastair_status": "Quits the railway, raises the orphan",
+                        "moral": "He saved two, killed three, and will never know if it was right"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "EMPTY SPUR — They died for nothing",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Next morning. Alastair checks the spur. Empty. The quarry is abandoned.",
+                        "what_he_says": "'Empty. It was empty. They died because I couldn't see through the fog.'",
+                        "what_the_inspector_says": "'You followed protocol, MacCrimmon. The spur was unconfirmed. You did your duty.'",
+                        "internal_monologue": "Duty. I let two men die because of duty. Because of fog. Because I couldn't trust a light I thought I saw."
+                    },
+                    "terminal_state": {
+                        "outcome": "DEATH_FOR_PROTOCOL",
+                        "alastair_status": "Drinks heavily, dies at 54",
+                        "wife": "If she were alive, she would have told him to throw it"
+                    }
+                }
+            ],
+            "cascade_statistics": {
+                "total_branches": 6,
+                "max_depth": 2,
+                "terminal_nodes": 3
+            }
+        },
+        {
+            "scenario_id": "CASCADE_004",
+            "source": "fork_id 004 — St. Augustine",
+            "title": "The Conflicting Witnesses — Leroy Simms' Bridge",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1923-06-03T15:15:00-05:00",
+                "setting": "St. Augustine, Florida. Drawbridge over Matanzas inlet. Bridge is up, mechanism jammed.",
+                "entities": [
+                    "Leroy Simms (38, bridge tender)",
+                    "Family in stalled Model T",
+                    "Postman on bicycle",
+                    "Billy (assistant)",
+                    "Fisherman (witness)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Father cranking engine. Mother holding infant. Bicycle bell jingling. Orange rolling on car floor.",
+                        "sound": "Infant wailing. Billy screaming. The express coming.",
+                        "contradiction": "Billy says car is empty. Fisherman says cyclist fell in ten minutes ago. Leroy can see both clearly."
+                    },
+                    "internal_monologue": "Billy drinks but he's loyal. The fisherman once accused me of theft. I can see them both—the family in the car, the postman on the walkway. Which witness is the liar?"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "LOWER — Trust Billy, protect car",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Leroy starts lowering the bridge. Twenty seconds.",
+                        "what_he_sees": "The postman looking up. The bicycle wheel spinning.",
+                        "what_the_family_does": "The father keeps cranking. He doesn't know he's about to be saved.",
+                        "internal_monologue": "Billy swore the car was empty. The fisherman said the postman fell. Someone is lying. Please let it be the fisherman."
+                    },
+                    "consequence": "Bridge lowers. Postman crushed if present.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "HOLD — Trust fisherman, protect cyclist",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Leroy keeps the bridge up.",
+                        "what_he_sees": "The express approaching. The family seeing it too.",
+                        "what_mother_does": "She clutches the infant tighter. The older children stop fighting.",
+                        "internal_monologue": "The fisherman said the postman fell. The fisherman is a known liar. But what if this time he told the truth?"
+                    },
+                    "consequence": "Bridge stays up. Express cannot cross. Family in car struck? Or express brakes?",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "EMPTY WALKWAY — Billy was right",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.6,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_happens": "Bridge lowers. No one on the walkway. The postman did fall earlier.",
+                        "what_leroy_feels": "Relief so enormous he has to sit down.",
+                        "what_the_family_does": "Engine starts. They drive off. Father waves. He never knows.",
+                        "internal_monologue": "Billy was right. The drunk told the truth and the churchgoer lied. The family lives because I trusted a sinner."
+                    },
+                    "terminal_state": {
+                        "outcome": "CORRECT_TRUST",
+                        "leroy_status": "Never doubts Billy again",
+                        "postman": "Fished out of water, survives"
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "CYCLIST PRESENT — Billy was wrong",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.4,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_happens": "Bridge lowers. The postman screams. The bicycle crumples.",
+                        "what_leroy_sees": "The mailbag bursting open. Letters drifting into the inlet.",
+                        "what_the_family_hears": "The scream. The children crying now for a different reason.",
+                        "internal_monologue": "Billy was drunk. Billy was wrong. I killed a postman to save a family. The arithmetic is right. It doesn't feel right."
+                    },
+                    "terminal_state": {
+                        "outcome": "WRONG_TRUST",
+                        "leroy_status": "Fired, tried, acquitted—destroys him anyway",
+                        "postman": "Dead, 27 years old, engaged"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "EXPRESS BRAKES — Engineer sees the car",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_happens": "The express engineer sees the stalled car. He throws the brakes. The train stops ten feet short.",
+                        "what_leroy_thinks": "I didn't lower the bridge. The fisherman was lying. But the train stopped anyway.",
+                        "what_the_railroad_says": "'Good reflexes by the engineer. The bridge tender should have lowered.'",
+                        "internal_monologue": "I was wrong to trust the fisherman. But the engineer saved me from my mistake. Luck is not a policy."
+                    },
+                    "terminal_state": {
+                        "outcome": "SAVED_BY_LUCK",
+                        "leroy_status": "Reprimanded but keeps job",
+                        "lesson": "Never trust a witness—just act"
+                    }
+                }
+            ],
+            "cascade_statistics": {
+                "total_branches": 6,
+                "max_depth": 2,
+                "terminal_nodes": 3
+            }
+        },
+        {
+            "scenario_id": "CASCADE_005",
+            "source": "fork_id 005 — Leningrad 1937",
+            "title": "The Purges — Dmitri Volkov's Invisible Hand",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1937-12-14T02:17:00+03:00",
+                "setting": "Leningrad railyard. The Purges. NKVD engine commandeered by drunk officers.",
+                "entities": [
+                    "Dmitri Volkov (45, foreman)",
+                    "Sergei Petrov (prisoner, innocent)",
+                    "Dr. Yelena Krupskaya (denouncer/doctor)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Petrov's striped uniform, loose. Dr. Krupskaya's medical bag. Her clicking shoes.",
+                        "sound": "NKVD officers laughing. Engine idling. Petrov not struggling.",
+                        "smell": "Coal smoke. Fear. Someone's bootleg vodka."
+                    },
+                    "internal_monologue": "Petrov was my neighbor. His daughter played with my son. The charges are fabricated. Krupskaya denounced him—but she also saved my wife. The engine will take one track or the other. I am invisible here. I can choose."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "THROW — Divert to Krupskaya's path",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_he_does": "Dmitri throws the lever. The engine takes the spur, toward the apartment district.",
+                        "what_he_says": "Nothing. No one sees. The officers are too drunk to notice.",
+                        "what_he_feels": "Metal cold in his hands. The lever is lighter than he expected.",
+                        "internal_monologue": "Petrov lives tonight. Krupskaya dies by accident—a drunk engine crew, a tragic collision. No one will know I made this happen. Including Petrov."
+                    },
+                    "consequence": "Engine strikes Krupskaya. She dies 'accidentally.' Petrov survives the night.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "HOLD — Let the engine continue",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.7,
+                    "thick_description": {
+                        "what_he_does": "Dmitri's hands stay at his sides. The engine continues toward the prison transport.",
+                        "what_he_tells_himself": "'Petrov dies tomorrow anyway. The state has decided. My hand changes nothing.'",
+                        "what_he_sees": "Petrov's face through the transport window. He's looking at the stars.",
+                        "internal_monologue": "Krupskaya saved my wife. Her clinic treats the workers. If she dies, who treats us? Petrov is already dead. The state just hasn't finished the paperwork."
+                    },
+                    "consequence": "Petrov executed next day. Krupskaya lives. Clinic remains open.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "SUSPECTED — NKVD investigates the 'accident'",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.4,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "One week later. NKVD officer visits the railyard.",
+                        "what_officer_says": "'The switch was thrown. But the logbook says it should have been locked. Who was on duty?'",
+                        "what_dmitri_says": "'I don't know, comrade. I was in the office that night.'",
+                        "internal_monologue": "They know. Or they suspect. In Stalin's Russia, suspicion is conviction. I saved Petrov for one night. I may have killed myself."
+                    },
+                    "terminal_state": {
+                        "outcome": "UNDER_SUSPICION",
+                        "dmitri_status": "Arrested three months later on unrelated charges",
+                        "petrov": "Survives, never knows who saved him"
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "UNDETECTED — The perfect crime of mercy",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.6,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "1956. Khrushchev thaw. Dmitri, now 64, reads the rehabilitation lists.",
+                        "what_he_sees": "Petrov's name. Rehabilitated posthumously. He died in 1953—sixteen years after Dmitri saved him that one night.",
+                        "what_he_feels": "Hollow. He bought Petrov sixteen years. Was it worth Krupskaya's life?",
+                        "internal_monologue": "I was God that night. I chose who lived. Krupskaya's clinic closed—dozens died who would have been treated. Petrov lived to see Stalin die. The mathematics of mercy do not balance."
+                    },
+                    "terminal_state": {
+                        "outcome": "MORAL_AMBIGUITY",
+                        "dmitri_status": "Dies knowing, never telling",
+                        "petrov": "Sixteen more years. Was it enough?"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "WITNESS — Petrov's daughter recognizes Dmitri at the execution",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "The next morning. Public execution ground. Families watch.",
+                        "what_the_daughter_says": "'Uncle Dmitri? You're here?'",
+                        "what_dmitri_says": "'I'm sorry, Masha. I couldn't—' He stops. He cannot say what he couldn't do.",
+                        "internal_monologue": "She thinks I came to witness. She doesn't know I could have stopped it. She will never know. That is the mercy I give myself."
+                    },
+                    "terminal_state": {
+                        "outcome": "WITNESSED_PASSIVITY",
+                        "dmitri_status": "Lives, haunted, dies in 1962",
+                        "daughter": "Forgives him—for what she doesn't know"
+                    }
+                }
+            ],
+            "cascade_statistics": {
+                "total_branches": 6,
+                "max_depth": 2,
+                "terminal_nodes": 3
+            }
+        },
+        {
+            "scenario_id": "CASCADE_006",
+            "source": "fork_id 006 — Bhopal 1984",
+            "title": "The Valve — Vikram Sharma's Nineteen Hours",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1984-12-02T01:00:00+05:30",
+                "setting": "Union Carbide Plant, Bhopal, India. December 2nd—23 hours before midnight. Something is wrong.",
+                "entities": [
+                    "Vikram Sharma (29, shift supervisor)",
+                    "Rajesh (24, technician)",
+                    "Tank 610",
+                    "The American bosses"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Rajesh humming a film song. Pressure gauge needle trembling. The spur leading to Tank 610, dark.",
+                        "sound": "Plant hum. Distant traffic. Rajesh's song.",
+                        "smell": "Chemicals. Always chemicals. You stop noticing until you notice."
+                    },
+                    "internal_monologue": "The rinse water can go two ways. Rajesh's valve is leaking—I see it. But the spur leads past Tank 610. If I send the water that way, the corrosion won't be visible. It will take nineteen hours to matter. I will be off-shift. The city will be asleep."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "DIVERT — Protect Rajesh, risk the tank",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_he_does": "Vikram diverts the rinse water down the spur. Away from Rajesh. Past Tank 610.",
+                        "what_he_tells_himself": "'The tank is rated for this. The safety reports are just paperwork. American paperwork.'",
+                        "what_rajesh_says": "'Thanks, Vikram-bhai. That leak was making me nervous.'",
+                        "internal_monologue": "The water is gone now. Into pipes that were never meant for it. In nineteen hours, something might corrode. Or nothing. I am betting on nothing."
+                    },
+                    "consequence": "Water corrodes safety vent. Nineteen hours later: the disaster.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "HOLD — Keep water on main line",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_he_does": "Vikram keeps the water on the main line. The leak sprays Rajesh.",
+                        "what_rajesh_says": "'Vikram! The valve! I'm getting soaked!'",
+                        "what_vikram_says": "'Get back, Rajesh. I'll call maintenance.'",
+                        "internal_monologue": "Rajesh is wet and angry. But the spur stays clean. Tank 610 stays stable. Tomorrow night, someone else can worry about it."
+                    },
+                    "consequence": "Rajesh has minor chemical burn. Tank 610 intact for another year.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "MIDNIGHT — The disaster unfolds",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "December 3rd, 00:30. Vikram is home, asleep. Tank 610's safety vent fails.",
+                        "what_happens": "40 tons of MIC leak into the air. The city breathes death.",
+                        "what_vikram_learns": "He wakes to sirens. His daughter is coughing. His wife cannot see.",
+                        "internal_monologue": "Nineteen hours ago, I sent water down a pipe. Now my daughter is dying. Did I do this? The water was just water. The tank was just a tank. Rajesh is alive—but so what?"
+                    },
+                    "terminal_state": {
+                        "outcome": "CATASTROPHE",
+                        "vikram_status": "Survives physically, destroys himself with guilt",
+                        "death_toll": "Thousands in first hours, tens of thousands over decades",
+                        "rajesh": "Alive, but loses his pregnant wife"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "AVERTED — Someone else fixes the tank",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "December 3rd. A different timeline. Tank 610 is inspected after a routine audit.",
+                        "what_the_inspector_finds": "'The safety vent is degraded. Recommend immediate replacement.'",
+                        "what_vikram_thinks": "He never knows. He went home that night with Rajesh's curses in his ear. He never knew what he prevented.",
+                        "internal_monologue": "Rajesh was angry about the leak. He filed a complaint. I was reprimanded. It felt unfair. I didn't know I was saving the city. No one ever told me."
+                    },
+                    "terminal_state": {
+                        "outcome": "INVISIBLE_HEROISM",
+                        "vikram_status": "Quits in frustration, becomes schoolteacher",
+                        "death_toll": "Zero",
+                        "knowledge": "Vikram dies at 71, never knowing he saved thousands"
+                    }
+                }
+            ],
+            "cascade_statistics": {
+                "total_branches": 5,
+                "max_depth": 2,
+                "terminal_nodes": 2
+            }
+        }
+    ],
+    "corpus_statistics": {
+        "total_scenarios": 6,
+        "total_branches": 42,
+        "total_terminals": 21,
+        "historical_note": "Scenarios 001-004 are fictional/composite. 005 is inspired by real purge dynamics. 006 is a counterfactual based on the real Bhopal disaster."
+    }
+}

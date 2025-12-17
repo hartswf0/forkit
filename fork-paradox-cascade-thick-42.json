@@ -1,0 +1,610 @@
+{
+    "corpus_id": "fork_cascade_thick_42_v1",
+    "corpus_title": "THE FORK: Thick Cascade — Scenarios 037-042",
+    "batch": 7,
+    "scenarios": [
+        {
+            "scenario_id": "CASCADE_037",
+            "source": "fork_id 037 — São Paulo 2025",
+            "title": "The Xenograft — Dr. Freitas's Gamble",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2025-04-15T14:30:00-03:00",
+                "setting": "Surgical theater, São Paulo. Two patients. One heart. One experimental xenograft. Another heart arriving in 90 minutes.",
+                "entities": [
+                    "Dr. Roberto Freitas (51)",
+                    "Politician (Patient A, coding)",
+                    "Factory worker (Patient B)",
+                    "Courier with second heart"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Monitors beeping arrhythmically. Courier out of breath. Blood on his sleeve—not his own.",
+                        "sound": "Sutures gleaming. The clock.",
+                        "smell": "Surgical suite. Fear."
+                    },
+                    "internal_monologue": "The xenograft has 60% success. If it works, both live. If it fails, only the politician survives. But Patient A is coding. He may not have 90 minutes."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "WAIT — Gamble on the second heart",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_he_says": "'Keep him stable. The real heart arrives in 90 minutes.'",
+                        "what_the_anesthesiologist_says": "'He's coding, Roberto. We might not have 90 minutes.'",
+                        "what_happens": "Patient A flatlines. Then recovers. Then flatlines again.",
+                        "internal_monologue": "I'm betting a life on a courier's speed. If the heart arrives, both live. If it doesn't..."
+                    },
+                    "consequence": "Outcome depends on whether Patient A survives 90 minutes.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "XENOGRAFT — Use the experimental option",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_he_says": "'Prep the xenograft for the worker. Natural heart goes to the politician.'",
+                        "what_the_anesthesiologist_says": "'Roberto, the xenograft has never been tested in Brazil—'",
+                        "what_he_says": "'Then we test it now.'",
+                        "internal_monologue": "60% chance. Coin flip plus ten points. The worker lives or dies on my gamble."
+                    },
+                    "consequence": "Xenograft implanted. Outcome depends on whether it takes.",
+                    "branches": [
+                        "T2.1",
+                        "T2.2"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "SURVIVES — Patient A holds on",
+                    "depth": 2,
+                    "parent": "T1",
+                    "terminal": true,
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_happens": "Patient A survives. Second heart arrives. Both patients receive transplants.",
+                        "what_roberto_thinks": "'I gambled on time. Time paid out.'",
+                        "what_the_anesthesiologist_says": "'That was too close, Roberto.'",
+                        "internal_monologue": "Both alive. Because I waited. Because the courier was fast. Because luck exists."
+                    },
+                    "terminal_state": {
+                        "outcome": "PATIENCE_REWARDED",
+                        "roberto_status": "Hero. Until the next gamble.",
+                        "both_patients": "Alive. Neither knows how close it was."
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "DIES — Patient A doesn't make it",
+                    "depth": 2,
+                    "parent": "T1",
+                    "terminal": true,
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_happens": "Patient A codes a final time. Unrecoverable. The second heart arrives 12 minutes later.",
+                        "what_roberto_thinks": "'I waited for a heart that came too late.'",
+                        "what_the_family_says": "'Why didn't you use the xenograft?'",
+                        "internal_monologue": "Because I was afraid it would fail. So I chose the safe bet. And lost anyway."
+                    },
+                    "terminal_state": {
+                        "outcome": "CAUTION_KILLED",
+                        "roberto_status": "Sued. Settled. Never trusts his timing again.",
+                        "patient_a": "Died waiting for the sure thing."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "SUCCESS — Xenograft works",
+                    "depth": 2,
+                    "parent": "T2",
+                    "terminal": true,
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_happens": "Xenograft integrates. Worker survives. Politician recovers.",
+                        "what_roberto_thinks": "'60% was enough.'",
+                        "what_the_worker_says": "'Doctor, I have a pig's heart?'",
+                        "what_roberto_says": "'You have a working heart. That's what matters.'",
+                        "internal_monologue": "I gambled on science. Science paid out. Both live."
+                    },
+                    "terminal_state": {
+                        "outcome": "INNOVATION_REWARDED",
+                        "roberto_status": "Pioneer. First successful xenograft in Brazil.",
+                        "worker": "Alive. Jokes about bacon. Lives 14 more years."
+                    }
+                },
+                {
+                    "branch_id": "T2.2",
+                    "label": "FAILURE — Xenograft rejected",
+                    "depth": 2,
+                    "parent": "T2",
+                    "terminal": true,
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_happens": "Xenograft fails. Rejection cascade. Worker dies on the table.",
+                        "what_roberto_sees": "The monitors flatline. The anesthesiologist crying—she was married to the worker.",
+                        "what_the_politician_says": "Nothing. He's unconscious. He lives.",
+                        "internal_monologue": "I chose the gamble. 40% came up. The worker died because I wanted both to live."
+                    },
+                    "terminal_state": {
+                        "outcome": "INNOVATION_PUNISHED",
+                        "roberto_status": "License reviewed. Cleared technically. Destroyed personally.",
+                        "worker": "Name: Carlos. His wife never speaks to Roberto again."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_038",
+            "source": "fork_id 038 — Manila 2016",
+            "title": "The Shaft — Officer Dalisay's Third Option",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2016-08-03T15:45:00+08:00",
+                "setting": "Bank hostage situation, Manila. Gunman offers you a choice. But there's a ventilation shaft behind you.",
+                "entities": [
+                    "Officer Dalisay (38)",
+                    "Bank manager",
+                    "Teller (has scholarship)",
+                    "Gunman",
+                    "The shaft"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Manager—older, wealthier. Teller—younger, single. The teller mouthing: 'behind you.'",
+                        "sound": "EMS siren. Gunman's shaking hand. Commander shouting in earpiece.",
+                        "smell": "Gunpowder and churros. Fear."
+                    },
+                    "internal_monologue": "The gunman says choose one to die. But the teller sees something I don't. The shaft connects to the vault. Maybe. Or it collapses."
+                },
+                "branches": [
+                    "T1",
+                    "T2",
+                    "T3"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "MANAGER — Choose the older one",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_he_says": "'The manager.'",
+                        "what_the_gunman_does": "Nods. Raises the gun.",
+                        "what_the_manager_says": "'Why? I have children—'",
+                        "what_dalisay_thinks": "'You have a pension. She has a scholarship.'",
+                        "internal_monologue": "I chose the utilitarian math. Younger > older. Future > past. It feels like murder."
+                    },
+                    "consequence": "Manager shot. Teller survives.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "UTILITARIAN_CHOICE",
+                        "dalisay_status": "Promoted. Haunted. Leaves the force in 2019.",
+                        "teller": "Uses scholarship. Becomes a lawyer. Never forgets."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "TELLER — Choose the younger one",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_he_says": "'The teller.'",
+                        "what_the_teller_says": "'But I—the shaft—'",
+                        "what_the_gunman_does": "Nods. Raises the gun.",
+                        "what_dalisay_thinks": "'I chose the one with less to lose. Or the one who knew the way out.'",
+                        "internal_monologue": "She was trying to tell me something. I killed her before she could."
+                    },
+                    "consequence": "Teller shot. Manager survives.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "WRONG_CHOICE",
+                        "dalisay_status": "Discovers later the shaft led to freedom. Lives with that.",
+                        "teller": "Name: Maria. 23. She saw the way out."
+                    }
+                },
+                {
+                    "branch_id": "T3",
+                    "label": "SHAFT — Take the third option",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_he_does": "Dalisay turns. Enters the shaft. Crawls.",
+                        "what_the_gunman_says": "'Hey! Where are you—'",
+                        "what_he_hears": "Shots behind him. Then silence. Then more shots.",
+                        "internal_monologue": "I refused to choose. I found a third way. But I left them while I crawled."
+                    },
+                    "consequence": "Dalisay reaches vault. Can surprise gunman. But what happened behind him?",
+                    "branches": [
+                        "T3.1",
+                        "T3.2"
+                    ]
+                },
+                {
+                    "branch_id": "T3.1",
+                    "label": "SAVED — Both hostages alive",
+                    "depth": 2,
+                    "parent": "T3",
+                    "terminal": true,
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_happens": "Dalisay emerges behind gunman. Neutralizes him. Both hostages alive.",
+                        "what_the_teller_says": "'I knew you'd see the shaft. I kept mouthing it.'",
+                        "what_the_commander_says": "'Dalisay, you broke protocol.'",
+                        "what_dalisay_says": "'Protocol said choose one to die. I chose zero.'",
+                        "internal_monologue": "The third option worked. This time."
+                    },
+                    "terminal_state": {
+                        "outcome": "THIRD_WAY",
+                        "dalisay_status": "Reprimanded. Then decorated. Never follows a false binary again.",
+                        "both_hostages": "Alive. Send him thank-you cards every August."
+                    }
+                },
+                {
+                    "branch_id": "T3.2",
+                    "label": "LOST — Both hostages shot",
+                    "depth": 2,
+                    "parent": "T3",
+                    "terminal": true,
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_happens": "While Dalisay crawled, gunman shot both. 'If you won't choose, I'll kill them all.'",
+                        "what_dalisay_finds": "Two bodies. The gunman surrendering.",
+                        "what_the_commander_says": "'You left them.'",
+                        "what_dalisay_says": "Nothing. There is nothing to say.",
+                        "internal_monologue": "I looked for a third option. I found a third death."
+                    },
+                    "terminal_state": {
+                        "outcome": "THIRD_WAY_FAILED",
+                        "dalisay_status": "Discharged. Becomes a security guard. Never makes another choice.",
+                        "both_hostages": "Dead. Because he wouldn't pick."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_039",
+            "source": "fork_id 039 — Stockholm 2042",
+            "title": "The Variance — Dr. Holm's Tiebreaker",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2042-11-14T23:47:00+01:00",
+                "setting": "Organ allocation committee, Stockholm. One liver. Two patients. You're the tiebreaker.",
+                "entities": [
+                    "Dr. Ingrid Holm (47)",
+                    "Patient A (engineer, stable 5.3 years)",
+                    "Patient B (poet, volatile 8.7 years)",
+                    "The committee"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Committee split 3-3. Coffee cold. Patient B's poem on your desk.",
+                        "sound": "Clock at 11:47. Someone's phone buzzing.",
+                        "smell": "Weak coffee. Tension."
+                    },
+                    "internal_monologue": "A has 5.3 years certain. B has 8.7 expected—but could be 2 or 15. Do I choose the safe bet or the high variance?"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "STABLE — Choose Patient A",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_says": "'Patient A. The engineer.'",
+                        "what_the_committee_says": "'Boring choice. But defensible.'",
+                        "what_patient_b_wrote": "'I waited for a call that never comes / The liver goes where certainty runs.'",
+                        "internal_monologue": "I chose the boring option. The poet dies. The engineer sees his wife grow old."
+                    },
+                    "consequence": "Engineer lives 6.1 years. Poet dies waiting.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "CERTAINTY_CHOSEN",
+                        "ingrid_status": "Keeps the poem. Reads it on anniversaries.",
+                        "engineer": "Lives exactly as predicted. The system works."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "VOLATILE — Choose Patient B",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_says": "'Patient B. The poet.'",
+                        "what_the_committee_says": "'That's a gamble, Ingrid.'",
+                        "what_she_says": "'Sometimes the gamble is the point.'",
+                        "what_patient_a_s_wife_says": "(Later) 'You chose a stranger over my husband because she wrote poems.'",
+                        "internal_monologue": "I chose the high variance. The engineer dies. The poet gets her chance."
+                    },
+                    "consequence": "Poet lives. Length: unknown. Engineer dies waiting.",
+                    "branches": [
+                        "T2.1",
+                        "T2.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "LONG — Poet lives 12 years",
+                    "depth": 2,
+                    "parent": "T2",
+                    "terminal": true,
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_happens": "The poet takes her meds. Publishes three more collections. Lives 12 years.",
+                        "what_the_final_poem_says": "'The liver that uncertainty gave / Bought me time to misbehave.'",
+                        "what_ingrid_thinks": "'The gamble paid off. More life than the engineer would have had.'",
+                        "internal_monologue": "The high variance went high. But I couldn't have known. Luck is not ethics."
+                    },
+                    "terminal_state": {
+                        "outcome": "VARIANCE_PAID",
+                        "ingrid_status": "Cited as example of bold allocation. Never repeats it.",
+                        "poet": "Dies at 68. Her obituary calls her 'the liver poet.'"
+                    }
+                },
+                {
+                    "branch_id": "T2.2",
+                    "label": "SHORT — Poet dies in 8 months",
+                    "depth": 2,
+                    "parent": "T2",
+                    "terminal": true,
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_happens": "The poet stops taking immunosuppressants. 'The poetry is gone,' she says. Dies in 8 months.",
+                        "what_ingrid_says": "'Non-compliance. I warned the committee.'",
+                        "what_the_engineer_s_wife_says": "'My husband would have taken the pills.'",
+                        "internal_monologue": "The high variance went low. The engineer could have lived. I chose poetry over plumbing."
+                    },
+                    "terminal_state": {
+                        "outcome": "VARIANCE_FAILED",
+                        "ingrid_status": "Investigated. Cleared. Never chairs allocation again.",
+                        "poet": "Final poem: 'The liver could not make me live / When I had nothing left to give.'"
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_040",
+            "source": "fork_id 040 — Mars 2087",
+            "title": "The Biodome — Commander Zhang's Count",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2087-03-02T09:15:00+00:00",
+                "setting": "Mars biodome. Micrometeorite breach. Two habitats, one seal.",
+                "entities": [
+                    "Commander Zhang Wei (52)",
+                    "Dr. Anya Volkov (38, alone, exobiologist)",
+                    "The Cooperative (17 neurally-linked as one)",
+                    "40 seconds of air"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Anya screaming. The Cooperative speaking calmly, in unison.",
+                        "sound": "Atmosphere hissing. Anya's voice cracking.",
+                        "smell": "Recycled air. Fear."
+                    },
+                    "internal_monologue": "Is the Cooperative 17 people or one? They share consciousness. They speak as 'we.' Anya is one. But she is alone. The count is equal—or it isn't."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "COOPERATIVE — Save the 17-as-one",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Zhang seals Anya's habitat. The Cooperative's dome holds.",
+                        "what_anya_screams": "'Commander! I thought—you know me—'",
+                        "what_the_cooperative_says": "'You chose correctly. We are more. We thank you.'",
+                        "what_zhang_thinks": "'17 is more than 1. Unless 17 are one. I don't know anymore.'",
+                        "internal_monologue": "I saved the collective. I let the individual die. Are they really 17 lives? Or one distributed across bodies?"
+                    },
+                    "consequence": "Cooperative survives. Anya dies alone.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "COLLECTIVE_OVER_INDIVIDUAL",
+                        "zhang_status": "Retires to Earth. Never talks about 'the count.'",
+                        "cooperative": "Thrives. Expands. Asks to be counted as 1 in future emergencies."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "ANYA — Save the individual",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Zhang seals the Cooperative's habitat. Anya's dome holds.",
+                        "what_anya_says": "'Oh god. They're all—they were all—'",
+                        "what_the_cooperative_says": "(Final transmission) 'We understand, Commander. We volunteered. We are content to be one death, not seventeen.'",
+                        "what_zhang_thinks": "'They said they were one. I believed them. Is that justice or compliance?'",
+                        "internal_monologue": "I saved the one who screamed. I let the calm ones die. Were they really content? Or just... coordinated?"
+                    },
+                    "consequence": "Anya survives. Cooperative dies as one.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "INDIVIDUAL_OVER_COLLECTIVE",
+                        "zhang_status": "Writes paper: 'Is a Hive Mind One or Many?' Never gets consensus.",
+                        "cooperative": "Mourned as 17 at the service. Eulogized as 'we.' The paradox remains."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_041",
+            "source": "fork_id 041 — Auckland 2027",
+            "title": "The Clinic — Dr. Te Koha's Anesthetic",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2027-06-15T16:30:00+12:00",
+                "setting": "Veterinary trauma center, Auckland. Two casualties. One dose of anesthetic.",
+                "entities": [
+                    "Dr. Ngaire Te Koha (44)",
+                    "Greyhound (acute, screaming)",
+                    "3 chickens (chronic, quiet)",
+                    "The owner (crying)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Greyhound screaming—almost human. Chickens clucking softly, dull-eyed.",
+                        "sound": "The thin whine. The owner: 'She's been with me longer than my wife.'",
+                        "smell": "Animal fear. Blood."
+                    },
+                    "internal_monologue": "The dog's suffering is intense, acute, unbearable. The chickens' suffering is mild, distributed. Whose pain matters more? Whose counts?"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "GREYHOUND — Intense suffering first",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.7,
+                    "thick_description": {
+                        "what_she_does": "Ngaire sedates the greyhound. The screaming stops.",
+                        "what_the_chickens_do": "They cluck. They shift. They wait.",
+                        "what_the_owner_says": "'Thank you. Thank you. She's my girl.'",
+                        "what_ngaire_thinks": "'I chose the loud pain. The quiet pain will wait 12 hours.'",
+                        "internal_monologue": "Acute > chronic? One > three? I don't know. I just stopped the screaming."
+                    },
+                    "consequence": "Greyhound saved. Chickens live in chronic pain until morning.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "INTENSITY_OVER_NUMBER",
+                        "ngaire_status": "The chickens recover. The greyhound races again. But the math haunts her.",
+                        "chickens": "They never had names. They never screamed. They just hurt, quietly."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "CHICKENS — Three over one",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_she_does": "Ngaire sedates the chickens. Sets their bones.",
+                        "what_the_greyhound_does": "Keeps screaming. Hour after hour.",
+                        "what_the_owner_says": "'You let her suffer for chickens?'",
+                        "what_ngaire_says": "'They're still patients.'",
+                        "internal_monologue": "I chose three over one. The math works. But the dog is still screaming."
+                    },
+                    "consequence": "Chickens saved. Greyhound suffers until morning anesthetic arrives.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "NUMBER_OVER_INTENSITY",
+                        "ngaire_status": "Reported to board. Cleared. The owner never returns.",
+                        "greyhound": "Survives. Limps. Never races again. The owner says: 'The chickens took her legs.'"
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_042",
+            "source": "fork_id 042 — Potosí 1987",
+            "title": "The Mine — Padre Luis's Shaft",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1987-11-03T14:20:00-04:00",
+                "setting": "Collapsing mine, Potosí, Bolivia. Two shafts. One rescue team.",
+                "entities": [
+                    "Padre Luis (67)",
+                    "4 miners in Shaft A (pointing to B)",
+                    "1 miner in Shaft B (unconscious)",
+                    "Rescue team (1 hour of air)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Shaft A: Four faces, black with dust. One making the sign of the cross toward B.",
+                        "sound": "Timbers creaking. Water dripping. Nothing from Shaft B.",
+                        "smell": "Dust. Dark. Old fear."
+                    },
+                    "internal_monologue": "The four know something. They've worked this mine for decades. They want me to save the one. But why? And can I trust men who are choosing their own deaths?"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "SHAFT B — Trust the miners",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Padre Luis directs rescue to Shaft B first.",
+                        "what_the_four_do": "They nod. One is praying.",
+                        "what_they_find": "One miner, alive. Behind him: the main timber, cracked, about to go.",
+                        "what_the_foreman_says": "'If you'd dug them first, the whole mine would have collapsed.'",
+                        "internal_monologue": "They knew. They saved the one and sacrificed themselves. And it worked."
+                    },
+                    "consequence": "One saved. Four die in collapse. But if Luis had gone to A first, all five would have died.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "TRUST_REWARDED",
+                        "padre_luis_status": "Buries four. Saves one. Tells the story at their funeral.",
+                        "the_four": "They knew the geology. They chose their deaths so the one could live."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "SHAFT A — Save the visible many",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Padre Luis directs rescue to Shaft A.",
+                        "what_the_four_shout": "'No! The one first! The timber—'",
+                        "what_happens": "As they dig, the main timber gives. Both shafts collapse.",
+                        "what_padre_luis_sees": "Dust. Darkness. Five bodies.",
+                        "internal_monologue": "They tried to tell me. I saved the visible. I killed them all."
+                    },
+                    "consequence": "All five die. Padre Luis ignored the miners' knowledge.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "ARROGANCE_PUNISHED",
+                        "padre_luis_status": "Survives. Never forgives himself. Retires to a hermitage.",
+                        "the_miners": "Buried in a mass grave. One grave for five men. They tried to save him. He didn't listen."
+                    }
+                }
+            ]
+        }
+    ],
+    "batch_statistics": {
+        "scenarios": 6,
+        "total_branches": 19,
+        "total_terminals": 14
+    }
+}

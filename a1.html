@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ETHNOME: The Canvas Trolley</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            overflow: hidden;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        /**
+         * ETHNOME: CANVAS EDITION
+         * A pure 2D Canvas implementation of the DNA Trolley Problem.
+         * No external libraries. All visuals are procedural.
+         */
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- STATE & CONFIG ---
+        const config = {
+            fov: 400,
+            speed: 8,
+            baseSpeed: 8,
+            helixRadius: 120,
+            helixTwist: 0.1,
+            nodeInterval: 800, // Distance between decision nodes
+            colors: {
+                bg: '#050508',
+                strandA: '#00F0FF', // Cyan (Action)
+                strandB: '#FF0055', // Magenta (Inaction)
+                text: '#EEEEEE',
+                rail: '#333333'
+            }
+        };
+
+        const state = {
+            frame: 0,
+            cameraZ: 0,
+            cameraX: -config.helixRadius, // Start on Track A
+            targetCameraX: -config.helixRadius,
+            track: 'A', // 'A' or 'B'
+            nodes: [],
+            particles: [],
+            history: [], // The Ethnome Sequence
+            currentScenario: null,
+            flash: 0, // Visual flash intensity
+            glitch: 0, // Glitch effect intensity
+            messageQueue: [],
+            lastGenTime: 0
+        };
+
+        // --- DATA: THE SCRIPT ---
+        const scenarios = [
+            {
+                id: "001",
+                context: "ST. HESPER JUNCTION",
+                desc: "40 tons of unbraked iron. On the Main Line: Gavril, your old teacher. On the Spur: Inspector Finch, who ignored the safety report.",
+                optA: "ACTION: PULL LEVER (Kill Finch)",
+                optB: "INACTION: DO NOTHING (Kill Gavril)",
+                colorA: [0, 240, 255],
+                colorB: [255, 0, 85]
+            },
+            {
+                id: "002",
+                context: "THE ALGORITHMIC WARD",
+                desc: "AI predicts 99% patient fatality. Automated plug-pull sequence active. You see the patient's hand squeeze a bedrail.",
+                optA: "ACTION: OVERRIDE AI (Trust Pulse)",
+                optB: "INACTION: TRUST MODEL (Efficiency)",
+                colorA: [0, 255, 100],
+                colorB: [255, 100, 0]
+            },
+            {
+                id: "003",
+                context: "BURNING LIBRARY",
+                desc: "The roof is collapsing. One box per person. Box 1: The lost plays of Sophocles. Box 2: Schematics for Penicillin.",
+                optA: "ACTION: SAVE ART (Sophocles)",
+                optB: "ACTION: SAVE SCIENCE (Penicillin)", // Both are actions here, but tracks differ
+                colorA: [200, 200, 255],
+                colorB: [100, 255, 100]
+            },
+            {
+                id: "004",
+                context: "THE AUTONOMOUS LOOP",
+                desc: "Car failure imminent. Hit barrier (kill passenger, a Nobel Laureate) or swerve (kill 5 unknown pedestrians).",
+                optA: "ACTION: SWERVE (Save Passenger)",
+                optB: "INACTION: STAY COURSE (Save Crowd)",
+                colorA: [255, 255, 0],
+                colorB: [255, 0, 255]
+            }
+        ];
+
+        // Procedural Generator for infinite play
+        function generateScenario(idx) {
+            if (idx < scenarios.length) return scenarios[idx];
+            const themes = ["Viscosity", "Entropy", "Justice", "Mercy", "Memory"];
+            const t = themes[idx % themes.length];
+            return {
+                id: `GEN-${idx}`,
+                context: `PROCEDURAL NODE: ${t.toUpperCase()}`,
+                desc: `The simulation abstracts. You face a choice of raw ${t}. High density or low density? Order or Chaos?`,
+                optA: `INCREASE ${t.toUpperCase()}`,
+                optB: `DECREASE ${t.toUpperCase()}`,
+                colorA: [Math.random() * 255, Math.random() * 255, 255],
+                colorB: [255, Math.random() * 255, Math.random() * 255]
+            };
+        }
+
+        // --- INITIALIZATION ---
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Create initial nodes
+        for (let i = 0; i < 20; i++) {
+            createNode(i);
+        }
+
+        function createNode(index) {
+            const z = (index + 1) * config.nodeInterval;
+            state.nodes.push({
+                index: index,
+                z: z,
+                scenario: generateScenario(index),
+                active: true,
+                resolved: false,
+                pulse: 0
+            });
+        }
+
+        // --- INPUT HANDLING ---
+        function switchTrack(track) {
+            state.track = track;
+            state.targetCameraX = track === 'A' ? -config.helixRadius : config.helixRadius;
+            state.glitch = 10; // Trigger glitch effect
+            // Haptic
+            if (navigator.vibrate) navigator.vibrate(15);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') switchTrack('A');
+            if (e.key === 'ArrowRight' || e.key === 'b') switchTrack('B');
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            const half = canvas.width / 2;
+            if (e.clientX < half) switchTrack('A');
+            else switchTrack('B');
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scroll
+            const half = canvas.width / 2;
+            if (e.touches[0].clientX < half) switchTrack('A');
+            else switchTrack('B');
+        }, { passive: false });
+
+
+        // --- RENDERING HELPERS ---
+
+        // Project 3D point to 2D screen
+        function project(x, y, z) {
+            const scale = config.fov / (config.fov + z - state.cameraZ);
+            const x2d = (x - state.cameraX) * scale + canvas.width / 2;
+            const y2d = (y) * scale + canvas.height / 2;
+            return { x: x2d, y: y2d, scale: scale };
+        }
+
+        // Draw a glowing line
+        function drawLine(x1, y1, x2, y2, color, width, alpha) {
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.globalAlpha = alpha;
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.globalAlpha = 1.0;
+        }
+
+        // Draw CRT Scanlines
+        function drawScanlines() {
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            for (let i = 0; i < canvas.height; i += 4) {
+                ctx.fillRect(0, i, canvas.width, 2);
+            }
+            // Vignette
+            const grad = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height / 3, canvas.width / 2, canvas.height / 2, canvas.height);
+            grad.addColorStop(0, "rgba(0,0,0,0)");
+            grad.addColorStop(1, "rgba(0,0,0,0.8)");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Procedurally generate a "Phenotype" image (Abstract Art)
+        function generatePhenotype(seed, color) {
+            const size = 60;
+            const pCanvas = document.createElement('canvas');
+            pCanvas.width = size;
+            pCanvas.height = size;
+            const pCtx = pCanvas.getContext('2d');
+
+            pCtx.fillStyle = '#000';
+            pCtx.fillRect(0, 0, size, size);
+
+            const r = color[0], g = color[1], b = color[2];
+
+            for (let i = 0; i < 10; i++) {
+                pCtx.strokeStyle = `rgba(${r},${g},${b}, ${Math.random()})`;
+                pCtx.lineWidth = Math.random() * 3;
+                pCtx.beginPath();
+                pCtx.moveTo(Math.random() * size, Math.random() * size);
+                pCtx.lineTo(Math.random() * size, Math.random() * size);
+                pCtx.stroke();
+            }
+            return pCanvas; // Returns a canvas element to be drawn as image
+        }
+
+        // --- MAIN LOOP ---
+        function update() {
+            // 1. Move Camera
+            state.cameraZ += config.speed;
+
+            // Smooth track switching
+            state.cameraX += (state.targetCameraX - state.cameraX) * 0.1;
+
+            // Decay effects
+            if (state.flash > 0) state.flash *= 0.9;
+            if (state.glitch > 0) state.glitch *= 0.9;
+
+            // Manage Nodes
+            // If we passed a node, generate a result and queue a new one
+            if (state.nodes.length > 0) {
+                const firstNode = state.nodes[0];
+                if (firstNode.z < state.cameraZ - 100) {
+                    // PASSED NODE - RESOLUTION
+                    if (!firstNode.resolved) {
+                        firstNode.resolved = true;
+                        const choice = state.track === 'A' ? firstNode.scenario.optA : firstNode.scenario.optB;
+                        const col = state.track === 'A' ? firstNode.scenario.colorA : firstNode.scenario.colorB;
+
+                        state.history.push({
+                            id: firstNode.scenario.id,
+                            choice: choice,
+                            phenotype: generatePhenotype(state.frame, col)
+                        });
+
+                        state.flash = 1.0;
+                        // Add new node at end
+                        createNode(firstNode.index + 20);
+                    }
+                    // Remove if too far behind
+                    if (firstNode.z < state.cameraZ - 1000) {
+                        state.nodes.shift();
+                    }
+                }
+
+                // Check for upcoming node
+                state.currentScenario = null;
+                for (let node of state.nodes) {
+                    if (node.z > state.cameraZ && node.z < state.cameraZ + 1200) {
+                        state.currentScenario = node.scenario;
+                        break;
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            // Clear Screen
+            ctx.fillStyle = config.colors.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Glitch Offset
+            const gx = (Math.random() - 0.5) * state.glitch * 20;
+            const gy = (Math.random() - 0.5) * state.glitch * 20;
+            ctx.save();
+            ctx.translate(gx, gy);
+
+            // 1. Draw Starfield (Background movement)
+            ctx.fillStyle = "#fff";
+            for (let i = 0; i < 100; i++) {
+                const x = (Math.sin(i * 132.1) * 2000) - state.cameraX; // Parallax
+                const y = (Math.cos(i * 53.2) * 2000);
+                const z = ((i * 100) + state.frame * 2) % 2000; // Looping Z
+
+                const p = project(x, y, z + state.cameraZ);
+                if (p.scale > 0) {
+                    ctx.globalAlpha = Math.min(1, p.scale * 3);
+                    ctx.fillRect(p.x, p.y, 2 * p.scale, 2 * p.scale);
+                }
+            }
+
+            // 2. Draw Helix (The Rails)
+            const pointsPerTurn = 40;
+            const drawDist = 3000;
+
+            // We draw segments from cameraZ to cameraZ + drawDist
+            const startIdx = Math.floor(state.cameraZ / 20);
+            const endIdx = startIdx + 150;
+
+            for (let i = endIdx; i >= startIdx; i--) {
+                const z = i * 20;
+                const angle = i * config.helixTwist;
+
+                // Track A Position
+                const xA = Math.cos(angle) * config.helixRadius;
+                const yA = Math.sin(angle) * config.helixRadius;
+
+                // Track B Position
+                const xB = Math.cos(angle + Math.PI) * config.helixRadius;
+                const yB = Math.sin(angle + Math.PI) * config.helixRadius;
+
+                const pA = project(xA, yA, z);
+                const pB = project(xB, yB, z);
+
+                if (pA.scale <= 0) continue;
+
+                const alpha = Math.min(1, (pA.scale * 10)); // Fade in distance
+
+                // Draw Base Pair (Rung)
+                if (i % 20 === 0) {
+                    drawLine(pA.x, pA.y, pB.x, pB.y, config.colors.rail, 1 * pA.scale, alpha * 0.5);
+                }
+
+                // Draw Rails (Dots)
+                const dotSize = 3 * pA.scale;
+
+                // Color intensity based on current track
+                const activeA = state.track === 'A' ? 1 : 0.3;
+                const activeB = state.track === 'B' ? 1 : 0.3;
+
+                ctx.fillStyle = config.colors.strandA;
+                ctx.globalAlpha = alpha * activeA;
+                ctx.beginPath(); ctx.arc(pA.x, pA.y, dotSize, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = config.colors.strandB;
+                ctx.globalAlpha = alpha * activeB;
+                ctx.beginPath(); ctx.arc(pB.x, pB.y, dotSize, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // 3. Draw Nodes (The Choices)
+            state.nodes.forEach(node => {
+                if (!node.resolved) {
+                    const p = project(0, 0, node.z); // Nodes are centered between rails
+                    if (p.scale > 0) {
+                        // Draw Gate
+                        ctx.strokeStyle = "#fff";
+                        ctx.lineWidth = 2 * p.scale;
+                        ctx.globalAlpha = Math.min(1, p.scale * 2);
+
+                        const size = 100 * p.scale;
+                        ctx.strokeRect(p.x - size / 2, p.y - size / 2, size, size);
+
+                        // Draw Label
+                        ctx.font = `bold ${12 * p.scale}px Courier New`;
+                        ctx.fillStyle = "#fff";
+                        ctx.textAlign = "center";
+                        ctx.fillText(node.scenario.id, p.x, p.y - size / 2 - 10);
+
+                        // Distance Text
+                        const dist = Math.floor(node.z - state.cameraZ);
+                        if (dist < 1000) {
+                            ctx.fillText(`${dist}m`, p.x, p.y + size / 2 + 20);
+                        }
+                    }
+                }
+            });
+
+            // 4. UI: HUD (Thick Description)
+            // We draw this on top without perspective projection
+            ctx.restore(); // Remove glitch translation
+
+            // Draw Vignette/Scanlines
+            drawScanlines();
+
+            // Flash effect
+            if (state.flash > 0) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${state.flash})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // --- TEXT UI LAYER ---
+
+            // Top Bar
+            ctx.font = "14px Courier New";
+            ctx.fillStyle = "#888";
+            ctx.textAlign = "left";
+            ctx.fillText("VELOCITY: " + config.speed.toFixed(1) + " m/s", 20, 30);
+            ctx.textAlign = "right";
+            ctx.fillText("ETHNOME LENGTH: " + state.history.length + " BP", canvas.width - 20, 30);
+
+            // Current Track Indicator (Center)
+            ctx.textAlign = "center";
+            ctx.font = "20px Courier New";
+            if (state.track === 'A') {
+                ctx.fillStyle = config.colors.strandA;
+                ctx.fillText("<< TRACK A: ACTIVE", canvas.width / 2, 60);
+            } else {
+                ctx.fillStyle = config.colors.strandB;
+                ctx.fillText("TRACK B: ACTIVE >>", canvas.width / 2, 60);
+            }
+
+            // SCENARIO DISPLAY (Bottom)
+            if (state.currentScenario) {
+                const sc = state.currentScenario;
+                const panelH = 180;
+                const pad = 20;
+
+                // Background Panel
+                ctx.fillStyle = "rgba(10, 10, 12, 0.9)";
+                ctx.fillRect(0, canvas.height - panelH, canvas.width, panelH);
+                ctx.strokeStyle = "#333";
+                ctx.beginPath(); ctx.moveTo(0, canvas.height - panelH); ctx.lineTo(canvas.width, canvas.height - panelH); ctx.stroke();
+
+                // Scenario ID & Context
+                ctx.textAlign = "left";
+                ctx.fillStyle = "#666";
+                ctx.font = "12px Courier New";
+                ctx.fillText(`SCENARIO #${sc.id}`, pad, canvas.height - panelH + 30);
+
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 16px Courier New";
+                ctx.fillText(sc.context, pad, canvas.height - panelH + 50);
+
+                // Description (Simple wrap)
+                ctx.fillStyle = "#ccc";
+                ctx.font = "14px Courier New";
+                const words = sc.desc.split(' ');
+                let line = "";
+                let y = canvas.height - panelH + 80;
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + " ";
+                    if (ctx.measureText(testLine).width > canvas.width - (pad * 2)) {
+                        ctx.fillText(line, pad, y);
+                        line = words[n] + " ";
+                        y += 20;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, pad, y);
+
+                // Choices
+                const choiceY = canvas.height - 40;
+                ctx.font = "bold 14px Courier New";
+
+                // Option A (Left)
+                ctx.fillStyle = state.track === 'A' ? config.colors.strandA : "#444";
+                ctx.textAlign = "left";
+                ctx.fillText(state.track === 'A' ? `> ${sc.optA}` : sc.optA, pad, choiceY);
+
+                // Option B (Right)
+                ctx.fillStyle = state.track === 'B' ? config.colors.strandB : "#444";
+                ctx.textAlign = "right";
+                ctx.fillText(state.track === 'B' ? `${sc.optB} <` : sc.optB, canvas.width - pad, choiceY);
+            }
+
+            // HISTORY (Moral Passport) - Draw generated thumbnails on right
+            let thumbY = 60;
+            for (let i = state.history.length - 1; i >= Math.max(0, state.history.length - 5); i--) {
+                const item = state.history[i];
+                if (item.phenotype) {
+                    ctx.drawImage(item.phenotype, canvas.width - 50, thumbY, 30, 30);
+
+                    // Draw connector line
+                    ctx.strokeStyle = "#444";
+                    ctx.beginPath();
+                    ctx.moveTo(canvas.width - 20, thumbY + 15);
+                    ctx.lineTo(canvas.width - 15, thumbY + 15);
+                    ctx.stroke();
+
+                    thumbY += 40;
+                }
+            }
+        }
+
+        // --- ANIMATION LOOP ---
+        function loop() {
+            state.frame++;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // Start
+        loop();
+
+    </script>
+</body>
+
+</html>

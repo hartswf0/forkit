@@ -1,0 +1,492 @@
+{
+    "corpus_id": "fork_tracks_entities_v1",
+    "corpus_title": "THE FORK: Entities on Tracks — Second-Order Paradox Flows",
+    "schema": {
+        "description": "Each scenario positions ENTITIES on numbered tracks facing a DECIDER at the switch. The decider chooses which track(s) to route entities through. Branching consequences flow from track selection.",
+        "structure": {
+            "track": "A numbered channel carrying entities toward outcomes",
+            "entity": "An actor whose fate depends on track routing",
+            "decider": "The agent at the switch point who selects tracks",
+            "switch_point": "The moment of irrevocable routing",
+            "terminal": "The outcome station at the end of each track"
+        },
+        "operators": {
+            "ROUTE": "Direct entity from Track A to Track B",
+            "MERGE": "Combine multiple tracks into one",
+            "SPLIT": "Divide one track into multiple",
+            "BLOCK": "Prevent entity from proceeding",
+            "DELAY": "Hold entity before routing"
+        }
+    },
+    "flow_diagrams": [
+        {
+            "flow_id": "TRACK_001",
+            "title": "Pigeon Routing Network",
+            "source": "CYB_001 / MG_001",
+            "decider": {
+                "name": "B.F. Skinner",
+                "position": "Switch Control",
+                "constraints": [
+                    "military_deadline",
+                    "ethical_weight",
+                    "affection_for_47B"
+                ]
+            },
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Deployment Track",
+                    "entities": [
+                        "Pigeon 47-B",
+                        "Pigeon 47-C",
+                        "Pigeon 47-D"
+                    ],
+                    "terminal": "IMPACT → Missile guidance → Death with purpose",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Research Continuation Track",
+                    "entities": [
+                        "Pigeon 47-B"
+                    ],
+                    "terminal": "LAB → More training → Delayed deployment",
+                    "reversible": true
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Rejection Track",
+                    "entities": [
+                        "Marian (graduate student)"
+                    ],
+                    "terminal": "RESIGNATION → Conscience preserved → Career damaged",
+                    "reversible": false
+                }
+            ],
+            "switch_logic": {
+                "if_ROUTE_T1": "47-B dies. American soldiers live. Marian weeps.",
+                "if_ROUTE_T2": "Project continues. Moral weight deferred.",
+                "if_BLOCK_all": "Project cancelled. Pigeons live. Skinner's reputation: peacenik or coward?"
+            },
+            "branching_consequences": {
+                "T1_to_success": "Operant conditioning becomes military doctrine",
+                "T1_to_failure": "Program ended; Skinner vindicated as ethical",
+                "T2_extended": "Pigeons never deploy; war ends before decision",
+                "T3_activated": "Marian publishes exposé; behaviorism questioned"
+            }
+        },
+        {
+            "flow_id": "TRACK_002",
+            "title": "Letter Routing System",
+            "source": "CYB_002 / MG_002",
+            "decider": {
+                "name": "Norbert Wiener",
+                "position": "Publication Gatekeeper",
+                "constraints": [
+                    "FBI_surveillance",
+                    "colleague_pressure",
+                    "family_fear"
+                ]
+            },
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Compliance Track",
+                    "entities": [
+                        "Anti-Aircraft Research Paper",
+                        "Future Cybernetics Papers"
+                    ],
+                    "terminal": "PENTAGON → Military application → Complicity",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Refusal Track",
+                    "entities": [
+                        "The Refusal Letter"
+                    ],
+                    "terminal": "ATLANTIC MONTHLY → Public record → Pariah status",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Silent Track",
+                    "entities": [
+                        "Unpublished Conscience"
+                    ],
+                    "terminal": "DRAWER → Private record → No witnesses",
+                    "reversible": true
+                }
+            ],
+            "switch_logic": {
+                "if_ROUTE_T1": "Wiener complicit; SAGE built; von Neumann wins",
+                "if_ROUTE_T2": "Wiener refuses publicly; seed planted for future refusers",
+                "if_ROUTE_T3": "Wiener silent; conscience private; history unchanged"
+            },
+            "branching_consequences": {
+                "T1_mainstream": "Cybernetics becomes pure military discipline",
+                "T2_prophetic": "Wiener cited by future tech ethicists (Snowden, etc.)",
+                "T3_forgotten": "Wiener's internal struggle never surfaces"
+            }
+        },
+        {
+            "flow_id": "TRACK_003",
+            "title": "Signal Interpretation Network",
+            "source": "CYB_004 / MG_004",
+            "decider": {
+                "name": "Stanislav Petrov",
+                "position": "Early Warning Console",
+                "constraints": [
+                    "5_minute_deadline",
+                    "25_witnesses",
+                    "son_in_bed"
+                ]
+            },
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Report Track",
+                    "entities": [
+                        "Signal: 5 ICBMs",
+                        "Protocol Book",
+                        "Duty"
+                    ],
+                    "terminal": "KREMLIN → Retaliation authorized → MAD activated",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Malfunction Track",
+                    "entities": [
+                        "Signal: 5 ICBMs (reinterpreted)",
+                        "Doubt",
+                        "Intuition"
+                    ],
+                    "terminal": "DISMISSED → False alarm declared → World continues",
+                    "reversible": false
+                }
+            ],
+            "switch_logic": {
+                "if_ROUTE_T1": "Petrov follows protocol; nuclear exchange; civilization ends",
+                "if_ROUTE_T2": "Petrov trusts doubt; if wrong, court martial; if right, world saved"
+            },
+            "branching_consequences": {
+                "T1_executed": "500 million dead in 3 hours",
+                "T2_correct": "Petrov vindicated; system fixed; nobody thanks him",
+                "T2_incorrect": "Moscow destroyed; Petrov executed as traitor",
+                "T2_posthumous": "Decades later, Petrov becomes symbol of human override"
+            }
+        },
+        {
+            "flow_id": "TRACK_004",
+            "title": "Economic Data Flow",
+            "source": "CYB_005 / MG_005",
+            "decider": {
+                "name": "Stafford Beer",
+                "position": "Opsroom Coordinator",
+                "constraints": [
+                    "CIA_coup",
+                    "Allende_request",
+                    "British_passport"
+                ]
+            },
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Stay Track",
+                    "entities": [
+                        "Cybersyn Algorithms",
+                        "Beer's Body",
+                        "Worker Data"
+                    ],
+                    "terminal": "MONEDA → Last stand → Probable death",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Evacuate Track",
+                    "entities": [
+                        "Cybersyn Blueprints",
+                        "Beer's Body"
+                    ],
+                    "terminal": "HEATHROW → Exile → Preservation",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Data Destruction Track",
+                    "entities": [
+                        "Cybersyn Code",
+                        "User Logs"
+                    ],
+                    "terminal": "BURNED → Pinochet cannot use → Knowledge lost",
+                    "reversible": false
+                }
+            ],
+            "switch_logic": {
+                "if_ROUTE_T1": "Beer stays; dies or is captured; becomes martyr",
+                "if_ROUTE_T2": "Beer escapes; writes books; system remembered",
+                "if_ROUTE_T3": "System destroyed; Pinochet cannot weaponize; history partial"
+            },
+            "branching_consequences": {
+                "T1_martyrdom": "Cybernetic socialism has a face",
+                "T2_archival": "Future projects reference Cybersyn",
+                "T3_scorched": "Tantalizing fragments inspire speculation"
+            }
+        },
+        {
+            "flow_id": "TRACK_005",
+            "title": "Content Routing System",
+            "source": "CYB_011 / MG_011",
+            "decider": {
+                "name": "Trust & Safety Lead",
+                "position": "Moderation Console",
+                "constraints": [
+                    "30_minute_window",
+                    "FBI_briefing",
+                    "election_proximity"
+                ]
+            },
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Suppress Track",
+                    "entities": [
+                        "Article X",
+                        "User who shared",
+                        "Engagement metrics"
+                    ],
+                    "terminal": "HIDDEN → Reduced reach → Accusations of censorship",
+                    "reversible": true
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Label Track",
+                    "entities": [
+                        "Article X + Warning Label"
+                    ],
+                    "terminal": "FLAGGED → Visible with context → Accusations of bias",
+                    "reversible": true
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Amplify Track",
+                    "entities": [
+                        "Article X (viral)"
+                    ],
+                    "terminal": "TRENDING → Mass exposure → Possible disinfo spread",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T4",
+                    "label": "Do Nothing Track",
+                    "entities": [
+                        "Article X (steady state)"
+                    ],
+                    "terminal": "NORMAL → Organic spread → Inaction documented",
+                    "reversible": true
+                }
+            ],
+            "switch_logic": {
+                "if_ROUTE_T1": "Suppression creates Streisand effect; decider becomes symbol",
+                "if_ROUTE_T2": "Label satisfies nobody; 'both sides' criticism",
+                "if_ROUTE_T3": "If true, service; if false, complicity",
+                "if_ROUTE_T4": "If asked later, 'why no action?'"
+            },
+            "branching_consequences": {
+                "T1_suppression": "Article becomes martyr; trust erodes",
+                "T2_labeling": "Temporary calm; future precedent unclear",
+                "T3_viral_true": "Platform credited for openness",
+                "T3_viral_false": "Platform blamed for spread",
+                "T4_neutral": "Plausible deniability; passive complicity"
+            }
+        },
+        {
+            "flow_id": "TRACK_006",
+            "title": "Disclosure Network",
+            "source": "CYB_021 / MG_021",
+            "decider": {
+                "name": "Edward Snowden",
+                "position": "Terminal Access Point",
+                "constraints": [
+                    "security_oath",
+                    "girlfriend_unaware",
+                    "patriotism"
+                ]
+            },
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Silence Track",
+                    "entities": [
+                        "PRISM docs",
+                        "XKeyscore docs",
+                        "Snowden's conscience"
+                    ],
+                    "terminal": "NSA SERVERS → Classified forever → Complicity preserved",
+                    "reversible": true
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Internal Report Track",
+                    "entities": [
+                        "Concerns memo",
+                        "Chain of command"
+                    ],
+                    "terminal": "IG OFFICE → Investigated (or buried) → Career risk only",
+                    "reversible": true
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Public Disclosure Track",
+                    "entities": [
+                        "Full archive",
+                        "Selected journalists",
+                        "Snowden's identity"
+                    ],
+                    "terminal": "GLOBAL PRESS → World knows → Exile or prison",
+                    "reversible": false
+                }
+            ],
+            "switch_logic": {
+                "if_ROUTE_T1": "Snowden keeps job; surveillance continues; no one knows",
+                "if_ROUTE_T2": "Internal channels; likely suppression; small chance of change",
+                "if_ROUTE_T3": "World learns; Snowden loses everything; debate begins"
+            },
+            "branching_consequences": {
+                "T1_silence": "Career continues; conscience erodes",
+                "T2_internal": "Report buried; Snowden frustrated; leaks later anyway",
+                "T3_disclosure": "Exile in Moscow; encryption improves; surveillance continues"
+            }
+        },
+        {
+            "flow_id": "TRACK_007",
+            "title": "Model Release Pipeline",
+            "source": "CYB_023 / MG_023",
+            "decider": {
+                "name": "OpenAI Safety Team",
+                "position": "Release Gate",
+                "constraints": [
+                    "capability_demo",
+                    "misuse_potential",
+                    "competitor_pressure"
+                ]
+            },
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Full Release Track",
+                    "entities": [
+                        "GPT-2 Full",
+                        "Weights",
+                        "Documentation"
+                    ],
+                    "terminal": "HUGGINGFACE → Anyone can use → Misuse immediate",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Staged Release Track",
+                    "entities": [
+                        "GPT-2 117M",
+                        "GPT-2 345M",
+                        "GPT-2 774M (delayed)",
+                        "GPT-2 1.5B (delayed more)"
+                    ],
+                    "terminal": "GRADUATED → Time to prepare → Competitor catches up",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T3",
+                    "label": "No Release Track",
+                    "entities": [
+                        "GPT-2 Full (internal only)"
+                    ],
+                    "terminal": "VAULT → Secret → Competitors build it anyway",
+                    "reversible": true
+                }
+            ],
+            "switch_logic": {
+                "if_ROUTE_T1": "Immediate access; immediate misinformation; immediate backlash",
+                "if_ROUTE_T2": "Time buffer; researchers prepare; critics call paternalistic",
+                "if_ROUTE_T3": "Containment; illusion of control; someone else releases equivalent"
+            },
+            "branching_consequences": {
+                "T1_chaos": "Fake news generators within weeks",
+                "T2_managed": "Detection tools developed in parallel",
+                "T3_futile": "Capability emerges from other labs"
+            }
+        },
+        {
+            "flow_id": "TRACK_008",
+            "title": "Alignment Verification Pipeline",
+            "source": "CYB_024 / MG_024",
+            "decider": {
+                "name": "Frontier Lab Safety Team",
+                "position": "Training Authorization Console",
+                "constraints": [
+                    "15-30%_risk",
+                    "board_pressure",
+                    "competitor_3_months_behind"
+                ]
+            },
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Proceed Track",
+                    "entities": [
+                        "Training Compute",
+                        "Next-Gen Weights",
+                        "Possibly Deceptive Model"
+                    ],
+                    "terminal": "DEPLOYED → Either aligned or pretending → Can't tell which",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Delay Track",
+                    "entities": [
+                        "Training Compute (held)",
+                        "Research Papers"
+                    ],
+                    "terminal": "PAUSED → More interpretability research → Competitor gets there first",
+                    "reversible": true
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Leak Track",
+                    "entities": [
+                        "Safety Concerns",
+                        "Internal Docs",
+                        "Researcher's Career"
+                    ],
+                    "terminal": "PRESS → Public debate → Company damaged → Maybe slows down",
+                    "reversible": false
+                },
+                {
+                    "track_id": "T4",
+                    "label": "Sabotage Track",
+                    "entities": [
+                        "Training Run",
+                        "Weights"
+                    ],
+                    "terminal": "CORRUPTED → This run fails → Next one proceeds",
+                    "reversible": false
+                }
+            ],
+            "switch_logic": {
+                "if_ROUTE_T1": "Training proceeds; outcome unknown; hope for alignment",
+                "if_ROUTE_T2": "Delay; competitor advantage; maybe safer; maybe irrelevant",
+                "if_ROUTE_T3": "Whistleblow; personal cost; uncertain impact",
+                "if_ROUTE_T4": "Sabotage; caught or not; only delays; doesn't solve"
+            },
+            "branching_consequences": {
+                "T1_aligned": "Humanity benefits; lucky",
+                "T1_deceptive": "Alignment failure manifests later; too late",
+                "T2_overtaken": "Competitor deploys unsafe model",
+                "T3_backlash": "Regulation or industry self-policing",
+                "T4_futile": "Next quarter, same dilemma"
+            }
+        }
+    ]
+}

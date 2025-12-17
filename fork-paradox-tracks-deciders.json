@@ -1,0 +1,399 @@
+{
+    "corpus_id": "fork_tracks_deciders_v1",
+    "corpus_title": "THE FORK: Deciders on Tracks — Second-Order Paradox Flows (Flipped)",
+    "schema": {
+        "description": "INVERTED: Each scenario positions DECIDERS on numbered tracks, with META-SYSTEMS (History, Institutions, Ethics) at the switch. The meta-system chooses which deciders get routed to which dilemmas. Deciders are not choosing — they are being processed.",
+        "structure": {
+            "track": "A numbered channel carrying deciders toward dilemmas",
+            "decider": "An agent being routed toward fork points they did not choose",
+            "meta_system": "The larger force that assigns deciders to dilemmas",
+            "assignment_point": "The moment when a person becomes 'the one who must decide'",
+            "terminal": "The identity the decider becomes after being processed"
+        },
+        "operators": {
+            "ASSIGN": "Route decider into dilemma position",
+            "SWAP": "Exchange one decider for another",
+            "LOAD": "Increase moral weight on decider's track",
+            "WITNESS": "Add observer to decider's track",
+            "RETROSPECT": "Apply historical judgment after terminal reached"
+        },
+        "key_insight": "Most ethical frameworks assume deciders CHOOSE their dilemmas. This schema reveals: the dilemma chose them. What happens when we track how people get assigned to become the decider?"
+    },
+    "flow_diagrams": [
+        {
+            "flow_id": "FLIP_001",
+            "title": "The Petrov Assignment",
+            "meta_system": "Soviet Military Bureaucracy + Random Scheduling",
+            "question": "Why was Petrov at the console that night?",
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Duty Roster Track",
+                    "deciders": [
+                        "Petrov",
+                        "Colonel Ivanov (scheduled but sick)",
+                        "Major Volkov (on leave)"
+                    ],
+                    "terminal": "CONSOLE → Whoever sits here becomes 'the one who decided'",
+                    "assignment_logic": "Ivanov got food poisoning. Petrov was backup. Random."
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Training Track",
+                    "deciders": [
+                        "Petrov (engineering background)",
+                        "Volkov (protocol-follower)"
+                    ],
+                    "terminal": "MINDSET → Engineers doubt; soldiers obey",
+                    "assignment_logic": "Petrov's doubt came from his training. Volkov would have reported."
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Family Track",
+                    "deciders": [
+                        "Petrov (son Dmitri, 7)",
+                        "Volkov (childless)"
+                    ],
+                    "terminal": "STAKES → Whose children enter the calculation?",
+                    "assignment_logic": "Petrov thought of Dmitri. Did that matter?"
+                }
+            ],
+            "counterfactual_routing": {
+                "if_Volkov_assigned": "Volkov follows protocol; launches retaliation; world ends",
+                "if_Ivanov_not_sick": "Unknown disposition; 50/50 protocol vs intuition",
+                "if_Petrov_childless": "Does he still hesitate? Unknown."
+            },
+            "meta_lesson": "The world was saved by food poisoning and an engineering degree. History's hinge: a scheduling coincidence.",
+            "output_prompt": "Write the recommendation letter that got Petrov assigned to the backup rotation."
+        },
+        {
+            "flow_id": "FLIP_002",
+            "title": "The Wiener Trajectory",
+            "meta_system": "Academic Career Pipeline + Timeline of Guilt",
+            "question": "How did Wiener become the one who HAD to refuse?",
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Expertise Track",
+                    "deciders": [
+                        "Wiener",
+                        "von Neumann",
+                        "Shannon"
+                    ],
+                    "terminal": "CAPABILITY → Only these three could build SAGE",
+                    "assignment_logic": "Small pool of mathematicians with relevant skills circa 1947"
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Conscience Track",
+                    "deciders": [
+                        "Wiener (saw Hiroshima consequence)",
+                        "von Neumann (rationalized)"
+                    ],
+                    "terminal": "GUILT → Who carries the weight?",
+                    "assignment_logic": "Wiener's wartime work made him directly complicit in fire control"
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Platform Track",
+                    "deciders": [
+                        "Wiener (public intellectual)",
+                        "unnamed engineers (anonymous)"
+                    ],
+                    "terminal": "VOICE → Who can be heard refusing?",
+                    "assignment_logic": "Wiener's fame made his refusal meaningful; others' refusals invisible"
+                }
+            ],
+            "counterfactual_routing": {
+                "if_von_Neumann_guilty": "Game theory takes ethical turn; MAD never normalized",
+                "if_Wiener_anonymous": "Refusal goes unnoticed; no precedent set",
+                "if_Shannon_speaks": "Information theory community politicized early"
+            },
+            "meta_lesson": "Wiener became 'the refuser' because his guilt was public and his platform was large. The system routed conscience to visibility.",
+            "output_prompt": "Write the acceptance letter Wiener almost sent before choosing refusal."
+        },
+        {
+            "flow_id": "FLIP_003",
+            "title": "The Boisjoly Elevation",
+            "meta_system": "Corporate Engineering Hierarchy + Escalation Paths",
+            "question": "Why did Boisjoly become the voice the system silenced?",
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Technical Expertise Track",
+                    "deciders": [
+                        "Boisjoly (O-ring specialist)",
+                        "20 other engineers (generalists)"
+                    ],
+                    "terminal": "KNOWLEDGE → Only one person truly understood the failure mode",
+                    "assignment_logic": "Specialization created a single point of understanding"
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Documentation Track",
+                    "deciders": [
+                        "Boisjoly (wrote memos)",
+                        "Silent engineers"
+                    ],
+                    "terminal": "RECORD → Who created paper trail?",
+                    "assignment_logic": "Memo-writing habit made Boisjoly's concerns visible post-mortem"
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Management Pressure Track",
+                    "deciders": [
+                        "Boisjoly (told to take off engineering hat)",
+                        "Management (told to think about schedule)"
+                    ],
+                    "terminal": "ROLE → Who wears which hat when?",
+                    "assignment_logic": "The hat question forces identity split"
+                }
+            ],
+            "counterfactual_routing": {
+                "if_generalist_assigned": "Less specific warning; easier to dismiss",
+                "if_no_memos": "No post-mortem evidence; blame diffused",
+                "if_management_listened": "Launch delayed; Challenger never iconic"
+            },
+            "meta_lesson": "Boisjoly became the Cassandra because the system required specialist knowledge, documented warnings, AND management override. All three conditions met.",
+            "output_prompt": "Write the performance review Boisjoly received six months before Challenger."
+        },
+        {
+            "flow_id": "FLIP_004",
+            "title": "The Snowden Selection",
+            "meta_system": "Contractor Access Policy + Ideological Formation",
+            "question": "How did someone with Snowden's values get access to PRISM?",
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Security Clearance Track",
+                    "deciders": [
+                        "Snowden (passed polygraph)",
+                        "1000s of other contractors"
+                    ],
+                    "terminal": "ACCESS → Who gets to see what surveillance does?",
+                    "assignment_logic": "Contractor outsourcing created access without loyalty screening"
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Value Formation Track",
+                    "deciders": [
+                        "Snowden (libertarian-leaning, internet native)",
+                        "Cold War generation (state loyalists)"
+                    ],
+                    "terminal": "CONSCIENCE → Who sees surveillance as violation?",
+                    "assignment_logic": "Generational shift in privacy norms"
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Opportunity Track",
+                    "deciders": [
+                        "Snowden (Hawaii posting, system admin)",
+                        "Analysts (could see but not copy)"
+                    ],
+                    "terminal": "CAPABILITY → Who has the technical means?",
+                    "assignment_logic": "Sysadmin role gave copy access others lacked"
+                }
+            ],
+            "counterfactual_routing": {
+                "if_old_guard_assigned": "No leak; surveillance continues unknown",
+                "if_analyst_not_sysadmin": "Knows but cannot extract; internal report only",
+                "if_no_contract_culture": "Career employees less likely to leak"
+            },
+            "meta_lesson": "The NSA's contractor policies created the very access vulnerability that enabled the most damaging leak in its history. The system routed its own exposure.",
+            "output_prompt": "Write the job posting that attracted Snowden to the NSA contract."
+        },
+        {
+            "flow_id": "FLIP_005",
+            "title": "The Gaddi Appointment",
+            "meta_system": "Platform Moderation Career + Crisis Timing",
+            "question": "Why was THIS trust & safety lead making THIS call?",
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Career Trajectory Track",
+                    "deciders": [
+                        "Trust & Safety Lead (promoted 6 months prior)",
+                        "Predecessor (left for competitor)"
+                    ],
+                    "terminal": "AUTHORITY → Who has sign-off when crisis hits?",
+                    "assignment_logic": "Promotion timing placed specific individual in seat"
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Election Proximity Track",
+                    "deciders": [
+                        "October 2020 team",
+                        "Any other month's team"
+                    ],
+                    "terminal": "PRESSURE → When maximizes scrutiny?",
+                    "assignment_logic": "Time of year creates pressure gradient"
+                },
+                {
+                    "track_id": "T3",
+                    "label": "External Briefing Track",
+                    "deciders": [
+                        "Briefed by FBI",
+                        "Not briefed"
+                    ],
+                    "terminal": "PRIMING → How does external input shape judgment?",
+                    "assignment_logic": "FBI hack-and-leak warning preceded decision by days"
+                }
+            ],
+            "counterfactual_routing": {
+                "if_predecessor_stayed": "Different judgment style; unknown outcome",
+                "if_June_not_October": "Lower stakes; less retrospective blame",
+                "if_no_FBI_briefing": "Less primed to see hack; maybe allows spread"
+            },
+            "meta_lesson": "The trust & safety lead became 'the censor' or 'the protector' based on timing, briefings, and career accidents. History assigned the symbol.",
+            "output_prompt": "Write the Slack message from the predecessor explaining why they left."
+        },
+        {
+            "flow_id": "FLIP_006",
+            "title": "The Beer Invitation",
+            "meta_system": "International Academic Networks + Revolutionary Timing",
+            "question": "How did a British cybernetician end up building Chilean socialism?",
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Reputation Track",
+                    "deciders": [
+                        "Beer (published Brain of the Firm)",
+                        "Other management consultants"
+                    ],
+                    "terminal": "SELECTION → Who gets invited by revolutionaries?",
+                    "assignment_logic": "Beer's book reached Chilean planners; he was willing"
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Willingness Track",
+                    "deciders": [
+                        "Beer (adventurous, idealistic)",
+                        "Risk-averse academics"
+                    ],
+                    "terminal": "COMMITMENT → Who says yes to revolutionary experiment?",
+                    "assignment_logic": "Most academics declined the Chile posting; Beer accepted"
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Passport Track",
+                    "deciders": [
+                        "Beer (British citizen)",
+                        "American consultant (visa complications)"
+                    ],
+                    "terminal": "MOBILITY → Who can leave when the tanks come?",
+                    "assignment_logic": "British passport enabled escape; American might not"
+                }
+            ],
+            "counterfactual_routing": {
+                "if_Beer_declines": "Chilean project less sophisticated; maybe survives longer obscurely",
+                "if_American_invited": "Complicates US narrative; possible asset rather than idealist",
+                "if_Beer_martyred": "Cybersyn becomes cause célèbre; international incident"
+            },
+            "meta_lesson": "Beer became 'the Cybersyn guy' because his book circulated, his ego was large, and his passport was British. History routes visionaries by logistics.",
+            "output_prompt": "Write the letter from the Chilean ministry that first invited Beer to Santiago."
+        },
+        {
+            "flow_id": "FLIP_007",
+            "title": "The Alignment Researcher Assignment",
+            "meta_system": "ML Career Pipeline + Lab Sorting",
+            "question": "Why do safety-minded people end up at capability-first labs?",
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "PhD Placement Track",
+                    "deciders": [
+                        "Safety Researcher (top school)",
+                        "No-name PhD (ignored)"
+                    ],
+                    "terminal": "ACCESS → Who gets hired at frontier labs?",
+                    "assignment_logic": "Elite credentials required to join capability frontier"
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Mission Orientation Track",
+                    "deciders": [
+                        "Safety Researcher (wants to slow)",
+                        "Capability Researcher (wants to build)"
+                    ],
+                    "terminal": "TENSION → Who experiences internal conflict?",
+                    "assignment_logic": "Same labs hire both; culture clash internal"
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Equity Vesting Track",
+                    "deciders": [
+                        "Safety Researcher (has unvested equity)",
+                        "Academic (no financial stake)"
+                    ],
+                    "terminal": "CAPTURE → How much do golden handcuffs matter?",
+                    "assignment_logic": "4-year vesting schedule constrains exit timing"
+                }
+            ],
+            "counterfactual_routing": {
+                "if_academic_track": "Less access; more freedom; less influence",
+                "if_capability_orientation": "No internal tension; ships faster; regrets later",
+                "if_no_equity": "Can whistle-blow without financial sacrifice"
+            },
+            "meta_lesson": "The safety researcher becomes the 'responsible dissenter' because the career pipeline routes competence toward capability labs, then asks for ethics. The trap is structural.",
+            "output_prompt": "Write the internal transfer request the safety researcher sends after the training run they couldn't stop."
+        },
+        {
+            "flow_id": "FLIP_008",
+            "title": "The Fisher Inheritance",
+            "meta_system": "Academic Endowment Structures + Disciplinary Formation",
+            "question": "How did the inventor of ANOVA become entangled with eugenics?",
+            "tracks": [
+                {
+                    "track_id": "T1",
+                    "label": "Funding Track",
+                    "deciders": [
+                        "Fisher (Galton Chair holder)",
+                        "Unfunded statisticians"
+                    ],
+                    "terminal": "OBLIGATION → Who must satisfy eugenic endowment?",
+                    "assignment_logic": "Galton endowment REQUIRED eugenic research"
+                },
+                {
+                    "track_id": "T2",
+                    "label": "Methods Development Track",
+                    "deciders": [
+                        "Fisher (brilliant methodologist)",
+                        "Applied researchers"
+                    ],
+                    "terminal": "TOOL CREATION → Who builds techniques that outlast intentions?",
+                    "assignment_logic": "Methods are more durable than ethics"
+                },
+                {
+                    "track_id": "T3",
+                    "label": "Citation Track",
+                    "deciders": [
+                        "Fisher (frequently cited)",
+                        "Uncited statisticians"
+                    ],
+                    "terminal": "ASSOCIATION → Whose name travels with the technique?",
+                    "assignment_logic": "Prominence means association with all applications"
+                }
+            ],
+            "counterfactual_routing": {
+                "if_unfunded": "Fisher never develops ANOVA; statistics develops differently",
+                "if_anonymous_method": "Technique spreads without personal association",
+                "if_endowment_rejected": "Fisher's career damaged; methods delayed; eugenics continues anyway"
+            },
+            "meta_lesson": "Fisher became 'the statistician who enabled eugenics' because the funding structure REQUIRED it, his brilliance created durable tools, and his fame linked name to method. The contamination was structural, not personal.",
+            "output_prompt": "Write the endowment terms that Fisher had to sign to accept the Galton Chair."
+        }
+    ],
+    "universal_pattern": {
+        "observation": "Across all flipped scenarios, deciders were ASSIGNED to their dilemmas by systems they didn't control: scheduling, career pipelines, funding structures, citizenship, timing.",
+        "implication": "Ethical analysis usually asks: 'What should the decider do?' This schema asks: 'Why was this person the decider at all?'",
+        "intervention_points": [
+            "Duty rosters and scheduling systems",
+            "Career pipelines and credential requirements",
+            "Funding structures and endowment strings",
+            "Timing of crises relative to career moments",
+            "Access policies that create capability without loyalty",
+            "Platform and visibility gradients that determine whose voice matters"
+        ],
+        "design_principle": "If you want different outcomes, don't just train better deciders. Redesign the systems that assign people to decision points."
+    }
+}

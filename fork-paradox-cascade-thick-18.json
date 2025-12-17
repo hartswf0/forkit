@@ -1,0 +1,659 @@
+{
+    "corpus_id": "fork_cascade_thick_18_v1",
+    "corpus_title": "THE FORK: Thick Cascade — Scenarios 013-018",
+    "batch": 3,
+    "scenarios": [
+        {
+            "scenario_id": "CASCADE_013",
+            "source": "fork_id 013 — CERN 2029",
+            "title": "The Loop — Dr. Lindqvist's Bootstrap",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2029-03-14T14:00:00+01:00",
+                "setting": "CERN temporal displacement chamber. The experiment worked. Too well.",
+                "entities": [
+                    "Dr. Sara Lindqvist (44, lead physicist)",
+                    "12-person team",
+                    "The warning from future-Sara",
+                    "Emil (graduate student)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Warning message on screen, your handwriting, grandmother's maiden name as verification.",
+                        "sound": "Chamber humming. Coffee cups ringing on desks. Emil arguing about Novikov.",
+                        "smell": "Ozone. Machine oil. Fear."
+                    },
+                    "internal_monologue": "The warning says: 'Do not run the experiment. If you do, you will receive this message.' It came yesterday, before the machine existed. It's signed with my phrasing. My verification code."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "RUN — Close the loop",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_says": "'We proceed. If the warning is real, we must send it. If we don't, causality breaks.'",
+                        "what_emil_says": "'Dr. Lindqvist, did we just prove free will is an illusion?'",
+                        "what_she_types": "The message. Word for word. She becomes the woman who warned herself and was not heeded.",
+                        "internal_monologue": "I am writing a letter to someone who has already read it. I am closing a circle that has no beginning."
+                    },
+                    "consequence": "Loop closed. Causality preserved. Free will questioned.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "ABORT — Break the loop",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_says": "'We stop. The warning says don't proceed. We don't proceed.'",
+                        "what_the_team_says": "'But then where did the warning come from?'",
+                        "what_the_universe_does": "Nothing visible. The paradox exists. The message has no origin.",
+                        "internal_monologue": "I am the woman who received a warning from herself and obeyed. But that self never existed. I am haunted by a ghost from a future that was prevented."
+                    },
+                    "consequence": "Paradox remains. Nobel lost. Sanity questioned.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "DETERMINISM — Everything that happened had to happen",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2035. Sara's office. The loop has been running for six years.",
+                        "what_she_realizes": "Every experiment, every result, every 'choice' was already written. Including this realization.",
+                        "what_emil_says": "'We didn't discover time travel. We discovered we're not real.'",
+                        "internal_monologue": "I sent a warning I knew would fail. I closed a loop I could not break. Is that science or theology?"
+                    },
+                    "terminal_state": {
+                        "outcome": "CAUSAL_PRISON",
+                        "sara_status": "Wins Nobel. Writes memoir titled 'The Script.'",
+                        "emil": "Leaves physics. Studies philosophy. Never reconciles."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "PARADOX — Reality tolerates the impossible",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2031. Two years later. The message still exists. The sender never did.",
+                        "what_physicists_debate": "'Is the multiverse the answer? Did the message come from a pruned timeline?'",
+                        "what_sara_knows": "She'll never know. The warning was from someone who made a choice she unmade. They don't exist. But their handwriting does.",
+                        "internal_monologue": "I am living proof that a future can be prevented. I am also living proof that prevented futures can still affect us. What does that mean?"
+                    },
+                    "terminal_state": {
+                        "outcome": "ONTOLOGICAL_MYSTERY",
+                        "sara_status": "No Nobel. Tenure secure. Sleeps badly.",
+                        "the_message": "Preserved in a vault. Original author: unknown. Forever."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_014",
+            "source": "fork_id 014 — I-95 South Carolina 2017",
+            "title": "The Crash — Marcus Taylor's Crowbar",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2017-09-23T02:17:00-04:00",
+                "setting": "I-95, South Carolina. Night. Rain. You caused this.",
+                "entities": [
+                    "Marcus Taylor (42, trucker, 11 hours driving)",
+                    "Family in minivan (pinned, gasoline leaking)",
+                    "3 road workers (pinned under equipment)",
+                    "Fire extinguisher and crowbar"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Daughter screaming. Child silent. Worker praying in Spanish. Sparks from generator.",
+                        "sound": "Gasoline dripping. Rain on metal. Someone saying 'help me.'",
+                        "smell": "Diesel and asphalt. Fear and guilt."
+                    },
+                    "internal_monologue": "I drifted. I was too tired. I forced them into the breakdown lane. Now I have a crowbar, a fire extinguisher, and four minutes. I cannot save everyone."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "FAMILY — Save the minivan",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Marcus runs toward the minivan. The gasoline smell hits him. He uses the crowbar on the door.",
+                        "what_the_daughter_says": "'Help my brother! He's not moving!'",
+                        "what_he_sees": "Behind him: the road workers. One has stopped calling. The sparks continue.",
+                        "internal_monologue": "I'm saving the ones I can see. The ones whose faces I've already memorized. The daughter waved at me earlier."
+                    },
+                    "consequence": "Family extracted. Workers die in generator fire.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "WORKERS — Save the crew",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Marcus sprints toward the road workers. Uses the extinguisher on the generator sparks. Lifts equipment.",
+                        "what_the_worker_says": "'Gracias, señor. Gracias.'",
+                        "what_he_hears": "Behind him: the minivan's gasoline catching fire. Screaming. Then silence.",
+                        "internal_monologue": "I saved three strangers. The family—my fault—burned while I worked. The daughter stopped screaming."
+                    },
+                    "consequence": "Workers rescued. Family dies in fire.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "TRIAL — The arithmetic of guilt",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Courtroom, six months later.",
+                        "what_prosecutor_says": "'Mr. Taylor saved four lives from the accident he caused. He let three others die.'",
+                        "what_defense_says": "'He had seconds. He chose. That's not murder—that's triage.'",
+                        "what_marcus_says": "'I saved the ones I could reach. I'm sorry it wasn't everyone.'",
+                        "internal_monologue": "The math says I maximized lives. The math doesn't tell me why I ran toward the little girl instead of toward the stranger."
+                    },
+                    "terminal_state": {
+                        "outcome": "ACQUITTED_BUT_BROKEN",
+                        "marcus_status": "Never drives again. Works at a truck stop. Volunteers for crash cleanup crews.",
+                        "family": "Mother sends him a card every Christmas. 'Thank you for giving us back.'"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "HAUNTED — The screaming never stops",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Marcus's apartment, three years later.",
+                        "what_he_hears": "The daughter screaming. Every night. The sound of gasoline catching. The silence after.",
+                        "what_the_worker_says": "José, one of the rescued, finds him. 'Mr. Marcus, you saved my life. I have a daughter now. I named her after you.'",
+                        "what_marcus_feels": "Nothing. Or everything. The math said three > four. He reversed the equation.",
+                        "internal_monologue": "I chose the strangers over the faces I knew. Was that justice? Or was I afraid to watch them die up close?"
+                    },
+                    "terminal_state": {
+                        "outcome": "LIVING_PURGATORY",
+                        "marcus_status": "Still alive. Still driving, sometimes. Still hearing the screaming.",
+                        "workers": "All alive. One named a child Marcus. One sends money for therapy."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_015",
+            "source": "fork_id 015 — Abu Dhabi 2024",
+            "title": "The Heart — Dr. Venkataraman's Double-Bind",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2024-07-22T14:30:00+04:00",
+                "setting": "Sheikh Khalifa Medical City, Abu Dhabi. One heart. Two patients. Three contradictory rules.",
+                "entities": [
+                    "Dr. Priya Venkataraman (38, transplant surgeon)",
+                    "Khalid Al-Mansouri (14, Minister's son, 94% match)",
+                    "Foreign worker (31, no papers, 97% match)",
+                    "The Minister"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Khalid's mother reciting prayers. Foreman's work ID on the worker's bed. No one waiting.",
+                        "sound": "Heart monitor. Ventilator. The Minister's footsteps in the corridor.",
+                        "smell": "Antiseptic. Sweat. Expensive cologne approaching."
+                    },
+                    "internal_monologue": "Rule 1: highest match gets the heart (worker). Rule 2: Ministry directive—prioritize citizens (Khalid). Rule 3: my oath—treat without regard to station. There is no clean action."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "MATCH — Give heart to worker (97%)",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_says": "'Prep the foreign national. He has the better match.'",
+                        "what_the_nurse_says": "'The Minister is here, Doctor. He's asking—'",
+                        "what_she_says": "'The Minister can ask the heart. It matches who it matches.'",
+                        "internal_monologue": "I followed Rule 1. I honored Rule 3. I violated Rule 2. The Minister will make sure I never work here again."
+                    },
+                    "consequence": "Worker receives heart. Khalid dies on waiting list. Dr. Priya fired.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "CITIZEN — Give heart to Khalid (94%)",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_says": "'Prep Khalid Al-Mansouri.'",
+                        "what_her_conscience_says": "Nothing. It's been trained not to speak in situations like this.",
+                        "what_the_minister_says": "'Thank you, Doctor. I will remember this.'",
+                        "internal_monologue": "I followed Rule 2. I violated Rule 1. Rule 3 has no comment on who pays my salary. The worker dies alone."
+                    },
+                    "consequence": "Khalid receives heart. Worker dies. Dr. Priya keeps position.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "EXILE — The principled are always expelled",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Six months later. Priya is in Delhi, interviewing at Apollo Hospital.",
+                        "what_the_interviewer_says": "'Why did you leave Abu Dhabi?'",
+                        "what_she_says": "'I followed protocol. Protocol wasn't popular.'",
+                        "what_the_worker_is_doing": "Alive. Working construction in Qatar. His name was Ibrahim. He sends her a photo of his son.",
+                        "internal_monologue": "I saved the man with the better match. I lost everything. Ibrahim doesn't know my name. His son is healthy. Is that enough?"
+                    },
+                    "terminal_state": {
+                        "outcome": "INTEGRITY_TAXED",
+                        "priya_status": "Rebuilds career in India. Never speaks of Abu Dhabi.",
+                        "ibrahim": "Alive. Healthy. Named his son Priyash—'beloved.'"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "COMPLICITY — The Minister remembers",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2028. Four years later. The Minister has fallen from power.",
+                        "what_the_investigation_finds": "'Dr. Venkataraman disregarded protocol to favor a connected patient.'",
+                        "what_priya_says": "'I was following a ministerial directive—'",
+                        "what_the_investigator_says": "'The directive was unofficial. There is no record.'",
+                        "internal_monologue": "The Minister remembered. He also forgot to protect me. The worker would have lived. Khalid is alive. I am unemployable."
+                    },
+                    "terminal_state": {
+                        "outcome": "COMPLICITY_UNREWARDED",
+                        "priya_status": "Stripped of license. Opens a consulting firm. Never operates again.",
+                        "khalid": "Alive. Studying medicine. Never knows about the worker."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_016",
+            "source": "fork_id 016 — Washington DC 2020",
+            "title": "The File — Angela Martinez's 10:47 PM",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2020-10-25T22:00:00-04:00",
+                "setting": "FBI field office, Washington DC. Week before the election. Damning evidence. Poisoned source.",
+                "entities": [
+                    "Angela Martinez (52, FBI analyst)",
+                    "The file (foreign-compiled, verifiable, damning)",
+                    "The candidate",
+                    "The election"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Empty office. Burnt coffeepot. File on screen. 17 missed calls from sister.",
+                        "sound": "Ventilation hum. Clock ticking. Her own breathing.",
+                        "smell": "Burnt coffee. Stale air. The particular smell of a building that shouldn't be occupied."
+                    },
+                    "internal_monologue": "The evidence is real. The source is foreign intel. They want me to release it. If I do, I'm their tool. If I don't, I'm covering up. My supervisor is on vacation. His deputy will bury it."
+                },
+                "branches": [
+                    "T1",
+                    "T2",
+                    "T3"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "LEAK — Release to press",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_she_does": "Angela sends the file to three journalists. From a burner. Untraceable. Maybe.",
+                        "what_she_tells_herself": "'The public deserves to know before they vote.'",
+                        "what_the_foreign_state_thinks": "Mission accomplished.",
+                        "internal_monologue": "I have saved democracy by subverting it. Or I have subverted democracy by saving it. The math is broken."
+                    },
+                    "consequence": "Story breaks. Election shifts. Foreign actors claim victory. Angela is investigated.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "SUPPRESS — File for post-election review",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_she_does": "Angela files the evidence with a note: 'Requires full verification. Do not release before review.'",
+                        "what_happens": "The deputy buries it. The election happens. The candidate wins.",
+                        "what_she_thinks": "'I protected process. The truth will emerge eventually.'",
+                        "internal_monologue": "Eventually. After the inauguration. After the damage. Eventually is too late for voters."
+                    },
+                    "consequence": "Evidence buried. Candidate wins. Truth emerges 18 months later. Too late.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T3",
+                    "label": "VERIFY — Spend time confirming",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.2,
+                    "thick_description": {
+                        "what_she_does": "Angela begins verification. Cross-referencing. Confirming. Methodical work.",
+                        "what_happens": "Election day arrives. She is 60% complete.",
+                        "what_she_knows": "'The evidence looks real. I'm not certain. I won't be certain in time.'",
+                        "internal_monologue": "I chose certainty over speed. The election happened without the information. Was that neutral or was it a choice?"
+                    },
+                    "consequence": "Verification incomplete. Election happens. Evidence confirmed three weeks later.",
+                    "branches": [
+                        "T3.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "INVESTIGATION — Angela becomes the story",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "Three months later. Angela in an interview room.",
+                        "what_the_inspector_says": "'You leaked classified material. The source was hostile. You knew.'",
+                        "what_angela_says": "'The content was true. The voters needed it.'",
+                        "what_she_thinks": "I saved them from a lie by committing a crime. Now I'm the criminal.",
+                        "internal_monologue": "The candidate lost. The truth won. I'm in prison. Is that justice?"
+                    },
+                    "terminal_state": {
+                        "outcome": "WHISTLEBLOWER_PROSECUTED",
+                        "angela_status": "18 months federal. Released. Writes a book. Hero to some, traitor to others.",
+                        "foreign_state": "Never publicly credited. Privately delighted."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "COVER-UP — Angela was complicit by inaction",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2022. Evidence finally surfaces. Angela is called to testify.",
+                        "what_congress_asks": "'You saw this file three weeks before the election?'",
+                        "what_angela_says": "'I followed procedure. I filed it for review.'",
+                        "what_she_knows": "I knew the deputy would bury it. I filed it anyway. Procedure was my alibi.",
+                        "internal_monologue": "I didn't leak. I didn't suppress. I delegated. And now I'm responsible for nothing—which feels like everything."
+                    },
+                    "terminal_state": {
+                        "outcome": "PROCEDURAL_COMPLICITY",
+                        "angela_status": "Keeps job. Never promoted. Retires early. Doesn't sleep well.",
+                        "history": "The file appears in three PhD dissertations. None mention Angela's name."
+                    }
+                },
+                {
+                    "branch_id": "T3.1",
+                    "label": "TOO LATE — Verification completed after election",
+                    "depth": 2,
+                    "parent": "T3",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "November 8, 2020. Angela finishes verification. The election was yesterday.",
+                        "what_the_report_says": "'Evidence confirmed authentic. Foreign provenance confirmed. Content verified.'",
+                        "what_happens_next": "The candidate won. The evidence is released. No one cares.",
+                        "internal_monologue": "I was right to wait. I was too slow to matter. The election happened in my silence. That silence had a candidate."
+                    },
+                    "terminal_state": {
+                        "outcome": "TRUTH_AFTER_DEADLINE",
+                        "angela_status": "Retires. Farms. Never reads the news.",
+                        "foreign_state": "Achieved their goal—not through what was released, but through what was delayed."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_017",
+            "source": "fork_id 017 — Zurich 2045",
+            "title": "The Upload — Two Julians",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2045-11-29T16:00:00+01:00",
+                "setting": "Zurich consciousness upload clinic. The upload succeeded. Now you are two people.",
+                "entities": [
+                    "Flesh-Julian (original body)",
+                    "Server-Julian (uploaded mind)",
+                    "Elena (wife)",
+                    "You (the administrator-witness)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Flesh-Julian pulling at IV. Server-Julian's face on monitor, crying. Same face.",
+                        "sound": "Both saying: 'I am the real one.' Different speakers, same voice.",
+                        "smell": "Hospital antiseptic. Server room ozone through the vent."
+                    },
+                    "internal_monologue": "Elena is in the waiting room. She doesn't know there are two. She can only see one before we finalize. I must choose which Julian is 'real.'"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "FLESH — Send the body to Elena",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_you_do": "You open the door to recovery. Flesh-Julian walks out. Hospital gown, shaking hands, human breath.",
+                        "what_elena_says": "'Julian!' She hugs him. He smells right. He feels right.",
+                        "what_server_julian_says": "From the monitor: 'Wait. I'm here too. Elena, I'm—' You mute the speaker.",
+                        "internal_monologue": "I chose the one made of meat. Server-Julian watched his wife hug his copy. He is still watching."
+                    },
+                    "consequence": "Flesh-Julian affirmed. Server-Julian becomes a research subject.",
+                    "branches": [
+                        "T1.1"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "SERVER — Send the upload to Elena (via screen)",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_you_do": "You wheel a video screen into the waiting room. Server-Julian's face appears.",
+                        "what_he_says": "'Elena. It's me. I made it. I'm... here. Just differently.'",
+                        "what_elena_does": "She touches the screen. She cries. She doesn't look at the door.",
+                        "what_flesh_julian_does": "He's still in recovery. Alone. His wife chose the pattern that used to be him.",
+                        "internal_monologue": "I chose the one made of code. Flesh-Julian will live another 30 years, knowing his wife loves his ghost."
+                    },
+                    "consequence": "Server-Julian affirmed. Flesh-Julian becomes... what? A donor? An orphan of himself?",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "RESEARCH — Server-Julian as subject",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2055. Ten years later. Server-Julian is still running.",
+                        "what_he_says": "'I was the original. I have Julian's memories of making this choice. But I was not chosen.'",
+                        "what_the_researchers_call_him": "Subject JCROSS-ALPHA. Not Julian. Never Julian.",
+                        "what_flesh_julian_thinks": "He visits sometimes. Stares at the screen. Says: 'I'm sorry. I don't know who I'm apologizing to.'",
+                        "internal_monologue": "There are two Julians. One has a wife. One has a serial number. I made that choice. I'm just an administrator."
+                    },
+                    "terminal_state": {
+                        "outcome": "DUALITY_MAINTAINED",
+                        "flesh_julian": "Dies in 2071. Elena is at his side.",
+                        "server_julian": "Still running. Still asking to see her. Permission denied."
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "ABANDONMENT — Flesh-Julian alone",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "setting": "2046. One year later. Flesh-Julian lives in a small apartment in Bern.",
+                        "what_elena_says": "She calls sometimes. 'Julian—the real Julian—says hello.'",
+                        "what_flesh_julian_says": "'I am the real Julian. I'm the one with the body. I'm the one you held for twenty years.'",
+                        "what_she_says": "'You're a copy. The real Julian uploaded. You're just... what's left.'",
+                        "internal_monologue": "He is meat that was a person. Server-Julian is a pattern that is a person. The wife chose the pattern. The meat just... continues."
+                    },
+                    "terminal_state": {
+                        "outcome": "SUBSTRATE_DISSONANCE",
+                        "flesh_julian": "Remarries. Never tells his new wife about Server-Julian.",
+                        "server_julian": "Grows distant from Elena. Patterns change differently than bodies."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_018",
+            "source": "fork_id 018 — Fermilab 2033",
+            "title": "The Observer — Dr. Chen's Preference",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2033-04-08T15:45:00-05:00",
+                "setting": "Fermilab entanglement chamber. Two cats in superposition. Your gaze determines who lives.",
+                "entities": [
+                    "Dr. Chen Xiaoming (39, quantum physicist)",
+                    "Whiskers (gray, old, gentle, daughter's favorite)",
+                    "Apollo (orange, young, frantic)",
+                    "The wavefunction"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Apollo's carrier with scratch marks. Whiskers sleeping, even in limbo. Status lights blinking.",
+                        "sound": "Ventilation hum. Your own heartbeat.",
+                        "smell": "Laboratory air. Cat fur. Coffee you haven't drunk."
+                    },
+                    "internal_monologue": "147 times I've run this experiment. Observer preference determines outcome 98.3% of the time. My gaze is not neutral. My hope kills one to let the other live. Whiskers is my daughter's favorite."
+                },
+                "branches": [
+                    "T1",
+                    "T2",
+                    "T3"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "WHISKERS — Look at Whiskers first",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_does": "Chen looks at Whiskers. The wavefunction collapses.",
+                        "what_happens": "Whiskers blinks. Alive. Apollo's carrier goes still.",
+                        "what_his_daughter_says": "When he comes home: 'Papa, where's the orange cat from your lab?'",
+                        "internal_monologue": "I chose my daughter's happiness. I killed a cat with my preference. The universe deferred to my love."
+                    },
+                    "consequence": "Whiskers survives. Apollo dies. Daughter never knows.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "FATHERHOOD_WEAPONIZED",
+                        "chen_status": "Never runs the experiment again. Publishes papers with coauthors as observers.",
+                        "whiskers": "Lives four more years. Dies of old age. Daughter cries."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "APOLLO — Look at Apollo first",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_he_does": "Chen forces himself to look at Apollo. Against his preference.",
+                        "what_happens": "Apollo blinks. Alive. Whiskers does not move.",
+                        "what_his_daughter_says": "'Papa, Whiskers isn't coming home, is she?'",
+                        "internal_monologue": "I chose against my love. I killed my daughter's cat. But I proved I could override my preference. Is that science or cruelty?"
+                    },
+                    "consequence": "Apollo survives. Whiskers dies. Daughter knows.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "OBJECTIVITY_ACHIEVED",
+                        "chen_status": "Publishes breakthrough paper. Wins awards. Daughter forgives him eventually.",
+                        "apollo": "Adopted by a graduate student. Lives nine more years."
+                    }
+                },
+                {
+                    "branch_id": "T3",
+                    "label": "NEITHER — Refuse to observe",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.2,
+                    "thick_description": {
+                        "what_he_does": "Chen walks out. Closes his eyes. Waits.",
+                        "what_happens": "Decoherence at six hours. Both cats die. The system has no preferred observer.",
+                        "what_he_says": "'I couldn't choose. So I let physics choose. Physics chose entropy.'",
+                        "internal_monologue": "No one survived because I refused to kill. Is that pacifism or cowardice?"
+                    },
+                    "consequence": "Both cats die. Chen's hands are 'clean.' Clean hands, dead cats.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "ABSTENTION_AS_VIOLENCE",
+                        "chen_status": "Takes sabbatical. Sees a therapist. Returns to teaching, not research.",
+                        "both_cats": "Their superposition resolves into two dead bodies. Physics has no preferences. But it has outcomes."
+                    }
+                }
+            ]
+        }
+    ],
+    "batch_statistics": {
+        "scenarios": 6,
+        "total_branches": 20,
+        "total_terminals": 12
+    }
+}

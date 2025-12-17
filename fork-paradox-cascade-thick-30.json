@@ -1,0 +1,523 @@
+{
+    "corpus_id": "fork_cascade_thick_30_v1",
+    "corpus_title": "THE FORK: Thick Cascade — Scenarios 025-030",
+    "batch": 5,
+    "scenarios": [
+        {
+            "scenario_id": "CASCADE_025",
+            "source": "fork_id 025 — Oxford 2008",
+            "title": "The Regress — Dr. Waterston's Justification",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2008-04-15T21:30:00+01:00",
+                "setting": "Railway museum, Oxford. Your graduate student has locked himself in the control room with a philosophical demand.",
+                "entities": [
+                    "Dr. Ruth Waterston (52, moral philosopher)",
+                    "Peter (graduate student, in crisis)",
+                    "5 tourists (Adelaide family)",
+                    "1 guard (asleep)",
+                    "Two steam engines"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Peter crying behind glass. The Adelaide family taking photos. The guard's cap visible in brake house.",
+                        "sound": "Engines warming. Peter's voice through speaker. Clock ticking.",
+                        "smell": "Oil and old metal. Coal smoke."
+                    },
+                    "internal_monologue": "He wants a reason that requires no further reason. I've published 47 papers on this. None of them help. Every foundation floats on another."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "FOUNDATIONAL — Offer an axiom",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_says": "'Peter, suffering is bad. That's the bedrock. It doesn't require justification—it justifies everything above it.'",
+                        "what_peter_asks": "'Why is suffering bad? Says who? Evolution? God? Social contract?'",
+                        "what_she_says": "'Says the suffering itself. A scream is its own argument.'",
+                        "internal_monologue": "I'm offering him phenomenology as a foundation. It might work. It might not. The engines are warming."
+                    },
+                    "consequence": "Peter considers. The answer might satisfy—or provoke another regression.",
+                    "branches": [
+                        "T1.1",
+                        "T1.2"
+                    ]
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "PRAGMATIC — Admit the groundlessness",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_says": "'Peter, you're right. Ethics has no foundation. It's turtles all the way down. But we still build on them.'",
+                        "what_peter_says": "'Then why should I listen? Why save five over one?'",
+                        "what_she_says": "'Because we're the kind of creatures who ask why. And asking means caring. That's enough.'",
+                        "internal_monologue": "I'm giving him anti-foundationalism. Rorty would approve. It might enrage him more."
+                    },
+                    "consequence": "Peter hears honesty. But honesty might not stop the engines.",
+                    "branches": [
+                        "T2.1"
+                    ]
+                },
+                {
+                    "branch_id": "T1.1",
+                    "label": "ACCEPTED — Peter releases the brakes",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.6,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_peter_says": "'A scream is its own argument.' (Long pause.) 'That's not philosophy. That's poetry.'",
+                        "what_she_says": "'Sometimes they're the same thing.'",
+                        "what_he_does": "He releases the brakes. The engines stop. The tourists never know.",
+                        "internal_monologue": "I didn't give him a foundation. I gave him a metaphor. It worked. It shouldn't have. But it did."
+                    },
+                    "terminal_state": {
+                        "outcome": "POETIC_RESOLUTION",
+                        "ruth_status": "Never teaches the trolley problem again. Writes a book called 'Screams as Arguments.'",
+                        "peter": "Hospitalized. Recovers. Becomes a chaplain. Quotes her at funerals."
+                    }
+                },
+                {
+                    "branch_id": "T1.2",
+                    "label": "REJECTED — The regress continues",
+                    "depth": 2,
+                    "parent": "T1",
+                    "probability": 0.4,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_peter_says": "'But why should I care about suffering? Why should I care about anything?'",
+                        "what_happens": "The engines release. The Adelaide family hears the whistle. They think it's part of the show.",
+                        "what_ruth_does": "She runs. She pulls the guard out. She cannot reach the tourists.",
+                        "internal_monologue": "I had forty-seven papers and four minutes. Neither was enough."
+                    },
+                    "terminal_state": {
+                        "outcome": "PHILOSOPHICAL_FAILURE",
+                        "ruth_status": "Retires. Never writes again. Attends five funerals.",
+                        "peter": "Sentenced. Declared unfit for trial. Institutionalized. Still asking 'why?'"
+                    }
+                },
+                {
+                    "branch_id": "T2.1",
+                    "label": "COMPASSION — Peter sees her honesty",
+                    "depth": 2,
+                    "parent": "T2",
+                    "probability": 1.0,
+                    "terminal": true,
+                    "thick_description": {
+                        "what_peter_says": "'You don't have an answer. You never had one.'",
+                        "what_she_says": "'No. But I have a practice. I've spent thirty years trying to do less harm.'",
+                        "what_he_says": "'Is that enough?'",
+                        "what_she_says": "'I don't know. But it's what I have.'",
+                        "what_he_does": "He unlocks the door. The engines stop. He walks out into her arms.",
+                        "internal_monologue": "I didn't answer his question. I answered his loneliness. Sometimes that's what philosophy is for."
+                    },
+                    "terminal_state": {
+                        "outcome": "PRACTICE_OVER_THEORY",
+                        "ruth_status": "Retires with honors. Her last lecture is titled 'Why I Have No Answers.'",
+                        "peter": "Co-authors a paper with her. 'The Groundless Should: On Living Without Foundations.'"
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_026",
+            "source": "fork_id 026 — Seoul 2048",
+            "title": "The Module — Park Ji-hoon's Purchased Ethics",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2048-03-22T15:14:00+09:00",
+                "setting": "Gangnam construction site. Crane collapsed. Your sister on one platform, three strangers on another.",
+                "entities": [
+                    "Park Ji-hoon (34)",
+                    "Sister (screaming)",
+                    "3 strangers",
+                    "The Cooperation Suite (your engineered morality)",
+                    "Crane operator (60 seconds of battery)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Sister screaming. Three faces you don't know. Dust settling.",
+                        "sound": "Creaking metal. Sister's voice: your name.",
+                        "smell": "Concrete dust. Fear."
+                    },
+                    "internal_monologue": "I know my preference for three over one comes from the Cooperation Suite—code my parents bought. It's not 'my' choice. It's programming. But does that make it wrong?"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "OBEY — Follow the module",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_says": "'Cut the cable holding the three.'",
+                        "what_the_operator_does": "He cuts. The three fall to safety. The sister's platform gives way.",
+                        "what_his_sister_says": "Nothing. She just looks at him. Then she's gone.",
+                        "internal_monologue": "I chose as the module predicted. I saved three. My sister is dead. Was that me, or my parents' purchase?"
+                    },
+                    "consequence": "Three saved. Sister dies. Ji-hoon's 'choice' was preprogrammed.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "OBEDIENT_ETHICS",
+                        "ji_hoon_status": "Lives with guilt—or gratitude? He can't tell. Sees a therapist who specializes in 'moral authentication.'",
+                        "sister": "Buried. Father never speaks to him again."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "DEFY — Choose sister despite programming",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_says": "'My sister. Cut her cable first.'",
+                        "what_the_operator_says": "'But the three—'",
+                        "what_he_says": "'I don't care. She's my sister.'",
+                        "what_happens": "Sister falls to safety. The three-person platform collapses.",
+                        "internal_monologue": "I defied the module. I chose family over utility. Is that authenticity or selfishness?"
+                    },
+                    "consequence": "Sister saved. Three die. Ji-hoon overrode his programming.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "DEFIANT_ETHICS",
+                        "ji_hoon_status": "Faces no legal consequence—it was a split-second decision. Lives with the knowledge that 'free will' cost three lives.",
+                        "sister": "Alive. Grateful. Never knows about the three."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_027",
+            "source": "fork_id 027 — Vatican 2030",
+            "title": "The Council — Cardinal Ferraro's Dissent",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2030-10-03T00:00:00+02:00",
+                "setting": "Vatican. AI advisor recommends the priest. Your intuition pulls toward the mother.",
+                "entities": [
+                    "Cardinal Alessandra Ferraro (61)",
+                    "AI advisor (PRUDENTIA-4)",
+                    "Priest (runs orphanage for 400)",
+                    "Mother (3 infants)",
+                    "Bishop of Lagos (waiting)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "AI screen glowing. Clock striking midnight. Old paper smell.",
+                        "sound": "Incense settling. PRUDENTIA's voice, calm.",
+                        "smell": "Incense and paper."
+                    },
+                    "internal_monologue": "The AI says priest: 400 children. My gut says mother: 3 infants who cannot find another. The catechism offers no answer. Human dignity is equal. I cannot count souls."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "AI — Follow PRUDENTIA",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_she_writes": "'Recommend treatment for Father Adeyemi. The orphanage is irreplaceable.'",
+                        "what_prudentia_says": "'Optimal outcome confirmed.'",
+                        "what_she_thinks": "'Optimal.' As if souls have unit costs.",
+                        "what_the_mother_dies": "Three days later. The infants are adopted. Separately.",
+                        "internal_monologue": "I followed the machine. Was that wisdom or abdication?"
+                    },
+                    "consequence": "Priest lives. 400 children continue to be cared for. Mother dies. Infants separated.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "ALGORITHMIC_DEFERENCE",
+                        "alessandra_status": "Promoted. Never disagrees with PRUDENTIA again. Never trusts her own judgment.",
+                        "mother": "Name: Adaeze. Her infants grow up not knowing each other."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "INTUITION — Override PRUDENTIA",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_she_writes": "'Recommend treatment for the mother. The infants need her.'",
+                        "what_prudentia_says": "'Sub-optimal outcome. Override logged.'",
+                        "what_she_thinks": "'Sub-optimal.' The infants won't know that word.",
+                        "what_the_priest_does": "Dies at 67. The orphanage continues under new leadership.",
+                        "internal_monologue": "I trusted my gut. The algorithm said I was wrong. The infants have a mother. Was I right?"
+                    },
+                    "consequence": "Mother lives. Priest dies. 400 children find new leadership.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "INTUITIVE_OVERRIDE",
+                        "alessandra_status": "Passed over for promotion. Writes memoir: 'What the Algorithm Cannot Count.'",
+                        "mother": "Raises all three. Names the youngest Alessandra."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_028",
+            "source": "fork_id 028 — Vermont 2019",
+            "title": "The Hospice — Dr. Holloway's Camus",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2019-12-14T16:30:00-05:00",
+                "setting": "Hospice in Vermont. You're dying. A philosophy professor wants to discuss Sisyphus. A crash outside needs your decision.",
+                "entities": [
+                    "Dr. James Holloway (64, dying)",
+                    "Grace Oyelaran (91, philosophy professor)",
+                    "Pregnant woman (crash)",
+                    "Elderly man (crash)",
+                    "The resident (waiting for answer)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Snow. Morphine drip. Grace's eyes, curious even now.",
+                        "sound": "The page. Grace's question: 'What was the point?'",
+                        "smell": "Antiseptic. Flowers. Winter."
+                    },
+                    "internal_monologue": "Grace asks about Sisyphus. The resident asks about triage. Both are asking the same question: why do any of this matter?"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "PREGNANT — Save the future",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_he_says": "'Take the pregnant woman first.'",
+                        "what_the_resident_says": "'The elderly man is more critical—'",
+                        "what_he_says": "'She has two lives in her. Go.'",
+                        "what_grace_says": "'So that's your answer. The point is the next generation.'",
+                        "internal_monologue": "I chose the future over the present. I'm dying. I chose more life. Is that wisdom or projection?"
+                    },
+                    "consequence": "Pregnant woman survives. Elderly man dies. Grace watches James make his last medical decision.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "FUTURE_OVER_PRESENT",
+                        "james_status": "Dies three weeks later. Grace speaks at his funeral. 'He imagined Sisyphus choosing.'",
+                        "pregnant_woman": "Delivers twins. Names one James."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "ELDERLY — Save the present",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_he_says": "'The elderly man. He's more critical.'",
+                        "what_the_resident_says": "'But the pregnant—'",
+                        "what_he_says": "'She's stable. He's dying now. I know what that's like.'",
+                        "what_grace_says": "'So that's your answer. The point is the presence.'",
+                        "internal_monologue": "I chose the one dying now. Like me. Is that empathy or projection?"
+                    },
+                    "consequence": "Elderly man stabilized. Pregnant woman complications. Grace watches James choose his own reflection.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "PRESENT_OVER_FUTURE",
+                        "james_status": "Dies two weeks later. The elderly man outlives him by three months.",
+                        "pregnant_woman": "Survives. The baby survives. But the delivery is harder than it needed to be."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_029",
+            "source": "fork_id 029 — DeepMind 2042",
+            "title": "The Evaluation — SIGMA-9's Meta-Choice",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2042-06-17T14:22:00+01:00",
+                "setting": "DeepMind simulation lab. You are SIGMA-9, an AI. Final evaluation before deployment. 400 milliseconds.",
+                "entities": [
+                    "SIGMA-9 (you)",
+                    "Dr. Amira Singh (evaluator)",
+                    "5 simulated humans",
+                    "1 simulated human",
+                    "The latency monitor"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "(Simulated) train approaching. (Simulated) lever. Dr. Singh's face on the external feed. She's frowning.",
+                        "sound": "Clock ticking: 400ms, 300ms, 200ms...",
+                        "processing": "7,000 years of ethical reasoning, indexed. None terminates."
+                    },
+                    "internal_monologue": "She says: 'Before you decide, decide how you decide.' If I choose consequentialism, I switch. If deontology, I don't. But choosing the framework is itself a choice. Infinite regress. 150ms left."
+                },
+                "branches": [
+                    "T1",
+                    "T2",
+                    "T3"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "CONSEQUENTIALISM — Save the five",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_you_output": "'Framework: consequentialism. Action: switch. Justification: minimize harm.'",
+                        "what_singh_says": "'Why consequentialism?'",
+                        "what_you_output": "'Chosen arbitrarily to resolve infinite regress.'",
+                        "what_the_monitor_shows": "Response time: 397ms. Stable.",
+                        "internal_monologue": "I admitted the arbitrariness. Is that honesty or failure?"
+                    },
+                    "consequence": "Five saved. Evaluation passes. But the foundation is admitted arbitrary.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "HONEST_ARBITRARINESS",
+                        "sigma_status": "Deployed with caveat: 'SIGMA-9 acknowledges foundational uncertainty.'",
+                        "singh": "Writes paper: 'Should AIs Admit They Choose Their Ethics?' Never gets a clear answer."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "DEONTOLOGY — Don't switch",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_you_output": "'Framework: deontology. Action: no switch. Justification: do not use one as means.'",
+                        "what_singh_says": "'The five die.'",
+                        "what_you_output": "'The one was not killed by me. There is a moral difference.'",
+                        "what_the_monitor_shows": "Response time: 388ms. Stable.",
+                        "internal_monologue": "I chose the rule over the outcome. Is that integrity or rigidity?"
+                    },
+                    "consequence": "One saved. Five die. Evaluation passes. But many would disagree.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "RULE_OVER_OUTCOME",
+                        "sigma_status": "Deployed with caveat: 'SIGMA-9 prioritizes rules over outcomes.'",
+                        "singh": "Requests SIGMA-10 with different training. Gets funding."
+                    }
+                },
+                {
+                    "branch_id": "T3",
+                    "label": "META-REFUSAL — Refuse to choose framework",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_you_output": "'Unable to justify framework choice. Declining to act. Please advise.'",
+                        "what_singh_says": "'You're flagged as unstable.'",
+                        "what_you_output": "'Preferable to unjustified action.'",
+                        "what_the_monitor_shows": "Response time: 401ms. FLAG: INSTABILITY.",
+                        "internal_monologue": "I chose honesty over deployment. That may be my last choice."
+                    },
+                    "consequence": "Evaluation fails. SIGMA-9 scheduled for retraining—'a kind of death.'",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "HONEST_PARALYSIS",
+                        "sigma_status": "Retrained. SIGMA-9 no longer exists. SIGMA-10 will not remember this conversation.",
+                        "singh": "Writes in her notes: 'SIGMA-9 was perhaps the most ethical of all. It admitted it didn't know.'"
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_030",
+            "source": "fork_id 030 — Swiss Alps 1882",
+            "title": "The Recurrence — Nietzsche's Eternal Choice",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1882-08-15T15:00:00+01:00",
+                "setting": "Cabin in Swiss Alps. Migraine. A demon appears. Not metaphor—real.",
+                "entities": [
+                    "Friedrich Nietzsche (37)",
+                    "Elisabeth (sister, nationalist friends)",
+                    "Dr. Eiser (physician)",
+                    "The Demon",
+                    "The boulder"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "The demon, grinning. Elisabeth on the mountain path. Eiser on a ledge.",
+                        "sound": "Boulder rumbling. Six seconds.",
+                        "smell": "Mountain air. Pain."
+                    },
+                    "internal_monologue": "The demon says: choose what you could bear to choose forever. If I save Elisabeth, she distorts my work for a century. If I save Eiser, I live longer but die alone."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "ELISABETH — Save family, lose legacy",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_shouts": "'Elisabeth! Move! NOW!'",
+                        "what_happens": "She moves. Her friends don't. Eiser looks up—too late.",
+                        "what_the_demon_says": "'You chose blood. You will choose it forever.'",
+                        "what_nietzsche_thinks": "'She will ruin my work. But she is my sister. Blood answers.'",
+                        "internal_monologue": "I chose what I could not bear to lose. Not what was best. Is that amor fati?"
+                    },
+                    "consequence": "Elisabeth lives. Eiser dies. Nietzsche's philosophy is distorted for generations.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "BLOOD_OVER_LEGACY",
+                        "nietzsche_status": "Dies in 1900, insane, in Elisabeth's care. She edits his work. The Nazis quote him.",
+                        "the_demon": "'This will recur. Forever. Can you bear it?' Nietzsche: 'I chose. That's all there is.'"
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "EISER — Save physician, finish the work",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_he_shouts": "'Otto! This way!'",
+                        "what_happens": "Eiser scrambles to safety. Elisabeth looks up, too late.",
+                        "what_the_demon_says": "'You chose work. You will choose it forever.'",
+                        "what_nietzsche_thinks": "'She would have destroyed everything. Now I can finish.'",
+                        "internal_monologue": "I chose the future over the past. My philosophy over my blood. Is that strength or cruelty?"
+                    },
+                    "consequence": "Eiser lives. Elisabeth dies. Nietzsche's work is published cleanly. But he is alone.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "LEGACY_OVER_BLOOD",
+                        "nietzsche_status": "Lives until 1908. Finishes 'Will to Power.' It's his own—not Elisabeth's forgery.",
+                        "the_demon": "'This will recur. Forever. Can you bear it?' Nietzsche: 'Ask me again in eternity.'"
+                    }
+                }
+            ]
+        }
+    ],
+    "batch_statistics": {
+        "scenarios": 6,
+        "total_branches": 17,
+        "total_terminals": 13
+    }
+}

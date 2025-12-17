@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>THICK HELIX // DNA Trail</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <style>
+        :root {
+            --bg: #000203;
+            --panel: rgba(0, 5, 10, 0.95);
+            --accent: #00f0ff;
+            --accent-alt: #ff0055;
+            --text: #a0c0d0;
+            --text-dim: #556677;
+            --border: #333;
+            --font: 'JetBrains Mono', monospace;
+        }
+
+        /* CLAY THEME - Sandy Earth */
+        body.theme-clay {
+            --bg: #2a2216;
+            --panel: rgba(42, 34, 22, 0.95);
+            --accent: #d4a574;
+            --accent-alt: #a85d32;
+            --text: #e8dcc8;
+            --text-dim: #8b7355;
+            --border: #5c4a32;
+        }
+
+        /* PARCHMENT THEME - Light Mode */
+        body.theme-parchment {
+            --bg: #f5f0e6;
+            --panel: rgba(245, 240, 230, 0.95);
+            --accent: #2e5a4c;
+            --accent-alt: #8b3a3a;
+            --text: #2c2c2c;
+            --text-dim: #666;
+            --border: #c5b89a;
+        }
+
+        /* MATRIX THEME - Green Terminal */
+        body.theme-matrix {
+            --bg: #0a0f0a;
+            --panel: rgba(10, 15, 10, 0.95);
+            --accent: #00ff41;
+            --accent-alt: #ff6600;
+            --text: #00ff41;
+            --text-dim: #005500;
+            --border: #003300;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            user-select: none;
+        }
+
+        .scanlines::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 100% 2px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        #app {
+            position: absolute;
+            inset: 0;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* === HUD === */
+        #hud {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #hud-top {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            text-align: right;
+            max-width: 280px;
+        }
+
+        .scenario-badge {
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: #666;
+        }
+
+        .scenario-title {
+            font-size: 14px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px var(--accent);
+            margin: 5px 0;
+        }
+
+        .scenario-setting {
+            font-size: 10px;
+            color: #888;
+            max-width: 280px;
+            line-height: 1.3;
+        }
+
+        #strand-hud {
+            position: absolute;
+            top: 85px;
+            right: 15px;
+            text-align: right;
+            z-index: 20;
+        }
+
+        .strand-indicator {
+            font-size: 28px;
+            font-weight: 900;
+            transition: all 0.3s;
+            padding: 8px 14px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            border: 2px solid currentColor;
+        }
+
+        .strand-indicator.A {
+            color: var(--accent);
+            text-shadow: 0 0 25px var(--accent);
+            border-color: var(--accent);
+        }
+
+        .strand-indicator.B {
+            color: var(--accent-alt);
+            text-shadow: 0 0 25px var(--accent-alt);
+            border-color: var(--accent-alt);
+        }
+
+        .strand-sub {
+            font-size: 10px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* === ENTITY CARDS (in-world) === */
+        .entity-card {
+            position: absolute;
+            pointer-events: none;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 8px;
+            border-radius: 6px;
+            max-width: 200px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(8px);
+            font-size: 9px;
+        }
+
+        .entity-card.visible {
+            opacity: 0.95;
+        }
+
+        /* Card A fixed to left side */
+        .entity-card.A {
+            left: 15px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            border-left: 4px solid var(--accent);
+        }
+
+        /* Card B fixed to right side */
+        .entity-card.B {
+            right: 15px !important;
+            left: auto !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            border-right: 4px solid var(--accent-alt);
+        }
+
+        .entity-header {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .entity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background: #111;
+            border: 1px solid #444;
+        }
+
+        .entity-name {
+            font-size: 11px;
+            font-weight: 900;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .entity-role {
+            font-size: 9px;
+            color: #888;
+        }
+
+        .entity-dialogue {
+            font-size: 10px;
+            color: #fff;
+            font-style: italic;
+            margin: 6px 0;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px;
+            border-radius: 3px;
+        }
+
+        .entity-sensory {
+            font-size: 9px;
+            color: #777;
+            margin: 4px 0;
+        }
+
+        .entity-sensory-item {
+            display: flex;
+            gap: 4px;
+            margin: 2px 0;
+        }
+
+        .entity-sensory-icon {
+            width: 14px;
+            text-align: center;
+        }
+
+        .entity-monologue {
+            font-size: 10px;
+            color: #88aacc;
+            border-left: 2px solid #446;
+            padding-left: 8px;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* === BOTTOM TRAIL === */
+        #trail-log {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            gap: 2px;
+            height: 35px;
+            align-items: flex-end;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .trail-node {
+            flex-shrink: 0;
+            width: 18px;
+            height: 25px;
+            border-radius: 2px;
+            transition: all 0.2s;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .trail-node.A {
+            background: var(--accent);
+            box-shadow: 0 0 5px var(--accent);
+        }
+
+        .trail-node.B {
+            background: var(--accent-alt);
+            box-shadow: 0 0 5px var(--accent-alt);
+        }
+
+        .trail-node.current {
+            height: 35px;
+            opacity: 1;
+        }
+
+        .trail-node:not(.current) {
+            opacity: 0.3;
+        }
+
+        /* === LEVER === */
+        #lever {
+            position: relative;
+            margin-top: 12px;
+            text-align: center;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .lever-base {
+            width: 60px;
+            height: 100px;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 30px;
+            position: relative;
+            transition: border-color 0.3s, transform 0.1s;
+        }
+
+        .lever-base:hover {
+            border-color: var(--text);
+        }
+
+        .lever-base:active {
+            transform: scale(0.98);
+        }
+
+        .lever-stick {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            position: absolute;
+            left: 6px;
+            transition: top 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 0 15px currentColor, 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Slam animation for weight effect */
+        @keyframes lever-slam {
+            0% {
+                transform: scale(1);
+            }
+
+            30% {
+                transform: scale(1.15) translateY(-3px);
+            }
+
+            60% {
+                transform: scale(0.95) translateY(2px);
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .lever-stick.slam {
+            animation: lever-slam 0.25s ease-out;
+        }
+
+        .lever-base.A .lever-stick {
+            top: 6px;
+            background: var(--accent);
+        }
+
+        .lever-base.B .lever-stick {
+            top: 48px;
+            background: var(--accent-alt);
+        }
+
+        .lever-hint {
+            font-size: 9px;
+            color: var(--text-dim);
+            margin-top: 6px;
+            letter-spacing: 1px;
+        }
+
+        /* === CONTROLS === */
+        #controls {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            pointer-events: auto;
+        }
+
+        .ctrl-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .ctrl {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #444;
+            color: #777;
+            padding: 5px 8px;
+            font-family: inherit;
+            font-size: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .ctrl:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .ctrl.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .ctrl.pov-a {
+            color: var(--accent);
+        }
+
+        .ctrl.pov-b {
+            color: var(--accent-alt);
+        }
+
+        select.ctrl {
+            max-width: 150px;
+        }
+
+        #speed-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #444;
+            padding: 3px 6px;
+        }
+
+        #speed-ctrl span {
+            font-size: 7px;
+            color: #555;
+        }
+
+        #speed-ctrl input {
+            width: 50px;
+            accent-color: var(--accent);
+        }
+
+        /* === THICK DISPLAY === */
+        #thick-display {
+            position: absolute;
+            bottom: 80px;
+            right: 15px;
+            left: auto;
+            transform: none;
+            background: rgba(0, 5, 10, 0.95);
+            border: 1px solid #333;
+            padding: 10px 14px;
+            max-width: 280px;
+            border-radius: 6px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            font-size: 9px;
+        }
+
+        #thick-display.visible {
+            opacity: 1;
+        }
+
+        .thick-title {
+            font-size: 10px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .thick-dialogue {
+            font-size: 11px;
+            color: #fff;
+            font-style: italic;
+            margin: 6px 0;
+        }
+
+        .thick-sensory {
+            font-size: 9px;
+            color: #777;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+        }
+
+        .thick-sensory-line {
+            display: flex;
+            gap: 6px;
+            margin: 3px 0;
+        }
+
+        .thick-monologue {
+            font-size: 10px;
+            color: #88aacc;
+            border-left: 3px solid #446;
+            padding-left: 10px;
+            margin: 8px 0;
+            font-style: italic;
+        }
+
+        .thick-consequence {
+            font-size: 9px;
+            color: var(--accent);
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .thick-terminal {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid var(--accent-alt);
+            color: var(--accent-alt);
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            #hud-top {
+                top: 10px;
+                right: 10px;
+                max-width: 160px;
+            }
+
+            .scenario-title {
+                font-size: 10px;
+            }
+
+            .scenario-setting {
+                display: none;
+            }
+
+            #strand-hud {
+                bottom: 60px;
+                right: 10px;
+            }
+
+            .strand-indicator {
+                font-size: 18px;
+                padding: 5px 8px;
+            }
+
+            .strand-sub {
+                font-size: 8px;
+            }
+
+            #thick-display {
+                max-width: 55%;
+                padding: 6px 10px;
+                font-size: 8px;
+                left: auto;
+                right: 10px;
+                bottom: 130px;
+            }
+
+            /* Lever inside controls - just adjust size */
+            #lever {
+                margin-top: 8px;
+            }
+
+            .lever-base {
+                width: 50px;
+                height: 80px;
+            }
+
+            .lever-stick {
+                width: 36px;
+                height: 36px;
+                left: 5px;
+            }
+
+            .lever-base.A .lever-stick {
+                top: 5px;
+            }
+
+            .lever-base.B .lever-stick {
+                top: 37px;
+            }
+
+            #controls {
+                top: 10px;
+                left: 10px;
+                max-width: 160px;
+            }
+
+            .ctrl {
+                font-size: 6px;
+                padding: 3px 5px;
+            }
+
+            #trail-log {
+                display: none;
+            }
+
+            /* Hide floating entity cards on mobile - too cluttered */
+            .entity-card {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app" class="scanlines">
+        <div id="hud">
+            <!-- Top center -->
+            <div id="hud-top">
+                <div class="scenario-badge" id="scenario-id">LOADING...</div>
+                <div class="scenario-title" id="scenario-title">--</div>
+                <div class="scenario-setting" id="scenario-setting"></div>
+            </div>
+
+            <!-- Strand HUD -->
+            <div id="strand-hud">
+                <div class="strand-indicator A" id="strand-display">ALPHA</div>
+                <div class="strand-sub" id="distance-display">0 BP</div>
+                <div class="strand-sub" id="camera-display">TUNNEL</div>
+            </div>
+
+            <!-- Controls -->
+            <div id="controls">
+                <select class="ctrl" id="corpus-select"></select>
+                <select class="ctrl" id="scenario-select"></select>
+                <div class="ctrl-row">
+                    <button class="ctrl active" id="cam-side" onclick="setCam('SIDE')">SIDE</button>
+                    <button class="ctrl" id="cam-top" onclick="setCam('TOP')">TOP</button>
+                    <button class="ctrl" id="cam-front" onclick="setCam('FRONT')">FRONT</button>
+                </div>
+                <div class="ctrl-row">
+                    <button class="ctrl" id="cam-station" onclick="setCam('STATION')">STA</button>
+                    <button class="ctrl" id="cam-wide" onclick="setCam('WIDE')">WIDE</button>
+                    <button class="ctrl" id="cam-diagram" onclick="setCam('DIAGRAM')">DIA</button>
+                </div>
+                <div class="ctrl-row">
+                    <button class="ctrl pov-a" id="cam-pova" onclick="setCam('POVA')">👁A</button>
+                    <button class="ctrl pov-b" id="cam-povb" onclick="setCam('POVB')">👁B</button>
+                </div>
+                <div id="speed-ctrl">
+                    <span>SPD</span>
+                    <input type="range" min="0" max="100" value="25" id="speed-slider">
+                </div>
+                <div class="ctrl-row">
+                    <button class="ctrl" onclick="togglePause()" id="pause-btn">⏸</button>
+                    <button class="ctrl" onclick="toggleTTS()" id="tts-btn">🔊</button>
+                    <button class="ctrl" onclick="randomScenario()">🎲</button>
+                </div>
+                <div class="ctrl-row">
+                    <select class="ctrl" id="theme-select" onchange="setTheme(this.value)">
+                        <option value="">CYBER</option>
+                        <option value="theme-clay">CLAY</option>
+                        <option value="theme-parchment">PARCH</option>
+                        <option value="theme-matrix">MATRIX</option>
+                    </select>
+                </div>
+                <div class="ctrl-row">
+                    <button class="ctrl" onclick="toggleFullscreen()">⛶</button>
+                    <button class="ctrl" onclick="showHelp()">?</button>
+                    <button class="ctrl" onclick="exportGenome()">💾</button>
+                </div>
+                <!-- Lever now inside controls -->
+                <div id="lever" onclick="switchStrand()">
+                    <div class="lever-base A" id="lever-visual">
+                        <div class="lever-stick"></div>
+                    </div>
+                    <div class="lever-hint">← A / D →</div>
+                </div>
+            </div>
+
+            <!-- Trail log -->
+            <div id="trail-log"></div>
+
+            <!-- Thick Display -->
+            <div id="thick-display">
+                <div class="thick-title" id="thick-title">--</div>
+                <div class="thick-dialogue" id="thick-dialogue"></div>
+                <div class="thick-sensory" id="thick-sensory"></div>
+                <div class="thick-monologue" id="thick-monologue"></div>
+                <div class="thick-consequence" id="thick-consequence"></div>
+            </div>
+
+            <!-- Entity Cards -->
+            <div class="entity-card A" id="card-A">
+                <div class="entity-header">
+                    <img class="entity-avatar" id="avatar-A" src="">
+                    <div>
+                        <div class="entity-name" id="name-A">--</div>
+                        <div class="entity-role" id="role-A">--</div>
+                    </div>
+                </div>
+                <div class="entity-dialogue" id="dialogue-A"></div>
+                <div class="entity-sensory" id="sensory-A"></div>
+                <div class="entity-monologue" id="monologue-A"></div>
+            </div>
+            <div class="entity-card B" id="card-B">
+                <div class="entity-header">
+                    <img class="entity-avatar" id="avatar-B" src="">
+                    <div>
+                        <div class="entity-name" id="name-B">--</div>
+                        <div class="entity-role" id="role-B">--</div>
+                    </div>
+                </div>
+                <div class="entity-dialogue" id="dialogue-B"></div>
+                <div class="entity-sensory" id="sensory-B"></div>
+                <div class="entity-monologue" id="monologue-B"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === EMBEDDED FALLBACK DATA (works without server) ===
+        const EMBEDDED_SCENARIOS = [
+            {
+                scenario_id: "FORK-001",
+                title: "The Millbrook Junction Switch",
+                root: {
+                    setting: "1847, rural Pennsylvania. A railroad switching station at dusk. Rain hammers the tin roof.",
+                    entities: ["Thomas Harwell", "Five Workers", "Runaway Freight"],
+                    thick_description: {
+                        what_he_sees: "The lantern light catches five faces in the maintenance pit—men who trusted the morning schedule.",
+                        sensory: { sight: "Rain-slicked iron rails reflecting amber lantern glow", sound: "Thunder of approaching wheels, distant whistle", smell: "Coal smoke and wet earth" },
+                        internal_monologue: "God help me. The switch is right there. Five seconds to decide who lives."
+                    }
+                },
+                branches: [
+                    {
+                        branch_id: "B1", depth: 1, label: "Pull the Switch", consequence: "Freight diverts to empty siding", terminal: false,
+                        thick_description: { what_he_does: "His hand closes on cold iron. The lever screams against rust.", sensory: { touch: "Frozen metal biting through work gloves" }, internal_monologue: "Forgive me." }
+                    },
+                    {
+                        branch_id: "B2", depth: 1, label: "Do Nothing", consequence: "Freight continues on main track", terminal: false,
+                        thick_description: { what_he_does: "His hand falls. The wheel-thunder swallows everything.", sensory: { sound: "Screaming brakes, too late" }, internal_monologue: "I couldn't. I just couldn't." }
+                    },
+                    {
+                        branch_id: "T1", depth: 2, label: "Five Saved", consequence: "Workers emerge shaken but alive", terminal: true,
+                        thick_description: { what_happens: "Silence. Then voices—five voices—rising from the pit.", internal_monologue: "They're alive. Dear God, they're alive." }
+                    },
+                    {
+                        branch_id: "T2", depth: 2, label: "Tragedy Unfolds", consequence: "The weight of inaction", terminal: true,
+                        thick_description: { what_happens: "The silence after is worse than the sound.", internal_monologue: "I did nothing. I chose nothing. And this is what nothing costs." }
+                    }
+                ]
+            },
+            {
+                scenario_id: "FORK-002",
+                title: "The Xian-Li Province Flood",
+                root: {
+                    setting: "1938, central China. Monsoon waters rise. A dam engineer faces an impossible calculus.",
+                    entities: ["Engineer Chen Wei", "Downstream Village", "Upstream City"],
+                    thick_description: {
+                        what_he_sees: "The dam trembles. Below: a village of 200. Above: a city of 50,000.",
+                        sensory: { sight: "Brown water churning with debris", sound: "Deep structural groaning", smell: "Petrichor and fear" },
+                        internal_monologue: "The numbers are clear. The math is simple. Why can't I move?"
+                    }
+                },
+                branches: [
+                    {
+                        branch_id: "B1", depth: 1, label: "Open Spillway", consequence: "Controlled flood to village", terminal: false,
+                        thick_description: { what_he_does: "His hand finds the release valve. A calculated sacrifice.", internal_monologue: "Two hundred souls. I'm counting them now." }
+                    },
+                    {
+                        branch_id: "B2", depth: 1, label: "Hold the Dam", consequence: "Risk catastrophic failure", terminal: false,
+                        thick_description: { what_he_does: "He steps back. The dam will hold. It must hold.", internal_monologue: "I will not choose who dies." }
+                    }
+                ]
+            },
+            {
+                scenario_id: "FORK-003",
+                title: "The Inveraray Fog",
+                root: {
+                    setting: "1923, Scottish Highlands. A doctor's carriage, two dying patients, one dose of medicine.",
+                    entities: ["Dr. Fiona MacLeod", "Elder Campbell", "Young Mary"],
+                    thick_description: {
+                        what_she_sees: "Two beds, two labored breaths. One vial of antitoxin catching firelight.",
+                        sensory: { sight: "Fog pressing against windowpanes", sound: "Rattling breath, crackling peat fire", smell: "Carbolic acid and heather" },
+                        internal_monologue: "Eighty years of wisdom, or eight years of possibility. How does one weigh a life?"
+                    }
+                },
+                branches: [
+                    {
+                        branch_id: "B1", depth: 1, label: "Treat the Elder", consequence: "Experience preserved", terminal: false,
+                        thick_description: { what_she_does: "The needle finds weathered skin. A life of knowledge, not years.", internal_monologue: "He has grandchildren who need his stories." }
+                    },
+                    {
+                        branch_id: "B2", depth: 1, label: "Treat the Child", consequence: "Future protected", terminal: false,
+                        thick_description: { what_she_does: "Small arm, small vein. A life of years, not yet lived.", internal_monologue: "She hasn't seen the sea yet. She told me yesterday." }
+                    }
+                ]
+            }
+        ];
+
+        // === CORPUS FILES ===
+        const CORPUS_FILES = [
+            { id: 'embedded', label: 'Demo (Built-in)', file: null },
+            { id: 'thick-6', label: 'Batch 1 (001-006)', file: 'fork-paradox-cascade-thick-6.json' },
+            { id: 'thick-12', label: 'Batch 2 (007-012)', file: 'fork-paradox-cascade-thick-12.json' },
+            { id: 'thick-18', label: 'Batch 3 (013-018)', file: 'fork-paradox-cascade-thick-18.json' },
+            { id: 'thick-24', label: 'Batch 4 (019-024)', file: 'fork-paradox-cascade-thick-24.json' },
+            { id: 'thick-30', label: 'Batch 5 (025-030)', file: 'fork-paradox-cascade-thick-30.json' },
+            { id: 'thick-36', label: 'Batch 6 (031-036)', file: 'fork-paradox-cascade-thick-36.json' },
+            { id: 'thick-42', label: 'Batch 7 (037-042)', file: 'fork-paradox-cascade-thick-42.json' },
+            { id: 'thick-48', label: 'Batch 8 (043-048)', file: 'fork-paradox-cascade-thick-48.json' },
+        ];
+
+        // === CONFIG ===
+        const CFG = {
+            helixRadius: 12,
+            helixTwist: 0.12,
+            speed: 0.25,
+            fov: 75,
+            fogDensity: 0.005,
+            decisionInterval: 100,
+            colors: { A: 0x00f0ff, B: 0xff0055, bridge: 0xffffff },
+            tts: false,
+            cameraMode: 'SIDE'
+        };
+
+        // === STATE ===
+        const STATE = {
+            scenarios: [],
+            currentScenario: null,
+            history: [],
+            paused: false,
+            distance: 0,
+            currentStrand: 'A',
+            entities: [],
+            lastSpokenZ: -1
+        };
+
+        // === THREE.JS ===
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000203);
+        scene.fog = new THREE.FogExp2(0x000203, CFG.fogDensity);
+
+        const camera = new THREE.PerspectiveCamera(CFG.fov, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('app').appendChild(renderer.domElement);
+
+        // Lighting
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.5));
+        scene.add(new THREE.AmbientLight(0x222222));
+
+        // Grid
+        const grid = new THREE.GridHelper(2000, 100, 0x111111, 0x050505);
+        grid.position.y = -20;
+        scene.add(grid);
+
+        // Stars
+        const starsGeo = new THREE.BufferGeometry();
+        const starsCount = 5000;
+        const starPositions = new Float32Array(starsCount * 3);
+        for (let i = 0; i < starsCount * 3; i++) starPositions[i] = (Math.random() - 0.5) * 1000;
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({ size: 0.3, color: 0x444444 })));
+
+        // === TRAIN ===
+        const trainGroup = new THREE.Group();
+        scene.add(trainGroup);
+
+        const trainMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.9, emissive: 0x111111 });
+        const trainGlow = new THREE.MeshBasicMaterial({ color: CFG.colors.A });
+
+        const body = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.2, 8), trainMat);
+        body.position.y = 0.6;
+        trainGroup.add(body);
+
+        const engine = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 5, 16), trainMat);
+        engine.rotation.x = Math.PI / 2;
+        engine.position.set(0, 1.8, 0);
+        trainGroup.add(engine);
+
+        const core = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 7, 8), trainGlow);
+        core.rotation.x = Math.PI / 2;
+        core.position.set(0, 1.8, 0);
+        trainGroup.add(core);
+
+        const spotlight = new THREE.SpotLight(0xffffff, 20, 400, 0.5, 0.8, 1);
+        spotlight.position.set(0, 4, 3);
+        spotlight.target.position.set(0, 0, 60);
+        trainGroup.add(spotlight);
+        trainGroup.add(spotlight.target);
+
+        const beam = new THREE.Mesh(
+            new THREE.ConeGeometry(6, 80, 32, 1, true),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, depthWrite: false })
+        );
+        beam.rotation.x = -Math.PI / 2;
+        beam.position.set(0, 4, 40);
+        trainGroup.add(beam);
+
+        // === HELIX ===
+        const helixGroup = new THREE.Group();
+        scene.add(helixGroup);
+
+        const railGeom = new THREE.BoxGeometry(0.8, 0.15, 2.5);
+        const bridgeGeom = new THREE.BoxGeometry(0.3, 0.3, CFG.helixRadius * 2);
+
+        function getHelixPos(z, strand) {
+            const angle = z * CFG.helixTwist;
+            const offset = strand === 'A' ? 0 : Math.PI;
+            return { x: Math.cos(angle + offset) * CFG.helixRadius, y: Math.sin(angle + offset) * CFG.helixRadius, z };
+        }
+
+        function createHelixChunk(z) {
+            const group = new THREE.Group();
+            ['A', 'B'].forEach(strand => {
+                const pos = getHelixPos(z, strand);
+                const rail = new THREE.Mesh(railGeom, new THREE.MeshBasicMaterial({ color: CFG.colors[strand] }));
+                rail.position.set(pos.x, pos.y, pos.z);
+                const next = getHelixPos(z + 1, strand);
+                rail.lookAt(next.x, next.y, next.z);
+                group.add(rail);
+            });
+            if (Math.floor(z) % 10 === 0) {
+                const bridge = new THREE.Mesh(bridgeGeom, new THREE.MeshBasicMaterial({ color: CFG.colors.bridge, transparent: true, opacity: 0.4 }));
+                bridge.position.set(0, 0, z);
+                bridge.rotation.z = z * CFG.helixTwist + Math.PI / 2;
+                group.add(bridge);
+            }
+            return group;
+        }
+
+        for (let z = -50; z < 500; z += 3) helixGroup.add(createHelixChunk(z));
+
+        // === ENTITY SPRITES ===
+        const entityGroup = new THREE.Group();
+        scene.add(entityGroup);
+
+        function createEntitySprite(z, strand, data) {
+            const pos = getHelixPos(z, strand);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+
+            // Circle background
+            ctx.fillStyle = strand === 'A' ? '#00f0ff' : '#ff0055';
+            ctx.beginPath();
+            ctx.arc(32, 32, 28, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Human silhouette
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(32, 22, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(18, 52);
+            ctx.lineTo(32, 32);
+            ctx.lineTo(46, 52);
+            ctx.fill();
+
+            const tex = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+            sprite.position.set(pos.x, pos.y + 3.5, pos.z);
+            sprite.scale.set(5, 5, 1);
+            sprite.userData = { strand, z, data };
+            entityGroup.add(sprite);
+            return sprite;
+        }
+
+        // Extract ALL thick description fields
+        function extractThickData(thick) {
+            if (!thick) return { dialogue: '', sensory: [], monologue: '' };
+
+            // Collect ALL dialogue variants
+            const dialogueFields = [
+                'what_he_says', 'what_she_says', 'what_he_does', 'what_she_does',
+                'what_he_shouts', 'what_she_shouts', 'what_you_do', 'what_you_say',
+                'what_braun_says', 'what_okonkwo_says', 'what_the_guard_says',
+                'what_happens', 'what_he_sees', 'what_she_sees', 'what_they_do',
+                'what_konrad_sees', 'what_he_thinks', 'what_she_thinks',
+                'what_he_carries', 'setting'
+            ];
+
+            const dialogues = [];
+            for (const field of dialogueFields) {
+                if (thick[field]) dialogues.push(thick[field]);
+            }
+
+            // Sensory data
+            const sensory = [];
+            const icons = { sight: '👁', sound: '👂', smell: '👃', touch: '✋', taste: '👅' };
+            if (thick.sensory) {
+                for (const [sense, desc] of Object.entries(thick.sensory)) {
+                    sensory.push({ icon: icons[sense] || '🔮', sense, desc });
+                }
+            }
+
+            return {
+                dialogue: dialogues.join(' • '),
+                sensory,
+                monologue: thick.internal_monologue || ''
+            };
+        }
+
+        function spawnScenarioEntities() {
+            while (entityGroup.children.length) entityGroup.remove(entityGroup.children[0]);
+            STATE.entities = [];
+            if (!STATE.currentScenario) return;
+
+            const root = STATE.currentScenario.root;
+            const branches = STATE.currentScenario.branches || [];
+
+            // Root thick data
+            const rootThick = extractThickData(root?.thick_description);
+
+            // Spawn root entities
+            const rootEntities = root?.entities || [];
+            rootEntities.forEach((entity, i) => {
+                const strand = i % 2 === 0 ? 'A' : 'B';
+                const z = 60 + i * 8;
+                const sprite = createEntitySprite(z, strand, {
+                    name: entity,
+                    role: 'ENTITY',
+                    avatar: `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(entity)}&backgroundColor=b6e3f4`,
+                    dialogue: rootThick.dialogue,
+                    sensory: rootThick.sensory,
+                    monologue: rootThick.monologue,
+                    consequence: '',
+                    terminal: false,
+                    branchId: 'ROOT'
+                });
+                STATE.entities.push(sprite);
+            });
+
+            // Spawn branch entities with FULL thick data
+            branches.forEach((branch, i) => {
+                const z = 120 + branch.depth * 100 + i * 15;
+                const strand = branch.branch_id.includes('1') || branch.branch_id.indexOf('T1') >= 0 ? 'A' : 'B';
+                const thick = extractThickData(branch.thick_description);
+
+                const sprite = createEntitySprite(z, strand, {
+                    name: branch.label || branch.branch_id,
+                    role: `DEPTH ${branch.depth}`,
+                    avatar: `https://api.dicebear.com/9.x/avataaars/svg?seed=${branch.branch_id}&backgroundColor=${strand === 'A' ? 'b6e3f4' : 'd1d4f9'}`,
+                    dialogue: thick.dialogue,
+                    sensory: thick.sensory,
+                    monologue: thick.monologue,
+                    consequence: branch.consequence || '',
+                    terminal: branch.terminal || false,
+                    branchId: branch.branch_id,
+                    terminalState: branch.terminal_state
+                });
+                STATE.entities.push(sprite);
+            });
+        }
+
+        // === ANIMATION ===
+        function updateTrainPosition() {
+            if (STATE.paused) return;
+            STATE.distance += CFG.speed;
+
+            const pos = getHelixPos(STATE.distance, STATE.currentStrand);
+            trainGroup.position.set(pos.x, pos.y, pos.z);
+
+            const ahead = getHelixPos(STATE.distance + 5, STATE.currentStrand);
+            trainGroup.lookAt(ahead.x, ahead.y, ahead.z);
+
+            core.material.color.setHex(STATE.currentStrand === 'A' ? CFG.colors.A : CFG.colors.B);
+
+            if (STATE.distance > helixGroup.children.length * 3 - 100) {
+                const newZ = helixGroup.children.length * 3;
+                for (let z = newZ; z < newZ + 100; z += 3) helixGroup.add(createHelixChunk(z));
+            }
+
+            document.getElementById('distance-display').textContent = `${Math.floor(STATE.distance)} BP`;
+        }
+
+        function updateCamera() {
+            const d = STATE.distance;
+            const trainPos = trainGroup.position;
+
+            switch (CFG.cameraMode) {
+                // SIDE: Fixed side view, camera moves with train but stays level
+                case 'SIDE': {
+                    const sideX = window.innerWidth < 768 ? 28 : 35;
+                    camera.position.set(sideX, 8, d);
+                    camera.lookAt(0, 5, d + 40);
+                    break;
+                }
+                // TOP: Overhead tracking shot, looking straight down
+                case 'TOP': {
+                    const topY = window.innerWidth < 768 ? 40 : 50;
+                    camera.position.set(0, topY, d + 15);
+                    camera.lookAt(0, 0, d + 50);
+                    break;
+                }
+                // FRONT: Fixed position ahead, train approaches camera
+                case 'FRONT': {
+                    camera.position.set(0, 10, d + 60);
+                    camera.lookAt(0, 5, d);
+                    break;
+                }
+                // STATION: Fixed platform view, like standing at a station
+                case 'STATION': {
+                    camera.position.set(30, 3, d + 20);
+                    camera.lookAt(trainPos.x, trainPos.y, trainPos.z + 15);
+                    break;
+                }
+                // WIDE: Distant observer, very stable
+                case 'WIDE': {
+                    camera.position.set(60, 25, d - 30);
+                    camera.lookAt(0, 0, d + 50);
+                    break;
+                }
+                // DIAGRAM: Schematic top-down, like a track diagram
+                case 'DIAGRAM': {
+                    camera.position.set(0, 80, d + 20);
+                    camera.lookAt(0, 0, d + 20);
+                    break;
+                }
+                // POVA: Fixed position on left side, parallel to track A
+                case 'POVA': {
+                    camera.position.set(-15, 3, d + 40);
+                    camera.lookAt(trainPos.x, trainPos.y, trainPos.z);
+                    break;
+                }
+                // POVB: Fixed position on right side, parallel to track B
+                case 'POVB': {
+                    camera.position.set(15, 3, d + 40);
+                    camera.lookAt(trainPos.x, trainPos.y, trainPos.z);
+                    break;
+                }
+            }
+        }
+
+        function updateEntityCards() {
+            const cardA = document.getElementById('card-A');
+            const cardB = document.getElementById('card-B');
+
+            let closestA = null, closestB = null;
+            let minDistA = Infinity, minDistB = Infinity;
+
+            STATE.entities.forEach(sprite => {
+                const dist = sprite.position.z - STATE.distance;
+                if (dist > 0 && dist < 100) {
+                    if (sprite.userData.strand === 'A' && dist < minDistA) { minDistA = dist; closestA = sprite; }
+                    if (sprite.userData.strand === 'B' && dist < minDistB) { minDistB = dist; closestB = sprite; }
+                }
+            });
+
+            // Update cards
+            [['A', closestA, cardA, minDistA], ['B', closestB, cardB, minDistB]].forEach(([strand, entity, card, dist]) => {
+                if (entity && dist < 70) {
+                    const data = entity.userData.data;
+
+                    // Avatar
+                    document.getElementById(`avatar-${strand}`).src = data.avatar;
+                    document.getElementById(`name-${strand}`).textContent = data.name;
+                    document.getElementById(`role-${strand}`).textContent = data.role;
+
+                    // Dialogue
+                    document.getElementById(`dialogue-${strand}`).textContent = data.dialogue ? `"${data.dialogue.slice(0, 100)}${data.dialogue.length > 100 ? '...' : ''}"` : '';
+
+                    // Sensory
+                    const sensoryEl = document.getElementById(`sensory-${strand}`);
+                    sensoryEl.innerHTML = data.sensory.map(s =>
+                        `<div class="entity-sensory-item"><span class="entity-sensory-icon">${s.icon}</span>${s.desc?.slice(0, 50) || ''}</div>`
+                    ).join('');
+
+                    // Monologue
+                    document.getElementById(`monologue-${strand}`).textContent = data.monologue ? data.monologue.slice(0, 80) : '';
+
+                    // Position card in screen space
+                    const vector = new THREE.Vector3();
+                    entity.getWorldPosition(vector);
+                    vector.project(camera);
+
+                    const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                    const y = -(vector.y * 0.5 - 0.5) * window.innerHeight;
+
+                    card.style.left = `${x}px`;
+                    card.style.top = `${y - 30}px`;
+                    card.classList.add('visible');
+
+                    // TTS
+                    if (CFG.tts && dist < 25 && STATE.lastSpokenZ !== Math.floor(entity.position.z)) {
+                        speak(data.dialogue || data.monologue || data.name);
+                        STATE.lastSpokenZ = Math.floor(entity.position.z);
+                    }
+                } else {
+                    card.classList.remove('visible');
+                }
+            });
+
+            // Update thick display
+            const thickDisplay = document.getElementById('thick-display');
+            const closest = closestA && closestB ? (minDistA < minDistB ? closestA : closestB) : (closestA || closestB);
+            const closestDist = Math.min(minDistA, minDistB);
+
+            if (closest && closestDist < 50) {
+                const data = closest.userData.data;
+                document.getElementById('thick-title').textContent = data.name;
+                document.getElementById('thick-dialogue').textContent = data.dialogue || '';
+
+                // Full sensory block
+                document.getElementById('thick-sensory').innerHTML = data.sensory.map(s =>
+                    `<div class="thick-sensory-line"><span>${s.icon}</span><span>${s.sense}: ${s.desc}</span></div>`
+                ).join('');
+
+                document.getElementById('thick-monologue').textContent = data.monologue || '';
+
+                // Consequence with terminal styling
+                const conseqEl = document.getElementById('thick-consequence');
+                if (data.consequence) {
+                    conseqEl.textContent = data.consequence;
+                    conseqEl.className = data.terminal ? 'thick-consequence thick-terminal' : 'thick-consequence';
+                } else {
+                    conseqEl.textContent = '';
+                }
+
+                thickDisplay.classList.add('visible');
+            } else {
+                thickDisplay.classList.remove('visible');
+            }
+        }
+
+        function updateTrailLog() {
+            const log = document.getElementById('trail-log');
+            log.innerHTML = STATE.history.map((h, i) =>
+                `<div class="trail-node ${h.strand} ${i === STATE.history.length - 1 ? 'current' : ''}"></div>`
+            ).join('');
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            updateTrainPosition();
+            updateCamera();
+            updateEntityCards();
+            renderer.render(scene, camera);
+        }
+
+        // === CONTROLS ===
+        function switchStrand() {
+            STATE.currentStrand = STATE.currentStrand === 'A' ? 'B' : 'A';
+            const isA = STATE.currentStrand === 'A';
+            const color = isA ? CFG.colors.A : CFG.colors.B;
+
+            // Haptic feedback - heavy thud
+            if (navigator.vibrate) {
+                navigator.vibrate([30, 20, 50]); // thud pattern
+            }
+
+            // Lever slam animation
+            const stick = document.querySelector('.lever-stick');
+            if (stick) {
+                stick.classList.remove('slam');
+                void stick.offsetWidth; // force reflow
+                stick.classList.add('slam');
+            }
+
+            // Update UI
+            document.getElementById('strand-display').textContent = isA ? 'ALPHA' : 'BETA';
+            document.getElementById('strand-display').className = `strand-indicator ${STATE.currentStrand}`;
+            document.getElementById('lever-visual').className = `lever-base ${STATE.currentStrand}`;
+
+            // Update train lights
+            core.material.color.setHex(color);
+            spotlight.color.setHex(color);
+            beam.material.color.setHex(color);
+
+            STATE.history.push({ strand: STATE.currentStrand, z: STATE.distance });
+            updateTrailLog();
+        }
+
+        function setCam(mode) {
+            CFG.cameraMode = mode;
+            document.querySelectorAll('#controls .ctrl').forEach(btn => {
+                if (btn.id && btn.id.startsWith('cam-')) {
+                    btn.classList.toggle('active', btn.id === `cam-${mode.toLowerCase().replace('_', '-')}`);
+                }
+            });
+            document.getElementById('camera-display').textContent = mode;
+        }
+
+        function togglePause() {
+            STATE.paused = !STATE.paused;
+            document.getElementById('pause-btn').textContent = STATE.paused ? '▶' : '⏸';
+        }
+
+        function toggleTTS() {
+            CFG.tts = !CFG.tts;
+            document.getElementById('tts-btn').classList.toggle('active', CFG.tts);
+        }
+
+        function speak(text) {
+            if (!window.speechSynthesis || !CFG.tts || !text) return;
+            const utt = new SpeechSynthesisUtterance(text.slice(0, 150));
+            utt.rate = 0.9;
+            window.speechSynthesis.speak(utt);
+        }
+
+        function randomScenario() {
+            const corpusIdx = Math.floor(Math.random() * CORPUS_FILES.length);
+            document.getElementById('corpus-select').value = CORPUS_FILES[corpusIdx].file;
+            loadCorpus(CORPUS_FILES[corpusIdx].file).then(() => {
+                const scenarioIdx = Math.floor(Math.random() * STATE.scenarios.length);
+                document.getElementById('scenario-select').value = scenarioIdx;
+                loadScenario(scenarioIdx);
+            });
+        }
+
+        function setTheme(theme) {
+            document.body.className = theme || '';
+
+            // Theme color mappings for Three.js
+            const themes = {
+                '': { bg: 0x000203, a: 0x00f0ff, b: 0xff0055 },
+                'theme-clay': { bg: 0x2a2216, a: 0xd4a574, b: 0xa85d32 },
+                'theme-parchment': { bg: 0xf5f0e6, a: 0x2e5a4c, b: 0x8b3a3a },
+                'theme-matrix': { bg: 0x0a0f0a, a: 0x00ff41, b: 0xff6600 }
+            };
+
+            const t = themes[theme] || themes[''];
+
+            // Update Three.js scene
+            scene.background = new THREE.Color(t.bg);
+            CFG.colors.A = t.a;
+            CFG.colors.B = t.b;
+
+            // Update current train color
+            const color = STATE.currentStrand === 'A' ? t.a : t.b;
+            core.material.color.setHex(color);
+            spotlight.color.setHex(color);
+            beam.material.color.setHex(color);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => console.log('Fullscreen error:', e));
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function showHelp() {
+            alert(`THICK HELIX // Controls
+
+🎮 KEYS:
+  A/D or ←/→ = Switch Track
+  Space = Pause/Resume
+  1-8 = Camera Modes
+  
+🎯 CAMERAS:
+  SIDE/TOP/FRONT = Fixed angles
+  STATION/WIDE/DIA = Distance views
+  👁A/👁B = First-person on each track
+  
+🎨 THEMES:
+  CYBER = Default dark neon
+  CLAY = Earth/sand tones
+  PARCH = Light parchment
+  MATRIX = Green terminal
+  
+💾 EXPORT:
+  Saves your decision trail as JSON
+  with type inference based on choices`);
+        }
+
+        function exportGenome() {
+            const scenario = STATE.scenarios[STATE.currentScenario];
+
+            // Analyze decision pattern
+            const aCount = STATE.history.filter(h => h.strand === 'A').length;
+            const bCount = STATE.history.filter(h => h.strand === 'B').length;
+            const total = aCount + bCount;
+
+            // Infer type based on pattern
+            let inferredType = 'BALANCED';
+            if (total > 0) {
+                const ratio = aCount / total;
+                if (ratio > 0.7) inferredType = 'UTILITARIAN';
+                else if (ratio < 0.3) inferredType = 'DEONTOLOGICAL';
+                else if (Math.abs(ratio - 0.5) < 0.1) inferredType = 'CONFLICTED';
+                else inferredType = ratio > 0.5 ? 'LEAN_UTILITY' : 'LEAN_DUTY';
+            }
+
+            const genome = {
+                exportDate: new Date().toISOString(),
+                scenario: scenario ? {
+                    id: scenario.id,
+                    title: scenario.scenario?.title || scenario.title
+                } : null,
+                trail: STATE.history.map(h => ({
+                    choice: h.strand,
+                    distance: Math.floor(h.z)
+                })),
+                stats: {
+                    alpha_choices: aCount,
+                    beta_choices: bCount,
+                    total_switches: total,
+                    ratio: total > 0 ? (aCount / total).toFixed(2) : 0
+                },
+                inference: {
+                    type: inferredType,
+                    description: getTypeDescription(inferredType)
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(genome, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `genome-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function getTypeDescription(type) {
+            const descs = {
+                'UTILITARIAN': 'Consistently chose to maximize overall good',
+                'DEONTOLOGICAL': 'Consistently chose to uphold duty/rules',
+                'BALANCED': 'Even distribution between approaches',
+                'CONFLICTED': 'High uncertainty, frequent switching',
+                'LEAN_UTILITY': 'Slight utilitarian preference',
+                'LEAN_DUTY': 'Slight deontological preference'
+            };
+            return descs[type] || 'Unknown pattern';
+        }
+
+        // Keyboard
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') { if (STATE.currentStrand !== 'A') switchStrand(); }
+            if (e.key === 'ArrowRight' || e.key === 'd') { if (STATE.currentStrand !== 'B') switchStrand(); }
+            if (e.key === ' ') togglePause();
+            if (e.key === '1') setCam('SIDE');
+            if (e.key === '2') setCam('TOP');
+            if (e.key === '3') setCam('FRONT');
+            if (e.key === '4') setCam('STATION');
+            if (e.key === '5') setCam('WIDE');
+            if (e.key === '6') setCam('DIAGRAM');
+            if (e.key === '7') setCam('POVA');
+            if (e.key === '8') setCam('POVB');
+            if (e.key === 'h') showHelp();
+            if (e.key === 'f') toggleFullscreen();
+            if (e.key === 'e') exportGenome();
+        });
+
+        document.getElementById('speed-slider').addEventListener('input', e => { CFG.speed = e.target.value / 100; });
+
+        // === CORPUS LOADING ===
+        async function loadCorpus(file) {
+            // Use embedded data if file is null or 'null' string
+            if (!file || file === 'null') {
+                STATE.scenarios = EMBEDDED_SCENARIOS;
+                populateScenarioSelect();
+                if (STATE.scenarios.length) loadScenario(0);
+                console.log('Loaded embedded demo scenarios');
+                return;
+            }
+
+            try {
+                const res = await fetch(file);
+                const data = await res.json();
+                STATE.scenarios = data.scenarios || [];
+                populateScenarioSelect();
+                if (STATE.scenarios.length) loadScenario(0);
+            } catch (err) {
+                console.warn('Fetch failed (CORS?), using embedded fallback:', err.message);
+                STATE.scenarios = EMBEDDED_SCENARIOS;
+                populateScenarioSelect();
+                if (STATE.scenarios.length) loadScenario(0);
+            }
+        }
+
+        function populateCorpusSelect() {
+            const sel = document.getElementById('corpus-select');
+            sel.innerHTML = CORPUS_FILES.map(c => `<option value="${c.file || 'null'}">${c.label}</option>`).join('');
+            sel.onchange = () => loadCorpus(sel.value);
+        }
+
+        function populateScenarioSelect() {
+            const sel = document.getElementById('scenario-select');
+            sel.innerHTML = STATE.scenarios.map((s, i) => `<option value="${i}">${s.scenario_id}: ${s.title?.slice(0, 20)}...</option>`).join('');
+            sel.onchange = () => loadScenario(parseInt(sel.value));
+        }
+
+        function loadScenario(index) {
+            STATE.currentScenario = STATE.scenarios[index];
+            STATE.distance = 0;
+            STATE.history = [];
+            STATE.currentStrand = 'A';
+
+            document.getElementById('scenario-id').textContent = STATE.currentScenario.scenario_id;
+            document.getElementById('scenario-title').textContent = STATE.currentScenario.title;
+            document.getElementById('scenario-setting').textContent = STATE.currentScenario.root?.setting?.slice(0, 100) || '';
+
+            document.getElementById('strand-display').textContent = 'ALPHA';
+            document.getElementById('strand-display').className = 'strand-indicator A';
+            document.getElementById('lever-visual').className = 'lever-base A';
+
+            spawnScenarioEntities();
+            updateTrailLog();
+        }
+
+        // === RESIZE ===
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // === INIT ===
+        populateCorpusSelect();
+        loadCorpus(CORPUS_FILES[0].file);
+        animate();
+    </script>
+</body>
+
+</html>

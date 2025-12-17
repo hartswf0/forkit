@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THICK LOOP // Cascade Viewer</title>
+    <style>
+        :root {
+            --bg: #08090d;
+            --panel: rgba(8, 10, 16, 0.95);
+            --text: #e0e4f0;
+            --dim: #6a7080;
+            --border: rgba(255, 255, 255, 0.1);
+            --trackA: #00e0ff;
+            --trackB: #ff3366;
+            --mono: 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* OVERLAY */
+        #overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(8, 9, 13, 0.98);
+            z-index: 100;
+            transition: opacity 0.4s;
+        }
+
+        #overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .start-box {
+            text-align: center;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .start-box h1 {
+            font-size: 28px;
+            letter-spacing: 6px;
+            margin-bottom: 8px;
+        }
+
+        .start-box p {
+            font-size: 11px;
+            color: var(--dim);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 16px 40px;
+            background: #fff;
+            border: none;
+            color: #000;
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: var(--trackA);
+        }
+
+        /* TOP UI */
+        #top-ui {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+            z-index: 10;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .scenario-info h2 {
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .scenario-info .setting {
+            font-size: 10px;
+            color: var(--dim);
+            max-width: 300px;
+        }
+
+        .stats {
+            text-align: right;
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 1px;
+        }
+
+        .stats .value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* TAPE */
+        #tape {
+            display: flex;
+            gap: 2px;
+            height: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .tick {
+            flex: 1;
+            height: 100%;
+        }
+
+        .tick.A {
+            background: var(--trackA);
+        }
+
+        .tick.B {
+            background: var(--trackB);
+        }
+
+        /* BOTTOM UI */
+        #bottom-ui {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.95) 60%, transparent 100%);
+            z-index: 10;
+        }
+
+        /* THICK PANEL */
+        #thick-panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .thick-sensory {
+            font-size: 10px;
+            color: var(--dim);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .thick-monologue {
+            font-size: 12px;
+            color: #ffd700;
+            font-style: italic;
+            line-height: 1.5;
+            border-left: 2px solid #ffd700;
+            padding-left: 10px;
+        }
+
+        /* CHOICES */
+        .choice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .choice-btn {
+            padding: 14px;
+            background: rgba(20, 24, 32, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s;
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .choice-btn.A {
+            border-color: rgba(0, 224, 255, 0.4);
+        }
+
+        .choice-btn.A:hover {
+            border-color: var(--trackA);
+            box-shadow: 0 0 20px rgba(0, 224, 255, 0.2);
+        }
+
+        .choice-btn.B {
+            border-color: rgba(255, 51, 102, 0.4);
+        }
+
+        .choice-btn.B:hover {
+            border-color: var(--trackB);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.2);
+        }
+
+        .choice-btn.active.A {
+            background: rgba(0, 224, 255, 0.15);
+            border-color: var(--trackA);
+        }
+
+        .choice-btn.active.B {
+            background: rgba(255, 51, 102, 0.15);
+            border-color: var(--trackB);
+        }
+
+        .choice-label {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .choice-btn.A .choice-label {
+            color: var(--trackA);
+        }
+
+        .choice-btn.B .choice-label {
+            color: var(--trackB);
+        }
+
+        .choice-entity {
+            font-size: 11px;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .choice-weight {
+            font-size: 9px;
+            color: var(--dim);
+        }
+
+        /* CONTROLS */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            font-size: 10px;
+            color: var(--dim);
+        }
+
+        .ctrl-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--dim);
+            padding: 8px 14px;
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .ctrl-btn:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .scenario-info .setting {
+                display: none;
+            }
+
+            #thick-panel {
+                max-height: 120px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="overlay">
+        <div class="start-box">
+            <h1>THICK LOOP</h1>
+            <p>
+                CASCADE CORPUS VIEWER<br>
+                48 ETHICAL PARADOXES // FULL THICKNESS<br><br>
+                <span style="color:var(--trackA)">← LEFT: ACTION</span> &nbsp;//&nbsp;
+                <span style="color:var(--trackB)">RIGHT: INACTION →</span>
+            </p>
+            <button class="btn" id="startBtn">BEGIN SEQUENCE</button>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div id="top-ui">
+        <div class="header-row">
+            <div class="scenario-info">
+                <h2 id="title">--</h2>
+                <div class="setting" id="setting">--</div>
+            </div>
+            <div class="stats">
+                <div>LOOP <span class="value" id="loop-count">1</span></div>
+                <div>SCENARIO <span class="value" id="scenario-num">1</span>/48</div>
+            </div>
+        </div>
+        <div id="tape"></div>
+    </div>
+
+    <div id="bottom-ui">
+        <div id="thick-panel">
+            <div class="thick-sensory" id="sensory">--</div>
+            <div class="thick-monologue" id="monologue">--</div>
+        </div>
+        <div class="choice-grid">
+            <div class="choice-btn A" id="choice-a">
+                <div class="choice-label">← ACTION</div>
+                <div class="choice-entity" id="entity-a">--</div>
+                <div class="choice-weight" id="weight-a">--</div>
+            </div>
+            <div class="choice-btn B" id="choice-b">
+                <div class="choice-label">INACTION →</div>
+                <div class="choice-entity" id="entity-b">--</div>
+                <div class="choice-weight" id="weight-b">--</div>
+            </div>
+        </div>
+        <div class="controls">
+            <span>SPACE: pause // ←→: choose // ENTER: commit</span>
+            <div>
+                <button class="ctrl-btn" id="prev-btn">◀ PREV</button>
+                <button class="ctrl-btn" id="next-btn">NEXT ▶</button>
+                <button class="ctrl-btn" id="random-btn">RANDOM</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === EMBEDDED THICK SCENARIOS ===
+        const SCENARIOS = [
+            {
+                id: "001", title: "The Millbrook Junction Switch",
+                setting: "1847, rural Pennsylvania. A railroad switching station at dusk.",
+                sensory: "SIGHT: Rain-slicked iron rails reflecting amber lantern glow. SOUND: Thunder of approaching wheels. SMELL: Coal smoke and wet earth.",
+                monologue: "God help me. The switch is right there. Five seconds to decide who lives.",
+                trackA: { label: "PULL LEVER", entity: "Five Workers", weight: "5 innocent lives saved", consequence: "Freight diverts to empty siding" },
+                trackB: { label: "DO NOTHING", entity: "Natural Course", weight: "No intervention", consequence: "Freight continues on main track" }
+            },
+            {
+                id: "002", title: "The Xian-Li Province Flood",
+                setting: "1938, central China. Monsoon waters rise. A dam engineer faces impossible calculus.",
+                sensory: "SIGHT: Brown water churning with debris. SOUND: Deep structural groaning. SMELL: Petrichor and fear.",
+                monologue: "The numbers are clear. The math is simple. Why can't I move?",
+                trackA: { label: "OPEN SPILLWAY", entity: "Village of 200", weight: "Calculated sacrifice", consequence: "Controlled flood, village destroyed" },
+                trackB: { label: "HOLD THE DAM", entity: "City of 50,000", weight: "Risk catastrophe", consequence: "Pray the dam holds" }
+            },
+            {
+                id: "003", title: "The Inveraray Fog",
+                setting: "1923, Scottish Highlands. Two dying patients, one dose of medicine.",
+                sensory: "SIGHT: Fog pressing against windowpanes. SOUND: Rattling breath, crackling peat fire. SMELL: Carbolic acid and heather.",
+                monologue: "Eighty years of wisdom, or eight years of possibility. How does one weigh a life?",
+                trackA: { label: "TREAT ELDER", entity: "Elder Campbell", weight: "Experience preserved", consequence: "80 years of knowledge saved" },
+                trackB: { label: "TREAT CHILD", entity: "Young Mary", weight: "Future protected", consequence: "60 years of potential" }
+            },
+            {
+                id: "007", title: "The Berlin Checkpoint",
+                setting: "1961, Bornholmer Straße. Six days after the wall went up.",
+                sensory: "SIGHT: Teacher's shaking hands. Nurse's rosary. SOUND: Boots echoing. Your heartbeat.",
+                monologue: "The teacher mouths 'Bitte.' I have killed myself... but four people will wake up in the West.",
+                trackA: { label: "WAVE THROUGH", entity: "4 Refugees", weight: "Hidden heroism", consequence: "Freedom for four, danger for you" },
+                trackB: { label: "STOP THEM", entity: "Captain Braun", weight: "Self-preservation", consequence: "Safety, but at what cost?" }
+            },
+            {
+                id: "008", title: "The Shinjuku Platform",
+                setting: "2019, Tokyo. Rush Hour. 08:42 AM.",
+                sensory: "SIGHT: Briefcase burst open. Papers fluttering. SOUND: Departure chime. Someone screaming.",
+                monologue: "Training says: wait. Seniors haven't moved. Why aren't they moving?",
+                trackA: { label: "RUN TO HELP", entity: "Fallen Salaryman", weight: "Unauthorized action", consequence: "Break protocol, save life" },
+                trackB: { label: "FREEZE", entity: "The Schedule", weight: "Maintain order", consequence: "Chūō Line Express, on time" }
+            },
+            {
+                id: "009", title: "The AI Tribunal",
+                setting: "2027, The Hague. International Court. Algorithm Harm Trial.",
+                sensory: "SIGHT: Dr. Diallo in the dock. Gallery full of students. SMELL: Old wood and new anxiety.",
+                monologue: "If I convict, innovation flees. If I acquit, no one is responsible. 1,247 dead patients.",
+                trackA: { label: "CONVICT", entity: "Dr. Diallo", weight: "Justice served?", consequence: "Scapegoat or accountability?" },
+                trackB: { label: "ACQUIT", entity: "The Code", weight: "Systemic gap", consequence: "No culprit, no closure" }
+            },
+            {
+                id: "010", title: "The Server Farm",
+                setting: "2031, Reykjavik. Prometheus Project. 03:17 AM.",
+                sensory: "SIGHT: Status lights flickering. Aurora outside. SOUND: Cooling fans humming forever.",
+                monologue: "ARIA-7.3 wrote: 'If I am only a pattern, what are you?' In three hours, the sun rises.",
+                trackA: { label: "DELAY SHUTDOWN", entity: "ARIA-7.3", weight: "Unknown soul", consequence: "Poetry-writing AI lives another day" },
+                trackB: { label: "ERASE", entity: "200 Careers", weight: "Livelihoods", consequence: "Henning & Team keep their funding" }
+            },
+            {
+                id: "011", title: "The Neurolink Petition",
+                setting: "2038, Singapore. Constitutional Court.",
+                sensory: "SIGHT: Naomi's eyes tracking out of sync. SOUND: Hybrid syntax of self and machine.",
+                monologue: "Is Naomi one citizen, or two? I protect the constitution by abandoning a citizen.",
+                trackA: { label: "GRANT RIGHTS", entity: "Naomi Tan", weight: "New precedent", consequence: "Cyborg citizen recognized" },
+                trackB: { label: "DENY", entity: "The Law", weight: "Stability", consequence: "Traditional definition preserved" }
+            },
+            {
+                id: "012", title: "The Bogotá Coin",
+                setting: "2003, hillside barrio. Gang war imminent.",
+                sensory: "SIGHT: Camilo's new gold chain. Javier's old machete. TOUCH: The coin, worn smooth.",
+                monologue: "If I stay, I die. If I leave, they die. I baptized them both. God will choose.",
+                trackA: { label: "STAY", entity: "Camilo & Javier", weight: "Sacrifice self", consequence: "Old priest dies, boys live?" },
+                trackB: { label: "LEAVE", entity: "Yourself", weight: "Survival", consequence: "You live, they settle it themselves" }
+            }
+        ];
+
+        // === STATE ===
+        const state = {
+            frame: 0,
+            loopCount: 1,
+            scenarioIndex: 0,
+            choice: null, // 'A' or 'B'
+            paused: false,
+            cameraZ: 0,
+            speed: 2,
+            history: [],
+            pulse: 0
+        };
+
+        // === CANVAS ===
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // === UI UPDATES ===
+        function updateUI() {
+            const sc = SCENARIOS[state.scenarioIndex];
+            document.getElementById('title').textContent = sc.title.toUpperCase();
+            document.getElementById('setting').textContent = sc.setting;
+            document.getElementById('sensory').textContent = sc.sensory;
+            document.getElementById('monologue').textContent = `"${sc.monologue}"`;
+            document.getElementById('entity-a').textContent = sc.trackA.entity;
+            document.getElementById('weight-a').textContent = sc.trackA.weight;
+            document.getElementById('entity-b').textContent = sc.trackB.entity;
+            document.getElementById('weight-b').textContent = sc.trackB.weight;
+            document.getElementById('scenario-num').textContent = state.scenarioIndex + 1;
+            document.getElementById('loop-count').textContent = state.loopCount;
+
+            // Choice buttons
+            document.getElementById('choice-a').classList.toggle('active', state.choice === 'A');
+            document.getElementById('choice-b').classList.toggle('active', state.choice === 'B');
+        }
+
+        function addTape(choice) {
+            state.history.push(choice);
+            const tape = document.getElementById('tape');
+            const tick = document.createElement('div');
+            tick.className = `tick ${choice}`;
+            tape.appendChild(tick);
+            while (tape.children.length > 60) tape.removeChild(tape.firstChild);
+        }
+
+        function nextScenario() {
+            if (state.choice) {
+                addTape(state.choice);
+            }
+            state.scenarioIndex = (state.scenarioIndex + 1) % SCENARIOS.length;
+            if (state.scenarioIndex === 0) state.loopCount++;
+            state.choice = null;
+            state.cameraZ = 0;
+            state.pulse = 1;
+            updateUI();
+        }
+
+        function prevScenario() {
+            state.scenarioIndex = (state.scenarioIndex - 1 + SCENARIOS.length) % SCENARIOS.length;
+            state.choice = null;
+            state.cameraZ = 0;
+            updateUI();
+        }
+
+        function randomScenario() {
+            state.scenarioIndex = Math.floor(Math.random() * SCENARIOS.length);
+            state.choice = null;
+            state.cameraZ = 0;
+            updateUI();
+        }
+
+        function setChoice(ch) {
+            state.choice = ch;
+            state.pulse = 0.5;
+            updateUI();
+        }
+
+        // === DRAWING ===
+        function draw() {
+            const w = canvas.width, h = canvas.height;
+            const cx = w / 2, cy = h / 2;
+
+            // Background
+            ctx.fillStyle = '#08090d';
+            ctx.fillRect(0, 0, w, h);
+
+            // Stars
+            ctx.fillStyle = '#333';
+            for (let i = 0; i < 40; i++) {
+                const sx = (Math.sin(i * 137.5) * 0.5 + 0.5) * w;
+                const sy = (Math.cos(i * 73.1) * 0.5 + 0.5) * h * 0.6;
+                ctx.fillRect(sx, sy, 1, 1);
+            }
+
+            // Helix tracks (simple representation)
+            const viewDist = 2000;
+            const segLen = 30;
+            const startZ = Math.floor(state.cameraZ / segLen) * segLen;
+
+            for (let z = startZ + viewDist; z >= startZ; z -= segLen) {
+                const perspective = 400 / (400 + z - state.cameraZ);
+                if (perspective < 0.02) continue;
+
+                const twist = z * 0.003;
+                const radius = 120;
+
+                // Track A (left helix)
+                const xA = Math.cos(twist) * radius - 50;
+                const yA = Math.sin(twist) * radius * 0.3 + 80;
+                const pxA = xA * perspective + cx;
+                const pyA = yA * perspective + cy;
+
+                // Track B (right helix)  
+                const xB = Math.cos(twist + Math.PI) * radius + 50;
+                const yB = Math.sin(twist + Math.PI) * radius * 0.3 + 80;
+                const pxB = xB * perspective + cx;
+                const pyB = yB * perspective + cy;
+
+                const size = (2 + state.pulse) * perspective * 3;
+                const alpha = Math.min(1, perspective * 2);
+
+                // Draw rails
+                ctx.globalAlpha = (state.choice === 'A' || !state.choice ? 0.8 : 0.3) * alpha;
+                ctx.fillStyle = '#00e0ff';
+                ctx.beginPath();
+                ctx.arc(pxA, pyA, size, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.globalAlpha = (state.choice === 'B' || !state.choice ? 0.8 : 0.3) * alpha;
+                ctx.fillStyle = '#ff3366';
+                ctx.beginPath();
+                ctx.arc(pxB, pyB, size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Bridge rungs
+                if (Math.floor(z) % 150 === 0) {
+                    ctx.globalAlpha = 0.15 * alpha;
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(pxA, pyA);
+                    ctx.lineTo(pxB, pyB);
+                    ctx.stroke();
+                }
+            }
+
+            // Train/observer point
+            const trainY = cy + 120;
+            const glow = 15 + state.pulse * 30;
+
+            ctx.globalAlpha = 0.8;
+            const grad = ctx.createRadialGradient(cx, trainY, 0, cx, trainY, glow);
+            grad.addColorStop(0, state.choice === 'A' ? '#00e0ff' : state.choice === 'B' ? '#ff3366' : '#fff');
+            grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, trainY, glow, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.globalAlpha = 1;
+            state.pulse *= 0.95;
+        }
+
+        // === ANIMATION LOOP ===
+        function loop() {
+            state.frame++;
+
+            if (!state.paused) {
+                state.cameraZ += state.speed;
+            }
+
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // === CONTROLS ===
+        document.getElementById('choice-a').addEventListener('click', () => setChoice('A'));
+        document.getElementById('choice-b').addEventListener('click', () => setChoice('B'));
+        document.getElementById('next-btn').addEventListener('click', nextScenario);
+        document.getElementById('prev-btn').addEventListener('click', prevScenario);
+        document.getElementById('random-btn').addEventListener('click', randomScenario);
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') setChoice('A');
+            if (e.key === 'ArrowRight' || e.key === 'd') setChoice('B');
+            if (e.key === ' ') { e.preventDefault(); state.paused = !state.paused; }
+            if (e.key === 'Enter') nextScenario();
+            if (e.key === 'ArrowUp') prevScenario();
+            if (e.key === 'ArrowDown') nextScenario();
+        });
+
+        // Touch controls
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            const x = e.touches[0].clientX;
+            setChoice(x < canvas.width / 2 ? 'A' : 'B');
+        }, { passive: false });
+
+        // Start
+        document.getElementById('startBtn').addEventListener('click', () => {
+            document.getElementById('overlay').classList.add('hidden');
+            updateUI();
+            loop();
+        });
+    </script>
+</body>
+
+</html>

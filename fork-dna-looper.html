@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FORK DNA LOOPER — Corpus Navigator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #050508;
+            color: #e8e8e8;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 2, 4, 0.97);
+            z-index: 100;
+        }
+
+        #overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s;
+        }
+
+        h1 {
+            color: #fff;
+            letter-spacing: 8px;
+            font-weight: 100;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #444;
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .corpus-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .corpus-btn {
+            padding: 12px 20px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            font-family: inherit;
+            font-size: 11px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        .corpus-btn:hover,
+        .corpus-btn.active {
+            border-color: #00f0ff;
+            color: #00f0ff;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        .btn-start {
+            padding: 15px 40px;
+            background: transparent;
+            border: 1px solid #00f0ff;
+            color: #00f0ff;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            letter-spacing: 3px;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover {
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        #load-status {
+            color: #888;
+            font-size: 10px;
+            margin-top: 15px;
+            height: 20px;
+        }
+
+        .hud {
+            position: fixed;
+            z-index: 10;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .hud-top {
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .hud-bottom {
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            text-align: center;
+        }
+
+        .hud-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            color: #666;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .hud-btn:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        .stat {
+            text-align: right;
+        }
+
+        .stat b {
+            color: #fff;
+        }
+
+        .cyan {
+            color: #00f0ff;
+        }
+
+        .magenta {
+            color: #ff0055;
+        }
+
+        /* CRT effect */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="overlay">
+        <h1>FORK DNA LOOPER</h1>
+        <div class="subtitle">SELECT CORPUS // NAVIGATE PARADOXES</div>
+
+        <div class="corpus-selector">
+            <button class="corpus-btn active" data-file="fork-paradox-thick.json">THICK (48)</button>
+            <button class="corpus-btn" data-file="fork-paradox-cybernetics.json">CYBERNETICS (24)</button>
+            <button class="corpus-btn" data-file="fork-paradox-midnight.json">MIDNIGHT (24)</button>
+            <button class="corpus-btn" data-file="fork-paradox-sitcom.json">SITCOM (24)</button>
+            <button class="corpus-btn" data-file="fork-paradox-tracks-entities.json">TRACKS-ENT (8)</button>
+            <button class="corpus-btn" data-file="fork-paradox-tracks-deciders.json">TRACKS-DEC (8)</button>
+            <button class="corpus-btn" data-file="fork-paradox-cascade-thick.json">CASCADE (15)</button>
+        </div>
+
+        <button class="btn-start" id="startBtn">BEGIN SEQUENCE</button>
+        <div id="load-status"></div>
+    </div>
+
+    <div class="hud hud-top">
+        <div>
+            <span id="corpus-name">—</span><br>
+            <span id="scenario-counter">0 / 0</span>
+        </div>
+        <div class="stat">
+            <span class="cyan">◀ A</span> | <span class="magenta">B ▶</span><br>
+            <b id="choice-count">0</b> DECISIONS
+        </div>
+    </div>
+
+    <div class="hud hud-bottom">
+        <span id="current-setting">—</span><br>
+        <em id="current-sensory">—</em>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        /**
+         * FORK DNA LOOPER
+         * Dynamic corpus loader for thick paradox scenarios
+         */
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // ═══════════════════════════════════════════════════════════════
+        // STATE
+        // ═══════════════════════════════════════════════════════════════
+
+        const state = {
+            corpus: [],
+            corpusName: '',
+            currentIndex: 0,
+            cameraZ: 0,
+            speed: 2.5,
+            nodes: [],
+            history: [],
+            trackPos: 0,
+            targetTrackPos: 0,
+            rotation: 0,
+            pulse: 0,
+            frame: 0
+        };
+
+        const config = {
+            colors: { strandA: '#00f0ff', strandB: '#ff0055', rail: '#222' },
+            physics: { baseSpeed: 2.5, dampening: 0.08 }
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // CORPUS LOADING
+        // ═══════════════════════════════════════════════════════════════
+
+        let selectedFile = 'fork-paradox-thick.json';
+
+        document.querySelectorAll('.corpus-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.corpus-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedFile = btn.dataset.file;
+            });
+        });
+
+        async function loadCorpus(filename) {
+            const status = document.getElementById('load-status');
+            status.textContent = `Loading ${filename}...`;
+
+            try {
+                const response = await fetch(filename);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                status.textContent = `Parsing ${filename}...`;
+
+                // Normalize different corpus formats
+                state.corpus = normalizeCorpus(data, filename);
+                state.corpusName = data.corpus_title || filename.replace('.json', '').toUpperCase();
+                state.currentIndex = 0;
+
+                status.textContent = `Loaded ${state.corpus.length} scenarios`;
+                document.getElementById('corpus-name').textContent = state.corpusName;
+                document.getElementById('scenario-counter').textContent = `0 / ${state.corpus.length}`;
+
+                return true;
+            } catch (err) {
+                status.textContent = `ERROR: ${err.message}`;
+                console.error(err);
+                return false;
+            }
+        }
+
+        function normalizeCorpus(data, filename) {
+            // Handle different JSON structures
+
+            // fork-paradox-thick.json, fork-paradox-cybernetics.json
+            if (data.scenarios && Array.isArray(data.scenarios)) {
+                return data.scenarios.map(s => ({
+                    id: s.fork_id || s.id || 'UNKNOWN',
+                    napkin: s.napkin || s.case || s.title || 'PARADOX',
+                    thick: {
+                        setting: extractSetting(s),
+                        main: extractMain(s),
+                        spur: extractSpur(s),
+                        sensory: extractSensory(s)
+                    },
+                    raw: s  // Keep original for detailed view
+                }));
+            }
+
+            // fork-paradox-midnight.json (episodes)
+            if (data.episodes && Array.isArray(data.episodes)) {
+                return data.episodes.map(e => ({
+                    id: e.episode_id || e.id,
+                    napkin: e.title || 'DIALOGUE',
+                    thick: {
+                        setting: e.visual_world?.landscape || e.setting || '—',
+                        main: e.guest?.name || 'GUEST',
+                        spur: e.philosophical_core?.paradox || 'PARADOX',
+                        sensory: e.visual_world?.atmosphere || '—'
+                    },
+                    raw: e
+                }));
+            }
+
+            // fork-paradox-sitcom.json
+            if (data.episodes && data.episodes[0]?.act_structure) {
+                return data.episodes.map(e => ({
+                    id: e.episode_id || e.id,
+                    napkin: e.title || e.source_case || 'EPISODE',
+                    thick: {
+                        setting: e.frame || '—',
+                        main: e.act_structure?.act_1 || 'ACT 1',
+                        spur: e.act_structure?.absurd_committee || 'COMMITTEE',
+                        sensory: e.cold_open || '—'
+                    },
+                    raw: e
+                }));
+            }
+
+            // fork-paradox-tracks-*.json
+            if (data.flows && Array.isArray(data.flows)) {
+                return data.flows.map(f => ({
+                    id: f.flow_id || f.id,
+                    napkin: f.source_case || f.title || 'FLOW',
+                    thick: {
+                        setting: f.timestamp || f.setting || '—',
+                        main: f.tracks?.[0]?.entities?.join(', ') || f.decider || 'TRACK A',
+                        spur: f.tracks?.[1]?.entities?.join(', ') || f.meta_system || 'TRACK B',
+                        sensory: f.switch_point?.description || '—'
+                    },
+                    raw: f
+                }));
+            }
+
+            // fork-paradox-cascade-thick.json
+            if (data.thick_cascade?.branches) {
+                return data.thick_cascade.branches.map(b => ({
+                    id: b.branch_id,
+                    napkin: b.label || 'BRANCH',
+                    thick: {
+                        setting: b.thick_description?.setting || b.timestamp || '—',
+                        main: b.thick_description?.what_he_says?.substring(0, 100) || 'DIALOGUE',
+                        spur: b.thick_description?.internal_monologue?.substring(0, 100) || 'INTERNAL',
+                        sensory: b.thick_description?.sensory?.sight || '—'
+                    },
+                    raw: b
+                }));
+            }
+
+            // Fallback: treat as array
+            if (Array.isArray(data)) {
+                return data.map((item, i) => ({
+                    id: item.id || `ITEM-${i}`,
+                    napkin: item.title || item.name || 'SCENARIO',
+                    thick: {
+                        setting: item.setting || '—',
+                        main: item.optionA || item.main || 'OPTION A',
+                        spur: item.optionB || item.spur || 'OPTION B',
+                        sensory: item.sensory || '—'
+                    },
+                    raw: item
+                }));
+            }
+
+            return [];
+        }
+
+        function extractSetting(s) {
+            if (s.thick_script?.setting) return s.thick_script.setting;
+            if (s.thick?.setting) return s.thick.setting;
+            if (s.setting) return s.setting;
+            if (s.era) return `Era: ${s.era}`;
+            return '—';
+        }
+
+        function extractMain(s) {
+            if (s.thick_script?.the_dilemma?.optionA) return s.thick_script.the_dilemma.optionA;
+            if (s.thick_script?.the_players) {
+                const players = Object.values(s.thick_script.the_players);
+                return players[0]?.substring?.(0, 80) || players[0] || 'OPTION A';
+            }
+            if (s.thick?.main) return s.thick.main;
+            return s.case || 'OPTION A';
+        }
+
+        function extractSpur(s) {
+            if (s.thick_script?.the_dilemma?.optionB) return s.thick_script.the_dilemma.optionB;
+            if (s.thick_script?.the_players) {
+                const players = Object.values(s.thick_script.the_players);
+                return players[1]?.substring?.(0, 80) || players[1] || 'OPTION B';
+            }
+            if (s.thick?.spur) return s.thick.spur;
+            return 'OPTION B';
+        }
+
+        function extractSensory(s) {
+            if (s.thick_script?.what_you_know) return s.thick_script.what_you_know.substring(0, 100);
+            if (s.thick?.sensory) return s.thick.sensory;
+            return s.historical_basis || '—';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // AUDIO
+        // ═══════════════════════════════════════════════════════════════
+
+        const Audio = {
+            ctx: null, master: null, nodes: [],
+            init() {
+                try {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    this.master = this.ctx.createGain();
+                    this.master.gain.value = 0.25;
+                    this.master.connect(this.ctx.destination);
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                    this.drone(55, 0.1);
+                    this.drone(110, 0.05);
+                } catch (e) { console.warn('Audio init failed:', e); }
+            },
+            drone(freq, vol) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.value = freq;
+                gain.gain.value = vol;
+                osc.connect(gain);
+                gain.connect(this.master);
+                osc.start();
+                this.nodes.push({ osc, gain, base: freq });
+            },
+            tick(isA) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.value = isA ? 800 : 600;
+                gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(this.master);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.11);
+            },
+            chord(isA) {
+                if (!this.ctx) return;
+                const root = isA ? 440 : 370;
+                [1, 1.25, 1.5].forEach(ratio => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.value = root * ratio;
+                    osc.type = 'triangle';
+                    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.02, this.ctx.currentTime + 0.2);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 3);
+                    osc.connect(gain);
+                    gain.connect(this.master);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 3.1);
+                });
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // NODES
+        // ═══════════════════════════════════════════════════════════════
+
+        function createNode(z, idx) {
+            const data = idx < state.corpus.length
+                ? state.corpus[idx]
+                : { id: `BEYOND-${idx}`, napkin: 'CORPUS END', thick: { setting: 'Beyond the data...', main: 'RESTART?', spur: 'CONTINUE?', sensory: '—' } };
+
+            return { z, id: data.id, data, resolved: false, choice: null, glyph: null };
+        }
+
+        function populateNodes() {
+            state.nodes = [];
+            for (let i = 0; i < Math.min(50, state.corpus.length + 5); i++) {
+                state.nodes.push(createNode(i * 400, i));
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RENDERING
+        // ═══════════════════════════════════════════════════════════════
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function project(x, y, z) {
+            const scale = 450 / (450 + (z - state.cameraZ));
+            return { x: x * scale + canvas.width / 2, y: y * scale + canvas.height / 2, scale };
+        }
+
+        function draw() {
+            const cx = canvas.width / 2, cy = canvas.height / 2;
+
+            // Background
+            const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, canvas.height);
+            grad.addColorStop(0, '#12121a');
+            grad.addColorStop(1, '#000');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const trainZ = 200;
+            const startZ = Math.floor((state.cameraZ + 2500) / 20) * 20;
+            const endZ = state.cameraZ - 200;
+
+            // Draw helix
+            for (let z = startZ; z > endZ; z -= 20) {
+                const localZ = z - state.cameraZ;
+                const scale = 450 / (450 + localZ);
+                if (scale < 0.01) continue;
+
+                const twist = z * 0.004 + state.rotation;
+                const rad = 130;
+
+                const ax = Math.cos(twist) * rad;
+                const ay = Math.sin(twist) * rad;
+                const bx = Math.cos(twist + Math.PI) * rad;
+                const by = Math.sin(twist + Math.PI) * rad;
+
+                const pA = project(ax, ay, z);
+                const pB = project(bx, by, z);
+
+                const node = state.nodes.find(n => Math.abs(n.z - z) < 10);
+
+                let cA = '#333', cB = '#333', alpha = 0.2;
+
+                if (localZ < trainZ) {
+                    const prevNode = state.nodes.find(n => n.z < z + 200 && n.z > z - 600 && n.resolved);
+                    if (prevNode) {
+                        if (prevNode.choice === 'A') { cA = config.colors.strandA; alpha = 0.8; }
+                        else { cB = config.colors.strandB; alpha = 0.8; }
+                    }
+                } else {
+                    cA = config.colors.strandA;
+                    cB = config.colors.strandB;
+                    if (state.targetTrackPos > 0.5) cA = '#222';
+                    if (state.targetTrackPos < -0.5) cB = '#222';
+                }
+
+                // Connection line at nodes
+                if (node) {
+                    ctx.strokeStyle = node.resolved ? '#fff' : '#444';
+                    ctx.lineWidth = 2 * scale;
+                    ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.stroke();
+
+                    // Labels for upcoming nodes
+                    if (!node.resolved && localZ > trainZ && localZ < 1500) {
+                        const opacity = Math.min(1, (1500 - localZ) / 500) * Math.min(1, (localZ - 200) / 300);
+                        ctx.globalAlpha = opacity;
+
+                        ctx.font = `bold ${14 * scale}px Courier New`;
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = config.colors.strandA;
+                        ctx.fillText(node.data.thick.main.substring(0, 30), pA.x - 30 * scale, pA.y);
+
+                        ctx.textAlign = 'left';
+                        ctx.fillStyle = config.colors.strandB;
+                        ctx.fillText(node.data.thick.spur.substring(0, 30), pB.x + 30 * scale, pB.y);
+
+                        ctx.textAlign = 'center';
+                        ctx.font = `${10 * scale}px Courier New`;
+                        ctx.fillStyle = '#fff';
+                        ctx.fillText(node.data.napkin.toUpperCase(), (pA.x + pB.x) / 2, (pA.y + pB.y) / 2 - 20 * scale);
+
+                        ctx.globalAlpha = 1;
+                    }
+                }
+
+                // Strand dots
+                ctx.fillStyle = cA;
+                ctx.globalAlpha = alpha;
+                ctx.beginPath(); ctx.arc(pA.x, pA.y, (node ? 5 : 2) * scale, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = cB;
+                ctx.beginPath(); ctx.arc(pB.x, pB.y, (node ? 5 : 2) * scale, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 1;
+
+                // Draw train at trainZ
+                if (Math.abs(localZ - trainZ) < 10) {
+                    drawTrain(ax, ay, bx, by, z);
+                }
+            }
+
+            // Vignette
+            const vig = ctx.createRadialGradient(cx, cy, canvas.height * 0.4, cx, cy, canvas.height);
+            vig.addColorStop(0, 'rgba(0,0,0,0)');
+            vig.addColorStop(1, 'rgba(0,0,0,0.9)');
+            ctx.fillStyle = vig;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Update HUD
+            const activeNode = state.nodes.find(n => n.z > state.cameraZ + 200 && n.z < state.cameraZ + 800);
+            if (activeNode) {
+                document.getElementById('current-setting').textContent = activeNode.data.thick.setting.substring(0, 100);
+                document.getElementById('current-sensory').textContent = `"${activeNode.data.thick.sensory.substring(0, 100)}"`;
+            }
+        }
+
+        function drawTrain(ax, ay, bx, by, z) {
+            const t = (state.trackPos + 1) / 2;
+            const tx = ax + (bx - ax) * t;
+            const ty = ay + (by - ay) * t;
+            const p = project(tx, ty, z);
+
+            const glow = 40 + state.pulse * 60;
+            const grad = ctx.createRadialGradient(p.x, p.y, 5, p.x, p.y, glow);
+            grad.addColorStop(0, '#fff');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(p.x, p.y, glow, 0, Math.PI * 2); ctx.fill();
+
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 10, 0, Math.PI * 2); ctx.stroke();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // UPDATE
+        // ═══════════════════════════════════════════════════════════════
+
+        function update() {
+            state.cameraZ += state.speed;
+            state.rotation += 0.002;
+            state.pulse *= 0.95;
+            state.trackPos += (state.targetTrackPos - state.trackPos) * config.physics.dampening;
+
+            const node = state.nodes[0];
+            const trainZ = 200;
+            const dist = node.z - state.cameraZ;
+
+            if (dist < trainZ && !node.resolved) {
+                node.resolved = true;
+                const choice = state.targetTrackPos < 0 ? 'A' : 'B';
+                node.choice = choice;
+
+                state.history.push({ data: node.data, choice });
+                state.pulse = 1;
+                Audio.chord(choice === 'A');
+
+                document.getElementById('scenario-counter').textContent =
+                    `${state.history.length} / ${state.corpus.length}`;
+                document.getElementById('choice-count').textContent = state.history.length;
+
+                // Spawn next node
+                const lastZ = state.nodes[state.nodes.length - 1].z;
+                state.nodes.push(createNode(lastZ + 400, state.nodes.length));
+
+                if (state.nodes.length > 30) state.nodes.shift();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // INPUT
+        // ═══════════════════════════════════════════════════════════════
+
+        function switchTrack(dir) {
+            state.targetTrackPos = dir;
+            Audio.tick(dir < 0);
+        }
+
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') switchTrack(-1);
+            if (e.key === 'ArrowRight' || e.key === 'd') switchTrack(1);
+        });
+
+        canvas.addEventListener('mousedown', e => {
+            switchTrack(e.clientX < canvas.width / 2 ? -1 : 1);
+        });
+
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            switchTrack(touch.clientX < canvas.width / 2 ? -1 : 1);
+        }, { passive: false });
+
+        // ═══════════════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════════════
+
+        document.getElementById('startBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            btn.textContent = 'LOADING...';
+
+            const success = await loadCorpus(selectedFile);
+
+            if (success && state.corpus.length > 0) {
+                Audio.init();
+                populateNodes();
+                document.getElementById('overlay').classList.add('hidden');
+                loop();
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'RETRY';
+            }
+        });
+
+        function loop() {
+            state.frame++;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+    </script>
+</body>
+
+</html>

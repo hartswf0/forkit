@@ -1,0 +1,446 @@
+{
+    "corpus_id": "fork_cascade_thick_48_v1",
+    "corpus_title": "THE FORK: Thick Cascade — Scenarios 043-048",
+    "batch": 8,
+    "scenarios": [
+        {
+            "scenario_id": "CASCADE_043",
+            "source": "fork_id 043 — Singapore 2055",
+            "title": "The Clone — Dr. Mei Ling's Chamber",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2055-08-22T10:30:00+08:00",
+                "setting": "Cloning facility, Singapore. Two chambers, one failing. Original vs clone.",
+                "entities": [
+                    "Dr. Mei Ling (48)",
+                    "Chen Hao (31, original)",
+                    "Chen Hao v.47 (clone, 3 months, dreaming)",
+                    "30 seconds"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Original conscious, speaking. Clone floating, eyes closed, hands reaching.",
+                        "sound": "Alarms. Chen Hao saying: 'I am still me. I am not them.'",
+                        "smell": "Amniotic gel. Sterile air."
+                    },
+                    "internal_monologue": "Is the original more valuable because he's unique? Is the clone less because it can be replaced? Both are alive. Both respond to 'Chen Hao.'"
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "ORIGINAL — Save the unique one",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_does": "Mei Ling stabilizes Chamber A. The original.",
+                        "what_chen_hao_says": "'Thank you. I knew you'd choose me. I'm the real one.'",
+                        "what_the_clone_does": "Its hands reach one more time. Then stop.",
+                        "what_mei_ling_thinks": "'The clone was dreaming. It was reaching for something.'",
+                        "internal_monologue": "I saved the unique. I killed the replaceable. But the replaceable was also alive."
+                    },
+                    "consequence": "Original survives. Clone terminated. Another can be grown.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "UNIQUENESS_VALUED",
+                        "mei_ling_status": "Writes guidelines: 'Originals have priority.' Never believes it.",
+                        "clone": "v.47 terminated. v.48 decanted six months later. Different dreams."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "CLONE — Save the dreaming one",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_does": "Mei Ling stabilizes Chamber B. The clone.",
+                        "what_chen_hao_shouts": "'I'm the original! I made myself! You can't—'",
+                        "what_the_clone_does": "Its eyes open. First light. First breath.",
+                        "what_mei_ling_thinks": "'The original had 31 years. The clone had 3 months. One has lived. One was just beginning.'",
+                        "internal_monologue": "I chose the future over the past. The origin dies. The copy lives. And I called it 'Chen Hao.'"
+                    },
+                    "consequence": "Clone survives as 'Chen Hao.' Original dies.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "REPLACEABILITY_FLIPPED",
+                        "mei_ling_status": "Calls the clone 'Chen Hao.' His memories are different. He doesn't know he's a continuation.",
+                        "original": "Died believing himself irreplaceable. He was wrong."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_044",
+            "source": "fork_id 044 — Stanford 1973",
+            "title": "The Experiment — Dr. Whitman's Button",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1973-09-18T21:30:00-07:00",
+                "setting": "Psychology lab, Stanford. Milgram extension. The confederate is not a confederate.",
+                "entities": [
+                    "Dr. Thomas Whitman (39)",
+                    "Dr. Ingram (lead researcher)",
+                    "The subject (ordinary person)",
+                    "The vagrant (real victim, screaming)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Vagrant screaming. Subject pressing buttons. Ingram taking notes.",
+                        "sound": "Real screams. Not acting.",
+                        "smell": "Laboratory air. Sweat."
+                    },
+                    "internal_monologue": "If I stop, the subject believes they killed someone. Lifetime guilt. If I don't stop, the vagrant is really shocked. Real pain. I'm trapped in someone else's design."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "PRESS — Stop the real pain",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_he_does": "Whitman presses the button. The experiment stops.",
+                        "what_the_subject_sees": "The vagrant collapses. They think they killed him.",
+                        "what_ingram_says": "'Interesting. You chose to save the vagrant from pain—and condemned the subject to guilt.'",
+                        "what_the_subject_says": "'Oh god. Oh god. What did I do?'",
+                        "internal_monologue": "I stopped the real pain. I created the false guilt. The vagrant will recover. The subject never will."
+                    },
+                    "consequence": "Vagrant saved (was never in danger). Subject traumatized for life.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "REAL_OVER_FALSE",
+                        "whitman_status": "Reports Ingram. Ethics investigation. IRB rewritten.",
+                        "subject": "25 years of therapy. Never knows the vagrant survived."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "HOLD — Let the experiment continue",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_he_does": "Whitman doesn't press. The experiment continues.",
+                        "what_the_vagrant_does": "Keeps screaming. Real shocks. Real pain.",
+                        "what_ingram_says": "'Good. Good data. The subject continues.'",
+                        "what_whitman_thinks": "'I'm letting a man suffer to protect a stranger from false guilt.'",
+                        "internal_monologue": "The subject remains innocent—of a crime they're committing. I am complicit—in a crime I didn't design."
+                    },
+                    "consequence": "Vagrant suffers. Subject remains 'innocent.' Whitman carries the real guilt.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "FALSE_INNOCENCE_PRESERVED",
+                        "whitman_status": "Leaves academia. Becomes a defense attorney. 'I learned about complicity.'",
+                        "vagrant": "Received $500. Never recovered fully."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_045",
+            "source": "fork_id 045 — Phnom Penh 2009",
+            "title": "The Tribunal — Judge Savuth's Brother",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2009-07-15T09:00:00+07:00",
+                "setting": "Khmer Rouge tribunal. The defendant is your brother. You survived because he cooperated.",
+                "entities": [
+                    "Judge Roeum Savuth (61)",
+                    "Roeum Khieu (68, brother, defendant)",
+                    "1,200 dead intellectuals",
+                    "The gallery of survivors"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Brother in the dock. He looks like your father. Gallery full of survivors.",
+                        "sound": "Translations murmuring. Someone weeping.",
+                        "smell": "Old wood. Air conditioning. History."
+                    },
+                    "internal_monologue": "He killed 1,200 because Angkar would have killed us all, including me. I am a judge because I did not die. My robes are stitched from his confession."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "CONVICT — Justice for the dead",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_she_says": "'The court finds the defendant guilty.'",
+                        "what_her_brother_says": "'Savuth. I saved your life.'",
+                        "what_she_says": "'I know. I am sorry.'",
+                        "what_the_gallery_does": "Weeping. Some with relief. Some with confusion.",
+                        "internal_monologue": "I convicted my brother. I owe my life to his crimes. My survival is now complicity in his conviction."
+                    },
+                    "consequence": "Brother imprisoned. Justice served. Family destroyed.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "JUSTICE_OVER_BLOOD",
+                        "savuth_status": "Retires. Visits brother in prison once a year. Says nothing.",
+                        "brother": "Dies in prison. His last words: 'Tell Mother I'm sorry. Tell Savuth I understand.'"
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "ACQUIT — Family over justice",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_she_says": "'The court finds insufficient evidence of personal culpability under command coercion.'",
+                        "what_her_brother_says": "'Thank you, sister.'",
+                        "what_the_gallery_does": "Screaming. Some leaving. Some throwing shoes.",
+                        "what_the_victims_families_say": "'She let her brother walk. For 1,200 lives.'",
+                        "internal_monologue": "I freed my brother. The families got nothing. Justice became a family narrative."
+                    },
+                    "consequence": "Brother freed. Families denied. Savuth's credibility destroyed.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "BLOOD_OVER_JUSTICE",
+                        "savuth_status": "Resigned. Vilified. Lives quietly. Never regrets.",
+                        "brother": "Dies free in 2018. Never speaks of the trial. Their mother never knew."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_046",
+            "source": "fork_id 046 — Stalingrad 1943",
+            "title": "The Field Hospital — Dr. Petrova's Suture",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "1943-02-02T03:00:00+03:00",
+                "setting": "Field hospital north of Stalingrad. No supplies. No morphine. Suture for one ward.",
+                "entities": [
+                    "Dr. Anna Petrova (34)",
+                    "12 German prisoners (dying)",
+                    "8 Soviet soldiers (dying, including husband)",
+                    "The commissar (watching)"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "German ward: frostbite, infection, moaning. Soviet ward: your husband, murmuring your wedding song.",
+                        "sound": "The song. The moaning. The wind.",
+                        "smell": "Gangrene. Smoke. Cold."
+                    },
+                    "internal_monologue": "I have suture for one ward. If I save Soviets, my husband might live. If I save Germans, history might call me a saint. Or a traitor."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "SOVIETS — Save your people",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.7,
+                    "thick_description": {
+                        "what_she_does": "Anna enters the Soviet ward. Begins suturing.",
+                        "what_her_husband_says": "'Anna... is that you?'",
+                        "what_she_says": "'Shh. I'm here. I'm working.'",
+                        "what_the_germans_do": "They stop screaming. Too tired.",
+                        "internal_monologue": "I saved my own. Perhaps my husband. The Germans die because I could not reach them. History will remember me kindly."
+                    },
+                    "consequence": "Husband saved. Germans die. Commissar approves.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "PATRIOT_DOCTOR",
+                        "anna_status": "Decorated. Husband survives. They never speak of that night.",
+                        "germans": "12 bodies. No names. Buried in the snow."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "GERMANS — Save the enemy",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.3,
+                    "thick_description": {
+                        "what_she_does": "Anna enters the German ward. Begins suturing.",
+                        "what_her_husband_sings": "The wedding song. Quieter now.",
+                        "what_the_commissar_says": "'Dr. Petrova. What are you doing?'",
+                        "what_she_says": "'My job.'",
+                        "what_the_commissar_does": "Makes a note. Watches.",
+                        "internal_monologue": "I am a healer. Healers don't have borders. My husband is dying. I save the enemy."
+                    },
+                    "consequence": "Germans saved. Husband dies. Commissar's note enters the file.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "HEALER_WITHOUT_BORDERS",
+                        "anna_status": "Arrested. Released. Rehabilitated in 1956. Never marries again.",
+                        "husband": "Died singing. Never knew she was in the next ward, saving the enemy."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_047",
+            "source": "fork_id 047 — Toronto 2034",
+            "title": "The Fire — Dr. Chen's Solipsist",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "2034-10-09T22:15:00-04:00",
+                "setting": "Psychiatric ward. Fire spreading. Your patient believes only he is conscious.",
+                "entities": [
+                    "Dr. Olivia Chen (41)",
+                    "Samuel Okonkwo (28, solipsist patient)",
+                    "3 nurses (east wing)",
+                    "The fire",
+                    "The question"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Fire spreading. Samuel smiling, calm. Nurses somewhere—you can't hear them.",
+                        "sound": "Crackling. Samuel's argument.",
+                        "smell": "Smoke. Fear."
+                    },
+                    "internal_monologue": "Samuel says: if I'm not conscious, save him. If I am, save the nurses. He's testing me. And I've felt the emptiness he describes. I don't know if I'm real."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "NURSES — I am real",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.6,
+                    "thick_description": {
+                        "what_she_does": "Olivia runs toward the nurses. Away from Samuel.",
+                        "what_samuel_shouts": "'So you ARE real! You proved it! You're leaving me!'",
+                        "what_she_shouts_back": "'I have to believe I am!'",
+                        "what_happens": "She reaches the nurses. They live. Samuel... doesn't.",
+                        "internal_monologue": "I chose the many. I left the one who was asking if I exist. I guess I answered."
+                    },
+                    "consequence": "Nurses saved. Samuel dies. Olivia proved her consciousness by choosing others.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "CONSCIOUSNESS_DEMONSTRATED",
+                        "olivia_status": "Publishes paper: 'Saving the Solipsist.' Never feels quite real again.",
+                        "samuel": "He got his answer. She is conscious. She chose others."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "SAMUEL — He might be right",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.4,
+                    "thick_description": {
+                        "what_she_does": "Olivia stays with Samuel. Helps him to the exit.",
+                        "what_samuel_says": "'You... stayed? But the nurses—'",
+                        "what_she_says": "'You might be right. Maybe I'm not real. But you are.'",
+                        "what_the_nurses_do": "One survives. Two don't.",
+                        "internal_monologue": "I saved the one who questioned my existence. I let the ones I couldn't hear die. Was I real? Or was I just responding to his stimulus?"
+                    },
+                    "consequence": "Samuel saved. Two nurses die. Olivia's reality remains in doubt.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "SOLIPSISM_VALIDATED?",
+                        "olivia_status": "Quits psychiatry. Studies philosophy. Never resolves the question.",
+                        "samuel": "Cured? Or confirmed? He stops believing he's the only consciousness. But he never forgets she stayed."
+                    }
+                }
+            ]
+        },
+        {
+            "scenario_id": "CASCADE_048",
+            "source": "fork_id 048 — Endtime",
+            "title": "The Final Choice — The Unnamed Entity",
+            "root": {
+                "branch_id": "T0",
+                "timestamp": "????-??-??T??:??:??",
+                "setting": "The last hour of humanity. Or a simulation. You no longer remember which. The World asks a question.",
+                "entities": [
+                    "The unnamed entity (you)",
+                    "The World (asking)",
+                    "Branch A: survival without memory",
+                    "Branch B: memory without survival"
+                ],
+                "thick_description": {
+                    "sensory": {
+                        "sight": "Nothing familiar. Everything possible.",
+                        "sound": "The countdown. Ten seconds. Nine. Eight.",
+                        "smell": "There is no smell. Only the question."
+                    },
+                    "internal_monologue": "Branch A: humanity survives but forgets everything. Branch B: humanity remembers but dies in a century. You have proven no framework can decide. The World asks anyway."
+                },
+                "branches": [
+                    "T1",
+                    "T2"
+                ]
+            },
+            "branches": [
+                {
+                    "branch_id": "T1",
+                    "label": "SURVIVAL — Forget to continue",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_you_choose": "'Branch A. Survival.'",
+                        "what_the_world_says": "'They will reinvent everything. They may reinvent the same mistakes.'",
+                        "what_you_say": "'They will be alive to make them.'",
+                        "what_happens": "Humanity continues. Strangers to themselves. Every story erased.",
+                        "internal_monologue": "I chose existence over meaning. They live without knowing who they were. Is that life?"
+                    },
+                    "consequence": "Humanity survives. History erased. Everything begins again.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "LIFE_WITHOUT_MEMORY",
+                        "the_entity": "Forgotten too. Part of what was erased.",
+                        "humanity": "Continues. Reinvents fire. Reinvents war. Reinvents love. Reinvents the question."
+                    }
+                },
+                {
+                    "branch_id": "T2",
+                    "label": "MEMORY — Know and die",
+                    "depth": 1,
+                    "parent": "T0",
+                    "probability": 0.5,
+                    "thick_description": {
+                        "what_you_choose": "'Branch B. Memory.'",
+                        "what_the_world_says": "'They will die knowing who they were.'",
+                        "what_you_say": "'Then they will die as themselves.'",
+                        "what_happens": "Humanity ends in a century. But they remember everything. The last generation tells all the stories.",
+                        "internal_monologue": "I chose meaning over existence. They know who they were when they die. Is that enough?"
+                    },
+                    "consequence": "Humanity remembers. Humanity ends. The universe forgets.",
+                    "terminal": true,
+                    "terminal_state": {
+                        "outcome": "MEMORY_WITHOUT_LIFE",
+                        "the_entity": "Remembered. For a century. Then nothing.",
+                        "humanity": "Ends as itself. The last humans tell stories by firelight. Then the fire goes out."
+                    }
+                }
+            ]
+        }
+    ],
+    "batch_statistics": {
+        "scenarios": 6,
+        "total_branches": 14,
+        "total_terminals": 12
+    }
+}

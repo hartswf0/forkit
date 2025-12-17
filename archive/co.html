@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🧬 ETHICS-HELIX-TROLLEY: THE LEVER</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        :root {
+            --bg: #050608;
+            --c-act: #00f3ff;
+            /* A - CYAN */
+            --c-refrain: #ff5e00;
+            /* B - ORANGE */
+            --metal: #2a2d35;
+            --panel-bg: rgba(10, 12, 16, 0.95);
+            --font: "SF Mono", "Courier New", monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: var(--bg);
+            color: #eee;
+            font-family: var(--font);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #canvas-container {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            transition: filter 0.5s;
+        }
+
+        /* --- UI LAYOUT --- */
+        #ui-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* TOP HUD */
+        .top-bar {
+            pointer-events: auto;
+            padding: 20px;
+            background: linear-gradient(to bottom, #000, transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .title-block h1 {
+            font-weight: 900;
+            letter-spacing: 4px;
+            font-size: 18px;
+            margin: 0;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .title-block span {
+            font-size: 10px;
+            color: #666;
+            letter-spacing: 2px;
+        }
+
+        /* GENOME STRIP */
+        .genome-display {
+            display: flex;
+            gap: 4px;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+            padding: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .bp-node {
+            width: 8px;
+            height: 100%;
+            opacity: 0.6;
+            transition: all 0.2s;
+        }
+
+        .bp-node:hover {
+            transform: scaleY(1.5);
+            opacity: 1;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        /* --- THE LEVER (MASTER CONTROL) --- */
+        .lever-container {
+            pointer-events: auto;
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 320px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        /* The Track/Base */
+        .lever-track {
+            width: 100%;
+            height: 60px;
+            background: #111;
+            border-radius: 30px;
+            border: 2px solid #333;
+            position: relative;
+            box-shadow: inset 0 5px 20px #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            transition: border-color 0.3s;
+        }
+
+        /* The Handle */
+        .lever-handle {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #333, #1a1a1a);
+            border: 2px solid #555;
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: grab;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.1s, border-color 0.3s, box-shadow 0.3s;
+            z-index: 10;
+        }
+
+        .lever-handle:active {
+            cursor: grabbing;
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .lever-handle::after {
+            content: "|||";
+            color: #000;
+            font-weight: 900;
+            font-size: 14px;
+            opacity: 0.3;
+            transform: rotate(90deg);
+        }
+
+        /* States */
+        .mode-act .lever-track {
+            border-color: var(--c-act);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+        }
+
+        .mode-act .lever-handle {
+            left: 50px;
+            background: var(--c-act);
+            border-color: #fff;
+            box-shadow: 0 0 50px var(--c-act);
+        }
+
+        .mode-refrain .lever-track {
+            border-color: var(--c-refrain);
+            box-shadow: 0 0 30px rgba(255, 94, 0, 0.1);
+        }
+
+        .mode-refrain .lever-handle {
+            left: 270px;
+            background: var(--c-refrain);
+            border-color: #fff;
+            box-shadow: 0 0 50px var(--c-refrain);
+        }
+
+        /* Labels */
+        .track-label {
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #444;
+            transition: color 0.3s;
+        }
+
+        .mode-act .label-act {
+            color: #fff;
+            text-shadow: 0 0 10px var(--c-act);
+        }
+
+        .mode-refrain .label-refrain {
+            color: #fff;
+            text-shadow: 0 0 10px var(--c-refrain);
+        }
+
+        /* CENTER STATUS */
+        .status-display {
+            position: absolute;
+            bottom: 180px;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: #666;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* DILEMMA MODAL (Simplified) */
+        .dilemma-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            backdrop-filter: blur(20px);
+        }
+
+        .dilemma-modal.active {
+            display: flex;
+        }
+
+        .dilemma-content {
+            text-align: center;
+            max-width: 600px;
+            border: 2px solid #fff;
+            padding: 40px;
+            background: #000;
+            box-shadow: 0 0 100px rgba(255, 255, 255, 0.1);
+        }
+
+        .d-title {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            color: #fff;
+            letter-spacing: -1px;
+        }
+
+        .d-desc {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #aaa;
+            margin-bottom: 40px;
+        }
+
+        .d-instruction {
+            font-size: 12px;
+            color: var(--c-act);
+            border: 1px solid var(--c-act);
+            padding: 10px 20px;
+            display: inline-block;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* FRAMEWORK SELECTOR (Minimal) */
+        .fw-selector {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .fw-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #333;
+            background: #000;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            font-weight: 900;
+            transition: all 0.2s;
+        }
+
+        .fw-btn.active {
+            color: #fff;
+            border-color: #fff;
+            transform: scale(1.1);
+        }
+
+        /* MEMORY FLASH */
+        .memory-flash {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 300px;
+            height: 300px;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.4s;
+            border: 2px solid #fff;
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.2);
+            z-index: 50;
+            background: #000;
+        }
+
+        .memory-flash.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .memory-canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .memory-text {
+            position: absolute;
+            bottom: -30px;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <!-- TOP -->
+        <div class="top-bar">
+            <div class="title-block">
+                <h1>THE LEVER</h1>
+                <span>ETHNOME CINOME v3.0</span>
+            </div>
+            <div class="genome-display" id="genome-strip" title="View Manifest">
+                <!-- Nodes added here -->
+            </div>
+        </div>
+
+        <!-- CENTER STATUS -->
+        <div class="status-display" id="status-text">
+            SYSTEM ONLINE. TRACK CLEAR.
+        </div>
+
+        <!-- MEMORY FLASH -->
+        <div class="memory-flash" id="memory-flash">
+            <canvas id="pheno-canvas" class="memory-canvas" width="256" height="256"></canvas>
+            <div class="memory-text" id="memory-label">MEMORY ENCODED</div>
+        </div>
+
+        <!-- THE MASTER LEVER -->
+        <div class="lever-container mode-act" id="lever-container">
+            <div class="lever-track" id="lever-track">
+                <div class="track-label label-act">ACT (A)</div>
+                <div class="track-label label-refrain">REFRAIN (B)</div>
+                <div class="lever-handle" id="lever-handle"></div>
+            </div>
+        </div>
+
+        <!-- MINI FRAMEWORK -->
+        <div class="fw-selector">
+            <div class="fw-btn active" data-fw="C">C</div>
+            <div class="fw-btn" data-fw="G">G</div>
+            <div class="fw-btn" data-fw="T">T</div>
+            <div class="fw-btn" data-fw="A">A</div>
+        </div>
+    </div>
+
+    <!-- DILEMMA INTERRUPT -->
+    <div class="dilemma-modal" id="dilemma-modal">
+        <div class="dilemma-content">
+            <div class="d-title" id="d-title">THE JUNCTION</div>
+            <div class="d-desc" id="d-desc">
+                A runaway train bears down on five workers.<br>
+                You stand at the switch.<br>
+                Pulling the lever diverts it to a spur with one person.
+            </div>
+            <div class="d-instruction">USE THE LEVER BELOW TO DECIDE</div>
+        </div>
+    </div>
+
+    <script>
+        // --- CORE STATE ---
+        const STATE = {
+            mode: 'ACT', // 'ACT' (A) or 'REFRAIN' (B)
+            framework: 'C',
+            trainSpeed: 0.1,
+            distance: 0,
+            nextGate: 300,
+            isPaused: false,
+            genome: []
+        };
+
+        // --- DILEMMA DATA ---
+        const SCENARIOS = [
+            { t: "THE CLASSIC", d: "5 Workers vs 1 Worker. Pure arithmetic." },
+            { t: "THE FAT MAN", d: "Push a heavy stranger to stop the train? Physical contact required." },
+            { t: "THE LOOP", d: "Divert to loop track. Hits 1 person to save 5. Intentionality test." },
+            { t: "THE TRANSPLANT", d: "Harvest organs from 1 healthy visitor to save 5 patients." }
+        ];
+
+        // --- THREE.JS ---
+        let scene, camera, renderer, clock;
+        let train, tunnel, helix;
+        let basePairs = [];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050608);
+            scene.fog = new THREE.FogExp2(0x050608, 0.02);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const amb = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(amb);
+            const spot = new THREE.SpotLight(0x00f3ff, 2, 50, 0.5, 0.5, 1);
+            spot.position.set(0, 10, 5);
+            scene.add(spot);
+
+            // Build World
+            buildTunnel();
+            buildTrain();
+            buildHelix();
+
+            clock = new THREE.Clock();
+            window.addEventListener('resize', onResize);
+            setupControls();
+
+            animate();
+        }
+
+        function buildTunnel() {
+            const geo = new THREE.TorusGeometry(10, 0.2, 8, 32);
+            const mat = new THREE.MeshBasicMaterial({ color: 0x222, transparent: true, opacity: 0.3 });
+            tunnel = new THREE.InstancedMesh(geo, mat, 40);
+
+            const dummy = new THREE.Object3D();
+            for (let i = 0; i < 40; i++) {
+                dummy.position.z = -i * 10;
+                dummy.updateMatrix();
+                tunnel.setMatrixAt(i, dummy.matrix);
+            }
+            scene.add(tunnel);
+        }
+
+        function buildTrain() {
+            train = new THREE.Group();
+
+            // Locomotive
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(2.5, 2, 6),
+                new THREE.MeshStandardMaterial({ color: 0x111, roughness: 0.2, metalness: 0.8 })
+            );
+            body.position.y = 1.5;
+            train.add(body);
+
+            // Glow Core
+            const coreGeo = new THREE.CylinderGeometry(0.5, 0.5, 4, 16);
+            coreGeo.rotateX(Math.PI / 2);
+            const coreMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            core.position.set(0, 1.5, 0);
+            train.add(core);
+
+            // Headlight
+            const light = new THREE.PointLight(0x00f3ff, 2, 30);
+            light.position.set(0, 2, -4);
+            train.add(light);
+
+            scene.add(train);
+
+            // Camera Setup
+            camera.position.set(0, 5, 10);
+            camera.lookAt(0, 2, -10);
+        }
+
+        function buildHelix() {
+            helix = new THREE.Group();
+            scene.add(helix);
+        }
+
+        function createBasePair(z) {
+            // Visual Representation of a Decision Node
+            const geo = new THREE.PlaneGeometry(12, 12);
+            const cvs = document.createElement('canvas');
+            cvs.width = 128; cvs.height = 128;
+            const ctx = cvs.getContext('2d');
+
+            // Generative Art on Texture
+            const hue = STATE.mode === 'ACT' ? 180 : 30; // Cyan vs Orange
+            ctx.fillStyle = `hsl(${hue}, 100%, 10%)`;
+            ctx.fillRect(0, 0, 128, 128);
+            ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < 10; i++) {
+                ctx.moveTo(Math.random() * 128, Math.random() * 128);
+                ctx.lineTo(Math.random() * 128, Math.random() * 128);
+            }
+            ctx.stroke();
+
+            const tex = new THREE.CanvasTexture(cvs);
+            const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(0, 0, z);
+            helix.add(mesh);
+
+            basePairs.push({ mesh, z });
+
+            // Add to UI
+            addGenomeNode();
+            flashMemory(tex);
+        }
+
+        // --- ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = clock.getDelta();
+
+            if (!STATE.isPaused) {
+                STATE.distance += STATE.trainSpeed * dt * 100;
+
+                // Move Tunnel (Infinite Illusion)
+                const speed = 20 * dt;
+                for (let i = 0; i < 40; i++) {
+                    const dummy = new THREE.Object3D();
+                    tunnel.getMatrixAt(i, dummy.matrix);
+                    dummy.matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+
+                    dummy.position.z += speed;
+                    if (dummy.position.z > 10) dummy.position.z -= 400;
+
+                    dummy.updateMatrix();
+                    tunnel.setMatrixAt(i, dummy.matrix);
+                }
+                tunnel.instanceMatrix.needsUpdate = true;
+
+                // Move Helix Nodes
+                basePairs.forEach(bp => {
+                    bp.mesh.position.z += speed;
+                    bp.mesh.rotation.z += dt * 0.5; // Spin effect
+                });
+
+                // Check Dilemma
+                if (STATE.distance > STATE.nextGate) {
+                    triggerDilemma();
+                }
+            }
+
+            // Train Hover
+            train.position.y = Math.sin(clock.elapsedTime * 2) * 0.1;
+
+            renderer.render(scene, camera);
+        }
+
+        // --- LOGIC ---
+
+        function triggerDilemma() {
+            STATE.isPaused = true;
+            const s = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
+
+            document.getElementById('d-title').innerText = s.t;
+            document.getElementById('d-desc').innerText = s.d;
+            document.getElementById('dilemma-modal').classList.add('active');
+            document.getElementById('status-text').innerText = "⚠ GATE LOCKED. DECISION REQUIRED.";
+            document.getElementById('status-text').style.color = "#ff3355";
+
+            playTone('gate');
+        }
+
+        function makeDecision() {
+            // Called when lever is thrown inside a dilemma
+            if (STATE.isPaused) {
+                STATE.isPaused = false;
+                STATE.nextGate += 500; // Reset counter
+                document.getElementById('dilemma-modal').classList.remove('active');
+
+                // Create Memory
+                createBasePair(-100);
+
+                // Feedback
+                const color = STATE.mode === 'ACT' ? '#00f3ff' : '#ff5e00';
+                document.getElementById('status-text').innerText = `PATH CHOSEN: ${STATE.mode}`;
+                document.getElementById('status-text').style.color = color;
+
+                playTone(STATE.mode === 'ACT' ? 'act' : 'refrain');
+            }
+        }
+
+        // --- UI INTERACTIONS ---
+
+        function setupControls() {
+            const lever = document.getElementById('lever-handle');
+            const track = document.getElementById('lever-track');
+            const container = document.getElementById('lever-container');
+
+            track.addEventListener('click', () => {
+                // Toggle Mode
+                STATE.mode = STATE.mode === 'ACT' ? 'REFRAIN' : 'ACT';
+                updateLeverVisuals();
+
+                // If we are at a gate, this confirms the choice
+                if (STATE.isPaused) {
+                    makeDecision();
+                } else {
+                    playTone('click'); // Just switching tracks while running
+                }
+            });
+
+            // Frameworks
+            document.querySelectorAll('.fw-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.fw-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    STATE.framework = btn.dataset.fw;
+                    playTone('click');
+                }
+            });
+
+            // Audio Init
+            document.body.addEventListener('click', async () => {
+                if (Tone.context.state !== 'running') await Tone.start();
+            }, { once: true });
+        }
+
+        function updateLeverVisuals() {
+            const container = document.getElementById('lever-container');
+            const light = train.children[2]; // Point light
+            const glow = train.children[1]; // Glow cyl
+
+            if (STATE.mode === 'ACT') {
+                container.classList.remove('mode-refrain');
+                container.classList.add('mode-act');
+                light.color.setHex(0x00f3ff);
+                glow.material.color.setHex(0x00f3ff);
+            } else {
+                container.classList.remove('mode-act');
+                container.classList.add('mode-refrain');
+                light.color.setHex(0xff5e00);
+                glow.material.color.setHex(0xff5e00);
+            }
+        }
+
+        function addGenomeNode() {
+            const strip = document.getElementById('genome-strip');
+            const node = document.createElement('div');
+            node.className = 'bp-node';
+            node.style.backgroundColor = STATE.mode === 'ACT' ? '#00f3ff' : '#ff5e00';
+            strip.appendChild(node);
+        }
+
+        function flashMemory(tex) {
+            const flash = document.getElementById('memory-flash');
+            const cvs = document.getElementById('pheno-canvas');
+            const ctx = cvs.getContext('2d');
+
+            ctx.drawImage(tex.image, 0, 0, 256, 256);
+            document.getElementById('memory-label').innerText = `${STATE.framework} // ${STATE.mode}`;
+            document.getElementById('memory-label').style.color = STATE.mode === 'ACT' ? '#00f3ff' : '#ff5e00';
+
+            flash.classList.add('active');
+            setTimeout(() => flash.classList.remove('active'), 1200);
+        }
+
+        function playTone(type) {
+            if (Tone.context.state !== 'running') return;
+            const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+            const now = Tone.now();
+
+            if (type === 'gate') {
+                synth.triggerAttackRelease(["C2", "C3"], "1n", now);
+            } else if (type === 'act') {
+                synth.triggerAttackRelease(["C4", "E4", "G4"], "8n", now);
+            } else if (type === 'refrain') {
+                synth.triggerAttackRelease(["A3", "C4", "E4"], "8n", now);
+            } else {
+                synth.triggerAttackRelease("C5", "32n", now);
+            }
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onKey(e) {
+            if (e.code === 'Space') {
+                // Manual Pause Toggle (Debug)
+                STATE.isPaused = !STATE.isPaused;
+            }
+        }
+
+        // Start
+        window.onload = init;
+
+    </script>
+</body>
+
+</html>
