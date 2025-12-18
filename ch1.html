@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>THE HELIX // BROADCAST FEED</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+
+    <style>
+        :root {
+            --bg: #050505;
+            --term: #0a0f14;
+            --line: #1f293a;
+            --accent: #00f0ff;
+            /* Strand A */
+            --accent-alt: #ff0055;
+            /* Strand B */
+            --text: #a0c0d0;
+            --font: 'Courier New', monospace;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: none;
+            /* FORCE NO BOUNCE */
+        }
+
+        /* --- TV BROADCAST EFFECTS --- */
+        #broadcast-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 50;
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 2px, 3px 100%;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #f00;
+            color: #fff;
+            font-weight: 900;
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-size: 14px;
+            /* Bigger */
+            animation: blink 2s infinite;
+            letter-spacing: 1px;
+        }
+
+        .cam-rec {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #fff;
+            font-family: monospace;
+            font-size: 14px;
+            /* Bigger */
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        #app {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            transition: grid-template-columns 0.3s ease;
+        }
+
+        #viewport {
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        /* --- GENOME MINIMAP --- */
+        #genome-minimap {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            width: 60px;
+            background: rgba(0, 0, 0, 0.8);
+            border-right: 1px solid #333;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(5px);
+        }
+
+        #genome-minimap:hover {
+            width: 260px;
+        }
+
+        .map-header {
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 1px solid #333;
+            cursor: default;
+            color: #666;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        .map-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 2px;
+            padding: 0;
+            scrollbar-width: none;
+        }
+
+        /* Genome Node */
+        .g-node {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+            overflow: hidden;
+            height: 60px;
+            /* Bigger touch target */
+        }
+
+        .g-node:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .g-status {
+            width: 6px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .g-status.A {
+            background: var(--accent);
+        }
+
+        .g-status.B {
+            background: var(--accent-alt);
+        }
+
+        .g-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            margin-left: 12px;
+            flex-shrink: 0;
+            background: #000;
+            object-fit: cover;
+        }
+
+        .g-info {
+            margin-left: 14px;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #genome-minimap:hover .g-info {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .gi-loss {
+            font-size: 10px;
+            color: #f33;
+            text-transform: uppercase;
+        }
+
+        .gi-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* --- SCENARIO HUD --- */
+        #scenario-hud {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+            opacity: 0;
+        }
+
+        #scenario-hud.active {
+            opacity: 1;
+        }
+
+        .sh-box {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #444;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            transform: translateY(-20px);
+            transition: transform 0.5s;
+            max-width: 80%;
+        }
+
+        #scenario-hud.active .sh-box {
+            transform: translateY(0);
+        }
+
+        .sh-context {
+            font-size: 12px;
+            letter-spacing: 3px;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .sh-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        /* --- TARGETING CARDS (Bottom) --- */
+        #targeting-display {
+            position: absolute;
+            bottom: 140px;
+            /* Moved up for bigger controls */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            opacity: 0;
+            transition: all 0.5s;
+            pointer-events: none;
+        }
+
+        #targeting-display.active {
+            opacity: 1;
+            bottom: 120px;
+        }
+
+        .target-card {
+            flex: 1;
+            background: rgba(0, 5, 10, 0.95);
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            transform: scale(0.95);
+            transition: all 0.3s;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            pointer-events: auto;
+            /* Allow clicking cards if we want */
+        }
+
+        .target-card.A {
+            border-left: 4px solid var(--accent);
+        }
+
+        .target-card.B {
+            border-right: 4px solid var(--accent-alt);
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+
+        .target-card.locked {
+            transform: scale(1.05);
+            /* Highlight active */
+            background: rgba(0, 20, 40, 0.98);
+            border-color: #fff;
+            z-index: 5;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .t-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 6px;
+            background: #222;
+            border: 1px solid #444;
+            flex-shrink: 0;
+        }
+
+        .t-data {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .t-header {
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .t-name {
+            font-size: 14px;
+            font-weight: 900;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .t-desc {
+            font-size: 11px;
+            color: #bbb;
+            line-height: 1.3;
+            margin-top: 4px;
+        }
+
+        /* --- CONTROLS --- */
+        #controls-overlay {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            /* More spacing */
+            align-items: flex-end;
+        }
+
+        .ctrl-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cam-btn {
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid #555;
+            color: #aaa;
+            padding: 12px 18px;
+            /* Hit area increase */
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            border-radius: 4px;
+        }
+
+        .cam-btn:hover,
+        .cam-btn:active {
+            color: #fff;
+            border-color: #fff;
+            background: #222;
+        }
+
+        .cam-btn.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(0, 240, 255, 0.15);
+        }
+
+        .cam-btn.alert {
+            color: var(--accent-alt);
+            border-color: var(--accent-alt);
+        }
+
+        /* LEVER - MEGA SIZED */
+        #manual-override {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            text-align: center;
+            cursor: pointer;
+            pointer-events: auto;
+            /* Increase hit area invisibly */
+            padding: 20px;
+            margin: -20px;
+        }
+
+        .lever-base {
+            width: 80px;
+            /* Bigger */
+            height: 140px;
+            /* Bigger */
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #666;
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            overflow: hidden;
+        }
+
+        .lever-stick {
+            width: 60px;
+            /* Bigger */
+            height: 60px;
+            /* Bigger */
+            border-radius: 50%;
+            position: absolute;
+            left: 7px;
+            transition: top 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            z-index: 2;
+        }
+
+        /* Track line behind stick */
+        .lever-base::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            left: 50%;
+            width: 4px;
+            transform: translateX(-50%);
+            background: #333;
+            z-index: 1;
+        }
+
+        .strand-A .lever-stick {
+            top: 10px;
+            background: var(--accent);
+            box-shadow: 0 0 25px var(--accent);
+        }
+
+        .strand-B .lever-stick {
+            top: 64px;
+            /* adjusted for height 140 - stick 60 - padding */
+            background: var(--accent-alt);
+            box-shadow: 0 0 25px var(--accent-alt);
+        }
+
+        /* Dynamic border color for base */
+        .strand-A.lever-base {
+            border-color: var(--accent);
+        }
+
+        .strand-B.lever-base {
+            border-color: var(--accent-alt);
+        }
+
+        .lever-label {
+            font-size: 12px;
+            font-weight: 900;
+            background: #000;
+            color: #fff;
+            padding: 4px 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: inline-block;
+            border: 1px solid #333;
+        }
+
+        /* HUD OVERLAY (Stats) */
+        #hud-layer {
+            position: absolute;
+            top: 0;
+            left: 80px;
+            right: 0;
+            padding: 20px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .hud-stat {
+            font-size: 13px;
+            font-weight: 700;
+            color: #aaa;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            margin-bottom: 5px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .strand-indicator {
+            font-size: 32px;
+            font-weight: 900;
+            text-shadow: 0 0 30px currentColor;
+            letter-spacing: -1px;
+        }
+
+        /* Terminal */
+        #terminal {
+            background: var(--term);
+            border-left: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+        }
+
+        .term-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--line);
+            background: #020406;
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .msg {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 10px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            animation: slideIn 0.3s;
+        }
+
+        .msg.system {
+            border-left: 3px solid #444;
+            color: #999;
+            font-style: italic;
+        }
+
+        .msg.A {
+            border-left: 3px solid var(--accent);
+        }
+
+        .msg.B {
+            border-left: 3px solid var(--accent-alt);
+        }
+
+        /* MODAL */
+        #data-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            width: min(400px, 90%);
+            background: rgba(5, 10, 15, 0.98);
+            border: 1px solid #444;
+            border-radius: 12px;
+            /* softer corners */
+            padding: 25px;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #data-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .dm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+
+        .dm-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #222;
+            padding-bottom: 8px;
+        }
+
+        .dm-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .dm-val {
+            font-size: 14px;
+            color: #fff;
+            text-align: right;
+        }
+
+        .dm-btn {
+            background: #222;
+            color: #fff;
+            padding: 15px;
+            /* Fat button */
+            border: 1px solid #444;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
+            text-transform: uppercase;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .dm-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            #app {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 0px;
+            }
+
+            #terminal {
+                display: none;
+            }
+
+            /* Hide Minimap on Mobile entirely for ZEN mode */
+            #genome-minimap {
+                display: none;
+            }
+
+            #targeting-display {
+                flex-direction: column;
+                bottom: 180px;
+                /* Push up above level/controls */
+                width: 90%;
+                gap: 15px;
+            }
+
+            .target-card.B {
+                flex-direction: row;
+                text-align: left;
+            }
+
+            /* Better mobile button placement */
+            #controls-overlay {
+                top: 20px;
+                right: 20px;
+                bottom: auto;
+                /* Move to top right corner */
+                align-items: flex-end;
+            }
+
+            #manual-override {
+                bottom: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                /* Full width tap zone effectively */
+                height: 200px;
+                /* Tall tap zone */
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                align-items: center;
+                pointer-events: none;
+                /* Let clicks pass through except lever */
+            }
+
+            #manual-override>* {
+                pointer-events: auto;
+                /* Re-enable lever */
+            }
+
+            #hud-layer {
+                left: 20px;
+                /* Reset padding since minimap is gone */
+            }
+
+            .sh-title {
+                font-size: 20px;
+            }
+
+            .sh-box {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app" class="scanlines">
+
+        <!-- GENOME MINIMAP -->
+        <div id="genome-minimap">
+            <div class="map-header">
+                <span class="map-icon">🧬</span>
+                <div class="map-label">GENOME</div>
+            </div>
+            <div class="map-content" id="genome-list"></div>
+        </div>
+
+        <div id="viewport">
+
+            <!-- TV Overlay -->
+            <div id="broadcast-overlay">
+                <div class="live-badge">LIVE</div>
+                <div class="cam-rec">REC [00:00:00:00]</div>
+            </div>
+
+            <!-- HUD Layer (Restored to fix null reference) -->
+            <div id="hud-layer">
+                <div class="hud-top">
+                    <div>
+                        <div class="hud-stat">SEQUENCER v19.0</div>
+                        <div class="hud-stat" id="dist" style="color:#666">0 BP</div>
+                        <div class="hud-stat" id="velocity">VEL: 0 km/h</div>
+                    </div>
+                    <div class="strand-indicator" id="strandDisplay" style="color:var(--accent)">ALPHA</div>
+                </div>
+            </div>
+
+            <!-- Scenario Context HUD -->
+            <div id="scenario-hud">
+                <div class="sh-box">
+                    <div class="sh-context" id="sh-context">LOADING...</div>
+                    <div class="sh-title" id="sh-title">--</div>
+                </div>
+            </div>
+
+            <!-- Targeting System -->
+            <div id="targeting-display">
+                <!-- Card A -->
+                <div class="target-card A" id="card-A">
+                    <img src="" id="img-A" class="t-img">
+                    <div class="t-data">
+                        <div class="t-header">OPTION A</div>
+                        <div class="t-name" id="name-A">--</div>
+                        <div class="t-desc" id="desc-A">--</div>
+                    </div>
+                </div>
+                <!-- Card B -->
+                <div class="target-card B" id="card-B">
+                    <div class="t-data">
+                        <div class="t-header">OPTION B</div>
+                        <div class="t-name" id="name-B">--</div>
+                        <div class="t-desc" id="desc-B">--</div>
+                    </div>
+                    <img src="" id="img-B" class="t-img">
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div id="controls-overlay">
+                <div class="ctrl-row">
+                    <button class="cam-btn alert" id="btn-pause" onclick="togglePause()">PAUSE</button>
+                    <button class="cam-btn" id="btn-tts" onclick="toggleTTS()">TTS: ON</button>
+                </div>
+                <div class="ctrl-row">
+                    <button class="cam-btn active" onclick="setCam('TUNNEL')">TUNNEL</button>
+                    <button class="cam-btn" onclick="setCam('FORK')">FORK</button>
+                    <button class="cam-btn" onclick="setCam('CHASE')">CHASE</button>
+                </div>
+                <div class="ctrl-row"
+                    style="background:rgba(0,0,0,0.8); padding:5px; border:1px solid #333; display:flex; align-items:center;">
+                    <span style="font-size:9px; color:#666; margin-right:5px;">SPD</span>
+                    <input type="range" min="0" max="200" value="10" style="width:60px; accent-color: white;"
+                        oninput="CFG.speed=this.value/100">
+                </div>
+            </div>
+
+            <!-- Lever -->
+            <div id="manual-override" onclick="toggleStrand()">
+                <div class="lever-base strand-A" id="leverVisual">
+                    <div class="lever-stick"></div>
+                </div>
+                <div class="lever-label">SWITCH</div>
+            </div>
+        </div>
+
+        <!-- Terminal -->
+        <div id="terminal">
+            <div class="term-header">DECISION STREAM</div>
+            <div id="chat-container">
+                <div class="msg system">
+                    <div style="flex:1">Paradox Corpus Loaded.<br>Broadcasting Signal...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DATA MODAL -->
+    <div id="data-modal">
+        <div class="dm-header">
+            <div class="dm-title" style="color:#fff; font-weight:900;">DECISION RECORD</div>
+            <div style="cursor:pointer;" onclick="closeModal()">✕</div>
+        </div>
+        <div class="dm-body">
+            <div class="dm-row">
+                <span class="dm-label">Scenario</span>
+                <span class="dm-val" id="dm-sc">--</span>
+            </div>
+            <div class="dm-row">
+                <span class="dm-label">Choice</span>
+                <span class="dm-val" id="dm-choice" style="font-weight:900">--</span>
+            </div>
+            <div class="dm-row">
+                <span class="dm-label">Sacrificed</span>
+                <span class="dm-val" id="dm-sac" style="color:#f33">--</span>
+            </div>
+            <div class="dm-row">
+                <span class="dm-label">Role</span>
+                <span class="dm-val" id="dm-role">--</span>
+            </div>
+            <img src="" id="dm-img"
+                style="width:100%; height:120px; object-fit:cover; border-radius:4px; border:1px solid #444; margin-top:10px;">
+        </div>
+        <button class="dm-btn" onclick="triggerRewind()">REWIND TIME</button>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const CFG = {
+            helixRadius: 18,
+            helixTwist: 0.1,
+            speed: 0.1,
+            fov: 70,
+            fogDensity: 0.008, // Thicker fog for atmosphere
+            decisionInterval: 900, // Spaced out for progressive reveal (was 400)
+            colors: { A: 0x00f0ff, B: 0xff0055, bridge: 0xffffff },
+            tts: false
+        };
+
+        // --- TYPEWRITER UTILS ---
+        class Typewriter {
+            constructor(elementId, speed = 30) {
+                this.el = document.getElementById(elementId);
+                this.speed = speed;
+                this.queue = [];
+                this.isTyping = false;
+                this.currentText = "";
+            }
+
+            type(text) {
+                if (this.currentText === text) return; // Ignore if same
+                this.currentText = text;
+                this.el.innerText = "";
+                this.queue = text.split('');
+                if (!this.isTyping) this.process();
+            }
+
+            process() {
+                if (this.queue.length === 0) {
+                    this.isTyping = false;
+                    return;
+                }
+                this.isTyping = true;
+                this.el.innerText += this.queue.shift();
+
+                // Random variation for "human" feel
+                setTimeout(() => this.process(), this.speed + (Math.random() * 20));
+            }
+
+            clear() {
+                this.el.innerText = "";
+                this.queue = [];
+                this.currentText = "";
+                this.isTyping = false;
+            }
+        }
+
+        const twContext = new Typewriter('sh-context', 40);
+        const twTitle = new Typewriter('sh-title', 60);
+
+        // --- THREE.JS ---
+        // ... (existing setup) ...
+
+        // --- CLOUDS ---
+        const cloudGeo = new THREE.PlaneGeometry(60, 30);
+        const cloudMat = new THREE.MeshBasicMaterial({
+            color: 0x111111,
+            transparent: true,
+            opacity: 0.05,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
+        const clouds = [];
+
+        function createCloud(z) {
+            const mesh = new THREE.Mesh(cloudGeo, cloudMat);
+            mesh.position.set(
+                (Math.random() - 0.5) * 60,
+                (Math.random() - 0.5) * 40,
+                z
+            );
+            mesh.rotation.z = Math.random() * Math.PI;
+            scene.add(mesh);
+            clouds.push(mesh);
+        }
+
+        // --- STATE ---
+        const STATE = {
+            playing: true,
+            paused: false,
+            distance: 0,
+            currentStrand: 'A',
+            targetStrand: 'A',
+            strandLerp: 0,
+            entities: [],
+            chunks: [],
+            nextDecisionZ: 100,
+            cameraMode: 'TUNNEL',
+            genome: [],
+            activeScenario: null,
+            approachingPair: null,
+            nucleotides: [],
+            futureScenarioData: null,
+            lastSpokenZ: -1,
+            selectedGenomeNode: null,
+            scenarios: [],
+            scenarioIndex: 0
+        };
+
+        let noise = null;
+        let synth = null;
+
+        // --- NUCLEOTIDE TEXT TRAIL ---
+        function createNucleotide(z, text) {
+            // Glassy square configuration
+            const size = 18;
+            const canvasSize = 1024; // Hi-res
+            const padding = 100;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = canvasSize; canvas.height = canvasSize;
+            const ctx = canvas.getContext('2d');
+
+            // 1. Draw Glass Frame
+            ctx.fillStyle = "rgba(0, 10, 20, 0.7)";
+            ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+            ctx.strokeStyle = "rgba(0, 255, 255, 0.6)";
+            ctx.lineWidth = 15;
+            ctx.strokeRect(0, 0, canvasSize, canvasSize);
+
+            // Inner Border/Accent
+            ctx.strokeStyle = "rgba(0, 255, 255, 0.2)";
+            ctx.lineWidth = 4;
+            ctx.strokeRect(30, 30, canvasSize - 60, canvasSize - 60);
+
+            // 2. Prepare Text
+            ctx.font = "bold 90px Courier New"; // Scaled for 1024
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowColor = "#00ffff";
+            ctx.shadowBlur = 10;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                const width = ctx.measureText(currentLine + " " + word).width;
+                if (width < canvasSize - (padding * 2)) {
+                    currentLine += " " + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            lines.push(currentLine);
+
+            // 3. Draw Centered Text
+            const lineHeight = 110;
+            const totalHeight = lines.length * lineHeight;
+            let startY = (canvasSize - totalHeight) / 2 + (lineHeight / 2);
+
+            lines.forEach(line => {
+                ctx.fillText(line, canvasSize / 2, startY);
+                startY += lineHeight;
+            });
+
+            // 4. Create Material
+            const tex = new THREE.CanvasTexture(canvas);
+            const mat = new THREE.MeshBasicMaterial({
+                map: tex,
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            const geo = new THREE.PlaneGeometry(size, size);
+            const mesh = new THREE.Mesh(geo, mat);
+
+            // Random jitter for organic trail feel
+            const jitterX = (Math.random() - 0.5) * 2;
+            const jitterY = (Math.random() - 0.5) * 2;
+            mesh.position.set(jitterX, jitterY, z);
+            // FIX: Flip text 180 degrees (PI) so it is upright. Use Math.PI exactly for 0% tilt.
+            mesh.rotation.z = Math.PI;
+            // FIX: Mirror X to correct backwards text
+            mesh.scale.x = -1;
+
+            mesh.userData = { type: 'nucleotide' };
+
+            scene.add(mesh);
+            STATE.nucleotides.push(mesh);
+        }
+
+        function spawnBreadcrumbs(targetZ, scenario) {
+            const rawText = scenario.monologue;
+            // Split by sentence, preserving punctuation
+            const chunks = rawText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [rawText];
+
+            // Spread deeper: 800 units -> 150 units before decision
+            const runway = 800;
+            const buffer = 150;
+
+            chunks.forEach((chunk, i) => {
+                // Determine Z position: spaced out based on index
+                // If we have 3 chunks, place at -800, -500, -200?
+                // Let's randomize slightly to avoid robotic spacing
+                const progress = i / (chunks.length || 1);
+                const offset = runway - (progress * (runway - buffer));
+
+                // Trim if too long for one card
+                if (chunk.length > 120) chunk = chunk.substring(0, 117) + "...";
+
+                createNucleotide(targetZ - offset, chunk.trim());
+            });
+        }
+
+        // --- AUDIO ENGINE ---
+        let heartbeat;
+
+        async function startAudio() {
+            await Tone.start();
+            if (!heartbeat) {
+                const kick = new Tone.MembraneSynth().volume.value = -6;
+                // Fix: MembraneSynth doesn't have .volume.value assignment like that, need to create then set
+
+                const kickSynth = new Tone.MembraneSynth().toDestination();
+                kickSynth.volume.value = -4;
+
+                heartbeat = new Tone.Loop(time => {
+                    kickSynth.triggerAttackRelease("C1", "8n", time);
+                }, "4n").start(0);
+
+                Tone.Transport.bpm.value = 110;
+                Tone.Transport.start();
+            }
+        }
+
+        // --- DATA LOADING (Protocol Aware) ---
+        const CORPUS_FILES = [
+            'fork-paradox-cascade-thick-6.json', 'fork-paradox-cascade-thick-12.json', 'fork-paradox-cascade-thick-18.json',
+            'fork-paradox-cascade-thick-24.json', 'fork-paradox-cascade-thick-30.json', 'fork-paradox-cascade-thick-36.json',
+            'fork-paradox-cascade-thick-42.json', 'fork-paradox-cascade-thick-48.json'
+        ];
+
+        async function loadCorpus() {
+            // Detect Protocol to avoid CORS on file://
+            const isLocal = window.location.protocol === 'file:';
+
+            if (!isLocal) {
+                // Parallel Fetch for HTTP/S
+                const promises = CORPUS_FILES.map(f =>
+                    fetch(f).then(r => r.json()).catch(e => null)
+                );
+                const results = await Promise.all(promises);
+                results.forEach(data => {
+                    if (data && data.scenarios) STATE.scenarios.push(...data.scenarios);
+                });
+            } else {
+                console.warn("Local file protocol detected. Skipping fetch to prevent CORS errors.");
+            }
+
+            // Always ensure we have content (Fallback + Embedded)
+            if (!STATE.scenarios.length) {
+                // Expanded Embedded Corpus for Offline Mode
+                STATE.scenarios.push(
+                    {
+                        title: "OMEGA PROTOCOL: THE INITIAL",
+                        root: {
+                            setting: "Void Sector // Anchor Point",
+                            thick_description: {
+                                internal_monologue: "The infinite helix stretches before you. It is not just data. It is memory. Every turn a choice made in stone."
+                            },
+                            entities: ["x", "The Navigator", "The Ghost"]
+                        },
+                        branches: [
+                            { branch_id: "T1", label: "ACCELERATE", thick_description: { what_he_does: "Push the engines to critical mass." }, consequence: "We outrun the decay." },
+                            { branch_id: "T2", label: "OBSERVE", thick_description: { what_he_does: "Stop and listen to the void." }, consequence: "The truth catches up." }
+                        ],
+                        ranges: []
+                    },
+                    {
+                        title: "PARADOX 002: THE SILENT SIGNAL",
+                        root: {
+                            setting: "Deep Space // Listening Post",
+                            thick_description: {
+                                internal_monologue: "Static on the comms. A voice from a timeline that shouldn't exist. It calls your name properly."
+                            },
+                            entities: ["x", "Broadcast", "Silence"]
+                        },
+                        branches: [
+                            { branch_id: "T1", label: "ANSWER", thick_description: { what_he_does: "Open the channel wide." }, consequence: "The signal takes hold." },
+                            { branch_id: "T2", label: "BLOCK", thick_description: { what_he_does: "Sever the link manually." }, consequence: "Silence returns, heavier now." }
+                        ],
+                        ranges: []
+                    }
+                );
+            }
+
+            addLog("system", `CORPUS LOADED: ${STATE.scenarios.length} SCENARIOS`);
+
+            // --- CINETMATIC INIT ---
+            const firstSc = generateScenario();
+            STATE.futureScenarioData = firstSc;
+            STATE.nextDecisionZ = 600;
+            spawnBreadcrumbs(600, firstSc);
+        }
+
+        function generateScenario() {
+            // Cycle through scenarios
+            const sc = STATE.scenarios[STATE.scenarioIndex % STATE.scenarios.length];
+            STATE.scenarioIndex++;
+
+            // Map Thick Data to VIZ structure
+            const branchA = sc.branches.find(b => b.branch_id === 'T1') || sc.branches[0];
+            const branchB = sc.branches.find(b => b.branch_id === 'T2') || sc.branches[1];
+
+            // ROBUSTNESS: Handle missing entities or short arrays
+            const entList = sc.root.entities || ["Unknown", "Entity A", "Entity B"];
+            const entA = entList[1] || entList[0] || "Entity A";
+            const entB = entList[2] || entList[1] || "Entity B";
+
+            return {
+                location: sc.root.setting || "Unknown Sector",
+                title: sc.title || "Untitled Paradox",
+                monologue: sc.root.thick_description?.internal_monologue || "System Awaiting Input.",
+                trackA: mapTrack(branchA, entA, 'A'),
+                trackB: mapTrack(branchB, entB, 'B')
+            };
+        }
+
+        function mapTrack(branch, entityName, strand) {
+            // Defensive check
+            if (!entityName) entityName = "Unknown Subject";
+
+            // Dicebear seed from name
+            const seed = entityName.replace(/[^a-zA-Z0-9]/g, '') || "seed" + Math.random();
+
+            // Try to extract role/desc from thick data or label
+            const label = branch?.label || "UNKNOWN OPTION";
+            const desc = branch?.thick_description?.what_he_does || "No data available.";
+
+            return {
+                label: label,
+                entity: entityName.length > 20 ? entityName.slice(0, 20) + "..." : entityName,
+                desc: desc.slice(0, 80),
+                role: label.split('—')[0].trim().slice(0, 18),
+                plea: (branch?.consequence || "Fate uncertain.").slice(0, 40),
+                img: `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&backgroundColor=b6e3f4`
+            };
+        }
+
+        // --- THREE.JS ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000203);
+        scene.fog = new THREE.FogExp2(0x000203, CFG.fogDensity);
+
+        const viewport = document.getElementById('viewport');
+        const camera = new THREE.PerspectiveCamera(CFG.fov, viewport.clientWidth / viewport.clientHeight, 0.1, 3000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        // Set initial size based on viewport, not window
+        renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+        viewport.appendChild(renderer.domElement);
+
+        const textureLoader = new THREE.TextureLoader();
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // Lighting
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.5));
+        const gridHelper = new THREE.GridHelper(4000, 100, 0x111111, 0x050505);
+        gridHelper.position.y = -30; scene.add(gridHelper);
+
+        // Stars
+        const starsGeo = new THREE.BufferGeometry();
+        const starsCount = 5000;
+        const posArray = new Float32Array(starsCount * 3);
+        for (let i = 0; i < starsCount * 3; i++) posArray[i] = (Math.random() - 0.5) * 1500;
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ size: 0.8, color: 0x555555, transparent: true, opacity: 0.6 }));
+        scene.add(stars);
+
+        // --- TRAIN ---
+        const trainGroup = new THREE.Group();
+        scene.add(trainGroup);
+
+        // Train Geometry
+        const tMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.8, emissive: 0x111111 });
+        const tGlowMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+        const tBody = new THREE.Mesh(new THREE.BoxGeometry(3, 1.5, 10), tMat);
+        tBody.position.y = 0.8; trainGroup.add(tBody);
+        const tEngine = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 8, 16), tMat);
+        tEngine.rotation.x = Math.PI / 2; tEngine.position.set(0, 2.5, 1); trainGroup.add(tEngine);
+
+        // FIX: Boost intensity significantly
+        const spot = new THREE.SpotLight(0xffffff, 150, 800, 0.6, 0.5, 1);
+        spot.position.set(0, 6, 5); spot.target.position.set(0, 0, 100);
+        trainGroup.add(spot); trainGroup.add(spot.target);
+
+        // --- HELIX ---
+        function getHelixPos(z, strand) {
+            const angle = z * CFG.helixTwist;
+            const offset = strand === 'A' ? 0 : Math.PI;
+            return { x: Math.cos(angle + offset) * CFG.helixRadius, y: Math.sin(angle + offset) * CFG.helixRadius, z: z };
+        }
+        function getTangent(z, strand) {
+            const p1 = getHelixPos(z, strand);
+            const p2 = getHelixPos(z + 0.5, strand);
+            return new THREE.Vector3(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z).normalize();
+        }
+
+        const chunkGeom = new THREE.BoxGeometry(1.2, 0.2, 4.0);
+        const bridgeGeom = new THREE.BoxGeometry(0.5, 0.5, CFG.helixRadius * 2);
+
+        function createChunk(z) {
+            const group = new THREE.Group();
+            ['A', 'B'].forEach(s => {
+                const pos = getHelixPos(z, s);
+                const m = new THREE.Mesh(chunkGeom, new THREE.MeshBasicMaterial({ color: CFG.colors[s] }));
+                m.position.set(pos.x, pos.y, pos.z);
+                m.lookAt(m.position.clone().add(getTangent(z, s)));
+                m.userData = { strand: s, type: 'rail' };
+                group.add(m);
+            });
+            if (Math.floor(z) % 20 === 0) {
+                const b = new THREE.Mesh(bridgeGeom, new THREE.MeshBasicMaterial({ color: CFG.colors.bridge, transparent: true, opacity: 0.3 }));
+                b.position.set(0, 0, z);
+                b.rotation.z = (z * CFG.helixTwist) + Math.PI / 2;
+                b.userData = { type: 'bridge' };
+                group.add(b);
+            }
+            return group;
+        }
+
+        // --- HOLO-BILLBOARDS ---
+        function createHoloCard(char, strand) {
+            const group = new THREE.Group();
+            const hexColor = strand === 'A' ? "#00f0ff" : "#ff0055";
+
+            // 1. Avatar Sprite
+            textureLoader.load(char.img, (tex) => {
+                const mat = new THREE.SpriteMaterial({ map: tex });
+                const avatar = new THREE.Sprite(mat);
+                avatar.scale.set(12, 12, 1);
+                avatar.position.set(0, 9, 0);
+                group.add(avatar);
+            });
+
+            // 2. Info Card (Canvas)
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = "rgba(0, 10, 20, 0.9)";
+            ctx.strokeStyle = hexColor;
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.rect(10, 10, 492, 236);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 50px Courier New";
+            ctx.textAlign = "center";
+            ctx.fillText(char.entity.split(' ')[0], 256, 90); // Short name
+
+            ctx.fillStyle = hexColor;
+            ctx.font = "30px Courier New";
+            ctx.fillText(char.role.slice(0, 25), 256, 140);
+
+            ctx.fillStyle = "#aaa";
+            ctx.font = "italic 24px Courier New";
+            ctx.fillText(char.plea.slice(0, 35), 256, 190);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
+            sprite.scale.set(16, 8, 1);
+            sprite.position.set(0, -2, 0);
+            group.add(sprite);
+
+            // 3. Anchor Line
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -6, 0)]);
+            const lineMat = new THREE.LineBasicMaterial({ color: CFG.colors[strand] });
+            group.add(new THREE.Line(lineGeo, lineMat));
+
+            return group;
+        }
+
+        function spawnBreadcrumbs(targetZ, scenario) {
+            const rawText = scenario.monologue;
+            // Split into 3 chunks max
+            const chunks = rawText.match(/.{1,60}(\s|$)/g) || [rawText];
+            const maxChunks = 3;
+
+            chunks.slice(0, maxChunks).forEach((chunk, i) => {
+                // Distribute backwards from the target: -700, -500, -300
+                const offset = 700 - (i * 200);
+                createNucleotide(targetZ - offset, chunk.trim());
+            });
+        }
+
+        function spawnDecisionNode(z) {
+            // Generate Data if we haven't already
+            let sc = STATE.futureScenarioData;
+            if (!sc) {
+                sc = generateScenario();
+            } else {
+                STATE.futureScenarioData = null; // Consumed
+            }
+
+            STATE.activeScenario = { z: z, data: sc };
+
+            // Create Holo Cards
+            const entA = createEntity(z, 'A', sc.trackA);
+            const entB = createEntity(z, 'B', sc.trackB);
+
+            entA.scenario = sc; entB.scenario = sc;
+            STATE.entities.push(entA, entB);
+
+            addLog("system", `SCENARIO DETECTED: ${sc.title}`);
+
+            // PREPARE NEXT scenario immediately for the trail
+            const nextSc = generateScenario();
+            STATE.futureScenarioData = nextSc;
+            // Spawn breadcrumbs for the NEXT one, extending from current Z to next Z
+            const nextZ = z + CFG.decisionInterval;
+            spawnBreadcrumbs(nextZ, nextSc);
+        }
+
+        function createEntity(z, strand, trackData) {
+            const pos = getHelixPos(z, strand);
+            const outward = new THREE.Vector3(pos.x, pos.y, 0).normalize();
+
+            const card = createHoloCard(trackData, strand);
+            card.position.set(pos.x, pos.y, pos.z);
+            card.position.add(outward.multiplyScalar(8)); // Push out further
+
+            scene.add(card);
+            return { mesh: card, z, strand, data: trackData, scenario: null };
+        }
+
+        // --- HUD LOGIC (PROGRESSIVE DISCLOSURE) ---
+        function updateHUD(distToNext, sc) {
+            const hud = document.getElementById('scenario-hud');
+            const disp = document.getElementById('targeting-display');
+
+            // Zone 4: Far (> 800) - Silence / Void
+            if (distToNext > 800) {
+                hud.classList.remove('active');
+                disp.classList.remove('active');
+                if (typeof twContext !== 'undefined') { twContext.clear(); twTitle.clear(); }
+                return;
+            }
+
+            // Zone 3: Atmosphere (800 - 600) - "Signal Detected"
+            if (distToNext <= 800 && distToNext > 600) {
+                // Subtle audio cue or light shift could go here
+            }
+
+            // Zone 2: The Setup (600 - 300) - Typewriter Reveal
+            if (distToNext <= 600 && distToNext > 300) {
+                hud.classList.add('active');
+                twContext.type(sc.location || "UNKNOWN SECTOR");
+                twTitle.type(sc.title || "SIGNAL INTERCEPT");
+
+                // TTS trigger (once per zone entry)
+                if (CFG.tts && STATE.lastSpokenZ !== STATE.activeScenario.z) {
+                    speak(sc.monologue);
+                    STATE.lastSpokenZ = STATE.activeScenario.z;
+                }
+            }
+
+            // Zone 1: The Charaters (300 - 0) - Cards & Entities
+            if (distToNext <= 300 && distToNext > 0) {
+                // Cards Slide In
+                if (!disp.classList.contains('active')) {
+                    // Update content only when entering zone
+                    const update = (id, d) => {
+                        const el = id => document.getElementById(id);
+                        if (el(`name-${id}`)) el(`name-${id}`).innerText = d.entity;
+                        if (el(`desc-${id}`)) el(`desc-${id}`).innerText = d.desc;
+                        if (el(`img-${id}`)) el(`img-${id}`).src = d.img;
+                    };
+                    update('A', sc.trackA);
+                    update('B', sc.trackB);
+                    disp.classList.add('active');
+                }
+
+                // Lock on visual
+                const cA = document.getElementById('card-A');
+                const cB = document.getElementById('card-B');
+                if (STATE.targetStrand === 'A') { cA.classList.add('locked'); cB.classList.remove('locked'); }
+                else { cB.classList.add('locked'); cA.classList.remove('locked'); }
+            } else {
+                // Hide cards if we passed or haven't reached
+                if (distToNext <= 0) disp.classList.remove('active');
+            }
+        }
+
+        // --- MAIN LOOP ---
+        function updatePhysics() {
+            if (!STATE.playing || STATE.paused) return;
+            STATE.distance += CFG.speed;
+
+            // Train
+            const targetLerp = STATE.targetStrand === 'B' ? 1 : 0;
+            STATE.strandLerp += (targetLerp - STATE.strandLerp) * 0.1;
+            const posA = getHelixPos(STATE.distance, 'A');
+            const posB = getHelixPos(STATE.distance, 'B');
+            const x = posA.x + (posB.x - posA.x) * STATE.strandLerp;
+            const y = posA.y + (posB.y - posA.y) * STATE.strandLerp;
+            const z = STATE.distance;
+            trainGroup.position.set(x, y, z);
+
+            // Camera
+            const tan = getTangent(z, STATE.targetStrand === 'A' ? 'A' : 'B');
+            trainGroup.lookAt(x + tan.x, y + tan.y, z + tan.z);
+
+            if (STATE.cameraMode === 'TUNNEL') {
+                camera.position.lerp(new THREE.Vector3(0, 0, z - 40), 0.1);
+                camera.lookAt(0, 0, z + 100);
+            } else if (STATE.cameraMode === 'FORK') {
+                camera.position.lerp(new THREE.Vector3(0, 30, STATE.nextDecisionZ - 80), 0.05);
+                camera.lookAt(0, 0, STATE.nextDecisionZ);
+            } else if (STATE.cameraMode === 'REAR') {
+                camera.position.lerp(new THREE.Vector3(0, 20, z + 30), 0.1);
+                camera.lookAt(0, 0, z - 50);
+            } else if (STATE.cameraMode === 'CHASE') {
+                const off = new THREE.Vector3(0, 8, -20).applyQuaternion(trainGroup.quaternion);
+                camera.position.lerp(new THREE.Vector3(x, y, z).add(off), 0.1);
+                camera.lookAt(x, y, z + 40);
+            }
+
+            // Chunks
+            const lastZ = STATE.chunks.length > 0 ? STATE.chunks[STATE.chunks.length - 1].userData.z : STATE.distance;
+            if (lastZ < STATE.distance + 400) {
+                for (let i = 0; i < 10; i++) {
+                    const nz = lastZ + i + 1;
+                    const c = createChunk(nz); c.userData = { z: nz };
+                    scene.add(c); STATE.chunks.push(c);
+                }
+            }
+            if (STATE.chunks.length && STATE.chunks[0].userData.z < STATE.distance - 50) scene.remove(STATE.chunks.shift());
+
+            // Nucleotides (Text Trail)
+            STATE.nucleotides.forEach((n, i) => {
+                const dist = n.position.z - z;
+
+                // Fade In/Out
+                // Visual range: 300 to -10
+                if (dist < 300 && dist > 20) {
+                    n.material.opacity = Math.min(1, (300 - dist) / 100);
+                    n.scale.setScalar(1 + (300 - dist) / 1000); // Slight grow
+                    n.rotation.z += 0.001;
+                } else if (dist <= 20) {
+                    n.material.opacity = Math.max(0, dist / 20); // Fade out quick
+                }
+
+                if (n.position.z < z - 50) {
+                    scene.remove(n);
+                    STATE.nucleotides.splice(i, 1);
+                }
+            });
+
+            // Clouds
+            if (Math.random() < 0.1) createCloud(STATE.distance + 800);
+            clouds.forEach((c, i) => {
+                if (c.position.z < STATE.distance - 50) {
+                    scene.remove(c);
+                    clouds.splice(i, 1);
+                }
+            });
+
+            // Logic
+            if (STATE.distance > STATE.nextDecisionZ || STATE.entities.length === 0) {
+                // If we forced a spawn because empty, ensure we update Z to be ahead
+                const spawnZ = Math.max(STATE.distance + 100, STATE.nextDecisionZ);
+                spawnDecisionNode(spawnZ);
+                STATE.nextDecisionZ = spawnZ + CFG.decisionInterval;
+            }
+
+            if (STATE.activeScenario) updateHUD(STATE.activeScenario.z - z, STATE.activeScenario.data);
+
+            // Collision & Fading
+            STATE.entities.forEach((ent, idx) => {
+                // Face Camera
+                ent.mesh.lookAt(camera.position);
+
+                // Progressive Opacity (Fade in from 600 to 300)
+                const dist = ent.z - z;
+                if (dist < 600 && dist > 100) {
+                    let op = 1 - ((dist - 200) / 400);
+                    op = Math.max(0, Math.min(1, op));
+
+                    ent.mesh.children.forEach(c => {
+                        if (c.material) {
+                            c.material.transparent = true;
+                            c.material.opacity = op;
+                        }
+                    });
+                }
+
+                if (ent.z < z - 2 && ent.z > z - 10) {
+                    const isHit = (ent.strand === 'A' && STATE.strandLerp < 0.2) || (ent.strand === 'B' && STATE.strandLerp > 0.8);
+                    if (isHit && ent.mesh.visible) {
+                        ent.mesh.visible = false;
+
+                        const gItem = {
+                            z: Math.floor(ent.z),
+                            choice: ent.strand === 'A' ? 'A' : 'B',
+                            sacrificed: ent.data,
+                            scenario: ent.scenario
+                        };
+                        STATE.genome.push(gItem);
+                        updateGenomeMinimap(gItem);
+                        addLog(ent.strand, `TERMINATED: ${ent.data.entity}`);
+
+                        // Impact FX
+                        camera.position.add(new THREE.Vector3((Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3, 0));
+
+                        // Auto Cut REMOVED to avoid jarring transition
+                        // if (STATE.cameraMode !== 'FORK') STATE.cameraMode = 'REAR';
+                        // setTimeout(() => { if (STATE.cameraMode === 'REAR') STATE.cameraMode = 'TUNNEL'; }, 2000);
+                    }
+                }
+                if (ent.z < z - 100) {
+                    scene.remove(ent.mesh);
+                    STATE.entities.splice(idx, 1);
+                }
+            });
+
+            stars.position.z = STATE.distance;
+
+            // Safe DOM Updates (Fix for TypeError)
+            const elDist = document.getElementById('dist');
+            if (elDist) elDist.innerText = `${STATE.distance.toFixed(0)} BP`;
+
+            const elVel = document.getElementById('velocity');
+            if (elVel) elVel.innerText = `VEL: ${(CFG.speed * 100).toFixed(0)} km/h`;
+        }
+
+        // --- UTILS ---
+        function toggleStrand() {
+            STATE.targetStrand = STATE.targetStrand === 'A' ? 'B' : 'A';
+            const knob = document.getElementById('leverVisual');
+            const label = document.getElementById('strandDisplay');
+
+            if (knob) {
+                if (STATE.targetStrand === 'A') {
+                    knob.classList.remove('strand-B'); knob.classList.add('strand-A');
+                } else {
+                    knob.classList.remove('strand-A'); knob.classList.add('strand-B');
+                }
+            }
+
+            if (label) {
+                if (STATE.targetStrand === 'A') {
+                    label.innerText = "ALPHA"; label.style.color = "var(--accent)";
+                } else {
+                    label.innerText = "BETA"; label.style.color = "var(--accent-alt)";
+                }
+            }
+
+            if (noise) {
+                const m = new Tone.MembraneSynth().toDestination();
+                m.triggerAttackRelease("C2", "8n");
+            }
+        }
+
+        function setCam(m) { STATE.cameraMode = m; }
+        function togglePause() { STATE.paused = !STATE.paused; }
+        function toggleTTS() { CFG.tts = !CFG.tts; }
+
+        function updateGenomeMinimap(gItem) {
+            const list = document.getElementById('genome-list');
+            const div = document.createElement('div');
+            div.className = 'g-node';
+            div.onclick = () => openDataModal(gItem);
+            div.innerHTML = `
+    <div class="g-status ${gItem.choice}"></div>
+    <img class="g-icon" src="${gItem.sacrificed.img}">
+    <div class="g-info">
+      <div class="gi-loss">LOST</div>
+      <div class="gi-name">${gItem.sacrificed.entity.split(' ')[1]}</div>
+    </div>`;
+            list.insertBefore(div, list.firstChild);
+        }
+
+        function openDataModal(item) {
+            const modal = document.getElementById('data-modal');
+            STATE.selectedGenomeNode = item;
+            document.getElementById('dm-sc').innerText = item.scenario.title;
+            document.getElementById('dm-choice').innerText = item.choice;
+            document.getElementById('dm-sac').innerText = item.sacrificed.entity;
+            document.getElementById('dm-role').innerText = item.sacrificed.role;
+            document.getElementById('dm-img').src = item.sacrificed.img;
+            modal.classList.add('active');
+            STATE.paused = true;
+        }
+
+        function closeModal() { document.getElementById('data-modal').classList.remove('active'); STATE.paused = false; }
+
+        function triggerRewind() {
+            if (STATE.selectedGenomeNode) {
+                const z = STATE.selectedGenomeNode.z;
+                STATE.distance = z;
+                STATE.nextDecisionZ = z + 100;
+                // Clear future
+                for (let i = STATE.entities.length - 1; i >= 0; i--) {
+                    if (STATE.entities[i].z > z) { scene.remove(STATE.entities[i].mesh); STATE.entities.splice(i, 1); }
+                }
+                STATE.genome = STATE.genome.filter(g => g.z <= z);
+                document.getElementById('genome-list').innerHTML = '';
+                STATE.genome.forEach(g => updateGenomeMinimap(g));
+                closeModal();
+            }
+        }
+
+        function addLog(type, text) {
+            const c = document.getElementById('chat-container');
+            const d = document.createElement('div');
+            d.className = `msg ${type}`;
+            d.innerHTML = `<div>${text}</div>`;
+            c.appendChild(d); c.scrollTop = c.scrollHeight;
+        }
+
+        function speak(text) {
+            if (CFG.tts && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.rate = 1.1; window.speechSynthesis.speak(u);
+            }
+        }
+
+        async function init() {
+            await Tone.start();
+            await loadCorpus();
+            requestAnimationFrame(animate);
+        }
+        function animate() {
+            requestAnimationFrame(animate);
+            updatePhysics();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            const w = viewport.clientWidth;
+            const h = viewport.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+        viewport.addEventListener('mousedown', async () => {
+            if (Tone.context.state !== 'running') await startAudio();
+            toggleStrand();
+        });
+
+        // Force a resize check after a short delay to handle mobile URL bar / layout shifts
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+
+        init();
+    </script>
+</body>
+
+</html>

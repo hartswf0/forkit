@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>THE FORK — CINEMATIC LOOP</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        :root {
+            --bg: #000203;
+            --text: #e8eef7;
+            --dim: #506070;
+            --cyan: #00f0ff;
+            --pink: #ff0055;
+            --amber: #ffd400;
+            --mono: "SFMono-Regular", Consolas, "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            user-select: none;
+        }
+
+        #viewport {
+            position: fixed;
+            inset: 0;
+        }
+
+        /* --- GLASS HUD --- */
+        .hud {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .bar {
+            background: linear-gradient(180deg, rgba(0, 2, 3, 0.9) 0%, transparent 100%);
+            padding: 16px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .logo {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--cyan);
+            border: 1px solid var(--cyan);
+            padding: 4px 8px;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+        }
+
+        .meta {
+            text-align: right;
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 1px;
+        }
+
+        .meta strong {
+            color: var(--text);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .controls {
+            pointer-events: auto;
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .lever-track {
+            width: 80px;
+            height: 160px;
+            background: rgba(0, 10, 20, 0.8);
+            border: 2px solid var(--dim);
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .lever-handle {
+            width: 60px;
+            height: 60px;
+            background: var(--cyan);
+            border-radius: 50%;
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            /* Start Top (A) */
+            box-shadow: 0 0 15px var(--cyan);
+            transition: top 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .lever-handle.switched {
+            top: 88px;
+            background: var(--pink);
+            box-shadow: 0 0 15px var(--pink);
+        }
+
+        .cam-btn {
+            width: 60px;
+            height: 60px;
+            border: 1px solid var(--dim);
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--dim);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            font-size: 10px;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+        }
+
+        .cam-btn:active {
+            background: var(--cyan);
+            color: #000;
+            border-color: var(--cyan);
+        }
+
+        /* Scenario Overlay */
+        .scenario-box {
+            position: absolute;
+            top: 40px;
+            /* Moved to Top to Clear Center */
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            opacity: 0;
+            transition: opacity 1s ease;
+            z-index: 5;
+            /* Ensure behind HUD bars if needed, but above world */
+        }
+
+        .scenario-box.active {
+            opacity: 1;
+        }
+
+        .sc-location {
+            font-size: 10px;
+            color: var(--cyan);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .sc-title {
+            font-size: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 1);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--dim);
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="viewport"></div>
+    <div id="loader">INITIALIZING CINEMATIC LOOP...</div>
+
+    <div class="hud">
+        <div class="bar">
+            <div class="logo">LOOP v2.0</div>
+            <div class="meta">
+                <span id="loop-count">CYCLE 01</span>
+                <strong>VEL 60 KM/H</strong>
+            </div>
+        </div>
+
+        <div class="scenario-box" id="scenario-hud">
+            <div class="sc-location" id="sc-loc">VOID SECTOR</div>
+            <div class="sc-title" id="sc-title">AWAITING INPUT</div>
+        </div>
+
+        <div class="controls">
+            <button class="cam-btn" id="btn-cam">CAM</button>
+            <div class="lever-track" id="lever">
+                <div class="lever-handle" id="handle"></div>
+            </div>
+            <button class="cam-btn" id="btn-audio">AUD</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTS ---
+        const CFG = {
+            radius: 80,
+            fogDensity: 0.012, // Dense for atmosphere
+            speed: 0.12,
+            colors: { A: 0x00f0ff, B: 0xff0055, rail: 0x506070 }
+        };
+
+        const STATE = {
+            t: 0,
+            choice: 'A',
+            loop: 1,
+            camMode: 0,
+            scenarios: [],
+            activeScenario: null,
+            nucleotides: [],
+            entities: []
+        };
+
+        // --- AUDIO ENGINE ---
+        let heartbeat;
+        async function startAudio() {
+            await Tone.start();
+            if (!heartbeat) {
+                const kick = new Tone.MembraneSynth().toDestination();
+                kick.volume.value = -4;
+                heartbeat = new Tone.Loop(time => {
+                    kick.triggerAttackRelease("C1", "8n", time);
+                }, "4n").start(0);
+                Tone.Transport.bpm.value = 110;
+                Tone.Transport.start();
+                updateLog("AUDIO SYSTEM ONLINE");
+            }
+        }
+
+        // --- DATA LOADING ---
+        const EMBEDDED_CORPUS = [
+            {
+                "scenario_id": "CASCADE_001",
+                "title": "The Ore Car — Herschel Quinn",
+                "root": {
+                    "setting": "Millbrook Junction, PA. August 1947.",
+                    "thick_description": { "internal_monologue": "Seven seconds. Józef owes me three dollars. The lever takes both arms. I can see the whites of Henry's eyes." },
+                    "entities": ["Herschel Quinn", "5 miners", "Henry Aldrich"]
+                },
+                "branches": [
+                    { "label": "THROW", "thick_description": { "what_he_does": "Heaves the lever. Henry dies." } },
+                    { "label": "HOLD", "thick_description": { "what_he_does": "Hands freeze. Five die." } }
+                ]
+            },
+            {
+                "scenario_id": "CASCADE_002",
+                "title": "The Monsoon — Chen Wei-Lin",
+                "root": {
+                    "setting": "Xian-Li Province. Monsoon flood. 1962.",
+                    "thick_description": { "internal_monologue": "I owe Teacher Fong my literacy. The lever is rusted. If it throws halfway, both tracks collapse." },
+                    "entities": ["Chen Wei-Lin", "3 children", "2 elders"]
+                },
+                "branches": [
+                    { "label": "THROW", "thick_description": { "what_he_does": "Tries to save children." } },
+                    { "label": "HOLD", "thick_description": { "what_he_does": "Cannot betray the elders." } }
+                ]
+            },
+            {
+                "scenario_id": "CASCADE_003",
+                "title": "The Fog — Alastair MacCrimmon",
+                "root": {
+                    "setting": "Inveraray, Scotland. 1889.",
+                    "thick_description": { "internal_monologue": "The spur leads to the quarry. I saw lantern-light—or was it marsh gas? Murphy and Brennan are on the main." },
+                    "entities": ["Alastair", "Murphy & Brennan", "Unknown Campers"]
+                },
+                "branches": [
+                    { "label": "THROW", "thick_description": { "what_he_does": "Risks the unknown." } },
+                    { "label": "HOLD", "thick_description": { "what_he_does": "Protects the known." } }
+                ]
+            },
+            {
+                "scenario_id": "CASCADE_004",
+                "title": "The Bridge — Leroy Simms",
+                "root": {
+                    "setting": "St. Augustine, FL. 1923.",
+                    "thick_description": { "internal_monologue": "Billy drinks but he's loyal. The fisherman lied before. I see them both. The express is coming." },
+                    "entities": ["Leroy Simms", "Family in Car", "Postman"]
+                },
+                "branches": [
+                    { "label": "LOWER", "thick_description": { "what_he_does": "Lowers for the car. Postman crushed?" } },
+                    { "label": "HOLD", "thick_description": { "what_he_does": "Saves postman. Express hits car?" } }
+                ]
+            },
+            {
+                "scenario_id": "CASCADE_005",
+                "title": "The Purges — Dmitri Volkov",
+                "root": {
+                    "setting": "Leningrad Railyard. 1937.",
+                    "thick_description": { "internal_monologue": "Petrov was my neighbor. Krupskaya saved my wife. The engine is coming. The state is watching." },
+                    "entities": ["Dmitri Volkov", "Petrov (Innocent)", "Dr. Krupskaya"]
+                },
+                "branches": [
+                    { "label": "THROW", "thick_description": { "what_he_does": "Diverts to apartment block. Krupskaya hit." } },
+                    { "label": "HOLD", "thick_description": { "what_he_does": "Engine takes prisoner transport. Petrov dies." } }
+                ]
+            }
+        ];
+
+        async function loadCorpus() {
+            // Use embedded corpus directly
+            STATE.scenarios = EMBEDDED_CORPUS;
+            initScenario();
+            updateLog(`CORPUS LOADED: ${STATE.scenarios.length} SCENARIOS (EMBEDDED)`);
+        }
+
+        function initScenario() {
+            // Pick next scenario
+            const raw = STATE.scenarios[(STATE.loop - 1) % STATE.scenarios.length];
+            STATE.activeScenario = {
+                title: raw.title || "UNKNOWN PARADOX",
+                location: raw.root.setting || "DEEP SPACE",
+                monologue: raw.root.thick_description?.internal_monologue || "System Offline.",
+                trackA: mapEntity(raw.branches[0], raw.root.entities[1]),
+                trackB: mapEntity(raw.branches[1], raw.root.entities[2])
+            };
+
+            // Update HUD
+            document.getElementById('sc-loc').innerText = STATE.activeScenario.location;
+            document.getElementById('sc-title').innerText = STATE.activeScenario.title;
+            document.getElementById('scenario-hud').classList.add('active');
+
+            // Spawn Content
+            spawnNucleotideTrail(STATE.activeScenario.monologue);
+            spawnHoloVictims();
+        }
+
+        function mapEntity(branch, name) {
+            const seed = (name || "u").replace(/[^a-z0-9]/gi, '');
+            return {
+                name: name || "Unknown",
+                role: branch?.label || "Target",
+                desc: branch?.thick_description?.what_he_does || "No Data",
+                img: `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&backgroundColor=b6e3f4`
+            };
+        }
+
+        // --- THREE.JS SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000203);
+        scene.fog = new THREE.FogExp2(0x000203, CFG.fogDensity);
+
+        const viewport = document.getElementById('viewport');
+        const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(innerWidth, innerHeight);
+        viewport.appendChild(renderer.domElement);
+
+        // Lights
+        const hemi = new THREE.HemisphereLight(0xffffff, 0x000000, 0.4);
+        scene.add(hemi);
+
+        // Stars
+        const starsGeo = new THREE.BufferGeometry();
+        const starPos = [];
+        for (let i = 0; i < 3000; i++) {
+            starPos.push((Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 500, (Math.random() - 0.5) * 1000);
+        }
+        starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+        scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({ size: 1, color: 0x8899aa, opacity: 0.6, transparent: true })));
+
+        // Ground/Ocean
+        const ground = new THREE.Mesh(new THREE.CircleGeometry(300, 64), new THREE.MeshBasicMaterial({ color: 0x06090c }));
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -2;
+        scene.add(ground);
+
+        // --- OBJECTS ---
+        const world = new THREE.Group();
+        scene.add(world);
+
+        // Track Generation
+        let rails = {};
+        function buildTracks() {
+            // Main Circle
+            const pts = [];
+            for (let i = 0; i <= 200; i++) {
+                const a = (i / 200) * Math.PI * 2;
+                pts.push(new THREE.Vector3(Math.cos(a) * CFG.radius, 0, Math.sin(a) * CFG.radius));
+            }
+            rails.main = new THREE.CatmullRomCurve3(pts, true);
+            drawRail(rails.main, CFG.colors.rail);
+
+            // Forks (Visual representation of choice)
+            const forkAngle = Math.PI * 0.5; // 90 degrees (Top)
+            const forkRadius = 12;
+
+            // Track A (Outer)
+            const ptsA = [];
+            for (let i = 0; i <= 40; i++) {
+                const t = i / 40;
+                // Distort circle outward around forkAngle
+                const angle = forkAngle + (t - 0.5) * 0.6; // Spread angle
+                const r = CFG.radius + (Math.sin(t * Math.PI) * forkRadius);
+                ptsA.push(new THREE.Vector3(Math.cos(angle) * r, 0, Math.sin(angle) * r));
+            }
+            rails.A = new THREE.CatmullRomCurve3(ptsA);
+            drawRail(rails.A, CFG.colors.A);
+
+            // Track B (Inner)
+            const ptsB = [];
+            for (let i = 0; i <= 40; i++) {
+                const t = i / 40;
+                // Distort circle inward
+                const angle = forkAngle + (t - 0.5) * 0.6;
+                const r = CFG.radius - (Math.sin(t * Math.PI) * forkRadius);
+                ptsB.push(new THREE.Vector3(Math.cos(angle) * r, 0, Math.sin(angle) * r));
+            }
+            rails.B = new THREE.CatmullRomCurve3(ptsB);
+            drawRail(rails.B, CFG.colors.B);
+        }
+
+        function drawRail(curve, color) {
+            const tube = new THREE.TubeGeometry(curve, 200, 0.2, 8, false);
+            const mat = new THREE.MeshStandardMaterial({
+                color: color || CFG.colors.rail, roughness: 0.4, metalness: 0.8,
+                emissive: color || 0x000000, emissiveIntensity: 0.2
+            });
+            const m1 = new THREE.Mesh(tube, mat); m1.position.y = 0.2;
+            world.add(m1);
+        }
+
+        // Train
+        const train = new THREE.Group();
+        const tBody = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 12), new THREE.MeshStandardMaterial({
+            color: 0x506070, roughness: 0.2, metalness: 0.5, emissive: 0x101520
+        }));
+        tBody.position.y = 2;
+        train.add(tBody);
+
+        // Headlight Bulb (Visual Source of Light)
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        bulb.position.set(0, 5, 6);
+        train.add(bulb);
+
+        // Spotlight - BOOSTED
+        const spot = new THREE.SpotLight(0xffffff, 300, 600, 0.6, 0.5, 1);
+        spot.position.set(0, 5, 6); spot.target.position.set(0, 0, 100);
+        train.add(spot); train.add(spot.target);
+
+        // Point helper for body illumination
+        const point = new THREE.PointLight(0x00f0ff, 2, 10);
+        point.position.set(0, 6, 0);
+        train.add(point);
+
+        world.add(train);
+
+        // --- NUCLEOTIDE TEXT ---
+        function createNucleotide(t, text) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            // Glass Frame
+            ctx.fillStyle = "rgba(0, 10, 20, 0.6)";
+            ctx.fillRect(0, 0, 512, 512);
+            ctx.strokeStyle = "rgba(0,255,255,0.5)"; ctx.lineWidth = 10;
+            ctx.strokeRect(0, 0, 512, 512);
+
+            // Text
+            ctx.fillStyle = "#fff"; ctx.font = "bold 60px Courier New";
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+
+            // Wrap Text
+            const words = text.split(' ');
+            let line = "", y = 200;
+            for (let w of words) {
+                if (ctx.measureText(line + w).width > 480) { ctx.fillText(line, 256, y); line = ""; y += 70; }
+                line += w + " ";
+            }
+            ctx.fillText(line, 256, y);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), new THREE.MeshBasicMaterial({
+                map: tex, transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false
+            }));
+
+            // Position on Curve
+            const pos = rails.main.getPoint(t);
+            const tan = rails.main.getTangent(t);
+            mesh.position.copy(pos).add(new THREE.Vector3(0, 6, 0)); // Floating above track
+            // mesh.lookAt(pos.clone().add(tan)); // Removed in favor of billboarding
+
+            mesh.userData = { t: t, type: 'text' };
+            STATE.nucleotides.push(mesh);
+            world.add(mesh);
+        }
+
+        function spawnNucleotideTrail(text) {
+            // Clear old
+            STATE.nucleotides.forEach(n => world.remove(n));
+            STATE.nucleotides = [];
+
+            const chunks = text.match(/.{1,40}(\s|$)/g) || [text];
+            // Distribute from t=0.2 to t=0.8
+            chunks.forEach((chk, i) => {
+                const t = 0.25 + (i * 0.15); // Place ahead of start
+                if (t < 0.9) createNucleotide(t, chk.trim());
+            });
+        }
+
+        // --- HOLO CARDS (Victims) ---
+        function createHoloCard(t, data, side) {
+            const group = new THREE.Group();
+
+            // Avatar
+            new THREE.TextureLoader().load(data.img, (tex) => {
+                const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
+                s.scale.set(6, 6, 1); s.position.y = 4;
+                group.add(s);
+            });
+
+            // Base Ring
+            const ring = new THREE.Mesh(new THREE.RingGeometry(3, 3.5, 32), new THREE.MeshBasicMaterial({
+                color: side === 'A' ? CFG.colors.A : CFG.colors.B, side: THREE.DoubleSide
+            }));
+            ring.rotation.x = -Math.PI / 2;
+            group.add(ring);
+
+            // Position - Use Main unless in fork zone
+            const mainPos = rails.main.getPoint(0.25); // Top of circle
+            const mainTan = rails.main.getTangent(0.25);
+            const right = new THREE.Vector3(-mainTan.z, 0, mainTan.x).normalize();
+
+            const offset = side === 'A' ? 12 : -12; // Wider offset for visual fork
+            group.position.copy(mainPos).add(right.multiplyScalar(offset));
+
+            STATE.entities.push(group);
+            world.add(group);
+        }
+
+        function spawnHoloVictims() {
+            STATE.entities.forEach(e => world.remove(e));
+            STATE.entities = [];
+
+            // Place victims at the Fork Zone (approx t=0.25 where forks are)
+            createHoloCard(0.25, STATE.activeScenario.trackA, 'A');
+            createHoloCard(0.25, STATE.activeScenario.trackB, 'B');
+        }
+
+        // --- LOOP & LOGIC ---
+        function loop() {
+            requestAnimationFrame(loop);
+
+            STATE.t += CFG.speed * 0.01;
+            if (STATE.t >= 1) {
+                STATE.t = 0;
+                handleLoopReset();
+            }
+
+            // Move Train
+            const pos = rails.main.getPoint(STATE.t);
+            const look = rails.main.getPoint((STATE.t + 0.01) % 1);
+            train.position.copy(pos);
+            train.lookAt(look);
+
+            // Camera
+            updateCamera(pos, look);
+
+            // Text Orientation (Face Camera using Quaternion)
+            // This ensures text is always readable and "flat" to the screen
+            STATE.nucleotides.forEach(n => {
+                n.quaternion.copy(camera.quaternion);
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        function updateCamera(target, lookAt) {
+            const tan = rails.main.getTangent(STATE.t);
+            const back = tan.clone().negate().multiplyScalar(20);
+            const up = new THREE.Vector3(0, 10, 0);
+
+            camera.position.lerp(train.position.clone().add(back).add(up), 0.1);
+            camera.lookAt(train.position);
+        }
+
+        function handleLoopReset() {
+            STATE.loop++;
+            document.getElementById('loop-count').innerText = `CYCLE ${String(STATE.loop).padStart(2, '0')}`;
+            // Flash Impact
+            if (navigator.vibrate) navigator.vibrate(200);
+            // Next Scenario
+            initScenario();
+        }
+
+        function updateLog(msg) { console.log(`[SYS] ${msg}`); }
+
+        // --- CONTROLS ---
+        const lever = document.getElementById('lever');
+        const handle = document.getElementById('handle');
+
+        lever.addEventListener('click', () => {
+            STATE.choice = STATE.choice === 'A' ? 'B' : 'A';
+            handle.className = STATE.choice === 'B' ? 'lever-handle switched' : 'lever-handle';
+            // Play Switch Sound (if configured)
+            if (Tone.context.state === 'suspended') startAudio();
+        });
+
+        // --- INIT ---
+        window.addEventListener('load', () => {
+            buildTracks();
+            loadCorpus(); // Sync/Async load
+            document.getElementById('loader').style.opacity = 0;
+            setTimeout(() => document.getElementById('loader').remove(), 500);
+            loop();
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = innerWidth / innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth, innerHeight);
+        });
+
+    </script>
+</body>
+
+</html>

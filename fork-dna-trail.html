@@ -63,6 +63,9 @@
             color: var(--text);
             font-family: var(--font);
             user-select: none;
+            overscroll-behavior: none;
+            /* FORCE NO BOUNCE */
+            -webkit-tap-highlight-color: transparent;
         }
 
         .scanlines::before {
@@ -94,20 +97,20 @@
 
         #hud-top {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 20px;
+            right: 20px;
             text-align: right;
             max-width: 280px;
         }
 
         .scenario-badge {
-            font-size: 9px;
+            font-size: 10px;
             letter-spacing: 3px;
             color: #666;
         }
 
         .scenario-title {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 900;
             color: #fff;
             text-shadow: 0 0 20px var(--accent);
@@ -115,7 +118,7 @@
         }
 
         .scenario-setting {
-            font-size: 10px;
+            font-size: 11px;
             color: #888;
             max-width: 280px;
             line-height: 1.3;
@@ -123,20 +126,21 @@
 
         #strand-hud {
             position: absolute;
-            top: 85px;
-            right: 15px;
+            top: 100px;
+            right: 20px;
             text-align: right;
             z-index: 20;
         }
 
         .strand-indicator {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 900;
             transition: all 0.3s;
-            padding: 8px 14px;
-            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 18px;
+            background: rgba(0, 0, 0, 0.85);
             border-radius: 8px;
             border: 2px solid currentColor;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
         .strand-indicator.A {
@@ -163,13 +167,14 @@
             pointer-events: none;
             background: var(--panel);
             border: 1px solid var(--border);
-            padding: 8px;
-            border-radius: 6px;
-            max-width: 200px;
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 220px;
             opacity: 0;
             transition: opacity 0.3s;
-            backdrop-filter: blur(8px);
-            font-size: 9px;
+            backdrop-filter: blur(10px);
+            font-size: 11px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
         }
 
         .entity-card.visible {
@@ -178,7 +183,7 @@
 
         /* Card A fixed to left side */
         .entity-card.A {
-            left: 15px !important;
+            left: 20px !important;
             top: 50% !important;
             transform: translateY(-50%) !important;
             border-left: 4px solid var(--accent);
@@ -186,7 +191,7 @@
 
         /* Card B fixed to right side */
         .entity-card.B {
-            right: 15px !important;
+            right: 20px !important;
             left: auto !important;
             top: 50% !important;
             transform: translateY(-50%) !important;
@@ -201,80 +206,82 @@
         }
 
         .entity-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 4px;
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
             background: #111;
             border: 1px solid #444;
         }
 
         .entity-name {
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 900;
             color: #fff;
             text-transform: uppercase;
         }
 
         .entity-role {
-            font-size: 9px;
+            font-size: 10px;
             color: #888;
         }
 
         .entity-dialogue {
-            font-size: 10px;
+            font-size: 11px;
             color: #fff;
             font-style: italic;
-            margin: 6px 0;
+            margin: 8px 0;
             background: rgba(255, 255, 255, 0.05);
-            padding: 6px;
-            border-radius: 3px;
+            padding: 8px;
+            border-radius: 4px;
         }
 
         .entity-sensory {
-            font-size: 9px;
+            font-size: 10px;
             color: #777;
             margin: 4px 0;
         }
 
         .entity-sensory-item {
             display: flex;
-            gap: 4px;
-            margin: 2px 0;
+            gap: 6px;
+            margin: 4px 0;
         }
 
         .entity-sensory-icon {
-            width: 14px;
+            width: 16px;
             text-align: center;
         }
 
         .entity-monologue {
-            font-size: 10px;
+            font-size: 11px;
             color: #88aacc;
             border-left: 2px solid #446;
-            padding-left: 8px;
-            margin-top: 8px;
+            padding-left: 10px;
+            margin-top: 10px;
             font-style: italic;
         }
 
         /* === BOTTOM TRAIL === */
         #trail-log {
             position: absolute;
-            bottom: 15px;
-            left: 15px;
-            right: 15px;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
             display: flex;
-            gap: 2px;
-            height: 35px;
+            gap: 4px;
+            height: 40px;
             align-items: flex-end;
             overflow-x: auto;
             scrollbar-width: none;
+            padding-bottom: 5px;
+            /* Touch padding */
         }
 
         .trail-node {
             flex-shrink: 0;
-            width: 18px;
-            height: 25px;
-            border-radius: 2px;
+            width: 22px;
+            height: 30px;
+            border-radius: 3px;
             transition: all 0.2s;
             cursor: pointer;
             pointer-events: auto;
@@ -291,8 +298,9 @@
         }
 
         .trail-node.current {
-            height: 35px;
+            height: 40px;
             opacity: 1;
+            box-shadow: 0 0 10px #fff;
         }
 
         .trail-node:not(.current) {
@@ -302,18 +310,20 @@
         /* === LEVER === */
         #lever {
             position: relative;
-            margin-top: 12px;
+            margin-top: 20px;
             text-align: center;
             pointer-events: auto;
             cursor: pointer;
+            padding: 10px;
+            margin: -10px;
         }
 
         .lever-base {
-            width: 60px;
-            height: 100px;
+            width: 70px;
+            height: 120px;
             background: var(--panel);
-            border: 2px solid var(--border);
-            border-radius: 30px;
+            border: 3px solid var(--border);
+            border-radius: 40px;
             position: relative;
             transition: border-color 0.3s, transform 0.1s;
         }
@@ -327,11 +337,11 @@
         }
 
         .lever-stick {
-            width: 44px;
-            height: 44px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             position: absolute;
-            left: 6px;
+            left: 7px;
             transition: top 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             box-shadow: 0 0 15px currentColor, 0 4px 8px rgba(0, 0, 0, 0.5);
         }
@@ -360,48 +370,52 @@
         }
 
         .lever-base.A .lever-stick {
-            top: 6px;
+            top: 7px;
             background: var(--accent);
         }
 
         .lever-base.B .lever-stick {
-            top: 48px;
+            top: 57px;
+            /* Adjusted math: 120 (H) - 50 (S) - 7 (Pad) - 6 (Border) approx */
             background: var(--accent-alt);
         }
 
         .lever-hint {
-            font-size: 9px;
+            font-size: 10px;
             color: var(--text-dim);
-            margin-top: 6px;
+            margin-top: 8px;
             letter-spacing: 1px;
+            font-weight: 700;
         }
 
         /* === CONTROLS === */
         #controls {
             position: absolute;
-            top: 15px;
-            left: 15px;
+            top: 20px;
+            left: 20px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 8px;
             pointer-events: auto;
+            z-index: 50;
         }
 
         .ctrl-row {
             display: flex;
-            gap: 4px;
+            gap: 8px;
         }
 
         .ctrl {
             background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #444;
-            color: #777;
-            padding: 5px 8px;
+            border: 1px solid #555;
+            color: #999;
+            padding: 8px 12px;
             font-family: inherit;
-            font-size: 8px;
+            font-size: 10px;
             cursor: pointer;
             transition: all 0.2s;
             text-transform: uppercase;
+            border-radius: 4px;
         }
 
         .ctrl:hover {
@@ -412,7 +426,7 @@
         .ctrl.active {
             color: var(--accent);
             border-color: var(--accent);
-            background: rgba(0, 240, 255, 0.1);
+            background: rgba(0, 240, 255, 0.15);
         }
 
         .ctrl.pov-a {
@@ -424,45 +438,48 @@
         }
 
         select.ctrl {
-            max-width: 150px;
+            max-width: 160px;
+            padding: 8px;
         }
 
         #speed-ctrl {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
             background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #444;
-            padding: 3px 6px;
+            border: 1px solid #555;
+            padding: 6px 10px;
+            border-radius: 4px;
         }
 
         #speed-ctrl span {
-            font-size: 7px;
-            color: #555;
+            font-size: 9px;
+            color: #777;
         }
 
         #speed-ctrl input {
-            width: 50px;
+            width: 60px;
             accent-color: var(--accent);
         }
 
         /* === THICK DISPLAY === */
         #thick-display {
             position: absolute;
-            bottom: 80px;
-            right: 15px;
+            bottom: 100px;
+            right: 20px;
             left: auto;
             transform: none;
             background: rgba(0, 5, 10, 0.95);
             border: 1px solid #333;
-            padding: 10px 14px;
-            max-width: 280px;
-            border-radius: 6px;
+            padding: 15px 20px;
+            max-width: 320px;
+            border-radius: 8px;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
             backdrop-filter: blur(10px);
-            font-size: 9px;
+            font-size: 11px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
         }
 
         #thick-display.visible {
@@ -470,51 +487,61 @@
         }
 
         .thick-title {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 900;
             color: #fff;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             text-transform: uppercase;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
         }
 
         .thick-dialogue {
-            font-size: 11px;
+            font-size: 12px;
             color: #fff;
             font-style: italic;
-            margin: 6px 0;
+            margin: 8px 0;
+            line-height: 1.4;
         }
 
         .thick-sensory {
-            font-size: 9px;
-            color: #777;
-            margin: 8px 0;
-            padding: 8px;
+            font-size: 10px;
+            color: #888;
+            margin: 10px 0;
+            padding: 10px;
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 4px;
+            border-radius: 6px;
         }
 
         .thick-sensory-line {
             display: flex;
-            gap: 6px;
-            margin: 3px 0;
+            gap: 8px;
+            margin: 4px 0;
+        }
+
+        .thick-sensory-icon {
+            width: 18px;
+            text-align: center;
+            color: #aaa;
         }
 
         .thick-monologue {
-            font-size: 10px;
+            font-size: 11px;
             color: #88aacc;
             border-left: 3px solid #446;
-            padding-left: 10px;
-            margin: 8px 0;
+            padding-left: 12px;
+            margin: 12px 0;
             font-style: italic;
         }
 
         .thick-consequence {
-            font-size: 9px;
+            font-size: 10px;
             color: var(--accent);
-            margin-top: 10px;
-            padding: 8px;
+            margin-top: 12px;
+            padding: 10px;
             background: rgba(0, 240, 255, 0.1);
-            border-radius: 4px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
         }
 
         .thick-terminal {
@@ -526,85 +553,106 @@
 
         @media (max-width: 768px) {
             #hud-top {
-                top: 10px;
-                right: 10px;
-                max-width: 160px;
+                top: 15px;
+                right: 15px;
+                max-width: 180px;
             }
 
             .scenario-title {
-                font-size: 10px;
+                font-size: 14px;
             }
 
             .scenario-setting {
                 display: none;
+                /* Keep hidden on mobile to save space */
             }
 
             #strand-hud {
-                bottom: 60px;
-                right: 10px;
+                bottom: auto;
+                /* Reset */
+                top: 80px;
+                right: 15px;
             }
 
             .strand-indicator {
-                font-size: 18px;
-                padding: 5px 8px;
+                font-size: 24px;
+                padding: 8px 14px;
             }
 
             .strand-sub {
-                font-size: 8px;
+                font-size: 9px;
             }
 
+            /* Mobile Thick Display (Stacked at Bottom) */
             #thick-display {
-                max-width: 55%;
-                padding: 6px 10px;
-                font-size: 8px;
-                left: auto;
-                right: 10px;
-                bottom: 130px;
+                max-width: 90%;
+                padding: 15px;
+                font-size: 11px;
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                bottom: 150px;
+                /* Above bottom controls */
+                text-align: left;
             }
 
-            /* Lever inside controls - just adjust size */
+            /* Stack controls for thumb reach */
+            #controls {
+                top: auto;
+                bottom: 20px;
+                left: 20px;
+                max-width: 180px;
+                flex-direction: column-reverse;
+                /* Put primary toggles at bottom */
+            }
+
+            /* Bigger Lever on Mobile */
             #lever {
-                margin-top: 8px;
+                position: absolute;
+                /* Take out of flow if needed */
+                bottom: 20px;
+                right: 20px;
+                /* Right thumb zone */
+                margin-top: 0;
             }
 
             .lever-base {
-                width: 50px;
-                height: 80px;
+                width: 70px;
+                height: 120px;
             }
 
             .lever-stick {
-                width: 36px;
-                height: 36px;
-                left: 5px;
+                width: 50px;
+                height: 50px;
             }
 
             .lever-base.A .lever-stick {
-                top: 5px;
+                top: 7px;
             }
 
             .lever-base.B .lever-stick {
-                top: 37px;
+                top: 57px;
             }
 
-            #controls {
-                top: 10px;
-                left: 10px;
+            /* Ensure Entity Cards don't overlap HUD too much */
+            .entity-card {
                 max-width: 160px;
-            }
-
-            .ctrl {
-                font-size: 6px;
-                padding: 3px 5px;
+                font-size: 10px;
             }
 
             #trail-log {
                 display: none;
+                /* Hide trail log on tiny mobile screens to save space? Or keep small? */
             }
 
-            /* Hide floating entity cards on mobile - too cluttered */
-            .entity-card {
-                display: none !important;
-            }
+            /* If we keep trail log, move it up */
+            /* #trail-log { bottom: 160px; } */
+        }
+
+        /* Hide floating entity cards on mobile - too cluttered */
+        .entity-card {
+            display: none !important;
+        }
         }
     </style>
 </head>
@@ -841,10 +889,25 @@
         scene.background = new THREE.Color(0x000203);
         scene.fog = new THREE.FogExp2(0x000203, CFG.fogDensity);
 
-        const camera = new THREE.PerspectiveCamera(CFG.fov, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const app = document.getElementById('app');
+        const camera = new THREE.PerspectiveCamera(CFG.fov, app.clientWidth / app.clientHeight, 0.1, 2000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('app').appendChild(renderer.domElement);
+        renderer.setSize(app.clientWidth, app.clientHeight);
+        app.appendChild(renderer.domElement);
+
+        // ...
+
+        // === RESIZE ===
+        window.addEventListener('resize', () => {
+            const w = app.clientWidth;
+            const h = app.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+
+        // Force resize
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
 
         // Lighting
         scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.5));
@@ -1506,11 +1569,7 @@
         }
 
         // === RESIZE ===
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        // Resize handled in init block
 
         // === INIT ===
         populateCorpusSelect();
