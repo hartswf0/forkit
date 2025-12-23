@@ -1,0 +1,2874 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>FORK CASCADE — Thick Data Explorer</title>
+    <style>
+        :root {
+            --transition: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --bg: #050507;
+            --panel: rgba(20, 10, 14, 0.98);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --text: #f6f2ef;
+            --text-muted: #888;
+            --accent: #ff3d4e;
+            --accent-soft: rgba(255, 61, 78, 0.15);
+            --accent-glow: rgba(255, 61, 78, 0.4);
+            --trackA: #56ff9f;
+            /* Safe/Protocol */
+            --trackB: #ff3d4e;
+            /* Danger/Risk */
+            --junction: #f8d66a;
+            --font-mono: "SF Mono", "Monaco", "Inconsolata", "Fira Mono", monospace;
+            --font-serif: "Georgia", serif;
+            --header-height: 48px;
+            --bottom-nav-height: 64px;
+            --safe-bottom: env(safe-area-inset-bottom);
+            /* Motion design tokens */
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+            --duration-fast: 150ms;
+            --duration-normal: 300ms;
+            --duration-slow: 500ms;
+        }
+
+        /* ═══ GLOBAL ANIMATIONS ═══ */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes progressFill {
+            from {
+                width: 0;
+            }
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px var(--accent-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--accent-glow), 0 0 30px var(--accent-glow);
+            }
+        }
+
+        @keyframes countUp {
+            from {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .btn {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            background: var(--accent-soft);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .btn-fork {
+            background: var(--trackA);
+            color: #000;
+            border-color: var(--trackA);
+        }
+
+        /* LAYOUT */
+        .app-shell {
+            display: flex;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* CHANNELS RAIL (Left) */
+        .channels-rail {
+            width: 60px;
+            background: var(--panel);
+            border-right: 1px solid var(--panel-border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .channel-tab {
+            width: 100%;
+            padding: 16px 8px;
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            cursor: pointer;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .channel-tab.active {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+        }
+
+        .channel-tab .depth {
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .channel-tab .label {
+            font-size: 8px;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .channel-add {
+            color: var(--accent);
+            font-size: 20px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        /* MAIN VIEW */
+        .main-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            min-height: var(--header-height);
+            background: var(--panel);
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            z-index: 40;
+            flex-shrink: 0;
+        }
+
+        .scenario-select {
+            background: var(--bg);
+            border: 1px solid var(--panel-border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        /* CONTENT AREA */
+        .content-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* THICK DESCRIPTION PANEL */
+        .thick-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--bg);
+            font-family: var(--font-serif);
+            line-height: 1.7;
+        }
+
+        .thick-header {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 900;
+            font-family: var(--font-mono);
+        }
+
+        .thick-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        .thick-section {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        .thick-section-label {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-family: var(--font-mono);
+        }
+
+        .thick-text {
+            font-size: 15px;
+            color: #ddd;
+        }
+
+        .thick-text em {
+            color: var(--text-muted);
+        }
+
+        .thick-text strong {
+            color: var(--accent);
+        }
+
+        .thick-monologue {
+            font-style: italic;
+            border-left: 3px solid var(--accent);
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .thick-entities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .entity-chip {
+            background: var(--accent-soft);
+            border: 1px solid var(--accent);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text);
+        }
+
+        /* BRANCHES PANEL */
+        .branches-panel {
+            width: 320px;
+            background: var(--panel);
+            border-left: 1px solid var(--panel-border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .branches-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--panel-border);
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        .branches-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .branch-card {
+            background: var(--bg);
+            border: 1px solid var(--panel-border);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .branch-card:hover {
+            border-color: var(--accent);
+        }
+
+        .branch-card.safe {
+            border-left: 4px solid var(--trackA);
+        }
+
+        .branch-card.danger {
+            border-left: 4px solid var(--trackB);
+        }
+
+        .branch-card.terminal {
+            border-left: 4px solid var(--junction);
+            background: rgba(248, 214, 106, 0.1);
+        }
+
+        .branch-id {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .branch-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .branch-prob {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prob-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--panel-border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .prob-fill {
+            height: 100%;
+            background: var(--accent);
+        }
+
+        .branch-fork-btn {
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        /* BREADCRUMB */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid var(--panel-border);
+            font-size: 11px;
+            overflow-x: auto;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .breadcrumb-item:hover {
+            color: var(--accent);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .breadcrumb-sep {
+            color: var(--panel-border);
+        }
+
+        /* BOTTOM NAV (Mobile) */
+        .bottom-nav {
+            display: none;
+            height: var(--bottom-nav-height);
+            background: rgba(18, 8, 12, 0.95);
+            border-top: 1px solid var(--panel-border);
+            justify-content: space-around;
+            align-items: center;
+            z-index: 60;
+            padding-bottom: var(--safe-bottom);
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 0;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            .channels-rail {
+                width: 50px;
+            }
+
+            .branches-panel {
+                display: none;
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                width: 100%;
+                z-index: 100;
+            }
+
+            .branches-panel.open {
+                display: flex;
+            }
+
+            .bottom-nav {
+                display: flex;
+            }
+        }
+
+        /* SOURCE PILLS */
+        .source-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            background: rgba(0, 200, 255, 0.1);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            border-radius: 12px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-mono);
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .source-pill:hover {
+            background: rgba(0, 200, 255, 0.2);
+            box-shadow: 0 0 8px rgba(0, 200, 255, 0.3);
+            color: #fff;
+        }
+
+        .source-pill.primary {
+            border-color: rgba(86, 255, 159, 0.5);
+            background: rgba(86, 255, 159, 0.1);
+        }
+
+        .source-pill.secondary {
+            border-color: rgba(248, 214, 106, 0.5);
+            background: rgba(248, 214, 106, 0.1);
+        }
+
+        .sources-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .sources-label {
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        /* TRANSCLUSION BLOCKS */
+        .transclude {
+            border-left: 3px solid var(--accent);
+            background: rgba(255, 255, 255, 0.02);
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            overflow: hidden;
+        }
+
+        .transclude.expanded {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .transclude-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .transclude-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .transclude-icon {
+            font-size: 14px;
+        }
+
+        .transclude-title {
+            flex: 1;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .transclude-type {
+            font-size: 9px;
+            color: var(--text-muted);
+            padding: 2px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .expand-btn {
+            width: 24px;
+            height: 24px;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            color: var(--text);
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .expand-btn:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .transclude-content {
+            padding: 0 16px 16px 16px;
+            animation: slideDown 0.3s ease;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.7;
+            color: #ccc;
+        }
+
+        .transclude-content p {
+            margin: 0 0 12px 0;
+        }
+
+        .transclude-sources {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* INFINITE DEPTH INDICATOR */
+        .depth-indicator {
+            position: fixed;
+            left: 80px;
+            top: 50%;
+            transform: translateY(-50%);
+            writing-mode: vertical-rl;
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            opacity: 0.5;
+            z-index: 10;
+        }
+
+        /* EXPANDABLE SECTIONS */
+        .expand-more {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            margin: 16px 0;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .expand-more:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ═══ PROGRESS HUD ═══ */
+        .progress-hud {
+            position: fixed;
+            bottom: 20px;
+            left: 80px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            animation: fadeInUp var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .progress-bar-wrap {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .progress-label {
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 4px;
+            background: var(--panel-border);
+            border-radius: 2px;
+            overflow: hidden;
+            min-width: 100px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--trackA), var(--accent));
+            border-radius: 2px;
+            transition: width var(--duration-slow) var(--ease-out-expo);
+            animation: progressFill var(--duration-slow) var(--ease-out-expo);
+        }
+
+        .progress-count {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .progress-count span {
+            animation: countUp var(--duration-fast) var(--ease-out-expo);
+            display: inline-block;
+        }
+
+        /* ═══ STATUS TOAST ═══ */
+        .status-toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text);
+            opacity: 0;
+            pointer-events: none;
+            transition: all var(--duration-normal) var(--ease-out-expo);
+            z-index: 150;
+        }
+
+        .status-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
+        .status-toast.success {
+            border-color: var(--trackA);
+        }
+
+        .status-toast.warning {
+            border-color: var(--junction);
+        }
+
+        .status-toast.error {
+            border-color: var(--accent);
+        }
+
+        /* ═══ TUTORIAL OVERLAY ═══ */
+        .tutorial-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .tutorial-overlay.active {
+            display: flex;
+        }
+
+        .tutorial-card {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 480px;
+            text-align: center;
+            animation: fadeInScale var(--duration-slow) var(--ease-out-expo);
+        }
+
+        .tutorial-step {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .tutorial-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .tutorial-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        .tutorial-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 14px 32px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all var(--duration-fast);
+        }
+
+        .tutorial-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .tutorial-skip {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .tutorial-skip:hover {
+            color: var(--text);
+        }
+
+        /* ═══ ACHIEVEMENT BADGES ═══ */
+        .achievement-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(86, 255, 159, 0.2), rgba(255, 61, 78, 0.2));
+            border: 1px solid var(--trackA);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: none;
+            align-items: center;
+            gap: 16px;
+            z-index: 200;
+            animation: slideInRight var(--duration-slow) var(--ease-out-expo);
+        }
+
+        .achievement-popup.show {
+            display: flex;
+        }
+
+        .achievement-icon {
+            font-size: 28px;
+        }
+
+        .achievement-text {
+            font-size: 12px;
+        }
+
+        .achievement-title {
+            font-weight: 700;
+            color: var(--trackA);
+            margin-bottom: 4px;
+        }
+
+        .achievement-desc {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        /* ═══ ENHANCED TRANSITIONS ═══ */
+        .branch-card {
+            transition: all var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .branch-card:hover {
+            transform: translateX(4px);
+        }
+
+        .channel-tab {
+            transition: all var(--duration-fast) var(--ease-out-expo);
+        }
+
+        .thick-section {
+            animation: fadeInUp var(--duration-normal) var(--ease-out-expo);
+            animation-fill-mode: both;
+        }
+
+        .thick-section:nth-child(1) {
+            animation-delay: 0ms;
+        }
+
+        .thick-section:nth-child(2) {
+            animation-delay: 50ms;
+        }
+
+        .thick-section:nth-child(3) {
+            animation-delay: 100ms;
+        }
+
+        .thick-section:nth-child(4) {
+            animation-delay: 150ms;
+        }
+
+        .thick-section:nth-child(5) {
+            animation-delay: 200ms;
+        }
+
+        @media (max-width: 768px) {
+            .progress-hud {
+                left: 10px;
+                bottom: 80px;
+            }
+
+            .achievement-popup {
+                top: auto;
+                bottom: 100px;
+                right: 10px;
+                left: 10px;
+            }
+        }
+
+        /* ═══ RAILS MODE ═══ */
+        .rails-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.95));
+            padding: 20px 24px 24px;
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .rails-bar.active {
+            display: flex;
+        }
+
+        .rails-logline {
+            font-size: 18px;
+            font-family: var(--font-serif);
+            color: var(--text);
+            text-align: center;
+            line-height: 1.5;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .rails-progress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .rails-progress {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .rails-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--trackA), var(--accent));
+            transition: width 0.5s var(--ease-out-expo);
+        }
+
+        .rails-step {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .rails-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .rails-btn {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            color: var(--text);
+            padding: 10px 20px;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .rails-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .rails-btn.primary {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .rails-btn.primary:hover {
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .rails-toggle {
+            position: fixed;
+            top: 60px;
+            right: 520px;
+            z-index: 100;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+        }
+
+        .rails-toggle:hover {
+            border-color: var(--text);
+            color: var(--text);
+        }
+
+        .rails-toggle.active {
+            border-color: var(--trackA);
+            color: var(--trackA);
+        }
+
+        @media (max-width: 768px) {
+            .rails-toggle {
+                right: 170px;
+                top: 100px;
+            }
+
+            .rails-bar {
+                padding: 16px;
+            }
+
+            .rails-logline {
+                font-size: 14px;
+            }
+        }
+
+        /* ═══ LEGO BLOCKS — FORK CARDS ═══ */
+        .fork-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 16px 0;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 2px solid var(--trackA);
+        }
+
+        .fork-block {
+            background: var(--trackA);
+            color: #000;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            padding: 14px 20px 14px 16px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.25s var(--ease-out-expo);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 100px;
+        }
+
+        .fork-block .fork-type {
+            font-size: 8px;
+            letter-spacing: 0.15em;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        .fork-block .fork-id {
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .fork-block .fork-desc {
+            font-size: 11px;
+            font-weight: 400;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .fork-block::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 10px;
+            width: 10px;
+            height: 6px;
+            background: inherit;
+            filter: brightness(1.3);
+        }
+
+        .fork-block::after {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 26px;
+            width: 10px;
+            height: 6px;
+            background: inherit;
+            filter: brightness(1.3);
+        }
+
+        .fork-block:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(86, 255, 159, 0.5);
+        }
+
+        .fork-block.danger {
+            background: var(--accent);
+        }
+
+        .fork-block.danger:hover {
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        /* Depth indicator */
+        .depth-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #000;
+            color: var(--text-muted);
+            font-size: 9px;
+            padding: 2px 6px;
+            font-weight: 700;
+        }
+
+        .fork-block.danger:hover {
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        /* Mobile fork UI */
+        @media (max-width: 768px) {
+            .fork-grid {
+                flex-direction: column;
+                padding: 12px;
+                gap: 10px;
+            }
+
+            .fork-block {
+                width: 100%;
+                min-height: 60px;
+                padding: 16px 20px;
+                font-size: 14px;
+            }
+
+            .fork-block .fork-id {
+                font-size: 16px;
+            }
+
+            .fork-block .fork-type {
+                font-size: 10px;
+            }
+
+            .depth-badge {
+                font-size: 10px;
+                padding: 4px 8px;
+                top: 10px;
+                right: 10px;
+            }
+
+            .decision-banner {
+                padding: 14px 16px;
+            }
+
+            .decision-title {
+                font-size: 11px;
+            }
+
+            .decision-actor {
+                font-size: 16px;
+            }
+        }
+
+        .section-label {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .section-label.green {
+            color: var(--trackA);
+        }
+
+        .decision-banner {
+            background: linear-gradient(90deg, rgba(86, 255, 159, 0.1), transparent);
+            border-left: 3px solid var(--trackA);
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+
+        .decision-title {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--trackA);
+            margin-bottom: 8px;
+        }
+
+        .decision-actor {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* ═══ MEDIA NEXUS ═══ */
+        .media-nexus {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .media-nexus.single {
+            grid-template-columns: 1fr;
+        }
+
+        .media-item {
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--panel-border);
+            transition: all var(--duration-normal) var(--ease-out-expo);
+            position: relative;
+        }
+
+        .media-item:hover {
+            border-color: var(--text-muted);
+            transform: scale(1.02);
+        }
+
+        .media-item.image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .media-item.video video {
+            width: 100%;
+            display: block;
+        }
+
+        .media-item.embed {
+            min-height: 200px;
+        }
+
+        .media-item.embed iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
+            border: none;
+        }
+
+        .media-item.three {
+            min-height: 300px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-item.three canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .media-item.three .three-placeholder {
+            color: var(--text-muted);
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .media-item.icon {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .media-caption {
+            padding: 8px 12px;
+            font-size: 10px;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .media-expand {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: var(--text);
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .media-item:hover .media-expand {
+            opacity: 1;
+        }
+
+        /* ═══ FOCUS MODE ═══ */
+        .focus-toggle {
+            position: fixed;
+            top: 60px;
+            right: 420px;
+            z-index: 100;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .focus-toggle:hover {
+            border-color: var(--text);
+            color: var(--text);
+        }
+
+        .focus-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            padding: 40px;
+        }
+
+        .focus-overlay.active {
+            display: flex;
+        }
+
+        .focus-exit {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 1px solid var(--panel-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .focus-exit:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .focus-content {
+            max-width: 680px;
+            margin: 60px auto 0;
+            font-family: var(--font-serif);
+            font-size: 18px;
+            line-height: 1.9;
+            color: #e8e4e0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .focus-content h1 {
+            font-size: 28px;
+            margin-bottom: 24px;
+            font-family: var(--font-mono);
+            letter-spacing: 0.05em;
+        }
+
+        .focus-content h2 {
+            font-size: 14px;
+            margin: 32px 0 12px;
+            font-family: var(--font-mono);
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .focus-content p {
+            margin-bottom: 20px;
+        }
+
+        .focus-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 20px;
+            margin: 24px 0;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .focus-toggle {
+                right: 20px;
+                top: 100px;
+            }
+
+            .focus-content {
+                padding: 20px;
+                font-size: 16px;
+                margin-top: 40px;
+            }
+        }
+
+        /* ═══ CASCADE MINIMAP ═══ */
+        .cascade-map-toggle {
+            position: fixed;
+            top: 60px;
+            right: 340px;
+            z-index: 100;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cascade-map-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .cascade-minimap {
+            position: fixed;
+            top: 100px;
+            right: 340px;
+            width: 280px;
+            max-height: 60vh;
+            background: rgba(20, 10, 14, 0.98);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            z-index: 99;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .cascade-minimap.open {
+            display: flex;
+        }
+
+        .cascade-map-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--panel-border);
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            font-weight: 900;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cascade-map-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .cascade-map-body {
+            flex: 1;
+            overflow: auto;
+            padding: 16px;
+            position: relative;
+        }
+
+        /* Tree nodes */
+        .map-tree {
+            position: relative;
+            padding-left: 0;
+        }
+
+        .map-node {
+            position: relative;
+            padding: 6px 10px;
+            margin: 4px 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .map-node:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-muted);
+        }
+
+        .map-node.current {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .map-node.visited {
+            border-left: 3px solid var(--trackA);
+        }
+
+        .map-node.terminal {
+            border-left: 3px solid var(--junction);
+            background: rgba(248, 214, 106, 0.1);
+        }
+
+        .map-node-icon {
+            font-size: 12px;
+        }
+
+        .map-node-id {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .map-node-label {
+            flex: 1;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .map-node-prob {
+            font-size: 9px;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        /* Tree indentation */
+        .map-children {
+            margin-left: 16px;
+            padding-left: 16px;
+            border-left: 1px dashed var(--panel-border);
+        }
+
+        /* Fork indicator */
+        .fork-badge {
+            font-size: 8px;
+            background: var(--trackA);
+            color: #000;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 900;
+        }
+
+        /* Minimap legend */
+        .map-legend {
+            padding: 12px 16px;
+            border-top: 1px solid var(--panel-border);
+            display: flex;
+            gap: 16px;
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.current {
+            background: var(--accent);
+        }
+
+        .legend-dot.visited {
+            background: var(--trackA);
+        }
+
+        .legend-dot.terminal {
+            background: var(--junction);
+        }
+
+        @media (max-width: 768px) {
+            .cascade-map-toggle {
+                right: 20px;
+            }
+
+            .cascade-minimap {
+                right: 10px;
+                left: 10px;
+                width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- MAP TOGGLE -->
+    <button class="cascade-map-toggle" id="mapToggle" onclick="toggleCascadeMap()">MAP</button>
+    <button class="focus-toggle" id="focusToggle" onclick="toggleFocusMode()">FOCUS</button>
+
+    <!-- CASCADE MINIMAP -->
+    <div class="cascade-minimap" id="cascadeMap">
+        <div class="cascade-map-header">
+            <span>CASCADE TREE</span>
+            <button class="cascade-map-close" onclick="toggleCascadeMap()">×</button>
+        </div>
+        <div class="cascade-map-body" id="cascadeMapBody">
+            <div style="color:var(--text-muted); text-align:center; padding:20px;">
+                Select a scenario to view cascade
+            </div>
+        </div>
+        <div class="map-legend">
+            <div class="legend-item">
+                <div class="legend-dot current"></div> Current
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot visited"></div> Visited
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot terminal"></div> Terminal
+            </div>
+        </div>
+    </div>
+
+    <!-- FOCUS MODE OVERLAY -->
+    <div class="focus-overlay" id="focusOverlay">
+        <button class="focus-exit" onclick="toggleFocusMode()">EXIT</button>
+        <div class="focus-content" id="focusContent"></div>
+    </div>
+
+    <!-- RAILS MODE -->
+    <button class="rails-toggle" id="railsToggle" onclick="toggleRailsMode()">RAILS</button>
+    <div class="rails-bar" id="railsBar">
+        <div class="rails-logline" id="railsLogline">What would you do?</div>
+        <div class="rails-progress-wrap">
+            <div class="rails-progress">
+                <div class="rails-progress-fill" id="railsFill" style="width:0%"></div>
+            </div>
+            <span class="rails-step"><span id="railsStep">0</span>/<span id="railsTotal">0</span></span>
+        </div>
+        <div class="rails-controls">
+            <button class="rails-btn" onclick="railsPrev()">PREV</button>
+            <button class="rails-btn primary" onclick="railsNext()">NEXT</button>
+            <button class="rails-btn" onclick="toggleRailsMode()">EXIT</button>
+        </div>
+    </div>
+
+    <!-- PROGRESS HUD -->
+    <div class="progress-hud" id="progressHud">
+        <div class="progress-bar-wrap">
+            <span class="progress-label">Progress</span>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <span class="progress-count"><span id="progressCount">0</span>/<span id="progressTotal">0</span></span>
+        </div>
+    </div>
+
+    <!-- STATUS TOAST -->
+    <div class="status-toast" id="statusToast"></div>
+
+    <!-- TUTORIAL OVERLAY -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-card">
+            <div class="tutorial-step" id="tutorialStep">STEP 1 OF 4</div>
+            <h2 class="tutorial-title" id="tutorialTitle">Welcome to Fork Cascade</h2>
+            <p class="tutorial-desc" id="tutorialDesc">Explore branching ethical decisions through thick description.
+                Each choice leads to new possibilities.</p>
+            <button class="tutorial-btn" onclick="nextTutorialStep()">BEGIN</button>
+            <button class="tutorial-skip" onclick="skipTutorial()">Skip tutorial</button>
+        </div>
+    </div>
+
+    <!-- ACHIEVEMENT POPUP -->
+    <div class="achievement-popup" id="achievementPopup">
+        <div class="achievement-icon" id="achievementIcon">*</div>
+        <div class="achievement-text">
+            <div class="achievement-title" id="achievementTitle">First Fork</div>
+            <div class="achievement-desc" id="achievementDesc">You explored your first branch</div>
+        </div>
+    </div>
+
+    <div class="app-shell">
+        <!-- CHANNELS RAIL -->
+        <div class="channels-rail" id="channelsRail">
+            <div class="channel-add" id="addChannel" title="New Root Channel">+</div>
+        </div>
+
+        <!-- MAIN VIEW -->
+        <div class="main-view">
+            <div class="top-bar">
+                <div style="font-weight:900; font-size:12px; letter-spacing:0.1em; color:var(--accent);">FORK CASCADE
+                </div>
+                <select class="scenario-select" id="scenarioSelect"></select>
+                <button class="btn" id="btnReset">RESET</button>
+            </div>
+
+            <!-- BREADCRUMB -->
+            <div class="breadcrumb" id="breadcrumb"></div>
+
+            <div class="content-area">
+                <!-- THICK DESCRIPTION -->
+                <div class="thick-panel" id="thickPanel">
+                    <div class="thick-header">SELECT A SCENARIO TO BEGIN</div>
+                </div>
+
+                <!-- BRANCHES -->
+                <div class="branches-panel" id="branchesPanel">
+                    <div class="branches-header">AVAILABLE PATHS</div>
+                    <div class="branches-list" id="branchesList"></div>
+                </div>
+            </div>
+
+            <!-- MOBILE NAV -->
+            <nav class="bottom-nav">
+                <button class="nav-item" onclick="showChannels()">
+                    <span style="font-size:16px;">≡</span><span>CHANNELS</span>
+                </button>
+                <button class="nav-item active">
+                    <span style="font-size:16px;">◉</span><span>VIEW</span>
+                </button>
+                <button class="nav-item" onclick="toggleBranches()">
+                    <span style="font-size:16px;">⎇</span><span>BRANCH</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════
+        // THICK DATA FORK CASCADE — Multi-Channel Branch Explorer
+        // ═══════════════════════════════════════════════════════════════════
+
+        let THICK_CORPUS = null;
+        let channels = [];
+        let activeChannelId = null;
+        let channelIdCounter = 0;
+
+        // Channel structure
+        function createChannel(scenarioIdx, branchId, parentChannelId = null, depth = 0) {
+            const id = `CH${String(++channelIdCounter).padStart(4, '0')}`;
+            const scenario = THICK_CORPUS[scenarioIdx];
+            const branch = branchId === 'root' ? scenario.root : getBranchById(scenario, branchId);
+
+            return {
+                id,
+                scenarioIdx,
+                scenarioTitle: scenario.title,
+                branchId,
+                branch,
+                parentChannelId,
+                depth,
+                history: parentChannelId ? [...getChannel(parentChannelId).history, branchId] : [branchId],
+                createdAt: Date.now()
+            };
+        }
+
+        function getChannel(id) {
+            return channels.find(c => c.id === id);
+        }
+
+        function getBranchById(scenario, branchId) {
+            if (scenario.root?.branch_id === branchId) return scenario.root;
+            return (scenario.branches || []).find(b => b.branch_id === branchId);
+        }
+
+        function getChildBranches(scenario, parentBranchId) {
+            const parent = getBranchById(scenario, parentBranchId);
+            if (!parent || !parent.branches) return [];
+            return parent.branches.map(id => getBranchById(scenario, id)).filter(Boolean);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // DATA LOADING
+        // ═══════════════════════════════════════════════════════════════════
+
+        async function loadThickData() {
+            try {
+                const response = await fetch('thick_data.json');
+                const data = await response.json();
+                THICK_CORPUS = data.ALL_THICK_DATA || data;
+                console.log('[FORK] Loaded corpus:', THICK_CORPUS.length, 'scenarios');
+                populateScenarioSelect();
+            } catch (err) {
+                console.error('[FORK] Failed to load thick data:', err);
+                // Fallback: try loading cascade file
+                try {
+                    const response = await fetch('fork-paradox-cascade-thick.json');
+                    const data = await response.json();
+                    THICK_CORPUS = [data];
+                    console.log('[FORK] Loaded cascade file');
+                    populateScenarioSelect();
+                } catch (e) {
+                    console.error('[FORK] No data available');
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // TRANSCLUSIONS & SOURCES SYSTEM
+        // ═══════════════════════════════════════════════════════════════════
+
+        let TRANSCLUSIONS = null;
+
+        async function loadTransclusions() {
+            try {
+                const response = await fetch('transclusions.json');
+                const data = await response.json();
+                TRANSCLUSIONS = data.blocks || {};
+                console.log('[FORK] Loaded transclusions:', Object.keys(TRANSCLUSIONS).length, 'blocks');
+            } catch (err) {
+                console.warn('[FORK] No transclusions.json found');
+                TRANSCLUSIONS = {};
+            }
+        }
+
+        function renderSources(sources) {
+            if (!sources || sources.length === 0) return '';
+
+            let html = `<div class="sources-bar"><div class="sources-label">📚 Sources & Citations</div><div style="display:flex; flex-wrap:wrap; gap:8px;">`;
+
+            sources.forEach(src => {
+                const typeClass = src.type === 'primary' ? 'primary' : 'secondary';
+                const icon = src.type === 'primary' ? '📜' : '📖';
+
+                if (src.url) {
+                    html += `<a href="${src.url}" target="_blank" class="source-pill ${typeClass}">${icon} ${src.title}</a>`;
+                } else {
+                    html += `<span class="source-pill ${typeClass}" title="${src.citation || src.author || ''}">${icon} ${src.title}</span>`;
+                }
+            });
+
+            html += `</div></div>`;
+            return html;
+        }
+
+        function renderTranscludeBlock(refId) {
+            if (!TRANSCLUSIONS || !TRANSCLUSIONS[refId]) {
+                return `<div class="transclude"><div class="transclude-header"><span class="transclude-icon">📎</span><span class="transclude-title">${refId}</span><span class="transclude-type">Not Found</span></div></div>`;
+            }
+
+            const block = TRANSCLUSIONS[refId];
+            const typeIcon = {
+                'historical_context': '🏛️',
+                'historical_event': '📅',
+                'technical_context': '⚙️',
+                'entity_biography': '👤',
+                'doctrinal_context': '📋'
+            }[block.type] || '📎';
+
+            return `
+                <div class="transclude" data-ref="${refId}">
+                    <div class="transclude-header" onclick="toggleTransclude('${refId}')">
+                        <span class="transclude-icon">${typeIcon}</span>
+                        <span class="transclude-title">${block.title}</span>
+                        <span class="transclude-type">${block.type?.replace(/_/g, ' ') || 'context'}</span>
+                        <button class="expand-btn" id="btn-${refId}">+</button>
+                    </div>
+                    <div class="transclude-content" id="content-${refId}" style="display:none;">
+                        <p>${block.content}</p>
+                        ${block.sources ? renderSources(block.sources) : ''}
+                        ${block.expandable ? `<div class="expand-more" onclick="loadMoreTransclusions('${refId}')">[+] Expand related context...</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleTransclude(refId) {
+            const content = document.getElementById(`content-${refId}`);
+            const btn = document.getElementById(`btn-${refId}`);
+            const container = content?.parentElement;
+
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                btn.textContent = '−';
+                container?.classList.add('expanded');
+            } else {
+                content.style.display = 'none';
+                btn.textContent = '+';
+                container?.classList.remove('expanded');
+            }
+        }
+
+        function loadMoreTransclusions(parentRef) {
+            const block = TRANSCLUSIONS[parentRef];
+            if (!block?.expandable) return;
+
+            const container = document.getElementById(`content-${parentRef}`);
+            const expandBtn = container?.querySelector('.expand-more');
+            if (!expandBtn) return;
+
+            let nestedHtml = '';
+            block.expandable.forEach(refId => {
+                nestedHtml += renderTranscludeBlock(refId);
+            });
+
+            expandBtn.outerHTML = nestedHtml;
+        }
+
+        function renderContextTransclusions(branchData) {
+            // Auto-add relevant context based on branch content
+            let html = '';
+
+            // Check for known context references in thick data
+            const thick = branchData?.thick_description;
+            if (!thick) return html;
+
+            // Add Cold War context for Petrov scenario
+            if (thick.setting?.includes('Serpukhov') || thick.setting?.includes('bunker')) {
+                html += renderTranscludeBlock('cold_war_1983_context');
+                html += renderTranscludeBlock('oko_satellite_system');
+            }
+
+            // Add character bios if mentioned
+            if (thick.what_petrov_says || thick.internal_monologue_of_petrov) {
+                html += renderTranscludeBlock('petrov_biography');
+            }
+            if (thick.what_ustinov_says) {
+                html += renderTranscludeBlock('ustinov_biography');
+            }
+            if (thick.what_ogarkov_says) {
+                html += renderTranscludeBlock('ogarkov_biography');
+            }
+
+            // Add doctrine context for launch scenarios
+            if (branchData.branch_id?.startsWith('T1')) {
+                html += renderTranscludeBlock('soviet_launch_doctrine');
+            }
+
+            return html;
+        }
+
+        function populateScenarioSelect() {
+            const select = document.getElementById('scenarioSelect');
+            select.innerHTML = '<option value="">— Select Scenario —</option>';
+
+            THICK_CORPUS.forEach((scenario, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = `${scenario.scenario_id}: ${scenario.title || 'Untitled'}`;
+                select.appendChild(opt);
+            });
+
+            select.addEventListener('change', (e) => {
+                if (e.target.value !== '') {
+                    startNewScenario(parseInt(e.target.value));
+                }
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CHANNEL MANAGEMENT
+        // ═══════════════════════════════════════════════════════════════════
+
+        function startNewScenario(scenarioIdx) {
+            // Clear all channels and start fresh
+            channels = [];
+            channelIdCounter = 0;
+
+            const channel = createChannel(scenarioIdx, 'root', null, 0);
+            channels.push(channel);
+            activeChannelId = channel.id;
+
+            renderChannelsRail();
+            renderActiveChannel();
+        }
+
+        function forkToNewChannel(branchId) {
+            const current = getChannel(activeChannelId);
+            if (!current) return;
+
+            // Flash animation on thick panel
+            const thickPanel = document.getElementById('thickPanel');
+            if (thickPanel) {
+                thickPanel.style.opacity = '0';
+                thickPanel.style.transform = 'translateX(20px)';
+            }
+
+            const newChannel = createChannel(
+                current.scenarioIdx,
+                branchId,
+                current.id,
+                current.depth + 1
+            );
+
+            channels.push(newChannel);
+            activeChannelId = newChannel.id;
+
+            console.log('[FORK] Created new channel:', newChannel.id, '→', branchId);
+
+            // Status feedback
+            showStatus(`Moved to branch ${branchId} (depth ${newChannel.depth})`, 'success');
+
+            renderChannelsRail();
+            renderActiveChannel();
+
+            // Animate in
+            setTimeout(() => {
+                if (thickPanel) {
+                    thickPanel.style.transition = 'all 0.4s var(--ease-out-expo)';
+                    thickPanel.style.opacity = '1';
+                    thickPanel.style.transform = 'translateX(0)';
+                }
+            }, 50);
+        }
+
+        function switchToChannel(channelId) {
+            activeChannelId = channelId;
+            renderChannelsRail();
+            renderActiveChannel();
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CASCADE MAP — SHOWING FORK ORIGINS AND DESTINATIONS
+        // ═══════════════════════════════════════════════════════════════════
+
+        let cascadeMapOpen = false;
+        let visitedBranches = new Set();
+        let focusModeActive = false;
+
+        function toggleFocusMode() {
+            focusModeActive = !focusModeActive;
+            const overlay = document.getElementById('focusOverlay');
+            const content = document.getElementById('focusContent');
+
+            if (focusModeActive) {
+                // Grab thick panel content
+                const thickPanel = document.getElementById('thickPanel');
+                if (thickPanel) {
+                    content.innerHTML = thickPanel.innerHTML;
+                }
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
+        }
+
+        // ═══ RAILS MODE ═══
+        let railsMode = false;
+        let railsPath = []; // Ordered list of branch IDs to visit
+        let railsIndex = 0;
+
+        function toggleRailsMode() {
+            railsMode = !railsMode;
+            document.getElementById('railsBar').classList.toggle('active', railsMode);
+            document.getElementById('railsToggle').classList.toggle('active', railsMode);
+            if (railsMode) {
+                buildRailsPath();
+                railsIndex = 0;
+                updateRailsUI();
+                showStatus('Rails mode: Use NEXT to advance through all branches', 'success');
+            }
+        }
+
+        function buildRailsPath() {
+            const channel = getChannel(activeChannelId);
+            if (!channel?.scenario) return;
+            railsPath = [];
+            // BFS through scenario branches
+            const queue = [channel.scenario.root];
+            while (queue.length > 0) {
+                const node = queue.shift();
+                if (node) {
+                    railsPath.push(node.branch_id || 'root');
+                    if (node.branches && Array.isArray(node.branches)) {
+                        node.branches.forEach(bid => {
+                            const child = channel.scenario.branches?.find(b => b.branch_id === bid);
+                            if (child) queue.push(child);
+                        });
+                    }
+                }
+            }
+        }
+
+        function updateRailsUI() {
+            const channel = getChannel(activeChannelId);
+            const scenario = channel?.scenario;
+
+            // Update logline
+            const logline = scenario?.logline || scenario?.description || 'What would you do?';
+            document.getElementById('railsLogline').textContent = logline;
+
+            // Update progress
+            const total = railsPath.length;
+            const pct = total > 0 ? Math.round(((railsIndex + 1) / total) * 100) : 0;
+            document.getElementById('railsFill').style.width = pct + '%';
+            document.getElementById('railsStep').textContent = railsIndex + 1;
+            document.getElementById('railsTotal').textContent = total;
+        }
+
+        function railsNext() {
+            if (railsIndex < railsPath.length - 1) {
+                railsIndex++;
+                navigateToRailsBranch();
+            } else {
+                showStatus('Scenario complete! All branches explored.', 'success');
+            }
+        }
+
+        function railsPrev() {
+            if (railsIndex > 0) {
+                railsIndex--;
+                navigateToRailsBranch();
+            }
+        }
+
+        function navigateToRailsBranch() {
+            const branchId = railsPath[railsIndex];
+            if (branchId) {
+                navigateToBranch(branchId);
+                updateRailsUI();
+            }
+        }
+
+        // ═══ UNIFIED STATE MANAGER ═══
+        const BonState = {
+            currentNodeId: null,
+            currentScenario: null,
+            subscribers: [],
+
+            setNode(nodeId, source = 'unknown') {
+                if (this.currentNodeId === nodeId) return;
+                this.currentNodeId = nodeId;
+                this.notify({ type: 'nodeChange', nodeId, source });
+            },
+
+            setScenario(scenario) {
+                this.currentScenario = scenario;
+                this.notify({ type: 'scenarioChange', scenario });
+            },
+
+            subscribe(callback) {
+                this.subscribers.push(callback);
+                return () => { this.subscribers = this.subscribers.filter(s => s !== callback); };
+            },
+
+            notify(event) {
+                this.subscribers.forEach(cb => cb(event));
+            }
+        };
+
+        // Subscribe map, main, side to state changes
+        BonState.subscribe((event) => {
+            if (event.type === 'nodeChange') {
+                // Update map highlight
+                document.querySelectorAll('.map-node').forEach(n => n.classList.remove('current'));
+                const mapNode = document.querySelector(`.map-node[onclick*="${event.nodeId}"]`);
+                if (mapNode) mapNode.classList.add('current');
+
+                // Update cascade map if open
+                if (cascadeMapOpen) renderCascadeMap();
+            }
+        });
+
+        // ═══ MEDIA NEXUS RENDERER ═══
+        function renderMediaNexus(mediaArray) {
+            if (!mediaArray || mediaArray.length === 0) return '';
+
+            const single = mediaArray.length === 1 ? ' single' : '';
+            let html = `<div class="media-nexus${single}">`;
+
+            mediaArray.forEach((m, i) => {
+                switch (m.type) {
+                    case 'image':
+                        html += `<div class="media-item image">
+                            <img src="${m.src}" alt="${m.caption || ''}" loading="lazy">
+                            ${m.caption ? `<div class="media-caption">${m.caption}</div>` : ''}
+                            <button class="media-expand" onclick="expandMedia(${i})">EXPAND</button>
+                        </div>`;
+                        break;
+                    case 'video':
+                        html += `<div class="media-item video">
+                            <video ${m.autoplay ? 'autoplay muted loop' : 'controls'} src="${m.src}"></video>
+                            ${m.caption ? `<div class="media-caption">${m.caption}</div>` : ''}
+                        </div>`;
+                        break;
+                    case 'embed':
+                        html += `<div class="media-item embed">
+                            <iframe src="${m.src}" loading="lazy"></iframe>
+                        </div>`;
+                        break;
+                    case 'three':
+                        html += `<div class="media-item three" data-scene="${m.scene || ''}">
+                            <div class="three-placeholder">3D Scene: ${m.scene || 'loading...'}</div>
+                        </div>`;
+                        break;
+                    case 'icon':
+                        html += `<div class="media-item icon">${m.name || '*'}</div>`;
+                        break;
+                    default:
+                        html += `<div class="media-item">${m.type}: ${m.src || m.name || ''}</div>`;
+                }
+            });
+
+            html += '</div>';
+            return html;
+        }
+
+        function expandMedia(index) {
+            // Future: open lightbox/fullscreen view
+            showStatus('Media expand coming soon', 'warning');
+        }
+
+        // ═══ GAMIFICATION SYSTEM ═══
+        const TUTORIAL_STEPS = [
+            { title: 'Welcome to Fork Cascade', desc: 'Explore branching ethical decisions through thick description. Each choice leads to new possibilities.' },
+            { title: 'Choose Your Path', desc: 'Select a scenario from the dropdown, then navigate through decision branches. Each fork represents a different choice.' },
+            { title: 'Track Your Progress', desc: 'The progress bar shows how many branches you have explored. Try to reach all terminal states.' },
+            { title: 'Use the Map', desc: 'Click MAP to see the full cascade tree. Click any node to jump directly to that branch.' }
+        ];
+        let tutorialStep = 0;
+        let tutorialSeen = localStorage.getItem('bon07_tutorial_seen') === 'true';
+        let achievements = JSON.parse(localStorage.getItem('bon07_achievements') || '{}');
+
+        function showTutorial() {
+            if (tutorialSeen) return;
+            document.getElementById('tutorialOverlay').classList.add('active');
+            updateTutorialCard();
+        }
+
+        function updateTutorialCard() {
+            const step = TUTORIAL_STEPS[tutorialStep];
+            document.getElementById('tutorialStep').textContent = `STEP ${tutorialStep + 1} OF ${TUTORIAL_STEPS.length}`;
+            document.getElementById('tutorialTitle').textContent = step.title;
+            document.getElementById('tutorialDesc').textContent = step.desc;
+            document.querySelector('.tutorial-btn').textContent = tutorialStep === TUTORIAL_STEPS.length - 1 ? 'START EXPLORING' : 'NEXT';
+        }
+
+        function nextTutorialStep() {
+            tutorialStep++;
+            if (tutorialStep >= TUTORIAL_STEPS.length) {
+                skipTutorial();
+            } else {
+                updateTutorialCard();
+            }
+        }
+
+        function skipTutorial() {
+            document.getElementById('tutorialOverlay').classList.remove('active');
+            localStorage.setItem('bon07_tutorial_seen', 'true');
+            tutorialSeen = true;
+            showStatus('Tutorial complete. Start exploring!', 'success');
+        }
+
+        // Progress tracking
+        function updateProgress() {
+            const total = visitedBranches.size;
+            const channel = getChannel(activeChannelId);
+            let maxBranches = 1;
+            if (channel && THICK_CORPUS[channel.scenarioIdx]) {
+                const scenario = THICK_CORPUS[channel.scenarioIdx];
+                maxBranches = (scenario.branches?.length || 0) + 1;
+            }
+            const pct = Math.min(100, Math.round((total / maxBranches) * 100));
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('progressCount').textContent = total;
+            document.getElementById('progressTotal').textContent = maxBranches;
+
+            // Check for achievements
+            if (total === 1 && !achievements.firstFork) {
+                showAchievement('*', 'First Fork', 'You explored your first branch');
+                achievements.firstFork = true;
+                saveAchievements();
+            }
+            if (total >= 5 && !achievements.explorer) {
+                showAchievement('+', 'Explorer', 'Visited 5 different branches');
+                achievements.explorer = true;
+                saveAchievements();
+            }
+            if (pct >= 100 && !achievements.completionist) {
+                showAchievement('#', 'Completionist', 'Explored all branches in a scenario');
+                achievements.completionist = true;
+                saveAchievements();
+            }
+        }
+
+        function saveAchievements() { localStorage.setItem('bon07_achievements', JSON.stringify(achievements)); }
+
+        // Status toast
+        function showStatus(message, type = '') {
+            const toast = document.getElementById('statusToast');
+            toast.textContent = message;
+            toast.className = 'status-toast show ' + type;
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        // Achievement popup
+        function showAchievement(icon, title, desc) {
+            const popup = document.getElementById('achievementPopup');
+            document.getElementById('achievementIcon').textContent = icon;
+            document.getElementById('achievementTitle').textContent = title;
+            document.getElementById('achievementDesc').textContent = desc;
+            popup.classList.add('show');
+            setTimeout(() => { popup.classList.remove('show'); }, 4000);
+        }
+
+        function toggleCascadeMap() {
+            cascadeMapOpen = !cascadeMapOpen;
+            document.getElementById('cascadeMap').classList.toggle('open', cascadeMapOpen);
+            if (cascadeMapOpen) {
+                renderCascadeMap();
+            }
+        }
+
+        function renderCascadeMap() {
+            const body = document.getElementById('cascadeMapBody');
+            const channel = getChannel(activeChannelId);
+
+            if (!channel || channel.scenarioIdx === undefined) {
+                body.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Select a scenario to view cascade</div>';
+                return;
+            }
+
+            const scenario = THICK_CORPUS[channel.scenarioIdx];
+            if (!scenario) {
+                body.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Scenario not loaded</div>';
+                return;
+            }
+
+            const currentBranchId = channel.branchId;
+
+            // Track visited
+            visitedBranches.add(currentBranchId);
+            updateProgress();
+
+            // Build tree from root
+            let html = '<div class="map-tree">';
+            html += renderMapNode(scenario.root, scenario, currentBranchId, 0);
+            html += '</div>';
+
+            body.innerHTML = html;
+        }
+
+        function renderMapNode(branch, scenario, currentBranchId, depth) {
+            if (!branch) return '';
+
+            const branchId = branch.branch_id || 'root';
+            const isCurrent = branchId === currentBranchId;
+            const isVisited = visitedBranches.has(branchId);
+            const isTerminal = !!branch.terminal_state;
+
+            let classes = 'map-node';
+            if (isCurrent) classes += ' current';
+            else if (isVisited) classes += ' visited';
+            if (isTerminal) classes += ' terminal';
+
+            const icon = isTerminal ? '🔚' : (branch.branches?.length > 0 ? '⎇' : '○');
+            const prob = branch.probability ? Math.round(branch.probability * 100) + '%' : '';
+            const label = branch.label || branchId;
+            const shortLabel = label.length > 20 ? label.substring(0, 20) + '...' : label;
+
+            let html = `
+                <div class="${classes}" onclick="navigateToBranch('${branchId}')" title="${label}">
+                    <span class="map-node-icon">${icon}</span>
+                    <span class="map-node-id">${branchId}</span>
+                    <span class="map-node-label">${shortLabel}</span>
+                    ${prob ? `<span class="map-node-prob">${prob}</span>` : ''}
+                    ${isCurrent ? '<span class="fork-badge">YOU</span>' : ''}
+                </div>
+            `;
+
+            // Render children
+            if (branch.branches && branch.branches.length > 0) {
+                const children = getChildBranches(scenario, branchId);
+                if (children.length > 0) {
+                    html += '<div class="map-children">';
+                    children.forEach(child => {
+                        html += renderMapNode(child, scenario, currentBranchId, depth + 1);
+                    });
+                    html += '</div>';
+                }
+            }
+
+            return html;
+        }
+
+        function navigateToBranch(branchId) {
+            const channel = getChannel(activeChannelId);
+            if (!channel?.scenario) return;
+
+            // Find branch in scenario
+            let targetBranch = null;
+            if (channel.scenario.root?.branch_id === branchId || branchId === 'root') {
+                targetBranch = channel.scenario.root;
+            } else {
+                targetBranch = channel.scenario.branches?.find(b => b.branch_id === branchId);
+            }
+
+            if (targetBranch) {
+                // Update unified state
+                BonState.setNode(branchId, 'map');
+
+                // Fork to this branch
+                forkToNewChannel(branchId);
+                renderCascadeMap();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // RENDERING
+        // ═══════════════════════════════════════════════════════════════════
+
+        function renderChannelsRail() {
+            const rail = document.getElementById('channelsRail');
+            rail.innerHTML = '';
+
+            channels.forEach(ch => {
+                const tab = document.createElement('div');
+                tab.className = `channel-tab ${ch.id === activeChannelId ? 'active' : ''}`;
+                tab.innerHTML = `
+          <div class="depth">${ch.depth}</div>
+          <span class="label">${ch.branchId.substring(0, 4)}</span>
+        `;
+                tab.onclick = () => switchToChannel(ch.id);
+                tab.title = `${ch.scenarioTitle}\n${ch.branchId}`;
+                rail.appendChild(tab);
+            });
+
+            // Add button
+            const addBtn = document.createElement('div');
+            addBtn.className = 'channel-add';
+            addBtn.textContent = '+';
+            addBtn.title = 'New scenario';
+            addBtn.onclick = () => {
+                document.getElementById('scenarioSelect').value = '';
+                document.getElementById('scenarioSelect').focus();
+            };
+            rail.appendChild(addBtn);
+        }
+
+        function renderActiveChannel() {
+            const channel = getChannel(activeChannelId);
+            if (!channel) return;
+
+            const scenario = THICK_CORPUS[channel.scenarioIdx];
+            const branch = channel.branch;
+
+            renderBreadcrumb(channel);
+            renderThickDescription(branch, scenario);
+            renderBranches(scenario, branch);
+
+            // Update cascade map if open
+            if (cascadeMapOpen) {
+                renderCascadeMap();
+            }
+        }
+
+        function renderBreadcrumb(channel) {
+            const container = document.getElementById('breadcrumb');
+            container.innerHTML = '';
+
+            // Build path from root to current
+            let path = [];
+            let current = channel;
+            while (current) {
+                path.unshift({ id: current.id, branchId: current.branchId, branch: current.branch });
+                current = current.parentChannelId ? getChannel(current.parentChannelId) : null;
+            }
+
+            path.forEach((item, idx) => {
+                if (idx > 0) {
+                    const sep = document.createElement('span');
+                    sep.className = 'breadcrumb-sep';
+                    sep.textContent = '→';
+                    container.appendChild(sep);
+                }
+
+                const crumb = document.createElement('span');
+                crumb.className = `breadcrumb-item ${item.id === channel.id ? 'active' : ''}`;
+                crumb.textContent = item.branch?.label || item.branchId;
+                crumb.onclick = () => switchToChannel(item.id);
+                container.appendChild(crumb);
+            });
+        }
+
+        function renderThickDescription(branch, scenario) {
+            const panel = document.getElementById('thickPanel');
+            if (!branch) {
+                panel.innerHTML = '<div class="thick-header">NO BRANCH DATA</div>';
+                return;
+            }
+
+            const thick = branch.thick_description || {};
+            let html = '';
+
+            // Header
+            html += `<div class="thick-header">${scenario.title || 'SCENARIO'}</div>`;
+            html += `<div class="thick-title">${branch.label || branch.branch_id}</div>`;
+
+            // Metadata bar
+            html += `<div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px; font-family:var(--font-mono); font-size:11px; color:var(--text-muted);">`;
+            if (branch.branch_id) html += `<span>🏷️ ${branch.branch_id}</span>`;
+            if (branch.depth !== undefined) html += `<span>📊 Depth ${branch.depth}</span>`;
+            if (branch.parent) html += `<span>↩ Parent: ${branch.parent}</span>`;
+            if (branch.time_elapsed) html += `<span>⏱️ ${branch.time_elapsed}</span>`;
+            html += `</div>`;
+
+            // Timestamp
+            if (branch.timestamp) {
+                html += `<div style="font-size:12px; color:var(--text-muted); margin-bottom:16px; font-family:var(--font-mono);">📅 ${branch.timestamp}</div>`;
+            }
+
+            // Probability
+            if (branch.probability !== undefined) {
+                const pct = Math.round(branch.probability * 100);
+                html += `<div style="margin-bottom:16px; font-family:var(--font-mono); font-size:11px;">
+                    <strong>Probability:</strong> ${'█'.repeat(Math.round(pct / 10))}${'░'.repeat(10 - Math.round(pct / 10))} ${pct}%
+                </div>`;
+            }
+
+            // Setting
+            if (thick.setting) {
+                html += `<div class="thick-section">
+                    <div class="thick-section-label">📍 SETTING</div>
+                    <div class="thick-text">${thick.setting}</div>
+                </div>`;
+            }
+
+            // What happens (overview)
+            if (thick.what_happens) {
+                html += `<div class="thick-section">
+                    <div class="thick-section-label">📖 WHAT HAPPENS</div>
+                    <div class="thick-text">${thick.what_happens}</div>
+                </div>`;
+            }
+
+            // Sensory - complete with all fields
+            if (thick.sensory) {
+                html += `<div class="thick-section">
+                    <div class="thick-section-label">👁 SENSORY EXPERIENCE</div>
+                    <div class="thick-text">
+                        ${thick.sensory.sight ? `<p><strong>👁️ Sight:</strong> ${thick.sensory.sight}</p>` : ''}
+                        ${thick.sensory.sound ? `<p><strong>👂 Sound:</strong> ${thick.sensory.sound}</p>` : ''}
+                        ${thick.sensory.touch ? `<p><strong>✋ Touch:</strong> ${thick.sensory.touch}</p>` : ''}
+                        ${thick.sensory.feel ? `<p><strong>💫 Feel:</strong> ${thick.sensory.feel}</p>` : ''}
+                        ${thick.sensory.smell ? `<p><strong>👃 Smell:</strong> ${thick.sensory.smell}</p>` : ''}
+                        ${thick.sensory.taste ? `<p><strong>👅 Taste:</strong> ${thick.sensory.taste}</p>` : ''}
+                    </div>
+                </div>`;
+            }
+
+            // Perception (what he sees/feels variants)
+            if (thick.what_he_sees || thick.what_he_feels) {
+                html += `<div class="thick-section">
+                    <div class="thick-section-label">💫 PERCEPTION</div>
+                    <div class="thick-text">
+                        ${thick.what_he_sees ? `<p><strong>Sees:</strong> ${thick.what_he_sees}</p>` : ''}
+                        ${thick.what_he_feels ? `<p><strong>Feels:</strong> ${thick.what_he_feels}</p>` : ''}
+                    </div>
+                </div>`;
+            }
+
+            // ═══ DIALOGUE SECTION — ALL SPEAKERS ═══
+            const dialogueFields = [
+                { key: 'what_he_says', label: 'He says', icon: '💬' },
+                { key: 'what_petrov_says', label: 'Petrov says', icon: '👤' },
+                { key: 'what_ustinov_says', label: 'Ustinov says', icon: '🎖️' },
+                { key: 'what_ogarkov_says', label: 'Ogarkov says', icon: '⭐' },
+                { key: 'what_the_aide_says', label: 'The aide says', icon: '📋' },
+                { key: 'what_the_operators_hear', label: 'Operators hear', icon: '📢' },
+                { key: 'what_the_engineer_says', label: 'Engineer says', icon: '🔧' },
+                { key: 'what_his_supervisor_says', label: 'Supervisor says', icon: '👔' },
+                { key: 'what_reagan_says', label: 'Reagan says', icon: '🇺🇸' },
+                { key: 'what_a_child_in_kansas_says', label: 'Child in Kansas says', icon: '👧' },
+                { key: 'what_no_one_says', label: 'What no one says', icon: '🤐' }
+            ];
+
+            const hasDialogue = dialogueFields.some(f => thick[f.key]);
+            if (hasDialogue) {
+                html += `<div class="thick-section">
+                    <div class="thick-section-label">💬 DIALOGUE</div>`;
+
+                dialogueFields.forEach(field => {
+                    if (thick[field.key]) {
+                        html += `<div style="margin-bottom:12px;">
+                            <div style="font-size:10px; color:var(--accent); margin-bottom:4px;">${field.icon} ${field.label.toUpperCase()}</div>
+                            <div class="thick-monologue">"${thick[field.key]}"</div>
+                        </div>`;
+                    }
+                });
+
+                if (thick.how_he_says_it) {
+                    html += `<div class="thick-text" style="font-size:13px; color:var(--text-muted); margin-top:8px;">🎭 ${thick.how_he_says_it}</div>`;
+                }
+                html += `</div>`;
+            }
+
+            // ═══ INTERNAL MONOLOGUE — ALL VARIANTS ═══
+            const monologueFields = [
+                { key: 'internal_monologue', label: 'Internal Monologue' },
+                { key: 'internal_monologue_of_petrov', label: 'Petrov\'s Thoughts' },
+                { key: 'internal_monologue_of_ogarkov', label: 'Ogarkov\'s Thoughts' },
+                { key: 'internal_monologue_of_launch_officer', label: 'Launch Officer\'s Thoughts' }
+            ];
+
+            const hasMonologue = monologueFields.some(f => thick[f.key]);
+            if (hasMonologue) {
+                html += `<div class="thick-section">
+                    <div class="thick-section-label">💭 INTERNAL MONOLOGUE</div>`;
+
+                monologueFields.forEach(field => {
+                    if (thick[field.key]) {
+                        html += `<div style="margin-bottom:12px;">
+                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">${field.label.toUpperCase()}</div>
+                            <div class="thick-monologue" style="border-color:var(--text-muted);">${thick[field.key]}</div>
+                        </div>`;
+                    }
+                });
+                html += `</div>`;
+            }
+
+            // Entities
+            if (branch.entities_present && branch.entities_present.length > 0) {
+                html += `<div class="thick-section">
+                    <div class="thick-section-label">👥 ENTITIES PRESENT</div>
+                    <div class="thick-entities">
+                        ${branch.entities_present.map(e => `<span class="entity-chip">${e}</span>`).join('')}
+                    </div>
+                </div>`;
+            }
+
+            // Consequence
+            if (branch.immediate_consequence) {
+                html += `<div class="thick-section">
+                    <div class="thick-section-label">⚡ IMMEDIATE CONSEQUENCE</div>
+                    <div class="thick-text">${branch.immediate_consequence}</div>
+                </div>`;
+            }
+
+            // Decider
+            if (branch.decider || branch.next_decider) {
+                html += `<div class="thick-section">
+                    <div class="thick-section-label">🎯 DECISION POINT</div>
+                    <div class="thick-text">
+                        ${branch.decider ? `<p><strong>Current Decider:</strong> ${branch.decider}</p>` : ''}
+                        ${branch.next_decider ? `<p><strong>Next Decider:</strong> ${branch.next_decider}</p>` : ''}
+                    </div>
+                </div>`;
+            }
+
+            // Terminal state
+            if (branch.terminal_state) {
+                const ts = branch.terminal_state;
+                html += `<div class="thick-section" style="background:rgba(248, 214, 106, 0.1); border-left:3px solid var(--junction); padding:16px;">
+                    <div class="section-label" style="color:var(--junction);">TERMINAL STATE</div>
+                    <div class="thick-text">
+                        <p><strong style="color:var(--junction); font-size:16px;">${ts.outcome}</strong></p>
+                        ${ts.petrov_status ? `<p><strong>Petrov:</strong> ${ts.petrov_status}</p>` : ''}
+                        ${ts.population_status ? `<p><strong>Population:</strong> ${ts.population_status}</p>` : ''}
+                        ${ts.world_status ? `<p><strong>World:</strong> ${ts.world_status}</p>` : ''}
+                        ${ts.historical_note ? `<p><em>${ts.historical_note}</em></p>` : ''}
+                    </div>
+                </div>`;
+            }
+
+            // Available branches preview — LEGO BLOCKS
+            if (branch.branches && branch.branches.length > 0) {
+                const channel = getChannel(activeChannelId);
+                const scenario = channel?.scenario;
+
+                html += `<div class="decision-banner">
+                    <div class="decision-title">WHAT DO YOU DO?</div>
+                    <div class="decision-actor">Choose one of ${branch.branches.length} actions</div>
+                </div>
+                <div class="thick-section">
+                    <div class="section-label green">YOUR OPTIONS</div>
+                    <div class="fork-grid">
+                        ${branch.branches.map((branchId) => {
+                    // Look up the branch to get its label
+                    const branchData = scenario?.branches?.find(b => b.branch_id === branchId);
+                    const label = branchData?.label || branchId;
+                    const shortDesc = branchData?.description?.substring(0, 60) || '';
+
+                    return `<button class="fork-block" onclick="forkToNewChannel('${branchId}')">
+                                <span class="fork-id">${label}</span>
+                                ${shortDesc ? `<span class="fork-desc">${shortDesc}${shortDesc.length >= 60 ? '...' : ''}</span>` : ''}
+                            </button>`;
+                }).join('')}
+                    </div>
+                </div>`;
+            }
+
+            // ═══ KNOWLEDGE INFRASTRUCTURE — TRANSCLUSIONS ═══
+            if (TRANSCLUSIONS && Object.keys(TRANSCLUSIONS).length > 0) {
+                const transclusions = renderContextTransclusions(branch);
+                if (transclusions) {
+                    html += `<div class="thick-section">
+                        <div class="section-label">CONTEXTUAL KNOWLEDGE</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">
+                            Expand sections below for historical context, sources, and background information.
+                        </div>
+                        ${transclusions}
+                    </div>`;
+                }
+            }
+
+            panel.innerHTML = html;
+        }
+
+        function renderBranches(scenario, parentBranch) {
+            const list = document.getElementById('branchesList');
+
+            if (!parentBranch.branches || parentBranch.branches.length === 0) {
+                list.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">
+          ${parentBranch.terminal_state ? '🔚 Terminal state reached' : 'No branches available'}
+        </div>`;
+                return;
+            }
+
+            const children = getChildBranches(scenario, parentBranch.branch_id);
+
+            list.innerHTML = children.map(child => {
+                const isTerminal = !!child.terminal_state;
+                const prob = child.probability || 0.5;
+                const probPct = Math.round(prob * 100);
+
+                // Determine type class
+                let typeClass = '';
+                if (isTerminal) typeClass = 'terminal';
+                else if (prob > 0.5) typeClass = 'safe';
+                else typeClass = 'danger';
+
+                return `
+          <div class="branch-card ${typeClass}">
+            <div class="branch-id">${child.branch_id}</div>
+            <div class="branch-label">${child.label || 'Branch'}</div>
+            <div class="branch-prob">
+              <span>${probPct}%</span>
+              <div class="prob-bar"><div class="prob-fill" style="width:${probPct}%"></div></div>
+            </div>
+            ${child.thick_description?.internal_monologue ?
+                        `<div style="font-size:11px; color:var(--text-muted); margin-top:8px; font-style:italic;">"${child.thick_description.internal_monologue.substring(0, 80)}..."</div>`
+                        : ''}
+            <button class="btn ${isTerminal ? '' : 'btn-fork'} branch-fork-btn" onclick="forkToNewChannel('${child.branch_id}')">
+              ${isTerminal ? '🔚 VIEW TERMINAL' : '⎇ FORK TO BRANCH'}
+            </button>
+          </div>
+        `;
+            }).join('');
+        }
+
+        // Mobile helpers
+        function toggleBranches() {
+            document.getElementById('branchesPanel').classList.toggle('open');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════════════════
+
+        document.getElementById('btnReset').addEventListener('click', () => {
+            const select = document.getElementById('scenarioSelect');
+            if (select.value !== '') {
+                startNewScenario(parseInt(select.value));
+            }
+        });
+
+        // Load all data sources
+        loadThickData();
+        loadTransclusions();
+
+        // Initialize gamification
+        setTimeout(() => {
+            showTutorial();
+            updateProgress();
+        }, 500);
+    </script>
+</body>
+
+</html>

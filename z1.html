@@ -155,7 +155,7 @@
                 helixWidth: 300,
             },
             physics: {
-                baseSpeed: 6,
+                baseSpeed: 4.5, // REDUCED from 6 for accessibility
                 dampening: 0.05
             }
         };
@@ -176,10 +176,24 @@
             // Visuals
             rotation: 0,
             pulse: 0,
+            particles: [], // For feedback bursts
 
             // Interaction
             activeScenario: null
         };
+
+        // --- VISUAL FX ---
+        function spawnParticles(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                state.particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 1.0,
+                    color: color
+                });
+            }
+        }
 
         // --- SCENARIO DATA (Thick Description + Heuristics) ---
         const scenarios = [
@@ -327,6 +341,14 @@
             // Smooth Track Switching
             state.trackPos += (state.targetTrackPos - state.trackPos) * config.physics.dampening;
 
+            // Particles
+            state.particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.05;
+            });
+            state.particles = state.particles.filter(p => p.life > 0);
+
             // Check Nodes
             const nextNode = state.nodes[0];
             const dist = nextNode.z - state.cameraZ;
@@ -354,6 +376,9 @@
 
                 state.pulse = 1.0;
                 Audio.chord(choice === 'A');
+
+                // Burst Logic
+                spawnParticles(canvas.width / 2, canvas.height / 2, choice === 'A' ? config.colors.strandA : config.colors.strandB);
 
                 // Add new node
                 state.nodes.push(createNode(state.nodes[state.nodes.length - 1].z + 1500));
@@ -470,6 +495,16 @@
                 ctx.globalAlpha = isEncoded ? 1.0 : (state.trackPos > 0 ? 0.8 : 0.3);
                 ctx.beginPath(); ctx.arc(pB.x, pB.y, size, 0, Math.PI * 2); ctx.fill();
             }
+            ctx.globalAlpha = 1.0;
+
+            // Draw Particles
+            state.particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4 * p.life, 0, Math.PI * 2);
+                ctx.fill();
+            });
             ctx.globalAlpha = 1.0;
 
             // 3. Draw Train (The Editor)

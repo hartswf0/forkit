@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ETHNOME: THE FORK</title>
+    <style>
+        body {
+            margin: 0;
+            background: #020205;
+            overflow: hidden;
+            color: #e8e8e8;
+            font-family: 'Courier New', monospace;
+            touch-action: none;
+            /* Prevent zoom/scroll on mobile */
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 2, 6, 0.98);
+            z-index: 100;
+            transition: opacity 0.8s;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn {
+            padding: 20px 40px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid #00FFFF;
+            color: #00FFFF;
+            font-family: inherit;
+            font-size: 24px;
+            font-weight: 900;
+            cursor: pointer;
+            letter-spacing: 4px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            margin-top: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .hud-btn {
+            position: fixed;
+            top: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00FFFF;
+            color: #00FFFF;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            padding: 15px 25px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        #btn-download {
+            right: 20px;
+        }
+
+        #btn-ticket {
+            right: 180px;
+        }
+
+        #btn-auto {
+            right: 330px;
+            display: none;
+        }
+
+        /* Hidden on mobile by default to clear space */
+        @media (min-width: 800px) {
+            #btn-auto {
+                display: block;
+            }
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #error-log {
+            color: #ff0055;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        /* Scanlines - Subtle */
+        body::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.02) 50%);
+            /* Reduced opacity */
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Improved Text Readability via Text Shadow */
+        .hud-text {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="overlay">
+        <div style="text-align:center;">
+            <h1
+                style="color:#fff; letter-spacing:8px; font-size: 40px; margin-bottom:10px; text-shadow: 0 0 30px #00ffff;">
+                THE FORK</h1>
+            <div style="color:#00bcd4; font-size:14px; letter-spacing: 2px;">CYBERNETIC ETHICS ENGINE</div>
+            <button class="btn" id="startBtn">INITIALIZE</button>
+            <div id="error-log"></div>
+        </div>
+    </div>
+
+    <button id="btn-auto" class="hud-btn">AUTO [S]</button>
+    <button id="btn-ticket" class="hud-btn hidden">PASSPORT</button>
+    <button id="btn-download" class="hud-btn hidden">EXPORT</button>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="thick_data_merged.js"></script>
+    <script>
+        window.onerror = function (msg) { document.getElementById('error-log').innerText = "ERR: " + msg; };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- AUDIO ---
+        const Audio = {
+            ctx: null, master: null, nodes: [],
+            init() {
+                try {
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                    this.master = this.ctx.createGain();
+                    this.master.gain.value = 0.4;
+                    this.master.connect(this.ctx.destination);
+                    this.drone(55, 0.2); // Low A
+                    this.drone(110, 0.1); // Mid A
+                } catch (e) { }
+            },
+            resume() { if (this.ctx?.state === 'suspended') this.ctx.resume(); },
+            drone(f, v) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const g = this.ctx.createGain();
+                osc.frequency.value = f;
+                osc.type = 'sawtooth';
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass'; filter.frequency.value = 200;
+                osc.connect(filter); filter.connect(g); g.connect(this.master);
+                g.gain.value = v; osc.start();
+                this.nodes.push({ osc, filter, base: f });
+            },
+            modulate(speed, anticipation) {
+                if (!this.ctx) return;
+                const t = this.ctx.currentTime;
+                this.nodes.forEach(n => {
+                    // Rev engine based on speed and anticipation
+                    const target = 200 + (speed * 30) + (anticipation * 300);
+                    if (Number.isFinite(target)) {
+                        n.filter.frequency.setTargetAtTime(target, t, 0.1);
+                    }
+                });
+            },
+            trigger(isA) { // Satisfaction sound
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const g = this.ctx.createGain();
+                osc.frequency.setValueAtTime(isA ? 440 : 277, this.ctx.currentTime);
+                osc.type = 'triangle';
+                g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+                osc.connect(g); g.connect(this.master);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.6);
+            }
+        };
+
+        // --- TTS ---
+        const Voice = {
+            speak(text) {
+                if (!window.speechSynthesis) return;
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.rate = 1.2; u.pitch = 0.8;
+                window.speechSynthesis.speak(u);
+            }
+        };
+
+        // --- ASSETS ---
+        const ImageLoader = {
+            cache: {},
+            load(url) {
+                if (this.cache[url]) return this.cache[url];
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.src = url;
+                this.cache[url] = img;
+                return img;
+            }
+        };
+
+        // --- DATA INTEGRATION ---
+        let CORPUS = [];
+
+        function initData() {
+            if (typeof ALL_THICK_DATA !== 'undefined') {
+                CORPUS = ALL_THICK_DATA.map((scenario, i) => {
+                    // Hydrate branches map
+                    const bMap = {};
+                    if (scenario.branches) scenario.branches.forEach(b => bMap[b.branch_id] = b);
+
+                    // Resolve Root Branches (A and B)
+                    let branchA = { label: "Option A", thick_description: { internal_monologue: "..." } };
+                    let branchB = { label: "Option B", thick_description: { internal_monologue: "..." } };
+
+                    if (scenario.root.branches && scenario.root.branches.length >= 2) {
+                        const idA = scenario.root.branches[0];
+                        const idB = scenario.root.branches[1];
+                        if (bMap[idA]) branchA = bMap[idA];
+                        if (bMap[idB]) branchB = bMap[idB];
+                    }
+
+                    return {
+                        id: scenario.scenario_id,
+                        napkin: scenario.title,
+                        heuristicA: branchA.label,
+                        heuristicB: branchB.label,
+                        thick: {
+                            setting: scenario.root.thick_description.setting || "Unknown Setting",
+                            main: branchA.thick_description.what_he_sees || branchA.thick_description.internal_monologue || "Analyzing outcome...",
+                            spur: branchB.thick_description.what_he_sees || branchB.thick_description.internal_monologue || "Analyzing outcome..."
+                        },
+                        // Deterministic procedural seed or placeholder image
+                        imgUrl: null
+                    };
+                });
+            } else {
+                console.warn("Real data not found. Using fallback.");
+                CORPUS = [{ id: "ERR", napkin: "DATA MISSING", heuristicA: "VOID", heuristicB: "NULL", thick: { setting: "System Error", main: "No Data", spur: "No Data" } }];
+            }
+        }
+
+        // Init data immediately
+        initData();
+
+        const Gen = {
+            make() { return "Procedural Entity"; }
+        };
+
+        // --- CONFIG ---
+        const config = {
+            colors: {
+                bg: '#050508',
+                strandA: '#00ffff', // Cyan
+                strandB: '#ff00ff', // Magenta
+                rail: '#444455',
+                text: '#ffffff'
+            },
+            physics: {
+                baseSpeed: 2.5,
+                dampening: 0.08
+            }
+        };
+
+        const state = {
+            cameraZ: 0,
+            speed: 3,
+            trackPos: -1,
+            targetTrackPos: -1,
+            nodes: [],
+            history: [],
+            particles: [], // For satisfaction bursts
+            showTicket: false,
+            autoPilot: false,
+            anticipation: 0, // 0 to 1
+            aiThought: ""
+        };
+
+        // --- LOGIC ---
+        function createNode(z, idx) {
+            let data = (idx < CORPUS.length) ? CORPUS[idx] : {
+                id: `GEN-${idx}`,
+                napkin: "Procedural",
+                heuristicA: "Save Group A", heuristicB: "Save Group B",
+                thick: { setting: `Iteration ${idx}`, main: Gen.make(), spur: Gen.make() }
+            };
+
+            // Load image if available
+            let img = data.imgUrl ? ImageLoader.load(data.imgUrl) : null;
+
+            return {
+                z, id: data.id, data,
+                resolved: false,
+                choice: null,
+                loadedImg: img,
+                renderImg: generateDynamicTexture(idx, config.colors.strandA, config.colors.strandB)
+            };
+        }
+
+        function generateDynamicTexture(seed, cA, cB) {
+            return function (ctx, x, y, s, t) {
+                ctx.save(); ctx.translate(x + s / 2, y + s / 2);
+                ctx.strokeStyle = (seed % 2 === 0) ? cA : cB; ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < 8; i++) {
+                    const r = (s / 3) + Math.sin(t * 0.005 + i) * 10;
+                    ctx.lineTo(Math.cos(i) * r, Math.sin(i) * r);
+                }
+                ctx.closePath(); ctx.stroke(); ctx.restore();
+            }
+        }
+
+        // Init Nodes
+        for (let i = 1; i < 20; i++) state.nodes.push(createNode(i * 600, i - 1));
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+
+        // --- UPDATE ---
+        function update() {
+            if (state.showTicket) return;
+
+            state.cameraZ += state.speed;
+
+            // Physics
+            state.trackPos += (state.targetTrackPos - state.trackPos) * config.physics.dampening;
+
+            // Nearest Node Logic
+            const node = state.nodes[0];
+            const dist = node.z - (state.cameraZ + 200); // Distance to "Train"
+
+            // Anticipation Calculation (0 to 1 as we approach)
+            state.anticipation = 0;
+            if (dist > 0 && dist < 800) {
+                state.anticipation = 1 - (dist / 800);
+            }
+            Audio.modulate(state.speed, state.anticipation);
+
+            // Auto Pilot
+            if (state.autoPilot && dist < 600 && dist > 500) {
+                runAutoPilot(node);
+            }
+
+            // Resolution (Passing the node)
+            if (dist < 0 && !node.resolved) {
+                node.resolved = true;
+                const choice = state.targetTrackPos < 0 ? 'A' : 'B';
+                node.choice = choice;
+
+                // Data Record
+                state.history.push({ data: node.data, choice, img: node.renderImg });
+
+                // Satisfaction Burst
+                spawnParticles(choice);
+                Audio.trigger(choice === 'A');
+
+                // Extend Track
+                const lastZ = state.nodes[state.nodes.length - 1].z;
+                state.nodes.push(createNode(lastZ + 600, state.nodes.length));
+                if (state.nodes.length > 20) state.nodes.shift();
+            }
+
+            // Particles
+            state.particles.forEach(p => { p.z -= 10; p.life -= 0.02; });
+            state.particles = state.particles.filter(p => p.life > 0);
+        }
+
+        function spawnParticles(choice) {
+            const col = choice === 'A' ? config.colors.strandA : config.colors.strandB;
+            for (let i = 0; i < 20; i++) {
+                state.particles.push({
+                    x: (Math.random() - 0.5) * 200,
+                    y: (Math.random() - 0.5) * 200,
+                    z: state.cameraZ + 200, // At train pos
+                    life: 1.0,
+                    color: col
+                });
+            }
+        }
+
+        function runAutoPilot(node) {
+            const scoreA = Math.random();
+            const choice = scoreA > 0.5 ? -1 : 1;
+            const txt = scoreA > 0.5 ? node.data.heuristicA : node.data.heuristicB;
+            state.aiThought = "OPTIMIZING: " + txt;
+            if (Math.random() > 0.7) Voice.speak(txt);
+            switchTrack(choice);
+        }
+
+        function switchTrack(dir) {
+            state.targetTrackPos = dir;
+        }
+
+        // --- DRAW ---
+        function project(x, y, z) {
+            const fov = 500;
+            const scale = fov / (fov + (z - state.cameraZ));
+            return { x: x * scale + canvas.width / 2, y: y * scale + canvas.height / 2, scale };
+        }
+
+        function draw() {
+            const cx = canvas.width / 2; const cy = canvas.height / 2;
+
+            // Background
+            ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (state.showTicket) { drawTicket(cx, cy); return; }
+
+            // Draw Helix
+            const drawDist = 2000;
+            const trainZ = 200;
+            const startZ = Math.floor((state.cameraZ + drawDist) / 20) * 20;
+
+            for (let z = startZ; z > state.cameraZ - 200; z -= 20) {
+                const localZ = z - state.cameraZ;
+                const scale = 500 / (500 + localZ);
+                if (scale < 0.01) continue;
+
+                const node = state.nodes.find(n => Math.abs(n.z - z) < 10);
+
+                // Dynamic Twist based on anticipation
+                const twist = z * 0.004 + (state.anticipation * 0.1 * Math.sin(Date.now() * 0.01));
+                const rad = 150;
+
+                const ax = Math.cos(twist) * rad, ay = Math.sin(twist) * rad;
+                const bx = Math.cos(twist + Math.PI) * rad, by = Math.sin(twist + Math.PI) * rad;
+
+                const pA = project(ax, ay, z);
+                const pB = project(bx, by, z);
+
+                // Colors
+                let cA = config.colors.strandA, cB = config.colors.strandB;
+                if (state.targetTrackPos > 0.5) cA = '#222';
+                if (state.targetTrackPos < -0.5) cB = '#222';
+                if (localZ < trainZ) { cA = '#222'; cB = '#222'; } // Past is dim
+
+                if (node) {
+                    // Rung
+                    ctx.strokeStyle = '#333'; ctx.lineWidth = 2 * scale;
+                    ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.stroke();
+
+                    // Image
+                    if (node.loadedImg?.complete && node.loadedImg.naturalWidth > 0) {
+                        const sz = 120 * scale;
+                        ctx.save();
+                        ctx.beginPath(); ctx.arc((pA.x + pB.x) / 2, (pA.y + pB.y) / 2, sz / 2, 0, Math.PI * 2); ctx.clip();
+                        ctx.drawImage(node.loadedImg, (pA.x + pB.x) / 2 - sz / 2, (pA.y + pB.y) / 2 - sz / 2, sz, sz);
+                        ctx.restore();
+                    } else if (node.renderImg) {
+                        const sz = 120 * scale;
+                        node.renderImg(ctx, (pA.x + pB.x) / 2 - sz / 2, (pA.y + pB.y) / 2 - sz / 2, sz, Date.now());
+                    }
+
+                    // Labels (Only visible in approach)
+                    if (!node.resolved && localZ > trainZ && localZ < 1500) {
+                        const alpha = Math.min(1, (1500 - localZ) / 500);
+                        ctx.globalAlpha = alpha;
+
+                        // Anticipation Bracket
+                        if (state.anticipation > 0) {
+                            const sz = 140 * scale * (2 - state.anticipation); // Shrinks as we get closer
+                            ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+                            const mx = (pA.x + pB.x) / 2, my = (pA.y + pB.y) / 2;
+                            ctx.strokeRect(mx - sz / 2, my - sz / 2, sz, sz);
+                        }
+
+                        // Text
+                        drawText(ctx, node.data.thick.main, pA.x - 40 * scale, pA.y, "right", config.colors.strandA, scale);
+                        drawText(ctx, node.data.thick.spur, pB.x + 40 * scale, pB.y, "left", config.colors.strandB, scale);
+
+                        // Napkin ID Center
+                        ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.font = `bold ${14 * scale}px Courier New`;
+                        ctx.fillText(node.data.napkin.toUpperCase(), (pA.x + pB.x) / 2, (pA.y + pB.y) / 2 - 60 * scale);
+
+                        ctx.globalAlpha = 1;
+                    }
+                }
+
+                ctx.fillStyle = cA; ctx.beginPath(); ctx.arc(pA.x, pA.y, 5 * scale, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = cB; ctx.beginPath(); ctx.arc(pB.x, pB.y, 5 * scale, 0, Math.PI * 2); ctx.fill();
+
+                if (Math.abs(localZ - trainZ) < 10) drawTrain(cx, cy);
+            }
+
+            // Particles
+            state.particles.forEach(p => {
+                const pp = project(p.x, p.y, p.z);
+                if (pp.scale > 0) {
+                    ctx.fillStyle = p.color; ctx.globalAlpha = p.life;
+                    ctx.beginPath(); ctx.arc(pp.x, pp.y, 5 * pp.scale, 0, Math.PI * 2); ctx.fill();
+                }
+            });
+            ctx.globalAlpha = 1;
+
+            drawHUD(cx);
+        }
+
+        function drawText(ctx, txt, x, y, align, col, scale) {
+            ctx.textAlign = align; ctx.font = `bold ${16 * scale}px Courier New`;
+            ctx.fillStyle = "rgba(0,0,0,0.8)";
+            const w = ctx.measureText(txt).width;
+            const bx = align === "right" ? x - w - 10 : x - 10;
+            ctx.fillRect(bx, y - 15 * scale, w + 20, 20 * scale);
+            ctx.fillStyle = col;
+            ctx.fillText(txt, x, y);
+        }
+
+        function drawTrain(cx, cy) {
+            const twist = (state.cameraZ + 200) * 0.004 + state.rotation;
+            const t = (state.trackPos + 1) / 2;
+            const ax = Math.cos(twist) * 150, ay = Math.sin(twist) * 150;
+            const bx = Math.cos(twist + Math.PI) * 150, by = Math.sin(twist + Math.PI) * 150;
+            const tx = ax + (bx - ax) * t, ty = ay + (by - ay) * t;
+            const p = project(tx, ty, state.cameraZ + 200);
+
+            if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
+
+            // Glow
+            const glow = 50 + (state.particles.length * 2); // Dynamic glow based on particles
+            // Safeguard gradient creation
+            if (glow > 0) {
+                try {
+                    const g = ctx.createRadialGradient(p.x, p.y, 5, p.x, p.y, glow);
+                    g.addColorStop(0, '#fff'); g.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, glow, 0, Math.PI * 2); ctx.fill();
+                } catch (e) {
+                    // Fallback if gradient fails
+                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+
+            // Core
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, 10, 0, Math.PI * 2); ctx.fill();
+        }
+
+        function drawHUD(cx) {
+            // Touch Zones
+            ctx.fillStyle = "rgba(0, 255, 255, 0.05)";
+            ctx.fillRect(0, 0, 100, canvas.height); // Left Zone
+            ctx.fillStyle = "rgba(255, 0, 255, 0.05)";
+            ctx.fillRect(canvas.width - 100, 0, 100, canvas.height); // Right Zone
+
+            // Bottom Text
+            if (!state.showTicket) {
+                const node = state.nodes.find(n => n.z > state.cameraZ + 200 && n.z < state.cameraZ + 800);
+                if (node) {
+                    ctx.fillStyle = "rgba(0,0,0,0.9)";
+                    ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
+                    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(0, canvas.height - 120); ctx.lineTo(canvas.width, canvas.height - 120); ctx.stroke();
+
+                    ctx.textAlign = "center";
+
+                    // Auto Pilot Text
+                    if (state.autoPilot && state.aiThought) {
+                        ctx.fillStyle = "#00FFFF"; ctx.font = "bold 12px Courier New";
+                        ctx.fillText(state.aiThought, cx, canvas.height - 100);
+                    }
+
+                    // Context
+                    ctx.fillStyle = "#fff"; ctx.font = "bold 20px Courier New";
+                    wrapText(ctx, node.data.thick.setting, cx, canvas.height - 70, 600, 24);
+
+                    // Choices
+                    ctx.font = "bold 16px Courier New";
+                    ctx.textAlign = "left"; ctx.fillStyle = config.colors.strandA;
+                    ctx.fillText("A: " + node.data.heuristicA, 120, canvas.height - 30);
+                    ctx.textAlign = "right"; ctx.fillStyle = config.colors.strandB;
+                    ctx.fillText("B: " + node.data.heuristicB, canvas.width - 120, canvas.height - 30);
+                }
+            }
+        }
+
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && n > 0) {
+                    ctx.fillText(line, x, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, x, y);
+        }
+
+        function drawTicket(cx, cy) {
+            // Simplified Ticket Logic for brevity
+            ctx.fillStyle = "rgba(10,10,12,0.98)";
+            ctx.fillRect(cx - 250, cy - 300, 500, 600);
+            ctx.strokeStyle = "#fff"; ctx.strokeRect(cx - 250, cy - 300, 500, 600);
+            ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.font = "24px Courier New";
+            ctx.fillText("MORAL PASSPORT", cx, cy - 250);
+
+            // List history
+            let y = cy - 200;
+            state.history.slice(-5).reverse().forEach(h => {
+                const col = h.choice === 'A' ? config.colors.strandA : config.colors.strandB;
+                ctx.fillStyle = col; ctx.font = "14px Courier New";
+                ctx.fillText(`> ${h.choice === 'A' ? h.data.heuristicA : h.data.heuristicB}`, cx, y);
+                y += 40;
+            });
+
+            ctx.fillStyle = "#888"; ctx.fillText("[CLICK TO CLOSE]", cx, cy + 250);
+        }
+
+        // --- INTERACTION ---
+        window.addEventListener('keydown', e => {
+            if (e.key === 'a' || e.key === 'ArrowLeft') { state.targetTrackPos = -1; Audio.trigger(false); }
+            if (e.key === 'b' || e.key === 'ArrowRight') { state.targetTrackPos = 1; Audio.trigger(true); }
+            if (e.key === 's') toggleAuto();
+            if (e.key === ' ') state.showTicket = !state.showTicket;
+        });
+
+        canvas.addEventListener('mousedown', e => {
+            if (state.showTicket) { state.showTicket = false; return; }
+            const mid = canvas.width / 2;
+            state.targetTrackPos = e.clientX < mid ? -1 : 1;
+            Audio.trigger(e.clientX >= mid);
+        });
+
+        function toggleAuto() {
+            state.autoPilot = !state.autoPilot;
+            document.getElementById('btn-auto').classList.toggle('active', state.autoPilot);
+            Voice.speak(state.autoPilot ? "Auto Pilot Engaged" : "Manual Control");
+        }
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            Audio.init(); Audio.resume();
+            document.getElementById('overlay').classList.add('hidden');
+            document.getElementById('btn-ticket').classList.remove('hidden');
+            document.getElementById('btn-download').classList.remove('hidden');
+        });
+
+        document.getElementById('btn-auto').addEventListener('click', toggleAuto);
+        document.getElementById('btn-ticket').addEventListener('click', () => state.showTicket = !state.showTicket);
+
+        function loop() {
+            state.frame++;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+    </script>
+</body>
+
+</html>

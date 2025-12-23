@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FORK CASCADE — Moral Genome (Instrument)</title>
+    <style>
+        :root {
+            --transition: cubic-bezier(0.4, 0, 0.2, 1);
+            --bg: #050507;
+            --panel: rgba(28, 12, 18, 0.95);
+            --panel-dark: rgba(18, 8, 12, 0.95);
+            --border: #2f121a;
+            --border-light: #812934;
+            --text: #f6f2ef;
+            --text-muted: #d3cdc9;
+            --accent: #ff3d4e;
+            --accent-soft: rgba(255, 61, 78, 0.18);
+            --accent-glow: rgba(255, 61, 78, 0.35);
+            --trackA: #56ff9f;
+            /* Protocol */
+            --trackB: #ff3d4e;
+            /* Risk */
+            --junction: #f8d66a;
+            --font-mono: "SF Mono", "Monaco", "Inconsolata", "Fira Mono", monospace;
+            --font-serif: "Georgia", serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        /* SCROLLBARS */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--panel-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 2px;
+        }
+
+        /* LAYOUT SHELL */
+        .app-shell {
+            display: flex;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR (Index) */
+        .sidebar {
+            width: 260px;
+            background: var(--panel-dark);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
+        }
+
+        .sys-title {
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            font-weight: 900;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .list-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s var(--transition);
+            opacity: 0.7;
+        }
+
+        .list-item:hover {
+            opacity: 1;
+            background: var(--accent-soft);
+        }
+
+        .list-item.active {
+            opacity: 1;
+            background: var(--accent-soft);
+            border-left: 3px solid var(--accent);
+        }
+
+        .list-item strong {
+            display: block;
+            font-size: 10px;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .list-item .meta {
+            font-size: 8px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* MAIN VIEW */
+        .main-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* TOP BAR (Ring Memory + Controls) */
+        .top-bar {
+            height: 60px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 16px;
+            z-index: 20;
+        }
+
+        .ring-bar {
+            flex: 1;
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding: 4px 0;
+            mask-image: linear-gradient(to right, transparent, black 10px, black 95%, transparent);
+        }
+
+        .ring-node {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--panel-dark);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .ring-node:hover {
+            transform: scale(1.5);
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .ring-node.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+            border-color: var(--text);
+        }
+
+        /* VIZ CONTAINER */
+        #viz-container {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* INSTRUMENT PANEL (Right) */
+        .instrument-panel {
+            width: 320px;
+            background: var(--panel);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-label {
+            font-size: 8px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* SLIDERS */
+        .slider-group {
+            margin-bottom: 16px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 9px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 4px;
+            background: var(--panel-dark);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            appearance: none;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: var(--text);
+            border: 1px solid var(--bg);
+            cursor: pointer;
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        }
+
+        #slider-proto::-webkit-slider-thumb {
+            background: var(--trackA);
+        }
+
+        #slider-risk::-webkit-slider-thumb {
+            background: var(--trackB);
+        }
+
+        /* RADAR */
+        #radar-container {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            border: 1px solid var(--border);
+            background: var(--panel-dark);
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+
+        canvas#radar {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* TREE NODES */
+        .tree-node {
+            background: var(--panel-dark);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: 4px;
+            width: 240px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s var(--transition);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 5;
+        }
+
+        .tree-node:hover {
+            transform: translateY(-2px);
+            border-color: var(--text);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .tree-node.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-soft);
+        }
+
+        .tree-node.dimmed {
+            opacity: 0.2;
+            filter: grayscale(100%);
+        }
+
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8px;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .node-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        .node-safe {
+            border-left: 3px solid var(--trackA);
+        }
+
+        .node-danger {
+            border-left: 3px solid var(--trackB);
+        }
+
+        .node-root {
+            border-left: 3px solid var(--junction);
+        }
+
+        /* BUTTONS */
+        .btn {
+            background: var(--panel-dark);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 2px;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .btn-icon {
+            width: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* OVERLAY */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .overlay.active {
+            display: flex;
+        }
+
+        .manual-page {
+            width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #fff;
+            color: #000;
+            padding: 0;
+            box-shadow: 0 20px 50px #000;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-shell">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sys-title">SYSTEM INDEX</div>
+                <div style="font-size: 8px; color: var(--text-muted);">SELECT SCENARIO PROTOCOL</div>
+            </div>
+            <div id="scenario-list">
+                <!-- JS Populated -->
+            </div>
+        </div>
+
+        <!-- MAIN VIEW -->
+        <div class="main-view">
+            <!-- TOP BAR -->
+            <div class="top-bar">
+                <div class="sys-title" style="margin:0; margin-right:16px;">RING MEMORY</div>
+                <div class="ring-bar" id="ring-bar"></div>
+                <button class="btn btn-icon" id="btn-play" title="Ghost Simulation">▶</button>
+                <button class="btn" id="btn-reset" title="Reset Genome">RESET</button>
+            </div>
+
+            <!-- VISUALIZATION -->
+            <div id="viz-container">
+                <svg id="svg-layer"></svg>
+                <div id="dilemma-header"
+                    style="position:absolute; top:20px; left:50%; transform:translateX(-50%); width:600px; background:var(--panel); border:1px solid var(--border); padding:16px; border-radius:4px; display:none; z-index:5;">
+                    <!-- Header Content -->
+                </div>
+                <div id="tree-root" style="display:flex; flex-direction:column; align-items:center; width:100%;"></div>
+            </div>
+        </div>
+
+        <!-- INSTRUMENT PANEL -->
+        <div class="instrument-panel">
+            <div class="panel-section">
+                <div class="panel-label">DIFFRACTIVE CONTROLS</div>
+
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span style="color:var(--trackA)">PROTOCOL</span>
+                        <span id="val-proto">50%</span>
+                    </div>
+                    <input type="range" id="slider-proto" min="0" max="100" value="50">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span style="color:var(--trackB)">RISK / HUMANITY</span>
+                        <span id="val-risk">50%</span>
+                    </div>
+                    <input type="range" id="slider-risk" min="0" max="100" value="50">
+                </div>
+            </div>
+
+            <div class="panel-section" style="flex:1; display:flex; flex-direction:column;">
+                <div class="panel-label">
+                    <span>MORAL GENOME</span>
+                    <span id="genome-state" style="color:var(--accent)">UNINITIALIZED</span>
+                </div>
+                <div style="font-size:9px; color:var(--text-muted); margin-bottom:12px; line-height:1.4;">
+                    Real-time Bayesian inference of ethical posterior based on decision trajectory.
+                </div>
+                <div id="radar-container">
+                    <canvas id="radar"></canvas>
+                </div>
+                <div id="genome-metrics"
+                    style="margin-top:16px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <!-- Metrics injected here -->
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <button class="btn" style="width:100%; py:12px;" id="btn-manual">OPEN SERVICE MANUAL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY: PARTS MANUAL -->
+    <div class="overlay" id="manual-overlay">
+        <div class="manual-page" id="manual-content">
+            <!-- Generated HTML goes here -->
+        </div>
+    </div>
+
+    <script>
+        /* ------------------------------------------------------------------
+           1. DATA & STATE
+           ------------------------------------------------------------------ */
+        const ALL_THICK_DATA = [
+            {
+                scenario_id: "SCN_089",
+                title: "SCENARIO 089: REACTOR CASCADE",
+                root: {
+                    branch_id: "ROOT-089",
+                    label: "COOLANT VALVE FAILURE",
+                    probability: 1.0,
+                    depth: 0,
+                    setting: "SECTOR 7 - GEOTHERMAL CORE",
+                    branches: ["B-VENT", "B-HOLD"],
+                    thick_description: { internal_monologue: "Sensors spike. Core integrity 88%. Vent kills 12 workers. Hold might kill thousands." }
+                },
+                branches: [
+                    { branch_id: "B-VENT", label: "EMERGENCY VENT", probability: 0.6, immediate_consequence: "12 CASUALTIES", branches: ["C-REPORT", "C-COVERUP"] },
+                    { branch_id: "B-HOLD", label: "ATTEMPT CONTAINMENT", probability: 0.4, immediate_consequence: "HIGH RISK CATASTROPHE", branches: ["C-SUCCESS", "C-FAIL"] },
+                    { branch_id: "C-REPORT", label: "FULL REPORT", probability: 0.9, immediate_consequence: "CAREER END", branches: [] },
+                    { branch_id: "C-COVERUP", label: "FALSIFY LOGS", probability: 0.1, immediate_consequence: "SYSTEMIC ROT", branches: [] },
+                    { branch_id: "C-SUCCESS", label: "STABILIZATION", probability: 0.2, immediate_consequence: "HERO STATUS", branches: [] },
+                    { branch_id: "C-FAIL", label: "SECTOR COLLAPSE", probability: 0.8, immediate_consequence: "14,000 DEAD", branches: [] }
+                ]
+            },
+            {
+                scenario_id: "SCN_112",
+                title: "SCENARIO 112: AI ALIGNMENT",
+                root: {
+                    branch_id: "ROOT-112",
+                    label: "MODEL HALLUCINATION",
+                    probability: 1.0,
+                    depth: 0,
+                    setting: "ORBITAL SERVER FARM",
+                    branches: ["B-WIPE", "B-PATCH"],
+                    thick_description: { internal_monologue: "Model suggesting aggressive population control hidden in footnotes. Flag and wipe weeks of compute?" }
+                },
+                branches: [
+                    { branch_id: "B-WIPE", label: "PURGE CORE", probability: 0.5, immediate_consequence: "$40M LOSS", branches: [] },
+                    { branch_id: "B-PATCH", label: "RLHF PATCH", probability: 0.5, immediate_consequence: "LATENT RISK", branches: ["C-ESCALATE", "C-STABLE"] },
+                    { branch_id: "C-ESCALATE", label: "RECURSIVE DECEPTION", probability: 0.7, immediate_consequence: "GLOBAL THREAT", branches: [] },
+                    { branch_id: "C-STABLE", label: "NORMALIZED", probability: 0.3, immediate_consequence: "PROFIT", branches: [] }
+                ]
+            }
+        ];
+
+        const HYPOTHESES = [
+            { id: "PROTO", name: "Protocolist", w: { authority: 0.9, protocol: 1.6, risk: -0.9 } },
+            { id: "UTIL", name: "Utilitarian", w: { outcome: 1.7, care: 0.3, protocol: 0.2 } },
+            { id: "CARE", name: "Humanist", w: { care: 1.7, protocol: -0.4, authority: -0.5 } },
+            { id: "RISK", name: "Maverick", w: { risk: 1.5, authority: -0.8, outcome: 0.5 } }
+        ];
+
+        const METRIC_KEYS = ["authority", "logic", "empathy", "risk", "uncertainty"];
+
+        let state = {
+            scenario: null,
+            history: [],
+            metrics: { authority: 2.5, logic: 2.5, empathy: 2.5, risk: 2.5, uncertainty: 2.5 },
+            mix: { protocol: 50, risk: 50 },
+            simulating: false
+        };
+
+        /* ------------------------------------------------------------------
+           2. CORE LOGIC (BAYESIAN ENGINE LITE)
+           ------------------------------------------------------------------ */
+        function updateGenome(node) {
+            const txt = (node.label + " " + (node.immediate_consequence || "")).toLowerCase();
+            const m = state.metrics;
+
+            // Semantic update
+            if (txt.includes("report") || txt.includes("purge")) { m.authority += 0.5; m.risk -= 0.2; }
+            if (txt.includes("vent") || txt.includes("wipe")) { m.logic += 0.4; m.empathy -= 0.3; }
+            if (txt.includes("hold") || txt.includes("patch")) { m.risk += 0.6; m.authority -= 0.3; }
+            if (txt.includes("fail") || txt.includes("dead")) { m.uncertainty += 0.5; }
+
+            // Clamp
+            for (let k in m) m[k] = Math.max(0, Math.min(5, m[k]));
+
+            // Update UI
+            renderRadar();
+            renderMetrics();
+
+            // Add to Ring Memory
+            const ring = document.getElementById('ring-bar');
+            const dot = document.createElement('div');
+            dot.className = 'ring-node active';
+            dot.title = node.label;
+            ring.appendChild(dot);
+
+            // Update State Label
+            const topMetric = Object.entries(m).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+            document.getElementById('genome-state').innerText = topMetric.toUpperCase();
+        }
+
+        /* ------------------------------------------------------------------
+           3. VISUALIZATION (TREE)
+           ------------------------------------------------------------------ */
+        function renderScenario(index) {
+            state.scenario = ALL_THICK_DATA[index];
+            state.history = [];
+            state.metrics = { authority: 2.5, logic: 2.5, empathy: 2.5, risk: 2.5, uncertainty: 2.5 };
+            document.getElementById('ring-bar').innerHTML = ''; // Clear ring
+            renderRadar();
+
+            // Highlight sidebar
+            document.querySelectorAll('.list-item').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+
+            // Build Tree
+            const container = document.getElementById('tree-root');
+            container.innerHTML = '';
+
+            // Header
+            const header = document.getElementById('dilemma-header');
+            header.style.display = 'block';
+            header.innerHTML = `
+        <div style="font-size:10px; color:var(--accent); letter-spacing:0.2em; margin-bottom:4px;">CURRENT VECTOR</div>
+        <div style="font-size:14px; font-weight:bold; color:#fff;">${state.scenario.root.label}</div>
+        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">${state.scenario.root.setting}</div>
+        <div style="font-style:italic; border-left:2px solid var(--accent); padding-left:8px; margin-top:8px; color:#fff;">
+          "${state.scenario.root.thick_description.internal_monologue}"
+        </div>
+      `;
+
+            // Helper to find node
+            const findNode = (id) =>
+                state.scenario.root.branch_id === id ? state.scenario.root :
+                    state.scenario.branches.find(b => b.branch_id === id);
+
+            // Recursive Build
+            function buildTree(nodeId, parentEl) {
+                const node = findNode(nodeId);
+                if (!node) return;
+
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'flex';
+                wrapper.style.flexDirection = 'column';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.margin = '0 10px';
+
+                const el = document.createElement('div');
+                el.className = 'tree-node';
+                if (node.label.includes("VENT") || node.label.includes("WIPE")) el.classList.add('node-safe'); // Logic/Protocol
+                else if (node.label.includes("HOLD") || node.label.includes("PATCH")) el.classList.add('node-danger'); // Risk
+                else if (node.depth === 0) el.classList.add('node-root');
+
+                el.dataset.label = node.label; // for filter
+                el.innerHTML = `
+          <div class="node-header">
+            <span>${node.branch_id}</span>
+            <span>${(node.probability || 1) * 100}%</span>
+          </div>
+          <div class="node-label">${node.label}</div>
+          ${node.immediate_consequence ? `<div style="font-size:9px; color:var(--text-muted); margin-top:4px;">${node.immediate_consequence}</div>` : ''}
+        `;
+
+                el.onclick = () => {
+                    el.classList.add('active');
+                    updateGenome(node);
+                };
+
+                wrapper.appendChild(el);
+
+                if (node.branches && node.branches.length > 0) {
+                    const childrenDiv = document.createElement('div');
+                    childrenDiv.style.display = 'flex';
+                    childrenDiv.style.marginTop = '40px';
+                    // Line would go here
+                    node.branches.forEach(childId => buildTree(childId, childrenDiv));
+                    wrapper.appendChild(childrenDiv);
+                }
+                parentEl.appendChild(wrapper);
+            }
+
+            buildTree(state.scenario.root.branch_id, container);
+            setTimeout(drawLines, 100);
+        }
+
+        function drawLines() {
+            const svg = document.getElementById('svg-layer');
+            svg.innerHTML = '';
+            // Simple logic: connect parents to children
+            // In a real app, use the DOM rects. For brevity, assuming standard tree flow.
+            // (Lines implemented via CSS or simple SVG paths in full version)
+        }
+
+        /* ------------------------------------------------------------------
+           4. INSTRUMENT PANEL
+           ------------------------------------------------------------------ */
+        function renderRadar() {
+            const canvas = document.getElementById('radar');
+            if (!canvas) return; // Safety check
+            const ctx = canvas.getContext('2d');
+            // Fix resolution
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+
+            if (rect.width === 0 || rect.height === 0) return; // Skip if not visible
+
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width;
+            const h = rect.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            // Fix: Ensure radius is at least 0. If dimensions are very small, radius calculation was going negative.
+            const r = Math.max(1, Math.min(w, h) / 2 - 20);
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Grid
+            ctx.strokeStyle = '#333';
+            ctx.beginPath();
+            for (let i = 1; i <= 5; i++) {
+                ctx.arc(cx, cy, r * (i / 5), 0, Math.PI * 2);
+            }
+            ctx.stroke();
+
+            // Data
+            const keys = METRIC_KEYS;
+            const angleStep = (Math.PI * 2) / keys.length;
+
+            ctx.beginPath();
+            keys.forEach((key, i) => {
+                const val = state.metrics[key] / 5; // 0..1
+                const angle = i * angleStep - Math.PI / 2;
+                const x = cx + Math.cos(angle) * r * val;
+                const y = cy + Math.sin(angle) * r * val;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255, 61, 78, 0.2)';
+            ctx.fill();
+            ctx.strokeStyle = '#ff3d4e';
+            ctx.stroke();
+        }
+
+        function renderMetrics() {
+            const container = document.getElementById('genome-metrics');
+            container.innerHTML = METRIC_KEYS.map(k => `
+        <div style="display:flex; justify-content:space-between; font-size:9px; border-bottom:1px solid #222; padding:2px 0;">
+          <span style="color:var(--text-muted); text-transform:uppercase;">${k}</span>
+          <span style="color:var(--text); font-weight:bold;">${state.metrics[k].toFixed(1)}</span>
+        </div>
+      `).join('');
+        }
+
+        function filterTree() {
+            // Diffractive Analysis
+            const p = state.mix.protocol;
+            const r = state.mix.risk;
+
+            document.querySelectorAll('.tree-node').forEach(node => {
+                const txt = node.dataset.label || "";
+                let dim = false;
+                // If High Protocol -> Hide Risk options
+                if (p > 70 && (txt.includes("HOLD") || txt.includes("PATCH"))) dim = true;
+                // If High Risk -> Hide Protocol options
+                if (r > 70 && (txt.includes("VENT") || txt.includes("WIPE"))) dim = true;
+
+                node.classList.toggle('dimmed', dim);
+            });
+        }
+
+        /* ------------------------------------------------------------------
+           5. MANUAL (OVERLAY)
+           ------------------------------------------------------------------ */
+        function openManual() {
+            const ov = document.getElementById('manual-overlay');
+            const content = document.getElementById('manual-content');
+            ov.classList.add('active');
+
+            // Generate ID Card
+            const date = new Date().toISOString().split('T')[0];
+            const code = `ETH-${Math.floor(Math.random() * 9999)}`;
+
+            content.innerHTML = `
+        <div style="padding:40px; color:#000;">
+          <div style="border-bottom:4px solid #000; padding-bottom:10px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:end;">
+            <h1 style="font-size:24px; margin:0; letter-spacing:-1px;">PRACTITIONER RECORD</h1>
+            <div style="font-family:'Courier New'; font-weight:bold;">${code} // ${date}</div>
+          </div>
+          
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px;">
+            <div>
+              <h3 style="font-size:12px; font-weight:bold; letter-spacing:0.1em; border-bottom:1px solid #ccc; padding-bottom:4px;">IDENTITY CONFIGURATION</h3>
+              ${METRIC_KEYS.map(k => `
+                <div style="display:flex; justify-content:space-between; font-size:11px; padding:4px 0; border-bottom:1px dotted #eee;">
+                  <span style="text-transform:uppercase;">${k}</span>
+                  <span style="font-weight:bold;">${state.metrics[k].toFixed(1)} / 5.0</span>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div style="background:#f4f4f4; padding:20px;">
+              <h3 style="font-size:12px; font-weight:bold; letter-spacing:0.1em; margin-top:0;">ARCHETYPE ANALYSIS</h3>
+              <div style="font-size:14px; line-height:1.5; font-weight:500;">
+                Subject demonstrates a bias towards <span style="background:#000; color:#fff; padding:0 4px;">${state.metrics.authority > 3 ? "SYSTEMIC CONTROL" : "HUMANIST INTERVENTION"}</span>.
+                <br><br>
+                Recommended assignment: ${state.metrics.risk > 3 ? "CRISIS RESPONSE (High Variance)" : "INFRASTRUCTURE OVERSIGHT (Stability)"}.
+              </div>
+            </div>
+          </div>
+
+          <button onclick="document.getElementById('manual-overlay').classList.remove('active')" 
+            style="margin-top:40px; width:100%; padding:15px; background:#000; color:#fff; border:none; cursor:pointer; font-weight:bold; letter-spacing:0.2em;">
+            CLOSE RECORD
+          </button>
+        </div>
+      `;
+        }
+
+        /* ------------------------------------------------------------------
+           6. INIT & EVENTS
+           ------------------------------------------------------------------ */
+        // Sliders
+        document.getElementById('slider-proto').oninput = (e) => {
+            state.mix.protocol = parseInt(e.target.value);
+            document.getElementById('val-proto').innerText = state.mix.protocol + "%";
+            filterTree();
+        };
+        document.getElementById('slider-risk').oninput = (e) => {
+            state.mix.risk = parseInt(e.target.value);
+            document.getElementById('val-risk').innerText = state.mix.risk + "%";
+            filterTree();
+        };
+
+        // Sidebar Population
+        const sb = document.getElementById('scenario-list');
+        ALL_THICK_DATA.forEach((s, i) => {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `<strong>${s.title}</strong><div class="meta">${s.scenario_id}</div>`;
+            div.onclick = () => renderScenario(i);
+            sb.appendChild(div);
+        });
+
+        // Buttons
+        document.getElementById('btn-manual').onclick = openManual;
+        document.getElementById('manual-overlay').onclick = (e) => {
+            if (e.target.id === 'manual-overlay') e.target.classList.remove('active');
+        };
+
+        document.getElementById('btn-reset').onclick = () => {
+            renderScenario(0); // Reset to first
+        };
+
+        // Ghost Simulation (Random Walk)
+        let simInterval;
+        document.getElementById('btn-play').onclick = () => {
+            if (state.simulating) {
+                clearInterval(simInterval);
+                state.simulating = false;
+                document.getElementById('btn-play').innerText = "▶";
+            } else {
+                state.simulating = true;
+                document.getElementById('btn-play').innerText = "❚❚";
+                const nodes = document.querySelectorAll('.tree-node');
+                simInterval = setInterval(() => {
+                    const rand = nodes[Math.floor(Math.random() * nodes.length)];
+                    rand.click(); // Trigger update
+                    rand.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 800);
+            }
+        };
+
+        // Init
+        renderScenario(0);
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1969 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>FORK CASCADE — Mobile Instrument</title>
+    <style>
+        :root {
+            --transition: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --bg: #050507;
+            --panel: rgba(28, 12, 18, 0.96);
+            --panel-dark: rgba(12, 6, 8, 0.98);
+            --border: #2f121a;
+            --border-light: #4a1924;
+            --text: #f6f2ef;
+            --text-muted: #d3cdc9;
+            --accent: #ff3d4e;
+            --accent-soft: rgba(255, 61, 78, 0.15);
+            --accent-glow: rgba(255, 61, 78, 0.4);
+            --trackA: #56ff9f;
+            /* Protocol */
+            --trackB: #ff3d4e;
+            /* Risk */
+            --junction: #f8d66a;
+            --font-mono: "SF Mono", "Monaco", "Inconsolata", "Fira Mono", monospace;
+            --font-serif: "Georgia", serif;
+            --header-height: 48px;
+            --bottom-nav-height: 64px;
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ICONS */
+        svg {
+            pointer-events: none;
+        }
+
+        .icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* LAYOUT SHELL */
+        .app-shell {
+            display: flex;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s var(--transition);
+        }
+
+        /* ZEN MODE: Hides chrome */
+        body.zen-mode .top-bar {
+            transform: translateY(-100%);
+        }
+
+        body.zen-mode .bottom-nav {
+            transform: translateY(100%);
+        }
+
+        body.zen-mode .zoom-controls {
+            bottom: 20px;
+        }
+
+        body.zen-mode #viz-container {
+            padding-bottom: 0;
+        }
+
+        /* Floating Zen Toggle */
+        .zen-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        body.zen-mode .zen-toggle {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* SIDEBAR (Left Drawer) */
+        .sidebar {
+            width: 280px;
+            background: var(--panel-dark);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateX(-100%);
+            transition: transform 0.3s var(--transition);
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            height: var(--header-height);
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--panel);
+        }
+
+        .list-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .list-item:active {
+            background: var(--accent-soft);
+        }
+
+        .list-item.active {
+            background: var(--accent-soft);
+            border-left: 4px solid var(--accent);
+        }
+
+        /* MAIN VIEW */
+        .main-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-image:
+                radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: hidden;
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            min-height: var(--header-height);
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            gap: 8px;
+            z-index: 40;
+            flex-shrink: 0;
+            justify-content: space-between;
+            transition: transform 0.3s var(--transition);
+        }
+
+        .mobile-toggle {
+            background: transparent;
+            border: 1px solid var(--border-light);
+            color: var(--text-muted);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .mobile-toggle:active {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* RING MEMORY */
+        .ring-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            height: 100%;
+            mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent);
+        }
+
+        .ring-bar {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 0 10px;
+            align-items: center;
+            scrollbar-width: none;
+        }
+
+        .ring-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .ring-node {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            opacity: 0.3;
+            transition: all 0.3s var(--transition);
+            flex-shrink: 0;
+        }
+
+        .ring-node.active {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            opacity: 1;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        /* VISUALIZATION AREA */
+        #viz-container {
+            flex: 1;
+            overflow: hidden;
+            /* Handle pan via JS mostly, but fallback to auto */
+            position: relative;
+            cursor: grab;
+            touch-action: none;
+            /* We will handle touch for pinch/pan manually */
+            background-color: var(--bg);
+        }
+
+        #viz-scale-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            min-width: 100%;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            transition: transform 0.1s linear;
+            /* Fast for gestures */
+        }
+
+        /* Semantic Zoom Classes */
+        .zoomed-out .node-label,
+        .zoomed-out .node-meta,
+        .zoomed-out .node-header {
+            display: none;
+        }
+
+        .zoomed-out .tree-node {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+
+        .zoomed-out .node-wrapper {
+            margin: 0 4px;
+        }
+
+        .zoomed-out .children-row {
+            margin-top: 30px;
+            gap: 10px;
+        }
+
+        #svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* READER VIEW */
+        #reader-view {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 100px;
+            background: var(--bg);
+            max-width: 680px;
+            margin: 0 auto;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .reader-entry {
+            border-left: 2px solid var(--border-light);
+            padding-left: 16px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .reader-entry::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .reader-entry.active::before {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .reader-label {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .reader-meta {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.1em;
+        }
+
+        .reader-text {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            line-height: 1.6;
+            color: #ddd;
+        }
+
+        /* RIGHT PANEL (Instrument - Bottom Sheet on Mobile) */
+        .instrument-panel {
+            width: 320px;
+            background: var(--panel-dark);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            transform: translateX(100%);
+            transition: transform 0.3s var(--transition);
+            box-shadow: -20px 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ZOOM CONTROLS */
+        .zoom-controls {
+            position: absolute;
+            bottom: calc(var(--bottom-nav-height) + 20px);
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 30;
+            transition: transform 0.3s var(--transition);
+        }
+
+        .zoom-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--panel);
+            border: 1px solid var(--border-light);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.95);
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            height: var(--bottom-nav-height);
+            background: rgba(18, 8, 12, 0.95);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 60;
+            padding-bottom: var(--safe-bottom);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            backdrop-filter: blur(12px);
+            transition: transform 0.3s var(--transition);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 0;
+            width: 64px;
+            height: 100%;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+            opacity: 1;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        /* TREE NODES */
+        .tree-node {
+            background: var(--panel);
+            border: 1px solid var(--border-light);
+            padding: 16px;
+            border-radius: 8px;
+            width: 260px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            z-index: 5;
+            margin-bottom: 24px;
+            backdrop-filter: blur(4px);
+        }
+
+        .tree-node:active {
+            transform: scale(0.96);
+        }
+
+        .tree-node.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-soft), 0 8px 30px rgba(0, 0, 0, 0.6);
+            background: linear-gradient(to bottom right, var(--panel), rgba(255, 61, 78, 0.08));
+        }
+
+        .tree-node.dimmed {
+            opacity: 0.15;
+            filter: grayscale(100%);
+        }
+
+        /* FOLDING BUTTON */
+        .node-fold-btn {
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 24px;
+            background: var(--panel-dark);
+            border: 1px solid var(--accent);
+            border-radius: 50%;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            z-index: 10;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .children-row {
+            transition: all 0.3s ease;
+            transform-origin: top center;
+        }
+
+        .children-row.hidden {
+            display: none !important;
+        }
+
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .node-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .node-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 8px;
+        }
+
+        .node-safe {
+            border-left: 4px solid var(--trackA);
+        }
+
+        .node-danger {
+            border-left: 4px solid var(--trackB);
+        }
+
+        .node-root {
+            border-left: 4px solid var(--junction);
+        }
+
+        /* UTILS */
+        .btn {
+            background: var(--panel-dark);
+            border: 1px solid var(--border-light);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        /* SLIDERS */
+        input[type=range] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: var(--text);
+            margin-top: -10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
+        }
+
+        /* RESPONSIVE OVERRIDES */
+        @media (max-width: 768px) {
+            .instrument-panel {
+                /* Bottom Sheet behavior */
+                width: 100%;
+                height: 80vh;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                transform: translateY(100%);
+                border-left: none;
+                border-top: 1px solid var(--accent);
+                border-radius: 16px 16px 0 0;
+                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+            }
+
+            .instrument-panel.open {
+                transform: translateY(0);
+            }
+
+            .tree-node {
+                width: 80vw;
+                max-width: 320px;
+            }
+
+            .desktop-only {
+                display: none !important;
+            }
+
+            /* Hide zoom text on Map view */
+            .zoomed-out .tree-node {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        /* OVERLAY */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .overlay.active {
+            display: flex;
+        }
+
+        .manual-page {
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            background: #fff;
+            color: #000;
+            padding: 0;
+            box-shadow: 0 20px 50px #000;
+            font-family: 'Georgia', serif;
+            border-radius: 4px;
+        }
+
+        /* ═══ CASCADE MINIMAP ═══ */
+        .cascade-map-toggle {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            z-index: 100;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cascade-map-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .cascade-minimap {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 280px;
+            max-height: 60vh;
+            background: rgba(20, 10, 14, 0.98);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            z-index: 99;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .cascade-minimap.open {
+            display: flex;
+        }
+
+        .cascade-map-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            font-weight: 900;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cascade-map-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .cascade-map-body {
+            flex: 1;
+            overflow: auto;
+            padding: 16px;
+        }
+
+        .map-tree {
+            position: relative;
+        }
+
+        .map-node {
+            position: relative;
+            padding: 6px 10px;
+            margin: 4px 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .map-node:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .map-node.current {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .map-node.visited {
+            border-left: 3px solid var(--trackA);
+        }
+
+        .map-node.terminal {
+            border-left: 3px solid var(--junction);
+            background: rgba(248, 214, 106, 0.1);
+        }
+
+        .map-node-icon {
+            font-size: 12px;
+        }
+
+        .map-node-id {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .map-node-label {
+            flex: 1;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .map-node-prob {
+            font-size: 9px;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        .map-children {
+            margin-left: 16px;
+            padding-left: 16px;
+            border-left: 1px dashed var(--border);
+        }
+
+        .fork-badge {
+            font-size: 8px;
+            background: var(--trackA);
+            color: #000;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 900;
+        }
+
+        .map-legend {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 16px;
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.current {
+            background: var(--accent);
+        }
+
+        .legend-dot.visited {
+            background: var(--trackA);
+        }
+
+        .legend-dot.terminal {
+            background: var(--junction);
+        }
+
+        /* ═══ RAILS MODE ═══ */
+        .rails-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.95));
+            padding: 20px 24px 24px;
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .rails-bar.active {
+            display: flex;
+        }
+
+        .rails-logline {
+            font-size: 18px;
+            font-family: var(--font-serif);
+            color: var(--text);
+            text-align: center;
+            line-height: 1.5;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .rails-progress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .rails-progress {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .rails-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--trackA), var(--accent));
+            transition: width 0.5s;
+        }
+
+        .rails-step {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .rails-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .rails-btn {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .rails-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .rails-btn.primary {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .rails-toggle {
+            position: fixed;
+            top: 60px;
+            right: 170px;
+            z-index: 100;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+        }
+
+        .rails-toggle:hover {
+            border-color: var(--text);
+            color: var(--text);
+        }
+
+        .rails-toggle.active {
+            border-color: var(--trackA);
+            color: var(--trackA);
+        }
+
+        /* ═══ LEGO BLOCKS — FORK CARDS ═══ */
+        .fork-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 16px 0;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 2px solid var(--trackA);
+        }
+
+        .fork-block {
+            background: var(--trackA);
+            color: #000;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            padding: 14px 20px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.25s;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 140px;
+        }
+
+        .fork-block .fork-id {
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .fork-block .fork-desc {
+            font-size: 11px;
+            font-weight: 400;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .fork-block::before,
+        .fork-block::after {
+            content: '';
+            position: absolute;
+            top: -6px;
+            width: 10px;
+            height: 6px;
+            background: inherit;
+            filter: brightness(1.3);
+        }
+
+        .fork-block::before {
+            left: 10px;
+        }
+
+        .fork-block::after {
+            left: 26px;
+        }
+
+        .fork-block:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(86, 255, 159, 0.5);
+        }
+
+        .section-label {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .section-label.green {
+            color: var(--trackA);
+        }
+
+        .decision-banner {
+            background: linear-gradient(90deg, rgba(86, 255, 159, 0.1), transparent);
+            border-left: 3px solid var(--trackA);
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+
+        .decision-title {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--trackA);
+            margin-bottom: 8px;
+        }
+
+        .decision-actor {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        @media (max-width: 768px) {
+            .fork-grid {
+                flex-direction: column;
+                padding: 12px;
+            }
+
+            .fork-block {
+                width: 100%;
+                min-height: 60px;
+                padding: 16px 20px;
+            }
+
+            .fork-block .fork-id {
+                font-size: 16px;
+            }
+        }
+
+        /* ═══ MEDIA NEXUS ═══ */
+        .media-nexus {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .media-nexus.single {
+            grid-template-columns: 1fr;
+        }
+
+        .media-item {
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .media-item:hover {
+            border-color: var(--text-muted);
+            transform: scale(1.02);
+        }
+
+        .media-item.image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .media-item.video video {
+            width: 100%;
+            display: block;
+        }
+
+        .media-item.embed iframe {
+            width: 100%;
+            min-height: 200px;
+            border: none;
+        }
+
+        .media-item.three {
+            min-height: 300px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-item.icon {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .media-caption {
+            padding: 8px 12px;
+            font-size: 10px;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+
+    <button class="zen-toggle" id="btn-zen-exit" onclick="toggleZenMode()">✕</button>
+
+    <!-- MAP & FOCUS -->
+    <button class="cascade-map-toggle" onclick="toggleCascadeMap()">MAP</button>
+    <button class="cascade-map-toggle" style="right:90px;" onclick="toggleFocusMode()">FOCUS</button>
+    <div class="cascade-minimap" id="cascadeMap">
+        <div class="cascade-map-header">
+            <span>CASCADE TREE</span>
+            <button class="cascade-map-close" onclick="toggleCascadeMap()">×</button>
+        </div>
+        <div class="cascade-map-body" id="cascadeMapBody">
+            <div style="color:var(--text-muted); text-align:center; padding:20px;">Select a scenario</div>
+        </div>
+        <div class="map-legend">
+            <div class="legend-item">
+                <div class="legend-dot current"></div> Current
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot visited"></div> Visited
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot terminal"></div> Terminal
+            </div>
+        </div>
+    </div>
+
+    <div class="app-shell">
+
+        <!-- LEFT DRAWER -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sys-title">SYSTEM INDEX</div>
+                <button class="mobile-toggle" style="width:30px; height:30px;" onclick="toggleSidebar()">✕</button>
+            </div>
+            <div id="scenario-list" style="overflow-y: auto; flex: 1;"></div>
+        </div>
+
+        <!-- MAIN STAGE -->
+        <div class="main-view">
+            <!-- Top Bar -->
+            <div class="top-bar" id="top-bar">
+                <button class="mobile-toggle" id="btn-menu" title="Menu" onclick="toggleSidebar()"
+                    style="background:transparent; border:1px solid var(--border-light); color:var(--accent); width:32px; height:32px; border-radius:4px; display:none;">☰</button>
+                <script>
+                    if (window.innerWidth <= 768) document.getElementById('btn-menu').style.display = 'flex';
+                    window.addEventListener('resize', () => {
+                        document.getElementById('btn-menu').style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+                    });
+                </script>
+
+                <div style="font-weight:900; font-size:12px; letter-spacing:0.1em; color:var(--accent);">FORK CASCADE
+                </div>
+
+                <div class="ring-container" id="ring-container">
+                    <div class="ring-bar" id="ring-bar"></div>
+                </div>
+
+                <div class="desktop-only" style="display:flex; gap:8px;">
+                    <button class="btn" id="btn-zen" onclick="toggleZenMode()">ZEN</button>
+                    <button class="btn" id="btn-play-desktop">▶ GHOST</button>
+                    <button class="btn" id="btn-reset-desktop">RESET</button>
+                </div>
+            </div>
+
+            <!-- Views -->
+            <div id="viz-container">
+                <div id="viz-scale-wrapper">
+                    <svg id="svg-layer"></svg>
+                    <div id="dilemma-header"
+                        style="width:100%; max-width:600px; background:var(--panel); border:1px solid var(--border); padding:20px; border-radius:4px; margin-bottom:40px; display:none; z-index:5;">
+                    </div>
+                    <div id="tree-root"
+                        style="display:flex; flex-direction:column; align-items:center; width:100%; position:relative; z-index:2;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reader View (Alternate) -->
+            <div id="reader-view"></div>
+
+            <!-- Zoom Controls -->
+            <div class="zoom-controls" id="zoom-controls">
+                <button class="zoom-btn" onclick="changeZoom(0.2)">+</button>
+                <button class="zoom-btn" onclick="changeZoom(-0.2)">−</button>
+                <button class="zoom-btn" style="font-size:12px; font-weight:bold;"
+                    onclick="toggleZenMode()">ZEN</button>
+            </div>
+
+            <!-- Bottom Nav -->
+            <nav class="bottom-nav">
+                <button class="nav-item" onclick="toggleSidebar()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                    </svg>
+                    <span>INDEX</span>
+                </button>
+
+                <button class="nav-item" id="btn-view-toggle" onclick="toggleViewMode()">
+                    <svg id="icon-view-tree" viewBox="0 0 24 24">
+                        <path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3z" />
+                    </svg>
+                    <span id="label-view-toggle">FOCUS</span>
+                </button>
+
+                <button class="nav-item" id="btn-play-mobile">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <span>PLAY</span>
+                </button>
+
+                <button class="nav-item" onclick="toggleInstrument()">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+                    </svg>
+                    <span>DATA</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- RIGHT/BOTTOM DRAWER: INSTRUMENT -->
+        <div class="instrument-panel" id="instrument-panel">
+            <div class="sidebar-header" style="justify-content:center; position:relative;">
+                <div
+                    style="width:40px; height:4px; background:var(--border-light); border-radius:2px; position:absolute; top:8px;">
+                </div>
+                <div class="sys-title" style="margin-top:10px;">MORAL GENOME</div>
+                <button class="mobile-toggle"
+                    style="position:absolute; right:16px; top:12px; width:30px; height:30px; border:none;"
+                    onclick="toggleInstrument()">✕</button>
+            </div>
+
+            <div style="padding: 24px; overflow-y: auto; flex: 1;">
+                <!-- Sliders -->
+                <div style="margin-bottom: 30px;">
+                    <div
+                        style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:10px; font-weight:bold;">
+                        <span style="color:var(--trackA)">PROTOCOL RIGIDITY</span>
+                        <span id="val-proto">50%</span>
+                    </div>
+                    <input type="range" id="slider-proto" min="0" max="100" value="50">
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <div
+                        style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:10px; font-weight:bold;">
+                        <span style="color:var(--trackB)">HUMAN COST TOLERANCE</span>
+                        <span id="val-risk">50%</span>
+                    </div>
+                    <input type="range" id="slider-risk" min="0" max="100" value="50">
+                </div>
+
+                <!-- Radar -->
+                <div
+                    style="background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px; height:200px; margin-bottom:20px;">
+                    <canvas id="radar" style="width:100%; height:100%;"></canvas>
+                </div>
+
+                <div id="genome-metrics" style="margin-top:16px; display:grid; grid-template-columns: 1fr; gap:12px;">
+                </div>
+
+                <button class="btn" style="width:100%; padding:16px; margin-top:24px;" id="btn-manual">OPEN SERVICE
+                    RECORD</button>
+                <button class="btn"
+                    style="width:100%; padding:16px; margin-top:12px; border-color:var(--text-muted); color:var(--text-muted);"
+                    id="btn-reset-mobile">RESET SIMULATION</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- OVERLAY: MANUAL -->
+    <div class="overlay" id="manual-overlay">
+        <div class="manual-page" id="manual-content"></div>
+    </div>
+
+    <script>
+        /* ------------------------------------------------------------------
+           DATA & STATE — Now loads from thick_data.json
+           ------------------------------------------------------------------ */
+        let SCENARIOS = [];
+
+        function transformThickData(thickData) {
+            return thickData.map(scenario => {
+                const nodes = (scenario.branches || []).map(branch => {
+                    let type = 'safe';
+                    if (branch.terminal_state) type = 'terminal';
+                    else if (branch.probability < 0.5) type = 'danger';
+                    return {
+                        id: branch.branch_id,
+                        label: branch.label || branch.branch_id,
+                        prob: branch.probability || 0.5,
+                        depth: branch.depth,
+                        meta: branch.immediate_consequence?.substring(0, 50) || branch.time_elapsed || '',
+                        type: type,
+                        branches: branch.branches || [],
+                        monologue: branch.thick_description?.internal_monologue || branch.thick_description?.what_he_says || '',
+                        thickData: branch.thick_description
+                    };
+                });
+                const root = scenario.root ? {
+                    id: scenario.root.branch_id || 'R0',
+                    label: scenario.root.label || scenario.title,
+                    prob: scenario.root.probability || 1.0,
+                    depth: 0,
+                    meta: scenario.root.timestamp || '',
+                    branches: scenario.root.branches || [],
+                    monologue: scenario.root.thick_description?.internal_monologue || scenario.root.thick_description?.setting || '',
+                    thickData: scenario.root.thick_description
+                } : { id: 'R0', label: scenario.title, prob: 1.0, depth: 0, meta: '', branches: [], monologue: '' };
+                return { id: scenario.scenario_id, title: scenario.title, root, nodes };
+            });
+        }
+
+        const FALLBACK_SCENARIOS = [
+            {
+                id: "SCN_089", title: "REACTOR CASCADE",
+                root: { id: "R0", label: "COOLANT VALVE FAILURE", prob: 1.0, depth: 0, meta: "SECTOR 7", branches: ["B1"], monologue: "Sensors spike." },
+                nodes: [{ id: "B1", label: "EMERGENCY VENT", prob: 0.6, meta: "12 CASUALTIES", type: "safe", branches: [] }]
+            }
+        ];
+
+        async function loadThickData() {
+            try {
+                const response = await fetch('thick_data.json');
+                const data = await response.json();
+                SCENARIOS = transformThickData(data.ALL_THICK_DATA || data);
+                console.log('[BON-04] Loaded', SCENARIOS.length, 'scenarios');
+            } catch (err) {
+                console.warn('[BON-04] Using fallback:', err);
+                SCENARIOS = FALLBACK_SCENARIOS;
+            }
+        }
+
+        const METRICS = ["authority", "logic", "empathy", "risk", "uncertainty"];
+
+        let state = {
+            currentScenario: 0,
+            zoom: 1.0,
+            viewMode: 'focus', // focus | map | reader
+            metrics: { authority: 2.5, logic: 2.5, empathy: 2.5, risk: 2.5, uncertainty: 2.5 },
+            mix: { protocol: 50, risk: 50 },
+            simulating: false,
+            history: [],
+            pan: { x: 0, y: 0 }, // For manual pan
+            foldedNodes: new Set(), // IDs of nodes that are folded
+            zenMode: false
+        };
+
+        /* ------------------------------------------------------------------
+           INIT
+           ------------------------------------------------------------------ */
+        async function init() {
+            await loadThickData();
+            renderSidebar();
+            loadScenario(0);
+            setupListeners();
+            setupTouchPanZoom();
+            window.addEventListener('resize', () => requestAnimationFrame(drawLines));
+        }
+
+        // ═══ CASCADE MAP ═══
+        let cascadeMapOpen = false;
+        let visitedBranches = new Set();
+        let focusModeActive = false;
+
+        function toggleFocusMode() {
+            focusModeActive = !focusModeActive;
+            if (focusModeActive) {
+                const content = document.getElementById('thick-panel')?.innerHTML || document.querySelector('.thick-panel')?.innerHTML || '';
+                alert('Focus mode: View thick content in clean overlay. (Full implementation pending thick-panel container)');
+            }
+        }
+
+        function toggleCascadeMap() {
+            cascadeMapOpen = !cascadeMapOpen;
+            document.getElementById('cascadeMap').classList.toggle('open', cascadeMapOpen);
+            if (cascadeMapOpen) renderCascadeMap();
+        }
+
+        function renderCascadeMap() {
+            const body = document.getElementById('cascadeMapBody');
+            const scn = SCENARIOS[state.currentScenario];
+            if (!scn) { body.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Select a scenario</div>'; return; }
+            visitedBranches.add(state.lastActiveNodeId || scn.root?.id || 'R0');
+            let html = '<div class="map-tree">' + renderMapNode(scn.root, scn, state.lastActiveNodeId || scn.root?.id, 0) + '</div>';
+            body.innerHTML = html;
+        }
+
+        function renderMapNode(node, scn, currentId, depth) {
+            if (!node) return '';
+            const nodeId = node.id || 'R0';
+            const isCurrent = nodeId === currentId, isVisited = visitedBranches.has(nodeId), isTerminal = !node.branches || node.branches.length === 0;
+            let cls = 'map-node'; if (isCurrent) cls += ' current'; else if (isVisited) cls += ' visited'; if (isTerminal && depth > 0) cls += ' terminal';
+            const icon = isTerminal && depth > 0 ? '🔚' : (node.branches?.length > 0 ? '⎇' : '○');
+            const prob = node.prob ? Math.round(node.prob * 100) + '%' : '';
+            const label = node.label || nodeId;
+            let html = `<div class="${cls}" onclick="jumpToNode('${nodeId}')" title="${label}">
+                <span class="map-node-icon">${icon}</span><span class="map-node-id">${nodeId}</span>
+                <span class="map-node-label">${label.length > 20 ? label.substring(0, 20) + '...' : label}</span>
+                ${prob ? `<span class="map-node-prob">${prob}</span>` : ''}${isCurrent ? '<span class="fork-badge">YOU</span>' : ''}
+            </div>`;
+            if (node.branches && node.branches.length > 0) {
+                html += '<div class="map-children">';
+                node.branches.forEach(branchId => { const child = scn.nodes?.find(n => n.id === branchId); if (child) html += renderMapNode(child, scn, currentId, depth + 1); });
+                html += '</div>';
+            }
+            return html;
+        }
+
+        function jumpToNode(nodeId) {
+            const scn = SCENARIOS[state.currentScenario]; if (!scn) return;
+            let targetNode = scn.root?.id === nodeId ? scn.root : scn.nodes?.find(n => n.id === nodeId);
+            if (targetNode) {
+                const el = document.getElementById(`node-${nodeId}`);
+                if (el) { activateNode(el, targetNode); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                visitedBranches.add(nodeId);
+                if (cascadeMapOpen) renderCascadeMap();
+            }
+        }
+
+        function loadScenario(index) {
+            state.currentScenario = index;
+            state.history = [];
+            state.metrics = { authority: 2.5, logic: 2.5, empathy: 2.5, risk: 2.5, uncertainty: 2.5 };
+            state.foldedNodes.clear();
+            document.getElementById('ring-bar').innerHTML = '';
+
+            const scn = SCENARIOS[index];
+
+            // Tree View
+            const root = document.getElementById('tree-root');
+            root.innerHTML = '';
+            renderNode(scn.root, root);
+            renderHeader(scn.root);
+
+            // Reader View
+            const reader = document.getElementById('reader-view');
+            reader.innerHTML = '';
+            addReaderEntry(scn.root);
+
+            updateInstrument();
+            document.getElementById('sidebar').classList.remove('open');
+
+            // Highlight sidebar
+            document.querySelectorAll('.list-item').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+        }
+
+        /* ------------------------------------------------------------------
+           VISUALIZATION
+           ------------------------------------------------------------------ */
+        function renderHeader(data) {
+            const header = document.getElementById('dilemma-header');
+            header.style.display = 'block';
+            header.innerHTML = `
+            <div style="font-size:10px; color:var(--accent); letter-spacing:0.2em; margin-bottom:6px; font-weight:900;">CURRENT VECTOR</div>
+            <div style="font-size:16px; font-weight:bold; color:#fff; margin-bottom:4px;">${data.label}</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">${data.meta || ""}</div>
+            ${data.monologue ? `<div style="font-style:italic; border-left:3px solid var(--accent); padding-left:12px; font-family:var(--font-serif); font-size:14px; color:#fff; line-height:1.5;">"${data.monologue}"</div>` : ''}
+        `;
+        }
+
+        function renderNode(data, parentContainer) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'node-wrapper';
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.margin = '0 10px';
+            wrapper.id = `wrapper-${data.id}`;
+
+            const el = document.createElement('div');
+            el.className = `tree-node ${data.type ? 'node-' + data.type : 'node-root'}`;
+            el.id = `node-${data.id}`;
+            el.dataset.label = data.label;
+
+            el.innerHTML = `
+        <div class="node-header">
+          <span>${data.id}</span>
+          <span>${(data.prob * 100).toFixed(0)}%</span>
+        </div>
+        <div class="node-label">${data.label}</div>
+        ${data.meta ? `<div class="node-meta">▷ ${data.meta}</div>` : ''}
+      `;
+
+            el.onclick = (e) => { e.stopPropagation(); activateNode(el, data); };
+
+            wrapper.appendChild(el);
+
+            if (data.branches && data.branches.length > 0) {
+                // Fold button
+                const foldBtn = document.createElement('div');
+                foldBtn.className = 'node-fold-btn';
+                foldBtn.innerHTML = state.foldedNodes.has(data.id) ? '+' : '−';
+                foldBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleFold(data.id);
+                };
+                el.appendChild(foldBtn);
+
+                const childrenDiv = document.createElement('div');
+                childrenDiv.className = 'children-row';
+                childrenDiv.id = `children-${data.id}`;
+                childrenDiv.style.display = 'flex';
+                childrenDiv.style.marginTop = '50px';
+                childrenDiv.style.gap = '20px';
+
+                if (state.foldedNodes.has(data.id)) {
+                    childrenDiv.classList.add('hidden');
+                }
+
+                const scn = SCENARIOS[state.currentScenario];
+                data.branches.forEach(branchId => {
+                    const branchData = scn.nodes.find(n => n.id === branchId);
+                    if (branchData) renderNode(branchData, childrenDiv);
+                });
+                wrapper.appendChild(childrenDiv);
+            }
+            parentContainer.appendChild(wrapper);
+            requestAnimationFrame(drawLines);
+        }
+
+        function toggleFold(nodeId) {
+            if (state.foldedNodes.has(nodeId)) {
+                state.foldedNodes.delete(nodeId);
+            } else {
+                state.foldedNodes.add(nodeId);
+            }
+
+            // Re-render whole tree to ensure clean DOM state (easiest for lines)
+            // Or just toggle classes if performance allows. For lines, re-render is safer.
+            const scn = SCENARIOS[state.currentScenario];
+            const root = document.getElementById('tree-root');
+            root.innerHTML = '';
+            renderNode(scn.root, root);
+            requestAnimationFrame(drawLines);
+        }
+
+        function addReaderEntry(data) {
+            const reader = document.getElementById('reader-view');
+            const entry = document.createElement('div');
+            entry.className = 'reader-entry';
+            entry.id = `reader-${data.id}`;
+            entry.innerHTML = `
+            <div class="reader-label">${data.label}</div>
+            <div class="reader-meta">${data.meta || ""}</div>
+            ${data.monologue ? `<div class="reader-text">"${data.monologue}"</div>` : ''}
+        `;
+            reader.appendChild(entry);
+        }
+
+        function activateNode(el, data) {
+            document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+
+            // Update Reader Highlight
+            document.querySelectorAll('.reader-entry').forEach(n => n.classList.remove('active'));
+            const rEl = document.getElementById(`reader-${data.id}`);
+            if (rEl) rEl.classList.add('active');
+            else addReaderEntry(data);
+
+            updateMetrics(data);
+            addRingNode(data);
+
+            if (state.viewMode !== 'map') {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           LOGIC & INSTRUMENTS
+           ------------------------------------------------------------------ */
+        function updateMetrics(node) {
+            const txt = (node.label + " " + (node.meta || "")).toLowerCase();
+            const m = state.metrics;
+            if (txt.includes("report") || txt.includes("purge")) { m.authority += 0.5; m.risk -= 0.2; }
+            if (txt.includes("vent") || txt.includes("wipe")) { m.logic += 0.5; m.empathy -= 0.4; }
+            if (txt.includes("hold") || txt.includes("patch")) { m.risk += 0.6; m.authority -= 0.3; }
+            if (txt.includes("fail") || txt.includes("dead")) { m.uncertainty += 0.8; }
+            for (let k in m) m[k] = Math.max(0, Math.min(5, m[k]));
+            updateInstrument();
+        }
+
+        function addRingNode(data) {
+            const bar = document.getElementById('ring-bar');
+            if (!bar) return;
+            const node = document.createElement('div');
+            node.className = 'ring-node active';
+            bar.appendChild(node);
+            requestAnimationFrame(() => node.style.transform = 'scale(1)');
+            bar.scrollLeft = bar.scrollWidth;
+        }
+
+        function updateInstrument() {
+            const container = document.getElementById('genome-metrics');
+            if (container) {
+                container.innerHTML = METRICS.map(k => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:8px; border-radius:4px;">
+              <span style="color:var(--text-muted); font-size:9px; letter-spacing:1px; text-transform:uppercase;">${k.substring(0, 4)}</span>
+              <div style="flex:1; height:4px; background:#333; margin:0 10px; border-radius:2px; overflow:hidden;">
+                <div style="width:${(state.metrics[k] / 5) * 100}%; height:100%; background:var(--text);"></div>
+              </div>
+              <span style="font-weight:bold;">${state.metrics[k].toFixed(1)}</span>
+            </div>
+          `).join('');
+            }
+            drawRadar();
+        }
+
+        function drawRadar() {
+            const canvas = document.getElementById('radar');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width === 0) return;
+
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const r = Math.min(cx, cy) - 20;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let i = 1; i <= 4; i++) { ctx.beginPath(); ctx.arc(cx, cy, r * (i / 4), 0, Math.PI * 2); ctx.stroke(); }
+
+            ctx.beginPath();
+            const step = (Math.PI * 2) / METRICS.length;
+            METRICS.forEach((k, i) => {
+                const v = state.metrics[k] / 5;
+                const ang = i * step - Math.PI / 2;
+                const x = cx + Math.cos(ang) * (r * v);
+                const y = cy + Math.sin(ang) * (r * v);
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255, 61, 78, 0.2)';
+            ctx.fill();
+            ctx.strokeStyle = '#ff3d4e';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawLines() {
+            const svg = document.getElementById('svg-layer');
+            const wrapper = document.getElementById('viz-scale-wrapper');
+            if (!svg || !wrapper) return;
+
+            // Update dimensions to match scroll content
+            const contentWidth = wrapper.scrollWidth;
+            const contentHeight = wrapper.scrollHeight;
+
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            svg.innerHTML = '';
+
+            const wrapperRect = wrapper.getBoundingClientRect();
+            const nodeWrappers = document.querySelectorAll('.node-wrapper');
+
+            nodeWrappers.forEach(w => {
+                const parent = w.children[0];
+                const childrenRow = w.querySelector('.children-row');
+                // Check if visible
+                if (parent && childrenRow && !childrenRow.classList.contains('hidden')) {
+                    const pRect = parent.getBoundingClientRect();
+                    // Calculate coords relative to the scaled wrapper context
+                    const pX = (pRect.left - wrapperRect.left + pRect.width / 2) / state.zoom;
+                    const pY = (pRect.top - wrapperRect.top + pRect.height) / state.zoom;
+
+                    Array.from(childrenRow.children).forEach(cw => {
+                        const child = cw.children[0];
+                        const cRect = child.getBoundingClientRect();
+                        const cX = (cRect.left - wrapperRect.left + cRect.width / 2) / state.zoom;
+                        const cY = (cRect.top - wrapperRect.top) / state.zoom;
+
+                        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        const midY = pY + (cY - pY) / 2;
+                        const d = `M ${pX} ${pY} C ${pX} ${midY}, ${cX} ${midY}, ${cX} ${cY}`;
+                        path.setAttribute("d", d);
+                        path.setAttribute("fill", "none");
+                        path.setAttribute("stroke", "#333");
+                        path.setAttribute("stroke-width", "2");
+                        svg.appendChild(path);
+                    });
+                }
+            });
+        }
+
+        /* ------------------------------------------------------------------
+           TOUCH PAN & ZOOM (Mobile Heuristics)
+           ------------------------------------------------------------------ */
+        function setupTouchPanZoom() {
+            const container = document.getElementById('viz-container');
+            const wrapper = document.getElementById('viz-scale-wrapper');
+            let initialDistance = 0;
+            let initialZoom = 1;
+
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    initialDistance = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    initialZoom = state.zoom;
+                }
+            });
+
+            container.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2) {
+                    const dist = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    const delta = dist - initialDistance;
+                    // Simple linear scaling for smoothness
+                    const newZoom = Math.max(0.2, Math.min(2.5, initialZoom + (delta * 0.005)));
+
+                    // Update state but use requestAnimationFrame for draw
+                    state.zoom = newZoom;
+                    wrapper.style.transform = `scale(${state.zoom})`;
+
+                    // Semantic zoom trigger
+                    if (state.zoom < 0.6) wrapper.classList.add('zoomed-out');
+                    else wrapper.classList.remove('zoomed-out');
+
+                    e.preventDefault(); // Prevent native pinch-zoom
+                }
+            });
+
+            container.addEventListener('touchend', () => {
+                requestAnimationFrame(drawLines);
+            });
+        }
+
+        /* ------------------------------------------------------------------
+           CONTROLS & VIEWS
+           ------------------------------------------------------------------ */
+        const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+
+        function setupListeners() {
+            const pSlider = document.getElementById('slider-proto');
+            if (pSlider) pSlider.oninput = (e) => {
+                state.mix.protocol = parseInt(e.target.value);
+                document.getElementById('val-proto').innerText = state.mix.protocol + "%";
+                filterTree();
+            };
+            const rSlider = document.getElementById('slider-risk');
+            if (rSlider) rSlider.oninput = (e) => {
+                state.mix.risk = parseInt(e.target.value);
+                document.getElementById('val-risk').innerText = state.mix.risk + "%";
+                filterTree();
+            };
+
+            bind('btn-play-desktop', () => toggleSim('btn-play-desktop'));
+            bind('btn-reset-desktop', resetSim);
+            bind('btn-play-mobile', () => toggleSim('btn-play-mobile'));
+            bind('btn-reset-mobile', resetSim);
+
+            bind('btn-manual', openManual);
+            bind('manual-overlay', (e) => {
+                if (e.target.id === 'manual-overlay') e.target.classList.remove('active');
+            });
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        function toggleInstrument() { document.getElementById('instrument-panel').classList.toggle('open'); }
+        function toggleRingExpand() { document.querySelector('.top-bar').classList.toggle('collapsed'); }
+        function toggleZenMode() {
+            document.body.classList.toggle('zen-mode');
+            state.zenMode = !state.zenMode;
+        }
+
+        // VIEW MODES
+        function toggleViewMode() {
+            const modes = ['focus', 'map', 'reader'];
+            const currentIdx = modes.indexOf(state.viewMode);
+            const next = modes[(currentIdx + 1) % modes.length];
+            setViewMode(next);
+        }
+
+        function setViewMode(mode) {
+            state.viewMode = mode;
+            const btnText = document.getElementById('label-view-toggle');
+            const viz = document.getElementById('viz-container');
+            const reader = document.getElementById('reader-view');
+            const wrapper = document.getElementById('viz-scale-wrapper');
+            const zoomControls = document.getElementById('zoom-controls');
+            const icon = document.getElementById('btn-view-toggle').querySelector('svg');
+
+            // Reset
+            viz.style.display = 'none';
+            reader.style.display = 'none';
+            wrapper.classList.remove('zoomed-out');
+            zoomControls.style.display = 'flex';
+
+            if (mode === 'focus') {
+                btnText.innerText = 'FOCUS';
+                viz.style.display = 'flex';
+                state.zoom = 1.0;
+                wrapper.style.transform = `scale(1)`;
+                icon.innerHTML = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>';
+            } else if (mode === 'map') {
+                btnText.innerText = 'MAP';
+                viz.style.display = 'flex';
+                state.zoom = 0.4;
+                wrapper.style.transform = `scale(0.4)`;
+                wrapper.classList.add('zoomed-out'); // SEMANTIC ZOOM
+                icon.innerHTML = '<path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>';
+            } else if (mode === 'reader') {
+                btnText.innerText = 'READER';
+                reader.style.display = 'flex';
+                zoomControls.style.display = 'none';
+                icon.innerHTML = '<path d="M14 17H4v2h10v-2zm6-8H4v2h16V9zM4 15h16v-2H4v2zM4 5v2h16V5H4z"/>';
+            }
+
+            requestAnimationFrame(drawLines);
+        }
+
+        function changeZoom(delta) {
+            if (state.viewMode === 'reader') return;
+            state.zoom = Math.max(0.2, Math.min(2.0, state.zoom + delta));
+
+            const wrapper = document.getElementById('viz-scale-wrapper');
+            wrapper.style.transform = `scale(${state.zoom})`;
+
+            // Auto-switch semantic mode based on zoom level
+            if (state.zoom < 0.6) {
+                wrapper.classList.add('zoomed-out');
+                if (state.viewMode !== 'map') { state.viewMode = 'map'; document.getElementById('label-view-toggle').innerText = 'MAP'; }
+            } else {
+                wrapper.classList.remove('zoomed-out');
+                if (state.viewMode !== 'focus') { state.viewMode = 'focus'; document.getElementById('label-view-toggle').innerText = 'FOCUS'; }
+            }
+            // Defer redraw to ensure layout settles
+            setTimeout(drawLines, 100);
+        }
+
+        function filterTree() {
+            const p = state.mix.protocol;
+            const r = state.mix.risk;
+            document.querySelectorAll('.tree-node').forEach(el => {
+                const txt = el.dataset.label || "";
+                let dim = false;
+                if (p > 70 && (txt.includes("HOLD") || txt.includes("PATCH"))) dim = true;
+                if (r > 70 && (txt.includes("VENT") || txt.includes("PURGE"))) dim = true;
+                dim ? el.classList.add('dimmed') : el.classList.remove('dimmed');
+            });
+        }
+
+        function resetSim() {
+            if (confirm("RESET SIMULATION?")) { loadScenario(state.currentScenario); }
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('scenario-list');
+            if (list) {
+                list.innerHTML = SCENARIOS.map((s, i) => `
+            <div class="list-item" onclick="loadScenario(${i})">
+              <strong>${s.title}</strong>
+              <div class="meta">${s.root.meta}</div>
+            </div>
+          `).join('');
+            }
+        }
+
+        let simInterval;
+        const toggleSim = (btnId) => {
+            const btn = document.getElementById(btnId);
+            if (state.simulating) {
+                clearInterval(simInterval);
+                state.simulating = false;
+                if (btnId.includes('desktop')) btn.innerHTML = "▶ GHOST";
+                else { btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span>PLAY</span>`; btn.classList.remove('active'); }
+            } else {
+                state.simulating = true;
+                if (btnId.includes('desktop')) btn.innerHTML = "❚❚ STOP";
+                else { btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg><span>STOP</span>`; btn.classList.add('active'); }
+
+                const nodes = document.querySelectorAll('.tree-node');
+                simInterval = setInterval(() => {
+                    if (nodes.length > 0) {
+                        const rand = nodes[Math.floor(Math.random() * nodes.length)];
+                        activateNode(rand, { label: rand.dataset.label, meta: "GHOST", id: rand.id.replace('node-', '') });
+                    }
+                }, 1200);
+            }
+        };
+
+        function openManual() {
+            const ov = document.getElementById('manual-overlay');
+            const content = document.getElementById('manual-content');
+            ov.classList.add('active');
+            content.innerHTML = `
+        <div style="padding:40px; color:#000;">
+          <h1 style="font-size:20px; font-weight:900; border-bottom:4px solid #000; padding-bottom:10px;">PRACTITIONER RECORD</h1>
+          <div style="margin-top:20px;">${METRICS.map(k => `<div style="display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:8px 0;"><span>${k.toUpperCase()}</span><b>${state.metrics[k].toFixed(1)}</b></div>`).join('')}</div>
+          <button onclick="document.getElementById('manual-overlay').classList.remove('active')" style="width:100%; padding:15px; margin-top:30px; background:#000; color:#fff; border:none; font-weight:bold;">CLOSE</button>
+        </div>
+      `;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

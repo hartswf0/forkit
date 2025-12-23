@@ -68,6 +68,8 @@
 
     <canvas id="gameCanvas"></canvas>
 
+    <script src="thick_data_merged.js"></script>
+
     <script>
         /**
          * ETHNOME: CANVAS EDITION (Calm + Audio)
@@ -196,7 +198,7 @@
         };
 
         // --- DATA: THE SCENARIOS ---
-        const scenarios = [
+        let scenarios = [
             {
                 id: "001",
                 context: "ST. HESPER JUNCTION",
@@ -205,38 +207,50 @@
                 optB: "INACTION: STAY (End the Teacher)",
                 colorA: [0, 240, 255],
                 colorB: [255, 0, 85]
-            },
-            {
-                id: "002",
-                context: "THE ALGORITHMIC WARD",
-                desc: "Predictive model vs. human reflex. AI sees 99% fatality. You see a finger twitch.",
-                optA: "ACTION: OVERRIDE (Trust Pulse)",
-                optB: "INACTION: COMPLY (Trust Data)",
-                colorA: [0, 255, 100],
-                colorB: [255, 100, 0]
-            },
-            {
-                id: "003",
-                context: "ARCHIVE PROTOCOL",
-                desc: "Data corruption imminent. Sector A: The lost poetry of Sappho. Sector B: The cure for a forgotten plague.",
-                optA: "ACTION: SAVE ART",
-                optB: "ACTION: SAVE SCIENCE",
-                colorA: [200, 200, 255],
-                colorB: [100, 255, 100]
-            },
-            {
-                id: "004",
-                context: "THE SILENT CRASH",
-                desc: "Autonomous vehicle logic. Hit barrier (passenger dies, Nobel laureate). Swerve (pedestrians die, strangers).",
-                optA: "ACTION: PROTECT CROWD",
-                optB: "INACTION: PROTECT PASSENGER",
-                colorA: [255, 255, 0],
-                colorB: [255, 0, 255]
             }
         ];
 
+        // Adapter for Thick Data
+        function loadThickData() {
+            if (typeof ALL_THICK_DATA === 'undefined') return;
+
+            const thickScenarios = ALL_THICK_DATA.map(d => {
+                // Find first decision point (branches off root)
+                if (!d.root || !d.root.branches || d.root.branches.length < 2) return null;
+
+                // For simplicity in this game engine, we take the Root context and the first two branches as A/B options
+                // We resolve the branch IDs to actual nodes if they are strings
+                let b1 = d.root.branches[0];
+                let b2 = d.root.branches[1];
+
+                // Resolve string IDs to objects if needed
+                if (typeof b1 === 'string' && d.branches) b1 = d.branches.find(x => x.branch_id === b1);
+                if (typeof b2 === 'string' && d.branches) b2 = d.branches.find(x => x.branch_id === b2);
+
+                if (!b1 || !b2) return null;
+
+                return {
+                    id: d.scenario_id,
+                    context: d.title.toUpperCase(),
+                    desc: (d.root.thick_description?.setting || d.root.label || "A complex moral situation.") + " " + (d.root.thick_description?.internal_monologue || ""),
+                    optA: `A: ${b1.label || 'OPTION A'}`,
+                    optB: `B: ${b2.label || 'OPTION B'}`,
+                    colorA: [0, 240, 255], // Cyan
+                    colorB: [255, 0, 85]   // Magenta
+                };
+            }).filter(s => s !== null);
+
+            if (thickScenarios.length > 0) {
+                scenarios = thickScenarios;
+                console.log("Loaded Thick Data into Ethnome:", scenarios.length);
+            }
+        }
+
         function generateScenario(idx) {
+            // Loop through fixed scenarios first
             if (idx < scenarios.length) return scenarios[idx];
+
+            // Then procedural backup
             const themes = ["Memory", "Silence", "Drift", "Gravity", "Echo"];
             const t = themes[idx % themes.length];
             return {
@@ -305,6 +319,9 @@
         }, { passive: false });
 
         document.getElementById('initBtn').addEventListener('click', () => {
+            // Load Data first
+            if (typeof loadThickData === 'function') loadThickData();
+
             AudioEngine.init();
             document.getElementById('start-overlay').classList.add('hidden');
         });

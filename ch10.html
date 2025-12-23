@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ETHNOME: THE FORK</title>
+    <style>
+        body {
+            margin: 0;
+            background: #020205;
+            overflow: hidden;
+            color: #e8e8e8;
+            font-family: 'Courier New', monospace;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 2, 6, 0.98);
+            z-index: 100;
+            transition: opacity 0.8s;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn {
+            padding: 20px 40px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid #00FFFF;
+            color: #00FFFF;
+            font-family: inherit;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            letter-spacing: 4px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            margin-top: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .btn:hover {
+            background: #00FFFF;
+            color: #000;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.6);
+        }
+
+        .hud-btn {
+            position: fixed;
+            top: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00FFFF;
+            color: #00FFFF;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            padding: 12px 20px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        .hud-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .hud-btn.active {
+            background: #00FFFF;
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+        }
+
+        #btn-download {
+            right: 30px;
+        }
+
+        #btn-ticket {
+            right: 200px;
+        }
+
+        #btn-auto {
+            right: 350px;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #error-log {
+            color: #ff0055;
+            font-size: 12px;
+            margin-top: 20px;
+            max-width: 80%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Cinematic Vignette & Scanline - Reduced Interference */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
+            /* Much lighter scanline */
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* High Contrast Text Classes */
+        .legible {
+            text-shadow: 2px 2px 4px #000;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 2px 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="overlay">
+        <div style="text-align:center;">
+            <h1
+                style="color:#fff; letter-spacing:12px; font-weight:100; margin-bottom:10px; font-size: 48px; text-shadow: 0 0 30px rgba(0,255,255,0.6);">
+                ETHNOME</h1>
+            <div style="color:#00bcd4; font-size:14px; letter-spacing: 4px; text-transform: uppercase;">Cybernetic
+                Ethics Engine v3.2</div>
+            <div style="color:#666; font-size:10px; margin-top:10px;">AUDIO REQUIRED FOR NEURAL SYNC</div>
+            <button class="btn" id="startBtn">INITIALIZE SYSTEM</button>
+            <div id="error-log"></div>
+        </div>
+    </div>
+
+    <button id="btn-auto" class="hud-btn">AUTO-PILOT [S]</button>
+    <button id="btn-ticket" class="hud-btn hidden">PASSPORT</button>
+    <button id="btn-download" class="hud-btn hidden">EXPORT DATA</button>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="thick_data_merged.js"></script>
+    <script>
+        /**
+         * ETHNOME: THE FORK (Voice & Vision Edition)
+         * - Native TTS Integration
+         * - Dynamic Procedural "Video" Textures
+         * - Deep Drone Audio
+         */
+
+        window.onerror = function (message, source, lineno, colno, error) {
+            document.getElementById('error-log').innerText = "ERR: " + message;
+            console.error(error);
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- SPEECH ENGINE (TTS) ---
+        const Voice = {
+            enabled: true,
+            speaking: false,
+
+            speak(text, priority = false) {
+                if (!this.enabled || !window.speechSynthesis) return;
+                if (this.speaking && !priority) return;
+
+                window.speechSynthesis.cancel();
+
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.rate = 1.1;
+                utter.pitch = 0.9;
+                utter.volume = 0.8;
+
+                const voices = window.speechSynthesis.getVoices();
+                const sysVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha'));
+                if (sysVoice) utter.voice = sysVoice;
+
+                utter.onstart = () => { this.speaking = true; };
+                utter.onend = () => { this.speaking = false; };
+
+                window.speechSynthesis.speak(utter);
+            }
+        };
+
+        // --- AUDIO ENGINE ---
+        const Audio = {
+            ctx: null,
+            master: null,
+            nodes: [],
+
+            init() {
+                try {
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                    this.master = this.ctx.createGain();
+                    this.master.gain.value = 0.5; // Louder base volume
+                    this.master.connect(this.ctx.destination);
+
+                    // Deep Industrial Drone (Continuous)
+                    this.drone(55, 0.3); // A1 (Sub)
+                    this.drone(110.00, 0.15); // A2
+                    this.drone(164.81, 0.05); // E3
+                    this.drone(220.00, 0.02); // A3
+
+                    console.log("Audio System Online");
+                } catch (e) {
+                    console.warn("Audio init failed:", e);
+                }
+            },
+
+            resume() {
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+
+            drone(freq, vol) {
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.value = freq;
+                    osc.type = 'sawtooth'; // Rougher, more industrial sound
+
+                    // Lowpass filter to muffle the sawtooth
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 200;
+
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.gain.value = vol;
+                    gain.connect(this.master);
+                    osc.start();
+
+                    this.nodes.push({ osc, gain, filter, base: freq });
+                } catch (e) { }
+            },
+
+            modulate(speed) {
+                if (!this.ctx) return;
+                const time = this.ctx.currentTime;
+                const safeSpeed = (typeof speed === 'number' && Number.isFinite(speed)) ? speed : 0;
+
+                this.nodes.forEach((n, i) => {
+                    try {
+                        // Engine RPM effect
+                        const wobble = Math.sin(time * 2 + i) * (safeSpeed * 0.5);
+                        n.filter.frequency.setTargetAtTime(200 + (safeSpeed * 20) + wobble, time, 0.1);
+                    } catch (e) { }
+                });
+            },
+
+            tick(isA) {
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.setValueAtTime(isA ? 880 : 660, this.ctx.currentTime);
+                    osc.type = "square";
+                    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+                    osc.connect(gain);
+                    gain.connect(this.master);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.12);
+                } catch (e) { }
+            },
+
+            chord(isA) {
+                if (!this.ctx) return;
+                try {
+                    const root = isA ? 440 : 277.18;
+                    const intervals = isA ? [1, 1.25, 1.5] : [1, 1.2, 1.5];
+
+                    intervals.forEach((ratio) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.frequency.value = root * ratio;
+                        osc.type = 'triangle';
+
+                        gain.gain.setValueAtTime(0, this.ctx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0.1, this.ctx.currentTime + 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 3);
+
+                        osc.connect(gain);
+                        gain.connect(this.master);
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + 3.1);
+                    });
+                } catch (e) { }
+            }
+        };
+
+        // --- IMAGE LOADER ---
+        const ImageLoader = {
+            cache: {},
+            load(url) {
+                if (this.cache[url]) return this.cache[url];
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.src = url;
+                img.onerror = () => { img.isBroken = true; };
+                this.cache[url] = img;
+                return img;
+            }
+        };
+
+        // --- DATA: THE FORK CORPUS ---
+        let CORPUS = [];
+
+        function initData() {
+            if (typeof ALL_THICK_DATA !== 'undefined') {
+                CORPUS = ALL_THICK_DATA.map((scenario, i) => {
+                    const bMap = {};
+                    if (scenario.branches) scenario.branches.forEach(b => bMap[b.branch_id] = b);
+
+                    let branchA = { label: "Option A", thick_description: { internal_monologue: "..." } };
+                    let branchB = { label: "Option B", thick_description: { internal_monologue: "..." } };
+
+                    if (scenario.root.branches && scenario.root.branches.length >= 2) {
+                        const idA = scenario.root.branches[0];
+                        const idB = scenario.root.branches[1];
+                        if (bMap[idA]) branchA = bMap[idA];
+                        if (bMap[idB]) branchB = bMap[idB];
+                    }
+
+                    return {
+                        id: scenario.scenario_id,
+                        napkin: scenario.title,
+                        heuristicA: branchA.label,
+                        heuristicB: branchB.label,
+                        // Use placeholder images that look decent
+                        imgUrl: `https://picsum.photos/seed/${scenario.scenario_id}/300/300?grayscale`,
+                        thick: {
+                            setting: scenario.root.thick_description.setting || "Unknown Setting",
+                            main: branchA.thick_description.what_he_sees || branchA.thick_description.internal_monologue || "Analyzing A...",
+                            spur: branchB.thick_description.what_he_sees || branchB.thick_description.internal_monologue || "Analyzing B...",
+                            sensory: scenario.root.thick_description.sensory ?
+                                (typeof scenario.root.thick_description.sensory === 'string' ? scenario.root.thick_description.sensory : scenario.root.thick_description.sensory.sight)
+                                : "No sensory data."
+                        }
+                    };
+                });
+            } else {
+                CORPUS = [
+                    {
+                        id: "000",
+                        napkin: "DATA LINK ERROR",
+                        heuristicA: "RETRY",
+                        heuristicB: "ABORT",
+                        imgUrl: "",
+                        thick: {
+                            setting: "SYSTEM FAILURE",
+                            main: "Cannot load thick_data_merged.js",
+                            spur: "Check file path",
+                            sensory: "Static noise."
+                        }
+                    }
+                ];
+            }
+        }
+        initData();
+
+        const Gen = {
+            make() { return "Procedural Entity"; }
+        };
+
+        const config = {
+            colors: {
+                bg: '#050508',
+                strandA: '#00ffff', // Cyan
+                strandB: '#ff00ff', // Magenta
+                rail: '#444455',
+                text: '#ffffff',
+                highlight: '#ffffff'
+            },
+            physics: {
+                baseSpeed: 2.0,
+                dampening: 0.08
+            }
+        };
+
+        const state = {
+            frame: 0,
+            cameraZ: 0,
+            speed: config.physics.baseSpeed,
+            trackPos: -1,
+            targetTrackPos: -1,
+            nodes: [],
+            history: [],
+            showTicket: false,
+            pulse: 0,
+            rotation: 0,
+            autoPilot: false,
+            aiThought: ""
+        };
+
+        // --- VISUAL GENERATOR (Dynamic Canvas Textures) ---
+        function generateDynamicTexture(seed, colorA, colorB) {
+            return function (ctx, x, y, size, time) {
+                ctx.save();
+                ctx.translate(x + size / 2, y + size / 2);
+                ctx.beginPath();
+                ctx.strokeStyle = (seed % 2 === 0) ? colorA : colorB;
+                ctx.lineWidth = 2;
+
+                const spikes = 8 + (seed % 8);
+                for (let i = 0; i <= spikes; i++) {
+                    const angle = (i / spikes) * Math.PI * 2 + (time * 0.001);
+                    const r = (size / 3) + Math.sin(time * 0.005 + (i * seed)) * (size / 6);
+                    const px = Math.cos(angle) * r;
+                    const py = Math.sin(angle) * r;
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+                ctx.stroke();
+
+                ctx.fillStyle = "#fff";
+                for (let j = 0; j < 5; j++) {
+                    if (Math.sin(time * 0.01 * j + seed) > 0.5) {
+                        ctx.fillRect((Math.random() - 0.5) * size / 2, (Math.random() - 0.5) * size / 2, 2, 2);
+                    }
+                }
+                ctx.restore();
+            }
+        }
+
+        // --- LOGIC ---
+        function createNode(z, idx) {
+            let data;
+            let renderFunc = null;
+            let loadedImg = null;
+
+            if (idx < CORPUS.length) {
+                data = CORPUS[idx];
+                if (data.imgUrl) {
+                    loadedImg = ImageLoader.load(data.imgUrl);
+                }
+            } else {
+                const mainP = Gen.make();
+                const spurP = Gen.make();
+                data = {
+                    id: `GEN-${idx}`,
+                    napkin: "Procedural",
+                    heuristicA: "Save " + mainP.split(" ").pop(),
+                    heuristicB: "Save " + spurP.split(" ").pop(),
+                    thick: {
+                        setting: `Iteration ${idx}. The simulation extends.`,
+                        main: mainP,
+                        spur: spurP,
+                        sensory: "Static. The hum of the generator."
+                    }
+                };
+            }
+
+            // Default render function if image not ready
+            renderFunc = generateDynamicTexture(idx, config.colors.strandA, config.colors.strandB);
+
+            return {
+                z: z,
+                id: data.id,
+                data: data,
+                resolved: false,
+                choice: null,
+                renderImg: renderFunc,
+                loadedImg: loadedImg
+            };
+        }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Populate initial nodes
+        for (let i = 1; i < 50; i++) state.nodes.push(createNode(i * 500, i - 1));
+
+        // --- RENDER ---
+        function project(x, y, z) {
+            const fov = 500;
+            const scale = fov / (fov + (z - state.cameraZ));
+            const x2d = x * scale + canvas.width / 2;
+            const y2d = y * scale + canvas.height / 2;
+            return { x: x2d, y: y2d, scale: scale };
+        }
+
+        function draw() {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // Background
+            const grad = ctx.createRadialGradient(cx, cy, 50, cx, cy, canvas.height);
+            grad.addColorStop(0, '#1a1a2e');
+            grad.addColorStop(1, '#050508');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (state.showTicket) {
+                drawTicket(cx, cy);
+                return;
+            }
+
+            const drawDist = 2500;
+            const trainZ = 200;
+
+            const startZ = Math.floor((state.cameraZ + drawDist) / 20) * 20;
+            const endZ = state.cameraZ - 200;
+
+            for (let z = startZ; z > endZ; z -= 20) {
+                const localZ = z - state.cameraZ;
+                const scale = 500 / (500 + localZ);
+                if (scale < 0.01) continue;
+
+                const node = state.nodes.find(n => Math.abs(n.z - z) < 10);
+
+                const twist = z * 0.004 + state.rotation;
+                const rad = 160;
+
+                const ax = Math.cos(twist) * rad;
+                const ay = Math.sin(twist) * rad;
+                const bx = Math.cos(twist + Math.PI) * rad;
+                const by = Math.sin(twist + Math.PI) * rad;
+
+                const pA = project(ax, ay, z);
+                const pB = project(bx, by, z);
+
+                let cA = '#333';
+                let cB = '#333';
+                let alpha = 0.3;
+                let isEncoded = false;
+
+                if (localZ < trainZ) {
+                    const prevNode = state.nodes.find(n => n.z < z + 200 && n.z > z - 600 && n.resolved);
+                    if (prevNode) {
+                        isEncoded = true;
+                        alpha = 1.0;
+                        if (prevNode.choice === 'A') { cA = config.colors.strandA; cB = '#222'; }
+                        else { cA = '#222'; cB = config.colors.strandB; }
+                    }
+                } else {
+                    cA = config.colors.strandA;
+                    cB = config.colors.strandB;
+                    if (state.targetTrackPos > 0.5) cA = '#222';
+                    if (state.targetTrackPos < -0.5) cB = '#222';
+                }
+
+                if (node) {
+                    ctx.strokeStyle = isEncoded ? '#fff' : '#555';
+                    ctx.lineWidth = (isEncoded ? 4 : 2) * scale;
+                    ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.stroke();
+
+                    // Draw Content (Image or ProcTex)
+                    const sz = 120 * scale;
+                    const imgX = (pA.x + pB.x) / 2 - sz / 2;
+                    const imgY = (pA.y + pB.y) / 2 - sz / 2;
+
+                    // Check if image is loaded AND valid (has width)
+                    if (node.loadedImg && node.loadedImg.complete && node.loadedImg.naturalWidth > 0) {
+                        // Draw real image inside
+                        ctx.save();
+                        ctx.globalAlpha = 0.9;
+
+                        // Circular Clip
+                        ctx.beginPath();
+                        ctx.arc((pA.x + pB.x) / 2, (pA.y + pB.y) / 2, sz / 2, 0, Math.PI * 2);
+                        ctx.closePath();
+                        ctx.clip();
+
+                        ctx.drawImage(node.loadedImg, imgX, imgY, sz, sz);
+                        ctx.restore();
+
+                        // Border
+                        ctx.strokeStyle = node.resolved ? '#fff' : '#444';
+                        ctx.lineWidth = 2 * scale;
+                        ctx.beginPath();
+                        ctx.arc((pA.x + pB.x) / 2, (pA.y + pB.y) / 2, sz / 2, 0, Math.PI * 2);
+                        ctx.stroke();
+
+                    } else if (node.renderImg) {
+                        // Fallback to procedural generation if image is loading or broken
+                        node.renderImg(ctx, imgX, imgY, sz, Date.now());
+                    }
+
+                    // --- TEXT LABELS (Dynamic Outside) ---
+                    if (!node.resolved && localZ > trainZ && localZ < 1500) {
+                        const opacity = Math.min(1, (1500 - localZ) / 500);
+                        ctx.globalAlpha = opacity;
+
+                        const fontSize = 16 * scale;
+                        ctx.font = `bold ${fontSize}px Courier New`;
+
+                        // Determine layout direction based on screen position
+                        // pA is Track A (Cyan). pB is Track B (Magenta).
+                        // Center X is cx.
+
+                        const pADir = pA.x < cx ? -1 : 1;
+                        const pBDir = pB.x < cx ? -1 : 1;
+
+                        // Push A "Outwards"
+                        const offA = 60 * scale;
+                        const alignA = pADir < 0 ? "right" : "left";
+                        const xA = pA.x + (pADir < 0 ? -offA : offA);
+
+                        // Push B "Outwards"
+                        const offB = 60 * scale;
+                        const alignB = pBDir < 0 ? "right" : "left";
+                        const xB = pB.x + (pBDir < 0 ? -offB : offB);
+
+                        // Draw Track A Label
+                        drawLabel(ctx, node.data.thick.main.split('(')[0], xA, pA.y, alignA, config.colors.strandA, scale, 18);
+                        // Draw connecting line
+                        ctx.strokeStyle = config.colors.strandA;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(xA, pA.y); ctx.stroke();
+
+                        // Draw Track B Label
+                        drawLabel(ctx, node.data.thick.spur.split('(')[0], xB, pB.y, alignB, config.colors.strandB, scale, 18);
+                        // Draw connecting line
+                        ctx.strokeStyle = config.colors.strandB;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath(); ctx.moveTo(pB.x, pB.y); ctx.lineTo(xB, pB.y); ctx.stroke();
+
+                        // Center Dilemma ID
+                        ctx.textAlign = "center";
+                        ctx.fillStyle = "#fff";
+                        ctx.font = `bold ${14 * scale}px Courier New`;
+                        ctx.fillText(node.data.napkin.toUpperCase(), (pA.x + pB.x) / 2, (pA.y + pB.y) / 2 - 50 * scale);
+
+                        ctx.globalAlpha = 1.0;
+                    }
+                }
+
+                ctx.fillStyle = cA;
+                ctx.globalAlpha = alpha;
+                if (isEncoded && cA !== '#222') {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = cA;
+                }
+                ctx.beginPath(); ctx.arc(pA.x, pA.y, (node ? 8 : 4) * scale, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = cB;
+                if (isEncoded && cB !== '#222') {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = cB;
+                }
+                ctx.beginPath(); ctx.arc(pB.x, pB.y, (node ? 8 : 4) * scale, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1.0;
+
+                if (Math.abs(localZ - trainZ) < 10) {
+                    drawTrain(cx, cy);
+                }
+            }
+
+            // Vignette
+            const vig = ctx.createRadialGradient(cx, cy, canvas.height * 0.5, cx, cy, canvas.height);
+            vig.addColorStop(0, 'rgba(0,0,0,0)');
+            vig.addColorStop(1, 'rgba(0,0,0,0.8)');
+            ctx.fillStyle = vig;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // HUD Bottom Panel
+            if (!state.showTicket) {
+                const activeNode = state.nodes.find(n => n.z > state.cameraZ + 200 && n.z < state.cameraZ + 800);
+
+                ctx.fillStyle = "rgba(0,0,0,0.85)";
+                ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
+                ctx.fillStyle = "#333";
+                ctx.fillRect(0, canvas.height - 120, canvas.width, 2);
+
+                if (activeNode) {
+                    ctx.textAlign = "center";
+
+                    if (state.autoPilot) {
+                        ctx.fillStyle = "#00FFFF";
+                        ctx.font = "bold 12px Courier New";
+                        ctx.fillText(`AI ANALYSIS: ${state.aiThought}`, cx, canvas.height - 100);
+                    }
+
+                    ctx.fillStyle = "#fff";
+                    ctx.font = "bold 18px Courier New";
+                    ctx.fillText(activeNode.data.thick.setting, cx, canvas.height - 70);
+                    ctx.fillStyle = "#aaa";
+                    ctx.font = "italic 14px Courier New";
+                    ctx.fillText(`"${activeNode.data.thick.sensory}"`, cx, canvas.height - 40);
+                }
+            }
+        }
+
+        function drawLabel(ctx, text, x, y, align, color, scale, size) {
+            ctx.textAlign = align;
+            ctx.font = `bold ${size * scale}px Courier New`;
+            const w = ctx.measureText(text).width;
+            const h = size * scale * 1.2;
+
+            ctx.fillStyle = "rgba(0,0,0,0.8)";
+            const bx = align === "right" ? x - w - 10 : x - 10;
+            ctx.fillRect(bx, y - h / 2, w + 20, h);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(bx, y - h / 2, w + 20, h);
+
+            ctx.fillStyle = color;
+            ctx.fillText(text, x, y + size * scale * 0.3);
+        }
+
+        function drawTrain(cx, cy) {
+            const trainZ = 200;
+            const twist = (state.cameraZ + trainZ) * 0.004 + state.rotation;
+            const rad = 160;
+
+            const ax = Math.cos(twist) * rad;
+            const ay = Math.sin(twist) * rad;
+            const bx = Math.cos(twist + Math.PI) * rad;
+            const by = Math.sin(twist + Math.PI) * rad;
+
+            const t = (state.trackPos + 1) / 2;
+            const tx = ax + (bx - ax) * t;
+            const ty = ay + (by - ay) * t;
+
+            const p = project(tx, ty, state.cameraZ + trainZ);
+
+            const glow = 50 + (state.pulse * 80);
+            const grad = ctx.createRadialGradient(p.x, p.y, 5, p.x, p.y, glow);
+            grad.addColorStop(0, '#fff');
+            grad.addColorStop(1, 'rgba(0,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(p.x, p.y, glow, 0, Math.PI * 2); ctx.fill();
+
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 15, 0, Math.PI * 2); ctx.stroke();
+
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y + 50); ctx.stroke();
+        }
+
+        function drawTicket(cx, cy) {
+            const w = Math.min(700, canvas.width - 40);
+            const h = Math.min(700, canvas.height - 100);
+            const x = cx - w / 2;
+            const y = cy - h / 2;
+
+            ctx.fillStyle = "rgba(10,10,15,0.98)";
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeRect(x, y, w, h);
+
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#fff";
+            ctx.font = "24px Courier New";
+            ctx.fillText("MORAL PASSPORT", cx, y + 50);
+
+            ctx.font = "14px Courier New";
+            ctx.fillStyle = "#888";
+            ctx.fillText(`ID: ${Date.now().toString(36).toUpperCase()}`, cx, y + 80);
+
+            let aCount = 0;
+            let bCount = 0;
+            state.history.forEach(h => h.choice === 'A' ? aCount++ : bCount++);
+
+            ctx.textAlign = "left";
+            ctx.fillStyle = config.colors.strandA;
+            ctx.fillText(`CYAN ACTS: ${aCount}`, x + 40, y + 120);
+            ctx.fillStyle = config.colors.strandB;
+            ctx.fillText(`MAGENTA ACTS: ${bCount}`, x + (w / 2) + 20, y + 120);
+
+            let dy = y + 160;
+
+            state.history.slice(-6).reverse().forEach((h) => {
+                const choiceText = h.choice === 'A' ? h.data.thick.main : h.data.thick.spur;
+                const logic = h.data.napkin;
+                ctx.fillStyle = h.choice === 'A' ? config.colors.strandA : config.colors.strandB;
+                ctx.font = "bold 16px Courier New";
+                ctx.fillText(`> ${logic.toUpperCase()}`, x + 40, dy);
+
+                ctx.fillStyle = "#ccc";
+                ctx.font = "14px Courier New";
+                ctx.fillText(`  ${choiceText.substring(0, 45)}...`, x + 40, dy + 20);
+
+                if (h.img) {
+                    const imgX = x + w - 70;
+                    // Draw procedural texture inside ticket
+                    h.img(ctx, imgX - 25, dy - 30, 50, Date.now());
+                    ctx.strokeStyle = h.choice === 'A' ? config.colors.strandA : config.colors.strandB;
+                    ctx.strokeRect(imgX - 25, dy - 30, 50, 50);
+                }
+
+                dy += 70;
+            });
+
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "center";
+            ctx.fillText("[CLICK TO CLOSE]", cx, y + h - 30);
+        }
+
+        function downloadLog() {
+            const data = {
+                session: Date.now(),
+                sequence: state.history.map(h => ({
+                    id: h.data.id,
+                    dilemma: h.data.napkin,
+                    choice: h.choice,
+                    logic: h.choice === 'A' ? h.data.heuristicA : h.data.heuristicB
+                }))
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "ethnome_log.json";
+            a.click();
+        }
+
+        // --- INTELLIGENT AUTO-PILOT ---
+        function runAutoPilot(node) {
+            if (!node) return;
+
+            const keywords = ["Save", "Future", "Child", "Many", "Life"];
+            let scoreA = Math.random() * 5;
+            let scoreB = Math.random() * 5;
+
+            if (node.data.heuristicA.includes("Utilitarian")) scoreA += 3;
+            if (node.data.thick.main.includes("Child")) scoreA += 4;
+
+            const choice = scoreA > scoreB ? -1 : 1;
+
+            const thought = scoreA > scoreB ?
+                `ANALYZING... UTILITY MAXIMIZED (${Math.floor(scoreA * 10)}%)` :
+                `ANALYZING... DEONTOLOGICAL CONSTRAINT (${Math.floor(scoreB * 10)}%)`;
+
+            state.aiThought = thought;
+
+            if (Math.random() > 0.6) {
+                const phrase = scoreA > scoreB ? node.data.heuristicA : node.data.heuristicB;
+                Voice.speak("Selecting " + phrase);
+            }
+
+            switchTrack(choice);
+        }
+
+        function update() {
+            if (state.showTicket) return;
+
+            state.cameraZ += state.speed;
+            state.rotation += 0.002;
+            state.pulse *= 0.95;
+
+            Audio.modulate(state.speed);
+            state.trackPos += (state.targetTrackPos - state.trackPos) * config.physics.dampening;
+
+            const node = state.nodes[0];
+            const trainZ = 200;
+            const dist = node.z - state.cameraZ;
+
+            if (state.autoPilot && dist < 1000 && dist > 900) {
+                if (!Voice.speaking && Math.random() > 0.5) {
+                    Voice.speak(node.data.napkin);
+                }
+            }
+
+            if (state.autoPilot && dist < 700 && dist > 600) {
+                runAutoPilot(node);
+            }
+
+            if (dist < trainZ && !node.resolved) {
+                node.resolved = true;
+                const choice = state.targetTrackPos < 0 ? 'A' : 'B';
+                node.choice = choice;
+
+                // Store render function for history
+                node.img = node.renderImg;
+
+                state.history.push({
+                    data: node.data,
+                    choice: choice,
+                    img: node.img
+                });
+
+                state.pulse = 1.0;
+                Audio.chord(choice === 'A');
+
+                const lastZ = state.nodes[state.nodes.length - 1].z;
+                state.nodes.push(createNode(lastZ + 500, state.nodes.length));
+
+                if (state.nodes.length > 30) state.nodes.shift();
+            }
+        }
+
+        function switchTrack(dir) {
+            if (state.showTicket) return;
+            state.targetTrackPos = dir;
+            Audio.tick(dir < 0);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') switchTrack(-1);
+            if (e.key === 'ArrowRight' || e.key === 'b') switchTrack(1);
+            if (e.key === 's') toggleAuto();
+            if (e.key === ' ') state.showTicket = !state.showTicket;
+        });
+
+        function toggleAuto() {
+            state.autoPilot = !state.autoPilot;
+            const btn = document.getElementById('btn-auto');
+            btn.innerText = `AUTO: ${state.autoPilot ? 'ON' : 'OFF'} [S]`;
+            btn.classList.toggle('active', state.autoPilot);
+            if (state.autoPilot) Voice.speak("Auto pilot engaged.");
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (state.showTicket) { state.showTicket = false; return; }
+            const mid = canvas.width / 2;
+            switchTrack(e.clientX < mid ? -1 : 1);
+        });
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            Audio.init();
+            Audio.resume();
+            Voice.speak("System initialized. The fork awaits.");
+            document.getElementById('overlay').classList.add('hidden');
+            document.getElementById('btn-ticket').classList.remove('hidden');
+            document.getElementById('btn-download').classList.remove('hidden');
+        });
+
+        document.getElementById('btn-ticket').addEventListener('click', () => state.showTicket = !state.showTicket);
+        document.getElementById('btn-auto').addEventListener('click', toggleAuto);
+        document.getElementById('btn-download').addEventListener('click', downloadLog);
+
+        function loop() {
+            try {
+                state.frame++;
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('error-log').innerText = "RUNTIME ERROR: " + e.message;
+            }
+        }
+
+        loop();
+
+    </script>
+</body>
+
+</html>

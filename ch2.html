@@ -581,17 +581,30 @@
                 handleLoopReset();
             }
 
-            // Move Train
-            const pos = rails.main.getPoint(STATE.t);
-            const look = rails.main.getPoint((STATE.t + 0.01) % 1);
-            train.position.copy(pos);
+            // Move Train - INTERPOLATE TO CHOSEN TRACK
+            // We want to be on Track A or Track B depending on STATE.choice
+            // But we only want to diverge near the fork (t=0.15 to t=0.35)
+            // For now, let's just snap to the chosen rail for the whole loop for clarity, 
+            // or better, blend between Main and Choice.
+
+            let targetCurve = rails.main;
+            if (STATE.t > 0.1 && STATE.t < 0.4) {
+                // We are in the "Fork Zone"
+                targetCurve = (STATE.choice === 'A') ? rails.A : rails.B;
+            }
+
+            // Sample position
+            const pos = targetCurve.getPoint(STATE.t);
+            const look = targetCurve.getPoint((STATE.t + 0.01) % 1);
+
+            // Smoothly move train visual to this position
+            train.position.lerp(pos, 0.1);
             train.lookAt(look);
 
             // Camera
             updateCamera(pos, look);
 
-            // Text Orientation (Face Camera using Quaternion)
-            // This ensures text is always readable and "flat" to the screen
+            // Text Orientation
             STATE.nucleotides.forEach(n => {
                 n.quaternion.copy(camera.quaternion);
             });
@@ -599,21 +612,40 @@
             renderer.render(scene, camera);
         }
 
+        const CAM_MODES = ['CHASE', 'COCKPIT', 'DRONE', 'SIDE'];
         function updateCamera(target, lookAt) {
-            const tan = rails.main.getTangent(STATE.t);
-            const back = tan.clone().negate().multiplyScalar(20);
-            const up = new THREE.Vector3(0, 10, 0);
+            const mode = CAM_MODES[STATE.camMode];
+            const tan = rails.main.getTangent(STATE.t); // Use main tangent for stable cam
 
-            camera.position.lerp(train.position.clone().add(back).add(up), 0.1);
-            camera.lookAt(train.position);
+            let offset, lookTgt;
+
+            if (mode === 'CHASE') {
+                const back = tan.clone().negate().multiplyScalar(20);
+                const up = new THREE.Vector3(0, 10, 0);
+                offset = back.add(up);
+                lookTgt = train.position;
+            } else if (mode === 'COCKPIT') {
+                offset = new THREE.Vector3(0, 3, 2).applyMatrix4(train.matrixWorld).sub(train.position);
+                lookTgt = train.position.clone().add(tan.multiplyScalar(50));
+            } else if (mode === 'DRONE') {
+                offset = new THREE.Vector3(0, 80, 0); // High up
+                lookTgt = train.position;
+            } else if (mode === 'SIDE') {
+                const side = new THREE.Vector3(-tan.z, 0, tan.x).multiplyScalar(30);
+                offset = side.add(new THREE.Vector3(0, 5, 0));
+                lookTgt = train.position;
+            }
+
+            // Apply
+            const dest = train.position.clone().add(offset);
+            camera.position.lerp(dest, 0.05);
+            camera.lookAt(lookTgt);
         }
 
         function handleLoopReset() {
             STATE.loop++;
             document.getElementById('loop-count').innerText = `CYCLE ${String(STATE.loop).padStart(2, '0')}`;
-            // Flash Impact
             if (navigator.vibrate) navigator.vibrate(200);
-            // Next Scenario
             initScenario();
         }
 
@@ -622,18 +654,32 @@
         // --- CONTROLS ---
         const lever = document.getElementById('lever');
         const handle = document.getElementById('handle');
+        const btnCam = document.getElementById('btn-cam');
 
         lever.addEventListener('click', () => {
             STATE.choice = STATE.choice === 'A' ? 'B' : 'A';
             handle.className = STATE.choice === 'B' ? 'lever-handle switched' : 'lever-handle';
-            // Play Switch Sound (if configured)
+
+            // Visual feedback of switch
+            updateLog(`SWITCHING TO STRAND ${STATE.choice}`);
             if (Tone.context.state === 'suspended') startAudio();
+
+            // Highlight the chosen track
+            // We can't easily change materials of single tube segments, but we can flash
+            const col = STATE.choice === 'A' ? CFG.colors.A : CFG.colors.B;
+            point.color.setHex(col);
+        });
+
+        btnCam.addEventListener('click', () => {
+            STATE.camMode = (STATE.camMode + 1) % CAM_MODES.length;
+            btnCam.innerText = CAM_MODES[STATE.camMode];
+            updateLog(`CAMERA: ${CAM_MODES[STATE.camMode]}`);
         });
 
         // --- INIT ---
         window.addEventListener('load', () => {
             buildTracks();
-            loadCorpus(); // Sync/Async load
+            loadCorpus();
             document.getElementById('loader').style.opacity = 0;
             setTimeout(() => document.getElementById('loader').remove(), 500);
             loop();

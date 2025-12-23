@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4: The Strata // Sequence A</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #e0e0e0;
+            --accent-color: #ff3333;
+            --dim-color: #404040;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #stage {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #visual-layer {
+            z-index: 1;
+            /* Placeholder for Three.js or Images */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #text-layer {
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        #overlay-layer {
+            z-index: 3;
+            background: black;
+            opacity: 0;
+            transition: opacity 0.1s;
+            /* Fast cuts */
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--dim-color);
+            padding: 20px;
+            max-width: 600px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .card.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card h1 {
+            font-size: 1.2rem;
+            color: var(--dim-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .card .meta {
+            font-size: 0.8rem;
+            color: var(--accent-color);
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        /* Sequence Specific Styles */
+        .cut-black {
+            background: black;
+        }
+
+        .cut-white {
+            background: white;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--dim-color);
+            color: var(--dim-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: var(--font-main);
+        }
+
+        button:hover {
+            color: var(--text-color);
+            border-color: var(--text-color);
+        }
+
+        /* Missing Figure Text */
+        .missing-figure {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+        }
+
+        .whisper {
+            font-size: 1rem;
+            color: var(--dim-color);
+            font-style: italic;
+        }
+
+        /* 3D Container */
+        #three-container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <!-- Import Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+
+    <div id="stage">
+        <div id="visual-layer" class="layer">
+            <div id="three-container"></div>
+        </div>
+        <div id="text-layer" class="layer">
+            <!-- Dynamic Content -->
+        </div>
+        <div id="overlay-layer" class="layer"></div>
+    </div>
+
+    <div id="controls">
+        <button id="btn-next">NEXT [Space]</button>
+    </div>
+
+    <script>
+        // --- DATA ONTOLOGY ---
+        const FRAGMENTS = {
+            "F1": { id: "F1", title: "Froebel Gift #3", scene: "Hands splitting a wooden cube into eight smaller cubes on a gridded table.", claim: "Froebel’s “Gifts” taught modular decomposition as a language of form.", type: "historical pedagogy" },
+            "F4": { id: "F4", title: "Sketchpad", scene: "Sketchpad footage; a pen drawing constraints; “master” and “instance” flashing.", claim: "Sketchpad formalized interactive geometry manipulation + instancing concepts.", type: "computing history" },
+            "F11": { id: "F11", title: "Moderation Crisis", scene: "User builds queued in endless feed; blur bars appear; tired moderators.", claim: "Visual UGC moderation at scale is expensive and brittle.", type: "developer anecdotes" },
+            "F12": { id: "F12", title: "The Room", scene: "Fluorescent office room, click-click, conveyor belt of creations.", claim: "Moderation labor is hidden infrastructure, not automation.", type: "platform labor" },
+            "F18": { id: "F18", title: "Sand Table", scene: "War room sand table → kids sandbox → game “sandbox” label.", claim: "Sandbox as concept has military planning ancestry.", type: "historical argument" },
+            "F19": { id: "F19", title: "Little Wars", scene: "Toy cannons firing; adults on the floor; “things should happen…”", claim: "Wells advocated physical, kinetic wargaming as critique/pacifist gesture.", type: "primary text" },
+            "F21": { id: "F21", title: "Game of War", scene: "Stark board; circuit-like lines; the game as critique object.", claim: "Wargame form can be used for radical critique, not optimization.", type: "theory" }
+        };
+
+        const SEQUENCE_A = [
+            {
+                step: "A1",
+                type: "cold_open",
+                ref: "F1",
+                action: "visual_cube_split",
+                audio: "wood_on_wood",
+                text: null
+            },
+            {
+                step: "A2",
+                type: "cut",
+                ref: "F4",
+                action: "visual_sketchpad_line",
+                audio: "snap",
+                text: null
+            },
+            {
+                step: "A3",
+                type: "cut",
+                ref: "F18+F19",
+                action: "visual_sand_table",
+                audio: "cannon_fire",
+                text: null
+            },
+            {
+                step: "A4",
+                type: "contradiction",
+                ref: "F21",
+                action: "visual_debord_grid",
+                audio: "silence",
+                text: "Debord: The Game of War"
+            },
+            {
+                step: "A5",
+                type: "cut_cost",
+                ref: "F11+F12",
+                action: "visual_moderation_queue",
+                audio: "click_fatigue",
+                text: null
+            },
+            {
+                step: "A6",
+                type: "missing_figure",
+                ref: null,
+                action: "black_screen_text",
+                audio: null,
+                text: "“We don’t have the names of most of the people who watched the feed.”"
+            },
+            {
+                step: "A7",
+                type: "late_label",
+                ref: null,
+                action: "whisper_text",
+                audio: "whisper",
+                text: "Legibility has a payroll."
+            },
+            {
+                step: "A8",
+                type: "exit",
+                ref: "F1",
+                action: "visual_cube_missing",
+                audio: "silence",
+                text: null
+            }
+        ];
+
+        // --- STRATA ENGINE ---
+        let currentStepIndex = -1;
+        const textLayer = document.getElementById('text-layer');
+        const overlayLayer = document.getElementById('overlay-layer');
+        const threeContainer = document.getElementById('three-container');
+
+        // Three.js Scene Setup (Minimal)
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        threeContainer.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 2);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        // State for Visuals
+        let cubes = [];
+        let sketchpadLine = null;
+        let activeVisual = null;
+
+        // Helper: Create Froebel Cube
+        function createFroebelCube() {
+            // Clear existing
+            cubes.forEach(c => scene.remove(c));
+            cubes = [];
+
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshStandardMaterial({ color: 0xD2B48C }); // Wood color
+
+            // Create 8 sub-cubes
+            for (let x = 0; x < 2; x++) {
+                for (let y = 0; y < 2; y++) {
+                    for (let z = 0; z < 2; z++) {
+                        const cube = new THREE.Mesh(geometry, material);
+                        cube.position.set(x * 1.05 - 0.5, y * 1.05 - 0.5, z * 1.05 - 0.5);
+                        scene.add(cube);
+                        cubes.push(cube);
+                    }
+                }
+            }
+            camera.position.z = 5;
+            camera.lookAt(0, 0, 0);
+        }
+
+        function splitCubes() {
+            cubes.forEach((c, i) => {
+                c.position.multiplyScalar(1.5);
+            });
+        }
+
+        function removeOneCube() {
+            if (cubes.length > 0) {
+                const removed = cubes.pop();
+                scene.remove(removed);
+            }
+        }
+
+        function clearVisuals() {
+            // Reset scene
+            while (scene.children.length > 0) {
+                scene.remove(scene.children[0]);
+            }
+            scene.add(ambientLight);
+            scene.add(directionalLight);
+            cubes = [];
+        }
+
+        // --- RENDER STEP LOGIC ---
+        function renderStep(index) {
+            if (index < 0 || index >= SEQUENCE_A.length) return;
+            const step = SEQUENCE_A[index];
+
+            // Log
+            console.log(`Executing Step: ${step.step} (${step.type})`);
+
+            // 1. Visual Action
+            handleVisualAction(step.action);
+
+            // 2. Text Overlay
+            renderText(step);
+
+            // 3. Audio (Placeholder log)
+            if (step.audio) console.log(`[AUDIO] Playing: ${step.audio}`);
+
+            // 4. Transitions (Cuts)
+            if (step.type.includes('cut') || step.type === 'contradiction') {
+                performCut();
+            }
+        }
+
+        function handleVisualAction(action) {
+            // Default: clear unless continuing
+            if (action !== 'visual_cube_missing' && action !== 'visual_cube_split') {
+                // For now, clear to keep it simple, or manage transitions
+                // In a real engine, we'd check persistency.
+            }
+
+            switch (action) {
+                case 'visual_cube_split':
+                    clearVisuals();
+                    createFroebelCube();
+                    setTimeout(splitCubes, 500);
+                    break;
+                case 'visual_sketchpad_line':
+                    clearVisuals();
+                    // Simple line drawing
+                    const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+                    const points = [];
+                    points.push(new THREE.Vector3(-2, 0, 0));
+                    points.push(new THREE.Vector3(2, 0, 0));
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const line = new THREE.Line(geometry, material);
+                    scene.add(line);
+
+                    // "Snap" effect (scale pulse)
+                    setTimeout(() => line.scale.set(1.1, 1.1, 1.1), 200);
+                    setTimeout(() => line.scale.set(1, 1, 1), 300);
+                    break;
+                case 'visual_sand_table':
+                    clearVisuals();
+                    // Placeholder: A flat plane (sand) with some boxes
+                    const planeGeo = new THREE.PlaneGeometry(5, 5);
+                    const planeMat = new THREE.MeshBasicMaterial({ color: 0xC2B280, side: THREE.DoubleSide });
+                    const plane = new THREE.Mesh(planeGeo, planeMat);
+                    plane.rotation.x = Math.PI / 2;
+                    scene.add(plane);
+                    break;
+                case 'visual_debord_grid':
+                    clearVisuals();
+                    // Grid Helper
+                    const grid = new THREE.GridHelper(10, 10, 0xffffff, 0x555555);
+                    scene.add(grid);
+                    break;
+                case 'visual_moderation_queue':
+                    clearVisuals();
+                    // A wall of red squares
+                    for (let i = 0; i < 20; i++) {
+                        const sq = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.1), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+                        sq.position.set((Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5, 0);
+                        scene.add(sq);
+                    }
+                    break;
+                case 'black_screen_text':
+                    clearVisuals();
+                    // Handled by CSS bg usually, but here we just empty scene
+                    break;
+                case 'visual_cube_missing':
+                    clearVisuals();
+                    createFroebelCube();
+                    splitCubes(); // Already split state
+                    removeOneCube(); // One missing
+                    break;
+                default:
+                    // Keep previous
+                    break;
+            }
+        }
+
+        function renderText(step) {
+            textLayer.innerHTML = ''; // Clear
+
+            if (step.text) {
+                const div = document.createElement('div');
+                div.className = step.type === 'missing_figure' ? 'missing-figure' : (step.type === 'late_label' ? 'whisper' : 'card active');
+
+                if (step.type === 'contradiction') {
+                    div.innerHTML = `<h1>${step.text}</h1>`;
+                } else if (step.type === 'missing_figure' || step.type === 'late_label') {
+                    div.innerText = step.text;
+                } else {
+                    // Generic card fallback
+                    div.innerText = step.text;
+                }
+                textLayer.appendChild(div);
+            }
+        }
+
+        function performCut() {
+            overlayLayer.style.opacity = 1;
+            setTimeout(() => {
+                overlayLayer.style.opacity = 0;
+            }, 100); // 100ms flash
+        }
+
+        // --- CONTROLS ---
+        function nextStep() {
+            currentStepIndex++;
+            if (currentStepIndex >= SEQUENCE_A.length) {
+                currentStepIndex = SEQUENCE_A.length - 1; // Clamp
+                return;
+            }
+            renderStep(currentStepIndex);
+        }
+
+        document.getElementById('btn-next').addEventListener('click', nextStep);
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') nextStep();
+        });
+
+        // --- ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+            // Slight rotation for active 3D elements
+            scene.children.forEach(child => {
+                if (child.type === 'Mesh' || child.type === 'Group') {
+                    // child.rotation.y += 0.005; 
+                }
+            });
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Start
+        console.log("Chapter 4 Loaded. Press Space to Start Sequence A.");
+
+    </script>
+</body>
+
+</html>

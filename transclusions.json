@@ -1,0 +1,149 @@
+{
+    "meta": {
+        "version": "1.0",
+        "description": "Reusable transclusion blocks for fork cascade knowledge infrastructure"
+    },
+    "blocks": {
+        "cold_war_1983_context": {
+            "id": "cold_war_1983_context",
+            "title": "Cold War Context: September 1983",
+            "type": "historical_context",
+            "content": "Tensions between the United States and Soviet Union were at a peak unseen since the Cuban Missile Crisis. Three weeks earlier, Soviet interceptors shot down Korean Air Lines Flight 007, killing all 269 aboard. President Reagan had called the USSR an 'evil empire' six months prior. NATO was preparing Exercise Able Archer 83, which Soviet intelligence feared might be cover for a genuine first strike.",
+            "sources": [
+                {
+                    "type": "primary",
+                    "title": "National Security Archive: The 1983 War Scare",
+                    "url": "https://nsarchive.gwu.edu/briefing-book/nuclear-vault/2015-10-24/1983-soviet-war-scare-declassified"
+                },
+                {
+                    "type": "secondary",
+                    "title": "The Dead Hand (2009)",
+                    "author": "David Hoffman",
+                    "publisher": "Anchor Books",
+                    "citation": "Hoffman, D. (2009). The Dead Hand. pp. 1-42"
+                }
+            ],
+            "expandable": [
+                "kal_007_incident",
+                "able_archer_83",
+                "reagan_evil_empire"
+            ]
+        },
+        "kal_007_incident": {
+            "id": "kal_007_incident",
+            "title": "KAL 007 Shootdown — September 1, 1983",
+            "type": "historical_event",
+            "content": "Korean Air Lines Flight 007 strayed into prohibited Soviet airspace over Sakhalin Island. Soviet Su-15 interceptors, after failing to make visual contact, shot down the Boeing 747. All 269 people aboard died, including U.S. Congressman Larry McDonald. The incident inflamed anti-Soviet sentiment worldwide and froze diplomatic channels.",
+            "sources": [
+                {
+                    "type": "primary",
+                    "title": "ICAO Report on KAL 007",
+                    "url": "https://www.icao.int/publications/Documents/KAL007.pdf"
+                }
+            ]
+        },
+        "able_archer_83": {
+            "id": "able_archer_83",
+            "title": "Exercise Able Archer 83",
+            "type": "historical_event",
+            "content": "A ten-day NATO command post exercise simulating a coordinated nuclear release. Soviet intelligence, already on high alert, interpreted unusual communications patterns as potential preparation for genuine nuclear attack. Some KGB stations were placed on heightened readiness.",
+            "sources": [
+                {
+                    "type": "primary",
+                    "title": "President's Foreign Intelligence Advisory Board Report (1990)",
+                    "url": "https://nsarchive.gwu.edu/document/16440-document-1-pfiab-soviet-war"
+                }
+            ]
+        },
+        "reagan_evil_empire": {
+            "id": "reagan_evil_empire",
+            "title": "Reagan's 'Evil Empire' Speech — March 8, 1983",
+            "type": "historical_event",
+            "content": "In a speech to the National Association of Evangelicals, President Reagan called the Soviet Union 'an evil empire' and 'the focus of evil in the modern world.' The speech alarmed Soviet leaders who interpreted it as evidence of American aggression.",
+            "sources": [
+                {
+                    "type": "primary",
+                    "title": "Reagan Library Archives",
+                    "url": "https://www.reaganlibrary.gov/archives/speech/remarks-annual-convention-national-association-evangelicals-orlando-florida"
+                }
+            ]
+        },
+        "oko_satellite_system": {
+            "id": "oko_satellite_system",
+            "title": "Oko Early Warning Satellite System",
+            "type": "technical_context",
+            "content": "The Oko ('Eye') system consisted of satellites in Molniya orbits designed to detect U.S. ICBM launches by their infrared signatures. The system was known to produce false alarms, particularly when sunlight reflected off high-altitude clouds. On September 26, 1983, a rare alignment of sunlight, cloud cover, and satellite position created ghost signatures that the computer interpreted as missile launches.",
+            "sources": [
+                {
+                    "type": "secondary",
+                    "title": "Russian Strategic Nuclear Forces (2001)",
+                    "author": "Pavel Podvig",
+                    "citation": "Podvig, P. (2001). Russian Strategic Nuclear Forces. MIT Press. pp. 417-419"
+                }
+            ]
+        },
+        "soviet_launch_doctrine": {
+            "id": "soviet_launch_doctrine",
+            "title": "Soviet Launch-on-Warning Doctrine",
+            "type": "doctrinal_context",
+            "content": "Unlike the U.S. policy of 'launch under attack' which required confirmation of detonations, Soviet doctrine called for 'launch on warning' — missiles would be released upon detection of incoming launches, before impact. This compressed decision windows to under 15 minutes. The Perimeter ('Dead Hand') system provided automated launch capability if leadership was decapitated, but required human authorization to activate.",
+            "sources": [
+                {
+                    "type": "secondary",
+                    "title": "The Dead Hand (2009)",
+                    "author": "David Hoffman",
+                    "citation": "Hoffman, D. (2009). Chapter 9: The Perimeter"
+                }
+            ]
+        },
+        "petrov_biography": {
+            "id": "petrov_biography",
+            "title": "Lt. Colonel Stanislav Petrov (1939-2017)",
+            "type": "entity_biography",
+            "content": "Stanislav Yevgrafovich Petrov was a Soviet military officer who served in the Air Defense Forces. On September 26, 1983, while serving as duty officer at the Serpukhov-15 bunker, he chose not to report a satellite warning of incoming American missiles, correctly judging it to be a false alarm. His decision may have prevented nuclear war. Petrov was neither rewarded nor punished for his actions; the incident was classified and he was reassigned. He retired in 1984 and lived in relative obscurity until Western media coverage in the late 1990s brought him international recognition.",
+            "sources": [
+                {
+                    "type": "primary",
+                    "title": "BBC Interview with Petrov (1998)",
+                    "url": "https://www.bbc.co.uk/russian/society/2013/09/130926_petrov_soviet_officer_nuclear"
+                },
+                {
+                    "type": "secondary",
+                    "title": "The Man Who Saved the World (2014)",
+                    "note": "Documentary film"
+                }
+            ],
+            "related_entities": [
+                "ogarkov",
+                "ustinov",
+                "andropov"
+            ]
+        },
+        "ustinov_biography": {
+            "id": "ustinov_biography",
+            "title": "Marshal Dmitry Ustinov (1908-1984)",
+            "type": "entity_biography",
+            "content": "Soviet Minister of Defense from 1976 to 1984. A hardliner who had overseen Soviet military buildup. Would have been responsible for recommending nuclear retaliation to the Politburo had Petrov reported the warning as genuine. Known for distrusting Western intentions.",
+            "sources": [
+                {
+                    "type": "secondary",
+                    "title": "Soviet Armed Forces Review Annual",
+                    "citation": "Volume 8, 1984"
+                }
+            ]
+        },
+        "ogarkov_biography": {
+            "id": "ogarkov_biography",
+            "title": "Marshal Nikolai Ogarkov (1917-1994)",
+            "type": "entity_biography",
+            "content": "Chief of the Soviet General Staff from 1977 to 1984. A military reformer who advocated for conventional force modernization. Would have been in the chain of command for nuclear launch authorization. Known for his press conference defending the KAL 007 shootdown.",
+            "sources": [
+                {
+                    "type": "secondary",
+                    "title": "The Soviet High Command (1997)",
+                    "author": "John Erickson"
+                }
+            ]
+        }
+    }
+}

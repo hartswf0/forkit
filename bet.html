@@ -552,6 +552,33 @@
                         ctx.filter = `blur(${blur}px)`;
                         ctx.globalAlpha = opacity;
 
+                        // ANTICIPATORY SIGNALING (New)
+                        if (localZ > 600 && localZ < 1400) {
+                            const bracketSize = 20 * scale;
+                            ctx.strokeStyle = `rgba(255, 50, 50, ${opacity * (Math.sin(Date.now() * 0.01) * 0.5 + 0.5)})`;
+                            ctx.lineWidth = 2;
+
+                            // Left Bracket
+                            ctx.beginPath();
+                            ctx.moveTo(pA.x - 40 * scale, pA.y - bracketSize);
+                            ctx.lineTo(pA.x - 50 * scale, pA.y);
+                            ctx.lineTo(pA.x - 40 * scale, pA.y + bracketSize);
+                            ctx.stroke();
+
+                            // Right Bracket
+                            ctx.beginPath();
+                            ctx.moveTo(pB.x + 40 * scale, pB.y - bracketSize);
+                            ctx.lineTo(pB.x + 50 * scale, pB.y);
+                            ctx.lineTo(pB.x + 40 * scale, pB.y + bracketSize);
+                            ctx.stroke();
+
+                            if (localZ > 1000) {
+                                ctx.fillStyle = "#ff3333";
+                                ctx.font = `bold ${10 * scale}px Courier New`;
+                                ctx.fillText("DECISION APPROACHING", (pA.x + pB.x) / 2, (pA.y + pB.y) / 2 - 50 * scale);
+                            }
+                        }
+
                         ctx.font = `bold ${14 * scale}px Courier New`;
 
                         ctx.textAlign = "right";

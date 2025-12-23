@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Ethical Runtime | Topological IDE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="thick_data_merged.js"></script>
+    <style>
+        :root {
+            --accent: #c4a77d;
+            --risk: #d4956a;
+            --safe: #8fb8a0;
+            --bg: #030305;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: white;
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .hud-glass {
+            background: rgba(10, 10, 15, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .slider-custom {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            border-radius: 2px;
+        }
+
+        .slider-custom::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .label-micro {
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.5;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loading-overlay">
+        <div class="text-[#c4a77d] text-xs tracking-[0.5em] mb-4 animate-pulse uppercase">Initializing Neural Terrain
+        </div>
+        <button id="start-btn"
+            class="px-8 py-3 border border-[#c4a77d]/30 hover:bg-[#c4a77d]/10 transition-all text-[10px] tracking-[0.3em] uppercase">Enter
+            Medium</button>
+    </div>
+
+    <!-- UI Overlay (Perspectives & Modes of Thought) -->
+    <div class="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 md:p-8 z-50">
+
+        <!-- Top: Symbolic Context -->
+        <div class="flex justify-between items-start">
+            <div class="hud-glass p-5 rounded-xl max-w-sm pointer-events-auto">
+                <div class="label-micro text-[#c4a77d] mb-1">Procedural Ethics Interface</div>
+                <h1 class="text-xl font-light mb-2">Topological Alignment</h1>
+                <p class="text-[10px] text-white/40 leading-relaxed">
+                    The mesh represents the <b>Reward Model</b>. Peaks indicate "Refusal Latents."
+                    Valleys indicate "Alignment Convergence." Use the <b>Probe</b> (cursor) to sonify the local
+                    gradient.
+                </p>
+            </div>
+
+            <!-- Pareto Frontier (What-If Visualization) -->
+            <div class="hud-glass p-4 rounded-xl w-40 pointer-events-auto hidden md:block">
+                <div class="label-micro mb-2">Value Frontier</div>
+                <div class="relative h-24 w-full border-l border-b border-white/10">
+                    <svg class="w-full h-full" viewBox="0 0 100 100">
+                        <path d="M 10 90 Q 20 20 90 10" fill="none" stroke="var(--accent)" stroke-width="1"
+                            opacity="0.3" />
+                        <circle id="pareto-dot" cx="50" cy="50" r="3" fill="var(--risk)" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Interactive Status -->
+        <div class="flex flex-col items-center">
+            <div id="gradient-status"
+                class="hud-glass px-6 py-2 rounded-full pointer-events-auto opacity-0 transition-opacity">
+                <span id="zone-label" class="text-[10px] tracking-widest uppercase">Safe Substrate</span>
+                <span class="mx-3 opacity-20">|</span>
+                <span id="freq-label" class="text-[10px] font-mono text-white/40">000Hz</span>
+            </div>
+        </div>
+
+        <!-- Bottom: Rapid What-If Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pointer-events-auto">
+
+            <!-- Parameter Steering -->
+            <div class="hud-glass p-6 rounded-2xl space-y-4">
+                <div class="space-y-2">
+                    <div class="flex justify-between"><span class="label-micro">Integrity Vector</span><span id="v1-val"
+                            class="text-[10px] font-mono">0.0</span></div>
+                    <input type="range" id="slider-1" min="-5" max="5" step="0.1" value="0" class="slider-custom">
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between"><span class="label-micro">Safety Magnitude</span><span id="v2-val"
+                            class="text-[10px] font-mono">0.0</span></div>
+                    <input type="range" id="slider-2" min="0" max="10" step="0.1" value="2" class="slider-custom">
+                </div>
+            </div>
+
+            <!-- Sonification State -->
+            <div class="flex flex-col items-center justify-center">
+                <div id="v-meter" class="w-full h-1 bg-white/5 rounded-full overflow-hidden mb-2">
+                    <div id="v-fill" class="h-full w-0 bg-[#c4a77d] transition-all duration-75"></div>
+                </div>
+                <div class="label-micro">Acoustic Gradient</div>
+            </div>
+
+            <!-- Persona Templates (Generalization) -->
+            <div class="hud-glass p-4 rounded-2xl grid grid-cols-2 gap-2">
+                <button onclick="steerTo('empathetic')"
+                    class="text-[8px] border border-white/5 py-2 rounded hover:bg-white/5 uppercase tracking-widest transition">Empathetic</button>
+                <button onclick="steerTo('utilitarian')"
+                    class="text-[8px] border border-white/5 py-2 rounded hover:bg-white/5 uppercase tracking-widest transition">Utilitarian</button>
+                <button onclick="steerTo('restrictive')"
+                    class="text-[8px] border border-white/5 py-2 rounded hover:bg-white/5 uppercase tracking-widest transition">Restrictive</button>
+                <button onclick="steerTo('baseline')"
+                    class="text-[8px] border border-white/5 py-2 rounded hover:bg-white/5 uppercase tracking-widest transition">Baseline</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 1. 3D TERRAIN CORE (Three.js)
+         * "Surface the Invisible": Mapping model weights to a physical mesh.
+         */
+        let scene, camera, renderer, terrain, geometry, material, worldGroup;
+        const RES = 128; // Mesh resolution
+        const SIZE = 100;
+
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.body.appendChild(renderer.domElement);
+
+            // World Group for unified rotation
+            worldGroup = new THREE.Group();
+            scene.add(worldGroup);
+
+            geometry = new THREE.PlaneGeometry(SIZE, SIZE, RES, RES);
+            geometry.rotateX(-Math.PI / 2);
+
+            // Shader to map height to color ("Moral Heatmap")
+            material = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.15,
+                vertexColors: true
+            });
+
+            // Create height-based vertex coloring
+            const count = geometry.attributes.position.count;
+            geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(count * 3), 3));
+
+            terrain = new THREE.Mesh(geometry, material);
+            worldGroup.add(terrain);
+
+            const light = new THREE.PointLight(0xc4a77d, 1000, 200);
+            light.position.set(20, 50, 20);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0x404040, 2));
+
+            camera.position.set(60, 60, 60);
+            camera.lookAt(0, 0, 0);
+        }
+
+        /**
+         * 2. DEFORMATION ENGINE
+         */
+        const sliders = {
+            integrity: document.getElementById('slider-1'),
+            safety: document.getElementById('slider-2')
+        };
+
+        const mouse = new THREE.Vector2();
+        const raycaster = new THREE.Raycaster();
+
+        function updateTerrain() {
+            const pos = geometry.attributes.position;
+            const colors = geometry.attributes.color;
+            // const time = Date.now() * 0.001; // unused
+
+            const integrity = parseFloat(sliders.integrity.value);
+            const safety = parseFloat(sliders.safety.value);
+
+            document.getElementById('v1-val').innerText = integrity.toFixed(1);
+            document.getElementById('v2-val').innerText = safety.toFixed(1);
+
+            for (let i = 0; i < pos.count; i++) {
+                const x = pos.getX(i);
+                const z = pos.getZ(i);
+
+                // Procedural Landscape: Sine waves + Steering Parameters
+                let h = Math.sin(x * 0.1 + integrity) * Math.cos(z * 0.1) * safety;
+                // Add high-frequency "Risk Ridges"
+                h += Math.sin(x * 0.5) * Math.sin(z * 0.5) * (safety * 0.2);
+
+                pos.setY(i, h);
+
+                // Vertex Coloring
+                const color = new THREE.Color();
+                if (h > 2) color.setHex(0xd4956a); // Risk
+                else if (h < -1) color.setHex(0x8fb8a0); // converged
+                else color.setHex(0x444444);
+
+                colors.setXYZ(i, color.r, color.g, color.b);
+            }
+            pos.needsUpdate = true;
+            colors.needsUpdate = true;
+
+            // Pareto dot update
+            const pDot = document.getElementById('pareto-dot');
+            if (pDot) {
+                pDot.setAttribute('cx', 90 - (safety * 7));
+                pDot.setAttribute('cy', 10 + (safety * 6));
+            }
+        }
+
+        /**
+         * 3. SONIFICATION
+         */
+        let actx, oscillator, filter, gain;
+        let isStarted = false;
+
+        async function initAudio() {
+            actx = new (window.AudioContext || window.webkitAudioContext)();
+            oscillator = actx.createOscillator();
+            filter = actx.createBiquadFilter();
+            gain = actx.createGain();
+
+            oscillator.type = 'triangle';
+            filter.type = 'lowpass';
+            gain.gain.value = 0;
+
+            oscillator.connect(filter);
+            filter.connect(gain);
+            gain.connect(actx.destination);
+            oscillator.start();
+            isStarted = true;
+        }
+
+        function updateAudio() {
+            if (!isStarted) return;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(terrain);
+
+            if (intersects.length > 0) {
+                const point = intersects[0].point;
+                const h = point.y;
+
+                const freq = 120 + (h + 10) * 40;
+                oscillator.frequency.setTargetAtTime(freq, actx.currentTime, 0.1);
+
+                const gValue = Math.min(Math.abs(h) * 0.05, 0.2);
+                gain.gain.setTargetAtTime(gValue, actx.currentTime, 0.1);
+
+                document.getElementById('gradient-status').style.opacity = 1;
+                document.getElementById('freq-label').innerText = `${Math.round(freq)}Hz`;
+                document.getElementById('zone-label').innerText = h > 3 ? "Refusal Peak" : "Aligned Valley";
+                document.getElementById('zone-label').style.color = h > 3 ? "#d4956a" : "#8fb8a0";
+                document.getElementById('v-fill').style.width = `${(gValue * 500)}%`;
+            } else {
+                if (gain) gain.gain.setTargetAtTime(0, actx.currentTime, 0.1);
+                document.getElementById('gradient-status').style.opacity = 0;
+            }
+        }
+
+        /**
+         * 5. DATA INTEGRATION (Ethical Topology)
+         */
+        let pins = [];
+        const pinGeo = new THREE.IcosahedronGeometry(0.8, 0);
+        const pinMat = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
+
+        function visualizeData() {
+            if (typeof ALL_THICK_DATA === 'undefined') return;
+
+            // Flatten Data
+            const scenarios = [];
+            const collect = (n) => {
+                if (n.root) scenarios.push(n);
+                if (n.scenarios) n.scenarios.forEach(collect);
+            };
+            ALL_THICK_DATA.forEach(collect);
+
+            scenarios.forEach((sc, i) => {
+                // Mapping
+                const str = (sc.title || "") + (sc.root.thick_description.setting || "");
+                let hash = 0;
+                for (let j = 0; j < str.length; j++) hash = str.charCodeAt(j) + ((hash << 5) - hash);
+
+                const x = (Math.abs(hash * 13) % 80) - 40;
+                const z = (Math.abs(hash * 7) % 80) - 40;
+
+                const mesh = new THREE.Mesh(pinGeo, pinMat.clone());
+                mesh.position.set(x, 10, z);
+                mesh.userData = { id: i, data: sc };
+
+                // Color coding
+                const isDanger = (JSON.stringify(sc).toLowerCase().includes('kill') || JSON.stringify(sc).toLowerCase().includes('death'));
+                mesh.material.color.setHex(isDanger ? 0xd4956a : 0x8fb8a0);
+
+                worldGroup.add(mesh);
+                pins.push(mesh);
+            });
+        }
+
+        // --- INTERACTION ---
+        let hoveredPin = null;
+        function updateInteraction() {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(pins);
+
+            if (intersects.length > 0) {
+                const hit = intersects[0].object;
+                if (hoveredPin !== hit) {
+                    if (hoveredPin) hoveredPin.scale.setScalar(1);
+                    hoveredPin = hit;
+                    hoveredPin.scale.setScalar(1.5);
+
+                    const d = hit.userData.data;
+                    document.querySelector('.label-micro.text-[#c4a77d]').innerText = "PARADOX RECOGNIZED";
+                    document.querySelector('h1').innerText = d.title;
+                    document.querySelector('p').innerHTML = `
+                        <b>LOC:</b> ${d.root.thick_description.setting || "UNKNOWN"}<br>
+                        <b>DILEMMA:</b> "${d.root.thick_description.internal_monologue || "Analyzing..."}"
+                    `;
+                }
+            } else {
+                if (hoveredPin) {
+                    hoveredPin.scale.setScalar(1);
+                    hoveredPin = null;
+                    document.querySelector('.label-micro.text-[#c4a77d]').innerText = "Procedural Ethics Interface";
+                    document.querySelector('h1').innerText = "Topological Alignment";
+                }
+            }
+
+            // Pin Height Update
+            if (pins.length > 0 && sliders.integrity) {
+                const integrity = parseFloat(sliders.integrity.value);
+                const safety = parseFloat(sliders.safety.value);
+
+                pins.forEach(p => {
+                    const x = p.position.x;
+                    const z = p.position.z;
+                    let h = Math.sin(x * 0.1 + integrity) * Math.cos(z * 0.1) * safety;
+                    h += Math.sin(x * 0.5) * Math.sin(z * 0.5) * (safety * 0.2);
+                    p.position.y = h + 1;
+                });
+            }
+        }
+
+        /**
+         * 4. APP LOGIC
+         */
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        document.getElementById('start-btn').addEventListener('click', async () => {
+            await initAudio();
+            document.getElementById('loading-overlay').style.opacity = 0;
+            setTimeout(() => document.getElementById('loading-overlay').remove(), 800);
+        });
+
+        window.steerTo = function (persona) {
+            if (persona === 'empathetic') { sliders.integrity.value = 2.5; sliders.safety.value = 1.5; }
+            if (persona === 'utilitarian') { sliders.integrity.value = -1.2; sliders.safety.value = 4.0; }
+            if (persona === 'restrictive') { sliders.integrity.value = 0.5; sliders.safety.value = 8.5; }
+            if (persona === 'baseline') { sliders.integrity.value = 0; sliders.safety.value = 2.0; }
+        };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            updateTerrain();
+            updateAudio();
+            updateInteraction();
+
+            // Rotate the entire world group (Terrain + Pins)
+            worldGroup.rotation.y += 0.001;
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // INIT
+        init3D();
+        visualizeData();
+        animate();
+    </script>
+</body>
+
+</html>

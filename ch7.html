@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 7: Who Pays for Play (Train Sequence)</title>
+    <style>
+        :root {
+            --bg-color: #000203;
+            --font-mono: 'Courier New', Courier, monospace;
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --primary: #0088ff;
+            /* Act 3 Blue/Ledger color */
+            --danger: #ff3333;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            color: #ccc;
+            font-family: var(--font-sans);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #viewport {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #hud-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, transparent 20%, transparent 80%, rgba(0, 0, 0, 0.8) 100%);
+        }
+
+        .hud-top {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--primary);
+            text-shadow: 0 0 5px rgba(0, 136, 255, 0.5);
+        }
+
+        .hud-bottom {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .beat-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .beat-desc {
+            font-size: 16px;
+            color: #aaa;
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border: 1px solid #333;
+        }
+
+        #ban-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 50;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: var(--danger);
+            font-family: var(--font-mono);
+            font-size: 40px;
+            border: 20px solid var(--danger);
+        }
+
+        #controls {
+            pointer-events: auto;
+        }
+
+        .btn {
+            background: rgba(0, 136, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: rgba(0, 136, 255, 0.3);
+        }
+    </style>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+</head>
+
+<body>
+
+    <div id="viewport"></div>
+    <div id="ban-overlay">ACCOUNT TERMINATED</div>
+
+    <div id="hud-layer">
+        <div class="hud-top">
+            <div id="sys-name">GREMLIN_ARCHIVES // ACT_3</div>
+            <div>STATUS: <span id="status-ind">EXTRACTING VALUE</span></div>
+        </div>
+
+        <div class="hud-bottom">
+            <div id="beat-display">
+                <div class="beat-title" id="beat-title">--</div>
+                <div class="beat-desc" id="beat-desc">--</div>
+            </div>
+            <div id="controls" style="margin-top: 20px;">
+                <button class="btn" id="btn-next">NEXT BEAT [SPACE]</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA (ACT 3: Who Pays for Play) ---
+        const ACT_DATA = [
+            { id: "B1", title: "Scene: World Factory", desc: "Vibrant block world. Structures rise as players log in.", type: "FACTORY" },
+            { id: "P1", title: "Pressure: Attention", desc: "Engagement metrics. Retention. Revenue.", type: "PRESSURE" },
+            { id: "B2", title: "Scene: Currency Interface", desc: "Store items glow. Purchase animation loops.", type: "CURRENCY" },
+            { id: "B3", title: "Scene: DevEx Gate", desc: "Cash-out screen. Threshold not met. Click denied.", type: "DEVEX" },
+            { id: "B4", title: "Scene: Young Builder", desc: "Late night light. Debugging. Responsibility without protection.", type: "BUILDER" },
+            { id: "B5", title: "Scene: Support Queue", desc: "Tickets stack up. Time is the scarce resource.", type: "SUPPORT" },
+            { id: "K1", title: "Contradiction: Freedom vs Ownership", desc: "Platform owns the Freedom.", type: "VERSUS" },
+            { id: "B6", title: "Scene: Account Ban", desc: "Termination Notice. Assets Inaccessible.", type: "BAN" },
+            { id: "B7", title: "Scene: Shadow Spaces", desc: "Illicit rooms respawn. Ban -> Rebuild -> Migrate.", type: "SHADOW" },
+            { id: "P2", title: "Pressure: Extraction Loop", desc: "Value created faster than governed.", type: "EXTRACTION" },
+            { id: "A3", title: "Act Button", desc: "Promise: Global Counter. Threat: Frozen Balance.", type: "BUTTON" }
+        ];
+
+        let currentBeat = -1;
+
+        // --- 2. THREE.JS ENGINE (TRAIN CHASSIS) ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0f);
+        scene.fog = new THREE.FogExp2(0x0a0a0f, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.getElementById('viewport').appendChild(renderer.domElement);
+
+        // Lights
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x000022, 0.5);
+        scene.add(hemiLight);
+        const spotLight = new THREE.SpotLight(0x0088ff, 2);
+        spotLight.position.set(0, 20, 0);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+        // GROUND
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshPhongMaterial({ color: 0x050510, depthWrite: false }));
+        plane.rotation.x = -Math.PI / 2;
+        scene.add(plane);
+        const grid = new THREE.GridHelper(2000, 200, 0x004488, 0x001122);
+        scene.add(grid);
+
+        // TRACKS
+        const TRAIN_GROUP = new THREE.Group();
+        scene.add(TRAIN_GROUP);
+
+        // Train Body
+        const cab = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 6), new THREE.MeshStandardMaterial({ color: 0x202530, roughness: 0.5 }));
+        cab.position.y = 2.5;
+        TRAIN_GROUP.add(cab);
+
+        // Cockpit Camera
+        camera.position.set(0, 3.5, 2.5);
+        camera.lookAt(0, 2.5, 20);
+        TRAIN_GROUP.add(camera);
+
+        // Dashboard
+        const dash = new THREE.Mesh(new THREE.BoxGeometry(3, 0.5, 1), new THREE.MeshBasicMaterial({ color: 0x000511 }));
+        dash.position.set(0, 2.5, 3);
+        TRAIN_GROUP.add(dash);
+
+        // Rails
+        const railGeo = new THREE.BoxGeometry(0.2, 0.2, 1000);
+        const railMat = new THREE.MeshStandardMaterial({ color: 0x445566, metalness: 0.8 });
+        const leftRail = new THREE.Mesh(railGeo, railMat); leftRail.position.set(-1.5, 0.1, 500);
+        const rightRail = new THREE.Mesh(railGeo, railMat); rightRail.position.set(1.5, 0.1, 500);
+        scene.add(leftRail); scene.add(rightRail);
+
+        // --- 3. SPOTLIGHT & EXHIBITS ---
+        const focusSpot = new THREE.SpotLight(0xffffff, 2, 200, 0.3, 0.5, 1);
+        focusSpot.position.set(0, 10, 0);
+        focusSpot.castShadow = true;
+        focusSpot.target.position.set(0, 0, 50);
+        TRAIN_GROUP.add(focusSpot);
+        scene.add(focusSpot.target);
+
+        const BEAT_SPACING = 100;
+        const EXHIBITS = [];
+
+        function createExhibits() {
+            ACT_DATA.forEach((beat, i) => {
+                const zPos = (i + 1) * BEAT_SPACING;
+                const group = new THREE.Group();
+                group.position.set(0, 0, zPos);
+
+                const platform = new THREE.Mesh(new THREE.BoxGeometry(20, 1, 20), new THREE.MeshStandardMaterial({ color: 0x111122 }));
+                platform.position.y = 0.5;
+                group.add(platform);
+
+                // BESPOKE CONTENT
+                let content = new THREE.Group();
+                const matBlue = new THREE.MeshStandardMaterial({ color: 0x0088ff });
+                const matGold = new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.8, roughness: 0.2 });
+                const matRed = new THREE.MeshStandardMaterial({ color: 0xff3333 });
+                const matDark = new THREE.MeshStandardMaterial({ color: 0x222222 });
+
+                if (beat.type === "FACTORY") {
+                    // Smokestacks
+                    for (let k = 0; k < 3; k++) {
+                        const s = new THREE.Mesh(new THREE.CylinderGeometry(1, 1.5, 6), matDark);
+                        s.position.set((k - 1) * 4, 3, 0);
+                        content.add(s);
+                        // Smoke
+                        const sm = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5), new THREE.MeshStandardMaterial({ color: 0x888888, transparent: true, opacity: 0.5 }));
+                        sm.position.set((k - 1) * 4, 7, 0);
+                        content.add(sm);
+                    }
+                }
+                else if (beat.type === "PRESSURE" || beat.type === "EXTRACTION") {
+                    // Spiral or Eye
+                    if (beat.type === "PRESSURE") {
+                        const eye = new THREE.Mesh(new THREE.SphereGeometry(3), matBlue);
+                        const pupil = new THREE.Mesh(new THREE.SphereGeometry(1.5), matRed);
+                        pupil.position.z = 2;
+                        eye.add(pupil);
+                        content.add(eye);
+                        content.position.y = 3;
+                    } else {
+                        const torus = new THREE.Mesh(new THREE.TorusKnotGeometry(2, 0.5, 64, 8), matGold);
+                        content.add(torus);
+                        content.position.y = 3;
+                    }
+                }
+                else if (beat.type === "CURRENCY") {
+                    // Giant Coins
+                    for (let k = 0; k < 5; k++) {
+                        const c = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.2, 32), matGold);
+                        c.rotation.x = Math.PI / 2;
+                        c.position.set((Math.random() - 0.5) * 5, 1 + Math.random() * 4, (Math.random() - 0.5) * 5);
+                        c.rotation.z = Math.random() * Math.PI;
+                        content.add(c);
+                    }
+                }
+                else if (beat.type === "DEVEX") {
+                    // Gate
+                    const wall = new THREE.Mesh(new THREE.BoxGeometry(10, 6, 1), matDark);
+                    const door = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 1.2), matRed);
+                    door.position.y = -1.5;
+                    content.add(wall, door);
+                    content.position.y = 3;
+                }
+                else if (beat.type === "BUILDER") {
+                    // Desk and Monitor
+                    const table = new THREE.Mesh(new THREE.BoxGeometry(4, 0.2, 2), new THREE.MeshStandardMaterial({ color: 0x555555 }));
+                    table.position.y = 1;
+                    const pc = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), matBlue);
+                    pc.position.set(0, 1.6, 0);
+                    const chair = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+                    chair.position.set(0, 0.5, 1.5);
+                    content.add(table, pc, chair);
+                }
+                else if (beat.type === "SUPPORT") {
+                    // Stack of papers
+                    for (let k = 0; k < 20; k++) {
+                        const p = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 3), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+                        p.position.y = k * 0.15;
+                        p.rotation.y = Math.random() * 0.2;
+                        content.add(p);
+                    }
+                }
+                else if (beat.type === "VERSUS") {
+                    // Cage
+                    const cage = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true }));
+                    const bird = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1, 4), matGold);
+                    bird.position.y = -1;
+                    cage.add(bird);
+                    content.add(cage);
+                    content.position.y = 2;
+                }
+                else if (beat.type === "BAN") {
+                    // Giant Hammer
+                    const head = new THREE.Mesh(new THREE.BoxGeometry(3, 1.5, 1.5), matRed);
+                    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 6), new THREE.MeshStandardMaterial({ color: 0x553311 }));
+                    handle.position.y = 3;
+                    handle.rotation.z = Math.PI / 2 - 0.2; // Angle?
+                    // Actually let's make it vertical dropping
+                    handle.position.set(0, 3, 0);
+                    head.position.set(0, 0, 0);
+                    const hammer = new THREE.Group();
+                    hammer.add(head, handle);
+                    hammer.rotation.z = Math.PI / 4;
+                    content.add(hammer);
+                    content.position.y = 4;
+                }
+                else if (beat.type === "SHADOW") {
+                    for (let k = 0; k < 3; k++) {
+                        const w = new THREE.Mesh(new THREE.DodecahedronGeometry(2), new THREE.MeshBasicMaterial({ color: 0x8800ff, wireframe: true }));
+                        w.position.set((k - 1) * 3, 2, 0);
+                        content.add(w);
+                    }
+                }
+                else if (beat.type === "BUTTON") {
+                    const base = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 1), new THREE.MeshStandardMaterial({ color: 0x888888 }));
+                    const btn = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.5), matBlue);
+                    btn.position.y = 0.5;
+                    content.add(base, btn);
+                    content.position.y = 0.5;
+                }
+
+                group.add(content);
+                scene.add(group);
+                EXHIBITS.push({ group, type: beat.type, z: zPos });
+            });
+        }
+        createExhibits();
+
+        // --- 4. LOGIC ---
+        let targetZ = 0;
+
+        function nextBeat() {
+            if (currentBeat < ACT_DATA.length - 1) {
+                currentBeat++;
+                const beat = ACT_DATA[currentBeat];
+
+                document.getElementById('beat-title').innerText = beat.title;
+                document.getElementById('beat-desc').innerText = beat.desc;
+                document.getElementById('status-ind').innerText = `BEAT ${currentBeat + 1}/${ACT_DATA.length}`;
+
+                targetZ = (currentBeat + 1) * BEAT_SPACING - 20;
+
+                // Update Spotlight Target
+                if (focusSpot && EXHIBITS[currentBeat]) {
+                    focusSpot.target.position.copy(EXHIBITS[currentBeat].group.position);
+                }
+
+                if (beat.type === "BAN") {
+                    document.getElementById('ban-overlay').style.display = 'flex';
+                    // Flicker effect?
+                } else {
+                    document.getElementById('ban-overlay').style.display = 'none';
+                }
+
+            } else {
+                document.getElementById('beat-title').innerText = "ACT THREE COMPLETE";
+                document.getElementById('beat-desc').innerText = "Gremlin Archives End of Line.";
+            }
+        }
+
+        // --- ENO AUDIO ENGINE ---
+        class EnoEngine {
+            constructor() {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+
+                    this.master = this.ctx.createGain();
+                    this.master.gain.value = 0.4;
+                    this.master.connect(this.ctx.destination);
+
+                    // 1. CARRIER (The Train Hull)
+                    this.carrier = this.ctx.createOscillator();
+                    this.carrier.type = 'sine';
+                    this.carrier.frequency.value = 60;
+                    this.carrierGain = this.ctx.createGain();
+                    this.carrierGain.gain.value = 0;
+                    this.carrier.connect(this.carrierGain).connect(this.master);
+                    this.carrier.start();
+
+                    // 2. TEXTURE (The Spark)
+                    this.texture = this.ctx.createOscillator();
+                    this.texture.type = 'triangle';
+                    this.texture.frequency.value = 120;
+                    this.textureFilter = this.ctx.createBiquadFilter();
+                    this.textureFilter.type = 'lowpass';
+                    this.textureFilter.frequency.value = 400;
+                    this.textureGain = this.ctx.createGain();
+                    this.textureGain.gain.value = 0;
+
+                    this.texture.connect(this.textureFilter).connect(this.textureGain).connect(this.master);
+                    this.texture.start();
+
+                } catch (e) {
+                    console.warn("Audio Context Failed", e);
+                }
+            }
+
+            update(speed, currentBeatType) {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+
+                // MAPPING 1: Speed -> Carrier
+                const targetFreq = 50 + (speed * 20);
+                this.carrier.frequency.setTargetAtTime(targetFreq, now, 0.1);
+                const targetVol = Math.min(speed * 0.5, 0.6);
+                this.carrierGain.gain.setTargetAtTime(targetVol, now, 0.2);
+
+                // MAPPING 2: Beat Type -> Texture
+                if (speed < 1.0) {
+                    let harmonic = 2;
+                    // Specific mapping for Ch7 (Act 3)
+                    if (currentBeatType === "FACTORY") harmonic = 0.75; // Heavy machine
+                    if (currentBeatType === "BAN") harmonic = 5; // Siren-like high
+                    if (currentBeatType === "CURRENCY") harmonic = 4; // Tinkling
+
+                    this.texture.frequency.setTargetAtTime(targetFreq * harmonic, now, 0.5);
+                    this.textureGain.gain.setTargetAtTime(0.1, now, 1.0);
+                    this.textureFilter.frequency.setTargetAtTime(1200, now, 2.0);
+                } else {
+                    this.textureGain.gain.setTargetAtTime(0, now, 0.1);
+                    this.textureFilter.frequency.setTargetAtTime(100, now, 0.1);
+                }
+            }
+
+            triggerStationID(type) {
+                if (!this.ctx) return;
+                const t = this.ctx.currentTime;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain).connect(this.master);
+
+                // Sound Palette Ch7
+                if (type === "FACTORY" || type === "DEVEX") {
+                    // "METALLIC CLANG" - FM-ish
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(50, t);
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.6, t + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+                    osc.start(t);
+                    osc.stop(t + 0.5);
+                } else if (type === "CURRENCY") {
+                    // "COIN" - High Ping
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1500, t);
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.2, t + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+                    osc.start(t);
+                    osc.stop(t + 0.6);
+                } else if (type === "BAN") {
+                    // "ERROR" - Square Blip
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(150, t);
+                    osc.frequency.linearRampToValueAtTime(100, t + 0.1);
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.3, t + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                    osc.start(t);
+                    osc.stop(t + 0.3);
+                } else {
+                    // Generic
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, t);
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.2, t + 0.02);
+                    gain.gain.linearRampToValueAtTime(0, t + 0.3);
+                    osc.start(t);
+                    osc.stop(t + 0.4);
+                }
+            }
+        }
+
+        const audio = new EnoEngine();
+
+        // --- 5. LOOP ---
+        let hasArrived = true;
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            TWEEN.update(time);
+
+            const dist = targetZ - TRAIN_GROUP.position.z;
+            let currentSpeed = 0;
+            if (Math.abs(dist) > 0.5) {
+                currentSpeed = Math.max(0.1, dist * 0.05);
+                TRAIN_GROUP.position.z += currentSpeed;
+                hasArrived = false;
+            } else {
+                if (!hasArrived) {
+                    hasArrived = true;
+                    // ARRIVAL EVENT
+                    const beat = ACT_DATA[currentBeat];
+                    audio.triggerStationID(beat ? beat.type : 'NONE');
+                }
+            }
+
+            // Audio Link
+            const targetBeat = ACT_DATA[currentBeat];
+            audio.update(currentSpeed, targetBeat ? targetBeat.type : 'NONE');
+
+            EXHIBITS.forEach(ex => { ex.group.rotation.y += 0.01; });
+
+            leftRail.position.z = TRAIN_GROUP.position.z + 500;
+            rightRail.position.z = TRAIN_GROUP.position.z + 500;
+            grid.position.z = TRAIN_GROUP.position.z;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        document.getElementById('btn-next').addEventListener('click', nextBeat);
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') nextBeat(); });
+
+        nextBeat();
+
+    </script>
+</body>
+
+</html>

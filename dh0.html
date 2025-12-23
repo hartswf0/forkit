@@ -1061,11 +1061,131 @@
             }
         });
 
-        function animate() { requestAnimationFrame(animate); updatePhysics(); renderer.render(scene, camera); }
-        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+        // --- CAMERA SYSTEM ---
+        function setCam(mode) {
+            STATE.cameraMode = mode;
+            // Update UI buttons
+            document.querySelectorAll('.cam-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.includes(mode) || (btn.innerText === mode));
+            });
+            // Specific overrides for POV buttons
+            if (mode === 'POV_A') document.querySelector('.pov-a').classList.add('active');
+            if (mode === 'POV_B') document.querySelector('.pov-b').classList.add('active');
+        }
 
-        initAudio();
+        function updateCamera() {
+            const z = STATE.distance;
+            const lookZ = z + 20;
+            const trainPos = getHelixPos(z, STATE.currentStrand);
+            const lookPos = getHelixPos(lookZ, STATE.currentStrand);
+
+            const target = new THREE.Vector3(trainPos.x, trainPos.y, trainPos.z);
+            const lookAt = new THREE.Vector3(lookPos.x, lookPos.y, lookPos.z);
+
+            // Smoothly interpolate current camera position
+            const speed = 0.05;
+
+            if (STATE.cameraMode === 'TUNNEL') {
+                // Fixed relative to train, inside/behind
+                camera.position.lerp(new THREE.Vector3(target.x, target.y + 2, target.z - 5), speed);
+                camera.lookAt(target.clone().add(new THREE.Vector3(0, 0, 20)));
+            }
+            else if (STATE.cameraMode === 'CHASE') {
+                // High and behind
+                camera.position.lerp(new THREE.Vector3(target.x, target.y + 8, target.z - 15), speed);
+                camera.lookAt(target);
+            }
+            else if (STATE.cameraMode === 'DRONE') {
+                // Side view / orbital
+                const angle = Date.now() * 0.0005;
+                camera.position.lerp(new THREE.Vector3(
+                    target.x + Math.cos(angle) * 30,
+                    target.y + 15,
+                    target.z - 10
+                ), speed);
+                camera.lookAt(target);
+            }
+            else if (STATE.cameraMode === 'POV_A') {
+                const p = getHelixPos(z + 5, 'A');
+                camera.position.lerp(new THREE.Vector3(p.x, p.y + 1, p.z), 0.1);
+                const nextP = getHelixPos(z + 10, 'A');
+                camera.lookAt(new THREE.Vector3(nextP.x, nextP.y, nextP.z));
+            }
+            else if (STATE.cameraMode === 'POV_B') {
+                const p = getHelixPos(z + 5, 'B');
+                camera.position.lerp(new THREE.Vector3(p.x, p.y + 1, p.z), 0.1);
+                const nextP = getHelixPos(z + 10, 'B');
+                camera.lookAt(new THREE.Vector3(nextP.x, nextP.y, nextP.z));
+            }
+        }
+
+        // --- ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (!STATE.paused) {
+                // Move Train
+                STATE.distance += CFG.speed;
+
+                // Camera Update
+                updateCamera();
+
+                // Chunk Generation (Infinite)
+                const forwardEdge = Math.floor(STATE.distance + 150);
+                if (!STATE.chunks.includes(forwardEdge)) {
+                    STATE.chunks.push(forwardEdge);
+                    // Cleanup old
+                    if (STATE.chunks.length > 200) STATE.chunks.shift();
+
+                    const chunk = createChunk(forwardEdge);
+                    scene.add(chunk);
+
+                    // Cleanup scene objects too far behind
+                    scene.children.forEach(child => {
+                        if (child.position.z < STATE.distance - 50 && child.userData.type === 'rail') {
+                            scene.remove(child);
+                        }
+                    });
+                }
+
+                // Update Train Group Position (it actually stays responsive to helix)
+                const tPos = getHelixPos(STATE.distance, STATE.currentStrand);
+                const tTan = getTangent(STATE.distance, STATE.currentStrand);
+                trainGroup.position.set(tPos.x, tPos.y, tPos.z);
+                trainGroup.lookAt(trainGroup.position.clone().add(tTan));
+
+                // HUD
+                // Fake approaching entities for demo
+                const distToNext = STATE.nextDecisionZ - STATE.distance;
+                if (STATE.distance > STATE.nextDecisionZ) STATE.nextDecisionZ += CFG.decisionInterval;
+
+                // Get dummy chars for HUD
+                if (!STATE.approachingPair) {
+                    STATE.approachingPair = {
+                        z: STATE.nextDecisionZ,
+                        A: generatePersona(),
+                        B: generatePersona()
+                    };
+                }
+
+                updateHUD(distToNext, STATE.approachingPair.A, STATE.approachingPair.B, null, null);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Init
         animate();
+        setCam('TUNNEL'); // Default
+
+        // Toggle Strand logic
+        window.toggleStrand = function () {
+            STATE.targetStrand = STATE.targetStrand === 'A' ? 'B' : 'A';
+            document.getElementById('leverVisual').className = `lever-base strand-${STATE.targetStrand}`;
+
+            // In this simplified helix, we just snap or lerp the current strand
+            STATE.currentStrand = STATE.targetStrand; // Instant switch for responsiveness
+        };
 
     </script>
 </body>

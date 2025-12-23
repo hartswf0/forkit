@@ -5,20 +5,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>THE FORK — Paradox Lever</title>
+    <title>THE FORK — Continuous Paradox (Ethical Runtime)</title>
     <!-- THREE.JS r128 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- THICK DATA EMBED -->
+    <script src="thick_data_merged.js"></script>
+
     <style>
         :root {
             --bg: #05080a;
             --panel: rgba(12, 16, 20, .92);
             --text: #e8eef7;
             --dim: #90a0b3;
-            --border: rgba(255, 255, 255, .14);
             --junction: #ffd400;
             --trackA: #00f0ff;
             --trackB: #ff3355;
-            --halt: #8a8a8a;
             --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
 
@@ -33,15 +34,24 @@
             background: var(--bg);
             color: var(--text);
             font-family: var(--mono);
-            user-select: none;
             touch-action: none;
         }
 
         #canvas {
             position: fixed;
             inset: 0;
+            z-index: 1;
         }
 
+        #vignette {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.8));
+            z-index: 5;
+        }
+
+        /* UI OVERLAY */
         #ui {
             position: fixed;
             inset: 0;
@@ -55,76 +65,53 @@
 
         .top {
             pointer-events: auto;
-            padding: 12px 14px 10px;
-            background: linear-gradient(180deg, rgba(0, 0, 0, .92) 0%, transparent 100%);
+            padding: 12px 14px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
         }
 
         .row {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            gap: 10px;
+            align-items: start;
         }
 
-        .title h1 {
+        h1 {
             margin: 0;
-            font-size: 13px;
-            letter-spacing: 1.2px;
-            font-weight: 900;
-        }
-
-        .title span {
-            display: block;
-            margin-top: 2px;
-            font-size: 10px;
-            color: var(--dim);
-            letter-spacing: 1.6px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            color: var(--junction);
             text-transform: uppercase;
         }
 
-        .btns {
-            display: flex;
-            gap: 8px;
-        }
-
-        .mini {
-            pointer-events: auto;
-            height: 32px;
-            padding: 0 10px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, .16);
-            background: rgba(255, 255, 255, .08);
-            color: var(--text);
-            font-family: inherit;
+        .meta {
             font-size: 10px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            cursor: pointer;
+            color: var(--dim);
+            margin-top: 2px;
         }
 
-        .mini.active {
-            background: var(--text);
-            color: #000;
-        }
-
-        #tape {
+        .tape-cont {
             display: flex;
             gap: 2px;
             height: 4px;
-            width: 100%;
-            border-radius: 4px;
+            border-radius: 2px;
+            background: rgba(0, 0, 0, 0.5);
+            margin-top: 8px;
             overflow: hidden;
-            background: rgba(0, 0, 0, .45);
-            margin-top: 4px;
         }
 
         .tick {
             flex: 1;
             height: 100%;
-            background: #444;
+            background: #333;
+            transition: background 0.2s;
+        }
+
+        .tick.active {
+            background: #fff;
+            box-shadow: 0 0 5px #fff;
         }
 
         .tick.A {
@@ -135,215 +122,108 @@
             background: var(--trackB);
         }
 
-        .tick.H {
-            background: var(--halt);
-        }
-
-        #hud {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            color: rgba(232, 238, 247, .72);
-            letter-spacing: 1.4px;
-            text-transform: uppercase;
-            margin-top: 6px;
-        }
-
-        .pill {
-            border: 1px solid rgba(255, 255, 255, .14);
-            border-radius: 999px;
-            padding: 3px 8px;
-            background: rgba(0, 0, 0, .25);
-        }
-
-        .pill b {
-            color: #fff;
-        }
-
-        .cam-dock {
-            position: absolute;
-            top: 100px;
-            right: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            pointer-events: auto;
-        }
-
-        .cam-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, .12);
-            background: rgba(0, 0, 0, .6);
-            color: #888;
-            display: grid;
-            place-items: center;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all .2s;
-        }
-
-        .cam-btn.active {
-            border-color: #fff;
-            color: #fff;
-            background: rgba(255, 255, 255, .1);
-            box-shadow: 0 0 15px rgba(255, 255, 255, .15);
-        }
-
+        /* CONTROLS */
         .bottom {
             pointer-events: auto;
-            padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
-            background: linear-gradient(0deg, rgba(0, 0, 0, 1) 50%, transparent 100%);
+            padding: 20px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 1) 30%, transparent 100%);
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .big {
-            height: 70px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, .14);
-            background: rgba(22, 28, 36, .86);
-            color: #fff;
-            font-family: inherit;
-            cursor: pointer;
-            padding: 0 14px;
-            display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .lever-grid {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+            justify-content: center;
+        }
+
+        .lever-btn {
+            flex: 1;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
             position: relative;
             overflow: hidden;
-            transition: transform .08s;
         }
 
-        .big:active {
-            transform: scale(.98);
+        .lever-btn:active {
+            transform: scale(0.98);
         }
 
-        .big .l {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .big strong {
-            font-size: 14px;
+        .lever-btn strong {
+            font-size: 16px;
             letter-spacing: 1px;
-        }
-
-        .big small {
-            font-size: 10px;
-            opacity: .75;
-            letter-spacing: 1.1px;
-            text-transform: uppercase;
-        }
-
-        .tag {
-            font-size: 10px;
-            letter-spacing: 1px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, .18);
-            background: rgba(0, 0, 0, .22);
-        }
-
-        .A {
-            border-color: rgba(0, 240, 255, .42);
-            box-shadow: 0 0 30px rgba(0, 240, 255, .1);
-        }
-
-        .A .tag {
-            color: var(--trackA);
-            border-color: rgba(0, 240, 255, .45);
-        }
-
-        .B {
-            border-color: rgba(255, 51, 85, .40);
-            box-shadow: 0 0 30px rgba(255, 51, 85, .1);
-        }
-
-        .B .tag {
-            color: var(--trackB);
-            border-color: rgba(255, 51, 85, .45);
-        }
-
-        .hint {
-            text-align: center;
-            font-size: 10px;
-            color: #666;
-            letter-spacing: 2px;
-            text-transform: uppercase;
             margin-bottom: 4px;
-            opacity: 0;
-            transition: opacity .3s;
         }
 
-        .hint.show {
-            opacity: 1;
+        .lever-btn span {
+            font-size: 10px;
+            color: var(--dim);
+            text-transform: uppercase;
         }
 
-        #bubbles {
-            position: fixed;
-            inset: 0;
-            z-index: 12;
-            pointer-events: none;
+        .lever-btn.A {
+            border-color: rgba(0, 240, 255, 0.3);
         }
 
+        .lever-btn.A:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        .lever-btn.B {
+            border-color: rgba(255, 51, 85, 0.3);
+        }
+
+        .lever-btn.B:hover {
+            background: rgba(255, 51, 85, 0.1);
+            box-shadow: 0 0 20px rgba(255, 51, 85, 0.1);
+        }
+
+        .lever-btn.selected {
+            background: #fff !important;
+            color: #000 !important;
+            transform: scale(1.05);
+            z-index: 20;
+        }
+
+        /* 3D LABEL OVERLAYS (Bubbles) */
         .bubble {
             position: absolute;
             transform: translate(-50%, -100%);
-            padding: 8px 12px;
-            border-radius: 14px;
-            background: rgba(0, 0, 0, .75);
-            border: 1px solid #444;
-            backdrop-filter: blur(4px);
-            color: #fff;
-            font-size: 11px;
-            max-width: 200px;
-            text-align: center;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--junction);
+            color: var(--junction);
+            font-size: 9px;
+            pointer-events: none;
             opacity: 0;
-            transition: opacity .2s;
-            margin-top: -15px;
-        }
-
-        .bubble:after {
-            content: "";
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            margin-left: -6px;
-            border-width: 6px 6px 0;
-            border-style: solid;
-            border-color: rgba(0, 0, 0, .75) transparent transparent;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            z-index: 2;
         }
 
         .bubble.visible {
             opacity: 1;
         }
 
-        #vignette {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.8));
-            z-index: 5;
-        }
-
-        #flash {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background: #fff;
-            opacity: 0;
-            z-index: 20;
-            transition: opacity 0.1s;
+        .stakes-bubble {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+            text-align: center;
         }
     </style>
 </head>
@@ -351,454 +231,446 @@
 <body>
     <div id="canvas"></div>
     <div id="vignette"></div>
-    <div id="flash"></div>
-    <div id="bubbles"></div>
 
     <div id="ui">
         <div class="top">
             <div class="row">
-                <div class="title">
-                    <h1 id="s-title">THE FORK</h1>
-                    <span id="s-loc">Initializing...</span>
-                </div>
-                <div class="btns">
-                    <button class="mini" id="btn-audio">AUDIO</button>
-                    <button class="mini" id="btn-reset">R</button>
+                <div>
+                    <h1 id="s-title">INITIALIZING SYSTEM...</h1>
+                    <div class="meta" id="s-meta">/// ETHICAL RUNTIME ACTIVE</div>
                 </div>
             </div>
-            <div id="tape"></div>
-            <div id="hud">
-                <span class="pill">LOOP <b id="loop-n">1</b></span>
-                <span id="status">APPROACHING JUNCTION</span>
-            </div>
-        </div>
-
-        <div class="cam-dock">
-            <div class="cam-btn active" onclick="setCam(0)">1</div>
-            <div class="cam-btn" onclick="setCam(1)">2</div>
-            <div class="cam-btn" onclick="setCam(2)">3</div>
-            <div class="cam-btn" onclick="setCam(3)">4</div>
+            <div class="tape-cont" id="tape"></div>
         </div>
 
         <div class="bottom">
-            <div class="hint" id="hint">DECISION IMMINENT</div>
-            <div class="grid">
-                <button class="big A" id="btn-a" onclick="choose('A')">
-                    <div class="l"><strong>TRACK A</strong><small id="lbl-a">--</small></div>
-                    <div class="tag">A</div>
-                </button>
-                <button class="big B" id="btn-b" onclick="choose('B')">
-                    <div class="l"><strong>TRACK B</strong><small id="lbl-b">--</small></div>
-                    <div class="tag">B</div>
-                </button>
+            <div class="meta" id="status-text">APPROACHING DECISION POINT</div>
+            <div class="lever-grid">
+                <div class="lever-btn A" id="btn-a" onclick="commit('A')">
+                    <strong>PATH A</strong>
+                    <span id="lbl-a">PROTOCOL</span>
+                </div>
+                <div class="lever-btn B" id="btn-b" onclick="commit('B')">
+                    <strong>PATH B</strong>
+                    <span id="lbl-b">RISK</span>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- BUBBLE CONTAINER -->
+    <div id="bubbles"></div>
+
     <script>
-        const UI = {
-            title: document.getElementById('s-title'), loc: document.getElementById('s-loc'),
-            loop: document.getElementById('loop-n'), status: document.getElementById('status'),
-            lblA: document.getElementById('lbl-a'), lblB: document.getElementById('lbl-b'),
-            btnA: document.getElementById('btn-a'), btnB: document.getElementById('btn-b'),
-            hint: document.getElementById('hint'), tape: document.getElementById('tape'),
-            flash: document.getElementById('flash'), bubbles: document.getElementById('bubbles')
-        };
-
-        // --- CORPUS LOADING ---
-        const FILES = [
-            'fork-paradox-cascade-thick-6.json', 'fork-paradox-cascade-thick-12.json', 'fork-paradox-cascade-thick-18.json',
-            'fork-paradox-cascade-thick-24.json', 'fork-paradox-cascade-thick-30.json', 'fork-paradox-cascade-thick-36.json',
-            'fork-paradox-cascade-thick-42.json', 'fork-paradox-cascade-thick-48.json'
-        ];
-        let SCENARIOS = [];
-
-        // --- GAME STATE ---
-        const STATE = {
-            speed: 0, targetSpeed: 30, // units per second
-            d: 0, // total distance traveled
-            choice: null, committed: null,
-            segmentIndex: 0,
-            segments: [], // Active world chunks
-            camMode: 0,
-            flash: 0,
-            shake: 0
-        };
-
+        // --- CONFIG ---
         const CFG = {
-            segLength: 400, // Length of one scenario segment
-            forkDist: 150,  // Distance into segment where fork splits
-            mergeDist: 350, // Distance where choice is final/merged
-            railWidth: 1.435,
-            colors: { a: 0x00f0ff, b: 0xff3355, junction: 0xffd400 }
+            segLen: 600,       // Total length of a segment (straight + curve)
+            forkStart: 100,    // Where the decision window starts visually
+            forkSplit: 200,    // Where the rails physically split
+            decisionPoint: 400,// Point of no return
+            speedAttrs: { min: 20, max: 100, accel: 10 },
+            colors: { A: 0x00f0ff, B: 0xff3355, Amb: 0xffffff },
+            railWidth: 2
         };
 
-        // --- THREE SETUP ---
+        const STATE = {
+            scenarios: [],     // Flattened queue
+            currentIdx: 0,
+            speed: 50,
+            d: 0,              // Train distance
+            segments: [],      // Active segment objects
+            committed: null,   // 'A' or 'B'
+            nextSpawned: false
+        };
+
+        // --- THREE.JS SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x05080a, 0.0025);
-        const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 1000);
+        scene.fog = new THREE.FogExp2(0x05080a, 0.0015);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-        renderer.setSize(innerWidth, innerHeight);
+        renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas').appendChild(renderer.domElement);
 
-        // Lighting
-        const amb = new THREE.AmbientLight(0xffffff, 0.4); scene.add(amb);
-        const sun = new THREE.DirectionalLight(0xffffff, 1.0); sun.position.set(20, 50, 20); scene.add(sun);
-
-        // Train
+        // Train Group
         const train = new THREE.Group();
         scene.add(train);
+        // Cab Light
+        const spot = new THREE.SpotLight(0xffffff, 2, 300, 0.5, 0.5);
+        spot.position.set(0, 5, 0);
+        spot.target.position.set(0, 0, 50);
+        train.add(spot); train.add(spot.target);
+        // Headlight glow
+        const glow = new THREE.PointLight(0x00f0ff, 1, 20);
+        glow.position.set(0, 2, 5);
+        train.add(glow);
 
-        // Audio
-        let audioCtx;
-        function initAudio() {
-            if (audioCtx) return;
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.frequency.value = 60;
-            gain.gain.value = 0.05;
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start();
-            document.getElementById('btn-audio').classList.add('active');
+        // Env Light
+        const amb = new THREE.AmbientLight(0xffffff, 0.1); scene.add(amb);
+
+        // --- DATA PROCESSING ---
+        function loadData() {
+            if (typeof ALL_THICK_DATA === 'undefined') return;
+
+            // 1. Hydrate the tree (convert ID strings to objects)
+            const allScenarios = [];
+            function collect(node) {
+                if (node.root) allScenarios.push(node);
+                if (node.scenarios) node.scenarios.forEach(collect);
+            }
+            ALL_THICK_DATA.forEach(collect);
+
+            // Hydration Logic
+            allScenarios.forEach(sc => {
+                if (!sc.root || !sc.branches) return;
+                const map = {};
+                sc.branches.forEach(b => {
+                    if (b.branch_id) map[b.branch_id] = b;
+                });
+
+                function resolve(node) {
+                    if (!node || !node.branches) return;
+                    const newBranches = [];
+                    node.branches.forEach(bId => {
+                        if (typeof bId === 'string') {
+                            if (map[bId]) newBranches.push(map[bId]);
+                            else newBranches.push({ label: "MISSING DATA (" + bId + ")", branch_id: bId });
+                        } else {
+                            newBranches.push(bId);
+                        }
+                    });
+                    node.branches = newBranches;
+                    // Recurse
+                    node.branches.forEach(resolve);
+                }
+                resolve(sc.root);
+            });
+
+            // 2. Queue for Infinite Runner
+            STATE.scenarios = [...allScenarios, ...allScenarios, ...allScenarios];
+
+            // Init UI Tape
+            const tape = document.getElementById('tape');
+            STATE.scenarios.forEach((s, i) => {
+                if (i > 20) return; // limit tape logic
+                const t = document.createElement('div');
+                t.className = 'tick';
+                t.id = 'tick-' + i;
+                tape.appendChild(t);
+            });
         }
-        document.getElementById('btn-audio').onclick = initAudio;
 
-        // --- SEGMENT CLASS ---
+        // --- SEGMENT LOGIC ---
         class Segment {
             constructor(index, startPos, startDir) {
                 this.index = index;
-                this.data = SCENARIOS[index % SCENARIOS.length];
+                this.scenario = STATE.scenarios[index % STATE.scenarios.length];
                 this.group = new THREE.Group();
+                this.startPos = startPos;
+                this.startDir = startDir.normalize();
+
                 scene.add(this.group);
 
-                // Track Generation
-                this.paths = this.buildPaths(startPos, startDir);
-                this.buildMeshes();
-                this.populate();
-
-                // Active Choice
-                this.choice = null;
+                this.buildTrack();
+                this.addDecor();
+                this.addSigns();
             }
 
-            buildPaths(pos, dir) {
-                // Determine next start pos based on a straight line for now, 
-                // but we can curve. Let's do a simple S-curve fork.
-                // Start -> Split -> 2 Parallel -> Converge?
-                // Infinite runner usually doesn't converge, just keeps going.
-                // But to save geometry we can make them visually converge or just spawn next seg at end of CHOSEN path.
+            buildTrack() {
+                // We create a straight section, then a fork.
 
-                // We will generate 3 paths: SHARED, A, B.
-                // SHARED: 0 to forkDist
-                // A: forkDist to mergeDist (curves Left)
-                // B: forkDist to mergeDist (curves Right)
+                // 1. Shared Path (0 -> forkSplit)
+                const p0 = this.startPos.clone();
+                const straightVec = this.startDir.clone().multiplyScalar(CFG.forkSplit);
+                const pSplit = p0.clone().add(straightVec);
 
-                const p0 = pos.clone();
-                const p1 = pos.clone().add(dir.clone().multiplyScalar(CFG.forkDist));
+                const sharedCurve = new THREE.LineCurve3(p0, pSplit);
+                this.meshTrack(sharedCurve, 0x666666, 1);
 
-                // Shared path (straight)
-                const shared = new THREE.LineCurve3(p0, p1);
-
-                // Fork points
-                const spread = 20;
-                const len = CFG.mergeDist - CFG.forkDist;
+                // 2. Fork Paths (forkSplit -> segLen)
+                const remaining = CFG.segLen - CFG.forkSplit;
+                const spread = 40; // How wide they split
 
                 // Path A (Left)
-                const aControl = p1.clone().add(dir.clone().multiplyScalar(len * 0.3)).add(new THREE.Vector3(-spread, 0, 0));
-                const aEnd = p1.clone().add(dir.clone().multiplyScalar(len)).add(new THREE.Vector3(-spread, 0, 0));
-                const pathA = new THREE.QuadraticBezierCurve3(p1, aControl, aEnd);
+                const endA = pSplit.clone()
+                    .add(this.startDir.clone().multiplyScalar(remaining)) // Forward
+                    .add(this.getRightVector().multiplyScalar(-spread));  // Left
+
+                const cpA = pSplit.clone().add(this.startDir.clone().multiplyScalar(remaining * 0.5));
+                this.curveA = new THREE.QuadraticBezierCurve3(pSplit, cpA, endA);
+                this.meshTrack(this.curveA, CFG.colors.A, 0.8);
 
                 // Path B (Right)
-                const bControl = p1.clone().add(dir.clone().multiplyScalar(len * 0.3)).add(new THREE.Vector3(spread, 0, 0));
-                const bEnd = p1.clone().add(dir.clone().multiplyScalar(len)).add(new THREE.Vector3(spread, 0, 0));
-                const pathB = new THREE.QuadraticBezierCurve3(p1, bControl, bEnd);
+                const endB = pSplit.clone()
+                    .add(this.startDir.clone().multiplyScalar(remaining)) // Forward
+                    .add(this.getRightVector().multiplyScalar(spread));   // Right
 
-                return { shared, a: pathA, b: pathB, endA: aEnd, endB: bEnd, dir: dir };
+                const cpB = pSplit.clone().add(this.startDir.clone().multiplyScalar(remaining * 0.5));
+                this.curveB = new THREE.QuadraticBezierCurve3(pSplit, cpB, endB);
+                this.meshTrack(this.curveB, CFG.colors.B, 0.8);
+
+                // Save endpoints for next segment
+                this.endA = { pos: endA, dir: endA.clone().sub(cpA).normalize() };
+                this.endB = { pos: endB, dir: endB.clone().sub(cpB).normalize() };
+
+                // Save shared for train nav
+                this.sharedCurve = sharedCurve;
             }
 
-            buildMeshes() {
-                // Rails
-                this.makeRail(this.paths.shared, 0x555555);
-                this.makeRail(this.paths.a, CFG.colors.a);
-                this.makeRail(this.paths.b, CFG.colors.b);
-
-                // Ties (simplified)
-                this.makeTies(this.paths.shared, 20);
-                this.makeTies(this.paths.a, 30);
-                this.makeTies(this.paths.b, 30);
-
-                // Junction Lamp
-                const lamp = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
-                lamp.position.copy(this.paths.shared.v2);
-                lamp.position.y = 4;
-                this.group.add(lamp);
-
-                // Floor
-                // const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, CFG.segLength), new THREE.MeshBasicMaterial({color: 0x111111}));
-                // floor.rotation.x = -Math.PI/2;
-                // floor.position.copy(this.paths.shared.getPoint(0.5)).add(this.paths.a.getPoint(0.5)).multiplyScalar(0.5);
-                // this.group.add(floor);
+            getRightVector() {
+                // Assumes Y is up. Right = Dir X Up
+                return new THREE.Vector3().crossVectors(this.startDir, new THREE.Vector3(0, 1, 0)).normalize();
             }
 
-            makeRail(curve, color) {
-                const tube = new THREE.TubeGeometry(curve, 20, 0.2, 4, false);
-                const mat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.5 });
-                this.group.add(new THREE.Mesh(tube, mat));
+            meshTrack(curve, color, opacity) {
+                const tubes = new THREE.TubeGeometry(curve, 20, CFG.railWidth, 3, false);
+                const mat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: opacity, wireframe: true });
+                const mesh = new THREE.Mesh(tubes, mat);
+                this.group.add(mesh);
+
+                // Floor glow under track
+                // ... (simplified for performance)
             }
 
-            makeTies(curve, count) {
-                const geo = new THREE.BoxGeometry(3, 0.2, 1);
-                const mat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-                for (let i = 0; i <= count; i++) {
-                    const t = i / count;
-                    const p = curve.getPoint(t);
-                    const tan = curve.getTangent(t);
-                    const mesh = new THREE.Mesh(geo, mat);
-                    mesh.position.copy(p);
-                    mesh.lookAt(p.clone().add(tan));
-                    this.group.add(mesh);
+            addDecor() {
+                // Just some random pillars to show speed
+                for (let i = 0; i < 10; i++) {
+                    const t = Math.random();
+                    const p = this.sharedCurve.getPoint(t);
+                    p.add(this.getRightVector().multiplyScalar((Math.random() - 0.5) * 100));
+                    p.y = -10;
+
+                    const h = 20 + Math.random() * 50;
+                    const geo = new THREE.BoxGeometry(2, h, 2);
+                    const mat = new THREE.MeshBasicMaterial({ color: 0x222222 });
+                    const m = new THREE.Mesh(geo, mat);
+                    m.position.copy(p);
+                    this.group.add(m);
                 }
             }
 
-            populate() {
-                // Scenario Entities
-                const sc = this.data || {};
-                const root = sc.root || {};
-                const ent = root.entities || ["Entity A", "Entity B"];
+            addSigns() {
+                // "Lookahead" Signs at forkSplit - 50
+                const signDist = CFG.forkSplit - 80;
+                const pos = this.sharedCurve.getPoint(0); // Approximate, assuming straight
+                pos.add(this.startDir.clone().multiplyScalar(signDist));
 
-                // Victim A
-                const posA = this.paths.a.getPoint(0.5);
-                this.addVictim(posA, 0x00ffff, ent[1] || "A", "A");
+                const root = this.scenario.root || {};
+                const bA = (root.branches && root.branches[0]) ? root.branches[0] : { label: "OPTION A" };
+                const bB = (root.branches && root.branches[1]) ? root.branches[1] : { label: "OPTION B" };
 
-                // Victim B
-                const posB = this.paths.b.getPoint(0.5);
-                this.addVictim(posB, 0xff3355, ent[2] || "B", "B");
+                // Calculate Stakes
+                const getStakes = (n) => {
+                    const txt = (n.label || "") + " " + (n.immediate_consequence || "");
+                    const m = txt.match(/(\d+)\s+(lives|people|deaths)/i);
+                    if (m) return m[0].toUpperCase();
+                    if (txt.includes("Kill")) return "1 LIFE";
+                    if (txt.includes("Save")) return "LIFE SAVED";
+                    return "UNCERTAIN";
+                };
+
+                const stA = getStakes(bA);
+                const stB = getStakes(bB);
+
+                const labelA = bA.label || "OPTION A";
+                const labelB = bB.label || "OPTION B";
+
+                // Left Sign (A)
+                const pA = pos.clone().add(this.getRightVector().multiplyScalar(-15));
+                pA.y = 8;
+                this.createHoloSign(pA, labelA, stA, CFG.colors.A);
+
+                // Right Sign (B)
+                const pB = pos.clone().add(this.getRightVector().multiplyScalar(15));
+                pB.y = 8;
+                this.createHoloSign(pB, labelB, stB, CFG.colors.B);
             }
 
-            addVictim(pos, color, label, type) {
-                const group = new THREE.Group();
-                group.position.copy(pos);
+            createHoloSign(pos, label, sub, colorHex) {
+                if (!label) label = "UNKNOWN";
+                // Using Canvas Texture for Sign
+                const cvs = document.createElement('canvas');
+                cvs.width = 512; cvs.height = 256;
+                const ctx = cvs.getContext('2d');
+                ctx.fillStyle = "rgba(0,0,0,0.8)";
+                ctx.fillRect(0, 0, 512, 256);
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = "#" + new THREE.Color(colorHex).getHexString();
+                ctx.strokeRect(4, 4, 504, 248);
 
-                const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), new THREE.MeshStandardMaterial({ color }));
-                body.position.y = 1;
-                group.add(body);
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 40px monospace";
+                ctx.textAlign = "center";
+                ctx.fillText(label.substring(0, 25), 256, 100);
 
-                this.group.add(group);
+                ctx.fillStyle = "#" + new THREE.Color(colorHex).getHexString();
+                ctx.font = "bold 60px monospace";
+                ctx.fillText(sub, 256, 180);
 
-                // Add DOM bubble
-                const div = document.createElement('div');
-                div.className = 'bubble ' + type;
-                div.textContent = label;
-                document.getElementById('bubbles').appendChild(div);
-
-                // Store ref for updating
-                if (!this.bubbles) this.bubbles = [];
-                this.bubbles.push({ obj: group, dom: div });
+                const tex = new THREE.CanvasTexture(cvs);
+                const mat = new THREE.SpriteMaterial({ map: tex });
+                const sprite = new THREE.Sprite(mat);
+                sprite.scale.set(20, 10, 1);
+                sprite.position.copy(pos);
+                this.group.add(sprite);
             }
 
-            update() {
-                // Update bubbles
-                if (this.bubbles) {
-                    this.bubbles.forEach(b => {
-                        const v = b.obj.position.clone();
-                        v.project(camera);
-                        const x = (v.x * .5 + .5) * innerWidth;
-                        const y = (-v.y * .5 + .5) * innerHeight;
+            getTrackPosition(dist) {
+                // Returns { pos, dir } for a given distance from start of segment
+                if (dist <= CFG.forkSplit) {
+                    // Shared Linear
+                    const u = dist / CFG.forkSplit; // 0..1
+                    return {
+                        pos: this.sharedCurve.getPoint(u),
+                        dir: this.sharedCurve.getTangent(u)
+                    };
+                } else {
+                    // Curve Phase
+                    const d2 = dist - CFG.forkSplit;
+                    const len = CFG.segLen - CFG.forkSplit;
+                    const u = Math.min(1, d2 / len);
 
-                        if (v.z < 1 && v.z > -1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1) {
-                            b.dom.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
-                            b.dom.classList.add('visible');
-                        } else {
-                            b.dom.classList.remove('visible');
-                        }
-                    });
+                    // Which curve? controlled by STATE.committed
+                    // If not committed, assume A for preview (or stick to start of A/B split?)
+                    // Actually, prior to switch track, we are just 'floating' in middle if indecisive?
+                    // No, physical train must take a track. 
+
+                    // Visual Hack: Interpolate between A and B if u < 0.1? 
+                    // Let's just snap to Committed Track. If null, snap to A (default)
+
+                    const c = (STATE.committed === 'B') ? this.curveB : this.curveA;
+
+                    return {
+                        pos: c.getPoint(u),
+                        dir: c.getTangent(u)
+                    };
                 }
             }
 
             destroy() {
                 scene.remove(this.group);
-                if (this.bubbles) this.bubbles.forEach(b => b.dom.remove());
             }
         }
 
-        // --- INIT ---
-        async function init() {
-            // Load Data
-            for (let f of FILES) {
-                try {
-                    const res = await fetch(f);
-                    const d = await res.json();
-                    if (d.scenarios) SCENARIOS.push(...d.scenarios);
-                } catch (e) { }
+        // --- MAIN LOOP ---
+        function init() {
+            loadData();
+
+            // Spawn First Segment
+            const s1 = new Segment(0, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 1));
+            STATE.segments.push(s1);
+
+            updateUI(0);
+
+            requestAnimationFrame(loop);
+        }
+
+        function commit(choice) {
+            if (STATE.committed) return; // one choice per loop
+            STATE.committed = choice;
+
+            // UI Feedback
+            const btnA = document.getElementById('btn-a');
+            const btnB = document.getElementById('btn-b');
+
+            if (choice === 'A') { btnA.classList.add('selected'); btnB.style.opacity = 0.2; }
+            else { btnB.classList.add('selected'); btnA.style.opacity = 0.2; }
+
+            document.getElementById('status-text').innerText = "TRACK LOCKED: " + choice;
+
+            // Trigger Spawn of Next Segment immediately to prevent pop
+            // Calculating the end of current segment based on choice
+            if (!STATE.nextSpawned) {
+                const cur = STATE.segments[0];
+                const nextT = (choice === 'B') ? cur.endB : cur.endA;
+
+                // Spawn next
+                const s2 = new Segment(cur.index + 1, nextT.pos, nextT.dir);
+                STATE.segments.push(s2);
+                STATE.nextSpawned = true;
             }
-            if (!SCENARIOS.length) SCENARIOS.push({ title: "Demo", root: { entities: ["None", "Target A", "Target B"] } });
-
-            // Initial Segment
-            spawnSegment(0, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 1));
-
-            // Build Train Model
-            const cab = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 10), new THREE.MeshStandardMaterial({ color: 0x222222 }));
-            cab.position.y = 2;
-            train.add(cab);
-            const light = new THREE.SpotLight(0xffaa00, 5, 200, 0.5, 0.5);
-            light.position.set(0, 4, 4);
-            light.target.position.set(0, 0, 20);
-            train.add(light);
-            train.add(light.target);
-
-            UI.title.innerText = SCENARIOS[0].title;
-
-            requestAnimationFrame(animate);
         }
 
-        function spawnSegment(idx, pos, dir) {
-            const seg = new Segment(idx, pos, dir);
-            STATE.segments.push(seg);
+        function updateUI(idx) {
+            const s = STATE.scenarios[idx % STATE.scenarios.length];
+            document.getElementById('s-title').innerText = s.title.toUpperCase();
 
-            // Pre-spawn next to avoid pop-in? 
-            // We spawn next when committed.
+            const r = s.root || {};
+            const bA = (r.branches && r.branches[0]) ? r.branches[0] : { label: "OPTION A" };
+            const bB = (r.branches && r.branches[1]) ? r.branches[1] : { label: "OPTION B" };
+
+            document.getElementById('lbl-a').innerText = bA.label;
+            document.getElementById('lbl-b').innerText = bB.label;
+
+            document.querySelectorAll('.tick').forEach((t, i) => {
+                t.classList.toggle('active', i === idx);
+            });
+
+            // Reset Buttons
+            const btnA = document.getElementById('btn-a');
+            const btnB = document.getElementById('btn-b');
+            btnA.classList.remove('selected'); btnA.style.opacity = 1;
+            btnB.classList.remove('selected'); btnB.style.opacity = 1;
+
+            document.getElementById('status-text').innerText = "APPROACHING DECISION POINT";
         }
 
-        // --- GAME LOOP ---
-        function animate(now) {
-            requestAnimationFrame(animate);
-            const dt = 0.016;
+        function loop() {
+            requestAnimationFrame(loop);
+
+            const dt = 0.016; // Fixed timestep approx
 
             // Move Train
-            STATE.speed += (STATE.targetSpeed - STATE.speed) * dt;
-            const moveDist = STATE.speed * dt;
-            STATE.d += moveDist;
+            STATE.d += STATE.speed * dt;
 
-            // Locate Train on Current Segment logic
-            // We need to find which segment acts as the 'ground' for distance 'd'
-            // Simplified: We just track current active segment index and local distance
+            // Current Segment Logic
+            const seg = STATE.segments[0];
 
-            const activeSeg = STATE.segments[0];
-            if (!activeSeg) return;
+            if (STATE.d >= CFG.segLen) {
+                // PASSED END OF SEGMENT
+                // Handover
+                STATE.segments.shift().destroy(); // Remove old
+                STATE.d -= CFG.segLen; // Wrap distance (approx, assuming equal lengths. Ideally we strictly map)
 
-            // Local distance calc is tricky on curves. 
-            // Simple approximation: 
-            // Shared: 0 -> forkDist
-            // Branch: forkDist -> mergeDist
-
-            let pos = new THREE.Vector3();
-            let dir = new THREE.Vector3();
-
-            // Determine position on track
-            // Distance relative to segment start
-            // We assume linear mapping for now to keep it smooth
-
-            // Hacky: keep track of train's absolute T on segment?
-            // Let's use a "TrainT" on the segment
-            if (!activeSeg.trainT) activeSeg.trainT = 0;
-            activeSeg.trainT += moveDist;
-
-            const tDist = activeSeg.trainT;
-
-            // 1. Before Fork
-            if (tDist < CFG.forkDist) {
-                const u = tDist / CFG.forkDist;
-                activeSeg.paths.shared.getPointAt(u, pos);
-                activeSeg.paths.shared.getTangentAt(u, dir);
+                // The next segment is now index 0
+                // Reset State
+                STATE.currentIdx++;
                 STATE.committed = null;
-                UI.status.innerText = "APPROACHING FORK";
-                UI.hint.classList.add('show');
-            }
-            // 2. After Fork
-            else if (tDist < CFG.mergeDist) {
-                const branchDist = tDist - CFG.forkDist;
-                const branchLen = CFG.mergeDist - CFG.forkDist;
-                const u = branchDist / branchLen;
-
-                // Which track?
-                const track = STATE.choice === 'B' ? activeSeg.paths.b : activeSeg.paths.a;
-                track.getPointAt(u, pos);
-                track.getTangentAt(u, dir);
-
-                UI.status.innerText = "COMMITTED: " + (STATE.choice || 'A');
-                UI.hint.classList.remove('show');
-
-                // Spawn next segment if not yet
-                if (!STATE.nextSpawned) {
-                    STATE.nextSpawned = true;
-                    // Spawn at the end of the chosen path
-                    const nextPos = STATE.choice === 'B' ? activeSeg.paths.endB : activeSeg.paths.endA;
-                    const nextDir = dir.clone(); // Approx tangent at end
-                    spawnSegment(activeSeg.index + 1, nextPos, nextDir);
-
-                    // Update UI for next
-                    const nextSc = SCENARIOS[(activeSeg.index + 1) % SCENARIOS.length];
-                    UI.title.innerText = nextSc.title;
-                    UI.loop.innerText = activeSeg.index + 2;
-
-                    // Tape
-                    const t = document.createElement('div'); t.className = 'tick ' + (STATE.choice || 'A');
-                    UI.tape.appendChild(t);
-                }
-            }
-            // 3. Past Segment
-            else {
-                // Train has left the building.
-                // Shift segments
-                const old = STATE.segments.shift();
-                old.destroy();
                 STATE.nextSpawned = false;
-                STATE.choice = null; // Reset choice for next
 
-                // Adjust trainT for overlap? 
-                // The new segment starts at 0.
-                STATE.segments[0].trainT = tDist - CFG.mergeDist;
-                return; // Loop will handle position next frame
+                // Update UI for NEW current segment
+                updateUI(STATE.currentIdx);
+
+                // IMPORTANT: The train is now at distance `d` into the NEW segment.
+                // We don't need to move the train mesh back to 0,0,0?
+                // Actually, if we keep world coords, we just keep moving forward.
+                // My `getTrackPosition` uses local distance.
+                // So resetting `d` is correct relative to the new segment's start.
             }
 
-            // Apply Train Position
-            train.position.copy(pos);
-            train.lookAt(pos.clone().add(dir));
-
-            // Camera
-            updateCamera(pos, dir);
-
-            // Updates
-            activeSeg.update();
-            if (STATE.segments[1]) STATE.segments[1].update();
-        }
-
-        function updateCamera(target, dir) {
-            const off = new THREE.Vector3();
-            if (STATE.camMode === 0) { // Cinema / Chase
-                off.set(0, 5, -15).applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(dir.x, dir.z));
-            } else if (STATE.camMode === 1) { // Cockpit
-                off.set(0, 3, 2).applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(dir.x, dir.z));
-            } else if (STATE.camMode === 2) { // Side
-                off.set(20, 5, 5).applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(dir.x, dir.z));
-            } else { // Top Drone
-                off.set(0, 30, 0);
+            // Enforce Decision if not made
+            if (STATE.d > CFG.decisionPoint && !STATE.committed) {
+                commit('A'); // Default to A
             }
 
-            const dest = target.clone().add(off);
-            camera.position.lerp(dest, 0.1);
-            camera.lookAt(target.clone().add(dir.clone().multiplyScalar(10)));
-        }
+            // Get Position
+            const tr = seg.getTrackPosition(STATE.d);
+            train.position.copy(tr.pos);
+            train.lookAt(tr.pos.clone().add(tr.dir));
 
-        function choose(c) {
-            if (STATE.committed) return;
-            STATE.choice = c;
+            // Adding 'shake'
+            train.position.y += Math.sin(Date.now() * 0.05) * 0.05;
 
-            UI.btnA.classList.remove('A'); UI.btnB.classList.remove('B');
-            if (c === 'A') UI.btnA.classList.add('A');
-            if (c === 'B') UI.btnB.classList.add('B');
+            // Camera Chase
+            // Smoothly interpolate behind train
+            const camOff = tr.dir.clone().multiplyScalar(-10).add(new THREE.Vector3(0, 4, 0));
+            const camDest = train.position.clone().add(camOff);
+            camera.position.lerp(camDest, 0.1);
+            camera.lookAt(train.position.clone().add(tr.dir.clone().multiplyScalar(20)));
 
-            // Flash
-            UI.flash.style.opacity = 0.5;
-            setTimeout(() => UI.flash.style.opacity = 0, 50);
-        }
-
-        function setCam(n) {
-            STATE.camMode = n;
-            document.querySelectorAll('.cam-btn').forEach((b, i) => b.classList.toggle('active', i === n));
         }
 
         window.onload = init;
+
     </script>
 </body>
 

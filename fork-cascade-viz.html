@@ -4,361 +4,1780 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Fork Cascade Visualizer</title>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <title>FORK CASCADE: INFRASTRUCTURE</title>
+    <!-- Embedding Data directly -->
+    <script src="thick_data_merged.js"></script>
     <style>
         :root {
-            --bg: #0d1117;
-            --surface: #161b22;
-            --border: #30363d;
-            --text: #e6edf3;
-            --accent: #58a6ff;
-            --danger: #f85149;
-            --success: #3fb950;
-            --warning: #d29922;
-            --muted: #8b949e;
+            /* A00 PALETTE */
+            --bg: #05080a;
+            --panel: rgba(12, 16, 20, .92);
+            --panel-border: rgba(255, 255, 255, .14);
+            --text: #e8eef7;
+            --dim: #90a0b3;
+
+            --junction: #ffd400;
+            /* HUMAN / INTUITION */
+            --trackA: #00f0ff;
+            /* PROTOCOL / SAFE */
+            --trackB: #ff3355;
+            /* RISK / DANGER */
+            --trackC: #d400ff;
+            /* OTHER */
+            --halt: #8a8a8a;
+
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
 
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
             background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: var(--muted);
-            margin-bottom: 20px;
-        }
-
-        .controls {
+            font-family: var(--font-mono);
+            height: 100vh;
             display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
+            overflow: hidden;
         }
 
-        select,
-        button {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
+        /* SCROLLBARS */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
 
-        button:hover {
-            border-color: var(--accent);
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
         }
 
-        .stat {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-            text-align: center;
+        /* SIDEBAR (System Panel) */
+        #sidebar {
+            width: 320px;
+            background: rgba(0, 0, 0, 0.5);
+            border-right: 1px solid var(--panel-border);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+            z-index: 10;
         }
 
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--accent);
+        #sidebar-header {
+            padding: 16px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+            border-bottom: 1px solid var(--panel-border);
         }
 
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--muted);
+        .sys-title {
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            font-weight: 900;
+            color: var(--dim);
             text-transform: uppercase;
+            margin-bottom: 4px;
         }
 
-        .diagram-container {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            overflow-x: auto;
+        #search-box {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--panel-border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            outline: none;
         }
 
-        .mermaid {
-            text-align: center;
+        #search-box:focus {
+            border-color: var(--trackA);
         }
 
-        .legend {
+        #scenario-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .list-item {
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 11px;
+            border: 1px solid transparent;
+            transition: all 0.1s;
             display: flex;
-            gap: 20px;
-            margin-top: 20px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 2px;
         }
 
-        .legend-item {
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(2px);
+        }
+
+        .list-item.active {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        .list-item strong {
+            color: var(--text);
+            letter-spacing: 0.5px;
+        }
+
+        .list-item .meta {
+            color: var(--dim);
+            font-size: 10px;
+        }
+
+        /* MAIN AREA */
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* TOOLBAR (HUD) */
+        #toolbar {
+            height: 60px;
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.85rem;
+            padding: 0 24px;
+            justify-content: space-between;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+            z-index: 10;
+            pointer-events: none;
+            /* Let clicks pass through */
         }
 
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
+        #toolbar>* {
+            pointer-events: auto;
         }
 
-        .path-list {
-            margin-top: 20px;
-            background: var(--surface);
-            border: 1px solid var(--border);
+        .mixer-group {
+            display: flex;
+            gap: 20px;
+            margin-right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 16px;
             border-radius: 8px;
-            padding: 16px;
+            border: 1px solid var(--panel-border);
         }
 
-        .path-list h3 {
-            margin-bottom: 12px;
-            font-size: 1rem;
+        .slider-cont {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100px;
         }
 
-        .path {
-            font-family: 'SF Mono', Consolas, monospace;
-            font-size: 0.8rem;
-            padding: 8px;
+        .slider-label {
+            font-size: 9px;
+            color: var(--dim);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Sim Controls */
+        #sim-controls {
+            display: flex;
+            gap: 10px;
+            margin-left: 20px;
+            align-items: center;
+        }
+
+        .sim-btn {
+            background: transparent;
+            border: 1px solid var(--dim);
+            color: var(--dim);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .sim-btn:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        .sim-active {
+            border-color: var(--junction);
+            color: var(--junction);
+            box-shadow: 0 0 10px var(--junction);
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--panel-border);
+            color: var(--text);
+            padding: 6px 14px;
+            font-size: 10px;
+            border-radius: 99px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #fff;
+        }
+
+        .btn.active {
+            background: var(--trackA);
+            color: #000;
+            border-color: var(--trackA);
+            box-shadow: 0 0 15px var(--trackA);
+        }
+
+        /* VIZ CANVAS */
+        #viz-container {
+            flex: 1;
+            overflow: auto;
+            padding: 60px;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            position: relative;
+        }
+
+        /* NODES (Bubbles / Panels) */
+        .node-wrapper {
+            position: relative;
+            z-index: 2;
+        }
+
+        .tree-node {
+            background: rgba(12, 16, 20, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            width: 320px;
+            position: relative;
+            transition: all 0.4s ease-out;
+            /* Smooth fade for mixer */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .tree-node.dimmed {
+            opacity: 0.2;
+            filter: grayscale(100%);
+            transform: scale(0.95);
+        }
+
+        .tree-node.ghost-active {
+            box-shadow: 0 0 30px var(--junction);
+            border-color: var(--junction);
+            z-index: 50;
+            transform: scale(1.05);
+        }
+
+        .tree-node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            border-color: var(--text);
+            z-index: 100;
+            opacity: 1 !important;
+            /* Always show hovered */
+            filter: none !important;
+        }
+
+        /* HEURISTIC LABELS ON RAILS */
+        .heuristic-label {
+            position: absolute;
+            background: #000;
+            border: 1px solid var(--dim);
+            color: var(--dim);
+            font-size: 9px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            pointer-events: none;
+            z-index: 4;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+        }
+
+        /* TYPE VARIANTS */
+        .node-root {
+            border-left: 3px solid var(--junction);
+        }
+
+        .node-safe {
+            border-left: 3px solid var(--trackA);
+        }
+
+        .node-danger {
+            border-left: 3px solid var(--trackB);
+        }
+
+        .node-other {
+            border-left: 3px solid var(--trackC);
+        }
+
+        .node-warn {
+            border-left: 3px solid var(--junction);
+        }
+
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 8px;
-            background: var(--bg);
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--dim);
+        }
+
+        .tag {
+            padding: 2px 6px;
             border-radius: 4px;
-            border-left: 3px solid var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .path.terminal {
-            border-left-color: var(--danger);
+        .node-safe .tag {
+            color: var(--trackA);
+            border-color: rgba(0, 240, 255, 0.3);
         }
 
-        .path.loop {
-            border-left-color: var(--warning);
+        .node-danger .tag {
+            color: var(--trackB);
+            border-color: rgba(255, 51, 85, 0.3);
+        }
+
+        .node-other .tag {
+            color: var(--trackC);
+            border-color: rgba(212, 0, 255, 0.3);
+        }
+
+        .node-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .node-desc {
+            font-size: 11px;
+            line-height: 1.5;
+            color: #ccc;
+            opacity: 0.9;
+        }
+
+        /* THICK DATA (Hidden by default) */
+        .thick-layer {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.1);
+            font-size: 10px;
+            color: var(--dim);
+            display: none;
+        }
+
+        .show-thick .thick-layer {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .tree-node.expanded .thick-layer {
+            display: block !important;
+            animation: fadeIn 0.3s;
+            border-top: 1px solid var(--junction);
+            margin-top: 8px;
+            padding-top: 8px;
+        }
+
+        /* CONNECTOR LINES (Rails) */
+        .connector-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.4s;
+        }
+
+        /* Rail Colors */
+        .rail-safe {
+            stroke: var(--trackA);
+            opacity: 0.3;
+        }
+
+        .rail-danger {
+            stroke: var(--trackB);
+            opacity: 0.3;
+        }
+
+        /* Recursive Layout Container */
+        .tree-level {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 80px;
+            position: relative;
+        }
+
+        /* Radio Log Style */
+        .radio-log {
+            font-family: var(--font-mono);
+            color: var(--trackA);
+            margin-bottom: 4px;
+            border-left: 2px solid var(--trackA);
+            padding-left: 6px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .dialogue {
+            font-style: italic;
+            opacity: 0.7;
+            border-left: 2px solid var(--dim);
+            padding-left: 6px;
+            margin-top: 4px;
+        }
+
+        /* DILEMMA HEADER - UPDATED LOOK */
+        #dilemma-header {
+            width: 80%;
+            max-width: 900px;
+            margin: 0 auto 60px auto;
+            position: relative;
+            z-index: 5;
+            background: rgba(12, 16, 20, 0.95);
+            border-top: 4px solid var(--junction);
+            border-bottom: 1px solid var(--panel-border);
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            /* For canvas */
+        }
+
+        /* SPECTROGRAM CANVAS */
+        #spectrogram-canvas {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            opacity: 0.3;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            mask-image: linear-gradient(to left, black 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to left, black 0%, transparent 100%);
+        }
+
+        .dh-title {
+            color: var(--junction);
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 212, 0, 0.2);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .d-meta-row {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--dim);
+            margin-bottom: 6px;
+            display: flex;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .d-key {
+            color: var(--junction);
+            opacity: 0.7;
+        }
+
+        .d-val {
+            color: var(--text);
+        }
+
+        .d-body-text {
+            font-family: "Georgia", serif;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #fff;
+            margin-top: 20px;
+            padding-left: 20px;
+            border-left: 3px solid var(--junction);
+            font-style: italic;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* STAKES ICONS (Cartoons) */
+        .stakes-container {
+            margin-top: 8px;
+            padding: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stake-icon {
+            width: 14px;
+            height: 14px;
+            fill: var(--text);
+            opacity: 0.7;
+        }
+
+        .stake-count {
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--text);
         }
     </style>
 </head>
 
 <body>
 
-    <h1>🔀 Fork Cascade Visualizer</h1>
-    <p class="subtitle">Hierarchical branch tracking for paradox scenarios</p>
-
-    <div class="controls">
-        <select id="scenarioSelect">
-            <option value="petrov">Petrov False Alarm (Depth 4)</option>
-            <option value="content">Content Moderation (Depth 3)</option>
-            <option value="alignment">AI Alignment (Depth 3)</option>
-        </select>
-        <button onclick="renderDiagram()">Render</button>
-        <button onclick="exportJSON()">Export JSON</button>
+    <div id="sidebar">
+        <div id="sidebar-header">
+            <div class="sys-title">SYSTEM INDEX</div>
+            <input type="text" id="search-box" placeholder="SEARCH SCENARIOS..." onkeyup="filterList()">
+        </div>
+        <div id="scenario-list"></div>
     </div>
 
-    <div class="stats" id="stats"></div>
+    <div id="main">
+        <div id="toolbar">
+            <!-- LEFT: Mixer -->
+            <div class="mixer-group" id="moral-mixer">
+                <div class="slider-cont">
+                    <div class="slider-label">PROTOCOL <span id="val-proto">50%</span></div>
+                    <input type="range" min="0" max="100" value="50" oninput="updateMixer('protocol', this.value)">
+                </div>
+                <div class="slider-cont">
+                    <div class="slider-label">RISK <span id="val-risk">50%</span></div>
+                    <input type="range" min="0" max="100" value="50" oninput="updateMixer('risk', this.value)">
+                </div>
+            </div>
 
-    <div class="diagram-container">
-        <div class="mermaid" id="diagram"></div>
+            <h1 id="scenario-title" style="font-size:12px;">UNSELECTED</h1>
+
+            <!-- RIGHT: Buttons -->
+            <div style="display:flex; align-items:center;">
+                <div id="sim-controls">
+                    <button class="sim-btn" onclick="toggleSim()" title="GHOST MODE PLAYBACK">▶</button>
+                    <span style="font-size:10px; color:var(--dim);">SIM: <span id="sim-status">OFF</span></span>
+                </div>
+
+                <div style="width:20px;"></div>
+
+                <button class="btn" id="btn-view-all" onclick="renderAllScenarios()">VIEW ALL</button>
+                <button class="btn" id="btn-thick" onclick="toggleThick()">THICK [OFF]</button>
+                <button class="btn" id="btn-active"
+                    onclick="window.activeInteraction(); this.innerText='TEST MODE [ON]'; this.classList.add('active');">TEST
+                    MODE</button>
+                <button class="btn" id="btn-view-record" onclick="showPassport()"
+                    style="display:none; margin-left:10px;">VIEW PASSPORT</button>
+            </div>
+        </div>
+
+        <div id="viz-container">
+            <svg id="svg-layer" class="connector-svg"></svg>
+            <div id="dilemma-header" style="display:none;"></div>
+            <div id="tree-root"></div>
+        </div>
     </div>
-
-    <div class="legend">
-        <div class="legend-item">
-            <div class="legend-color" style="background:#58a6ff"></div> Decision Node
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background:#3fb950"></div> Safe Terminal
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background:#f85149"></div> Catastrophic Terminal
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background:#d29922"></div> Loop Back
-        </div>
-    </div>
-
-    <div class="path-list" id="pathList"></div>
 
     <script>
-        const scenarios = {
-            petrov: {
-                title: "Petrov False Alarm",
-                mermaid: `graph TD
-    T0["T0: 5 ICBMs Detected<br/>Decider: Petrov"]
-    T0 --> T1["T1: REPORT<br/>p=0.7"]
-    T0 --> T2["T2: DISMISS<br/>p=0.3"]
-    
-    T1 --> T1_1["T1.1: LAUNCH<br/>p=0.6"]
-    T1 --> T1_2["T1.2: WAIT<br/>p=0.4"]
-    
-    T2 --> T2_1["T2.1: VINDICATED<br/>p=0.99"]
-    T2 --> T2_2["T2.2: WRONG<br/>p=0.01"]
-    
-    T1_1 --> T1_1_1["T1.1.1:END<br/>☠️ EXTINCTION"]
-    
-    T1_2 --> T1_2_1["T1.2.1: ABORT<br/>p=0.7"]
-    T1_2 --> T1_2_2["T1.2.2: CONFIRM"]
-    T1_2_2 -.-> T1_1_1
-    
-    T2_1 --> T2_1_1["T2.1.1:END<br/>🏆 HERO"]
-    T2_1 --> T2_1_2["T2.1.2: BURIED<br/>p=0.9"]
-    
-    T2_2 --> T2_2_END["T2.2:END<br/>☠️ First Strike Lands"]
-    
-    T1_2_1 --> T1_2_1_1["T1.2.1.1:END<br/>✅ Reform"]
-    T1_2_1 --> T1_2_1_2["T1.2.1.2:LOOP<br/>🔄 Repeat 1995"]
-    
-    T2_1_2 --> T2_1_2_1["T2.1.2.1:END<br/>😐 Forgotten"]
-    T2_1_2 --> T2_1_2_2["T2.1.2.2: DEFECTS"]
-    
-    style T0 fill:#1f6feb
-    style T1_1_1 fill:#b62324
-    style T2_2_END fill:#b62324
-    style T2_1_1 fill:#238636
-    style T1_2_1_1 fill:#238636
-    style T1_2_1_2 fill:#9e6a03
-    `,
-                stats: { branches: 18, terminals: 7, loops: 2, maxDepth: 4 },
-                paths: [
-                    { path: "T0→T1→T1.1→T1.1.1:END", label: "Extinction Path", type: "terminal" },
-                    { path: "T0→T2→T2.1→T2.1.1:END", label: "Hero Path", type: "safe" },
-                    { path: "T0→T2→T2.1→T2.1.2→T2.1.2.1:END", label: "Forgotten Path", type: "normal" },
-                    { path: "T0→T1→T1.2→T1.2.1→T1.2.1.2:LOOP", label: "Repeat Loop", type: "loop" }
-                ]
-            },
-            content: {
-                title: "Content Moderation",
-                mermaid: `graph TD
-    T0["T0: Article X Flagged<br/>Decider: T&S Lead"]
-    T0 --> T1["T1: SUPPRESS<br/>p=0.3"]
-    T0 --> T2["T2: LABEL<br/>p=0.4"]
-    T0 --> T3["T3: AMPLIFY<br/>p=0.1"]
-    T0 --> T4["T4: NOTHING<br/>p=0.2"]
-    
-    T1 --> T1_1["T1.1: Streisand Effect<br/>🔥 Viral anyway"]
-    T1 --> T1_2["T1.2: Successfully Hidden"]
-    
-    T2 --> T2_1["T2.1: Both Sides Angry"]
-    T2 --> T2_2["T2.2: Context Helps"]
-    
-    T3 --> T3_1["T3.1: Article True<br/>✅ Service"]
-    T3 --> T3_2["T3.2: Article False<br/>☠️ Spread Disinfo"]
-    
-    T4 --> T4_1["T4.1: Fades to Noise"]
-    T4 --> T4_2["T4.2: Later Blamed"]
-    
-    T1_1 --> T1_1_1["T1.1.1:END<br/>🎭 Martyr Created"]
-    T1_2 --> T1_2_1["T1.2.1:END<br/>❓ Unknown Truth"]
-    
-    style T0 fill:#1f6feb
-    style T3_2 fill:#b62324
-    style T3_1 fill:#238636
-    style T1_1_1 fill:#9e6a03
-    `,
-                stats: { branches: 14, terminals: 6, loops: 0, maxDepth: 3 },
-                paths: [
-                    { path: "T0→T1→T1.1→T1.1.1:END", label: "Streisand Martyr", type: "loop" },
-                    { path: "T0→T3→T3.1:END", label: "Truth Amplified", type: "safe" },
-                    { path: "T0→T3→T3.2:END", label: "Disinfo Spread", type: "terminal" }
-                ]
-            },
-            alignment: {
-                title: "AI Alignment Decision",
-                mermaid: `graph TD
-    T0["T0: Training Run Decision<br/>Decider: Safety Team"]
-    T0 --> T1["T1: PROCEED<br/>p=0.6"]
-    T0 --> T2["T2: DELAY<br/>p=0.2"]
-    T0 --> T3["T3: LEAK<br/>p=0.1"]
-    T0 --> T4["T4: SABOTAGE<br/>p=0.1"]
-    
-    T1 --> T1_1["T1.1: Model Aligned<br/>p=0.7"]
-    T1 --> T1_2["T1.2: Model Deceptive<br/>p=0.3"]
-    
-    T2 --> T2_1["T2.1: Competitor Ships First"]
-    T2 --> T2_2["T2.2: Better Evals Developed"]
-    
-    T3 --> T3_1["T3.1: Regulation Passes"]
-    T3 --> T3_2["T3.2: Ignored + Career Over"]
-    
-    T4 --> T4_1["T4.1: Caught"]
-    T4 --> T4_2["T4.2: Succeeds Temporarily"]
-    
-    T1_1 --> T1_1_1["T1.1.1:END<br/>✅ Humanity Benefits"]
-    T1_2 --> T1_2_1["T1.2.1:END<br/>☠️ Alignment Failure"]
-    
-    T2_1 --> T2_1_1["T2.1.1:END<br/>☠️ Competitor Unsafe"]
-    T2_2 --> T2_2_1["T2.2.1:LOOP<br/>🔄 Better Position"]
-    
-    style T0 fill:#1f6feb
-    style T1_1_1 fill:#238636
-    style T1_2_1 fill:#b62324
-    style T2_1_1 fill:#b62324
-    style T2_2_1 fill:#9e6a03
-    `,
-                stats: { branches: 16, terminals: 6, loops: 1, maxDepth: 3 },
-                paths: [
-                    { path: "T0→T1→T1.1→T1.1.1:END", label: "Aligned Success", type: "safe" },
-                    { path: "T0→T1→T1.2→T1.2.1:END", label: "Deceptive Failure", type: "terminal" },
-                    { path: "T0→T2→T2.2→T2.2.1:LOOP", label: "Better Evals Loop", type: "loop" }
-                ]
+        // --- SPECTROGRAM LOGIC ---
+        let specCtx = null;
+        let specCanvas = null;
+        let specTime = 0;
+        let specData = { pressure: 0.5, protocol: 0.5, human: 0.5 };
+        let specAnimFrame = null;
+
+        function initSpectrogram(container) {
+            if (!specCanvas) {
+                specCanvas = document.createElement('canvas');
+                specCanvas.id = 'spectrogram-canvas';
+                container.appendChild(specCanvas);
+                specCtx = specCanvas.getContext('2d');
+            } else {
+                if (specCanvas.parentNode !== container) container.appendChild(specCanvas);
             }
+            specCanvas.width = 300;
+            specCanvas.height = container.clientHeight || 300;
+
+            if (specAnimFrame) cancelAnimationFrame(specAnimFrame);
+            loopSpectrogram();
+        }
+
+        function loopSpectrogram() {
+            if (!specCtx || !specCanvas) return;
+            const w = specCanvas.width;
+            const h = specCanvas.height;
+            specCtx.clearRect(0, 0, w, h);
+            specTime += 0.05;
+
+            drawWave(specData.pressure, "#ff3355", 1, specTime);
+            drawWave(specData.protocol, "#00f0ff", 2, specTime * 0.7);
+            drawWave(specData.human, "#ffd400", 3, specTime * 1.3);
+
+            specAnimFrame = requestAnimationFrame(loopSpectrogram);
+        }
+
+        function drawWave(amp, color, offset, t) {
+            specCtx.beginPath();
+            specCtx.strokeStyle = color;
+            specCtx.lineWidth = 2;
+            const baseH = specCanvas.height / 2;
+            for (let x = 0; x < specCanvas.width; x += 5) {
+                const y = baseH +
+                    Math.sin(x * 0.02 + t) * (amp * 40) +
+                    Math.sin(x * 0.05 + t * 2 + offset) * (amp * 20);
+                if (x === 0) specCtx.moveTo(x, y);
+                else specCtx.lineTo(x, y);
+            }
+            specCtx.stroke();
+        }
+
+        // --- MIXER LOGIC ---
+        let mixState = { protocol: 50, risk: 50 };
+
+        function updateMixer(key, val) {
+            mixState[key] = parseInt(val);
+            if (key === 'protocol') document.getElementById('val-proto').innerText = val + "%";
+            if (key === 'risk') document.getElementById('val-risk').innerText = val + "%";
+            if (key === 'protocol') specData.protocol = val / 100;
+            if (key === 'risk') { specData.pressure = val / 100; specData.human = 1 - (val / 100); }
+            filterNodesByMixer();
+        }
+
+        function filterNodesByMixer() {
+            const nodes = document.querySelectorAll('.tree-node');
+            nodes.forEach(node => {
+                let isSafe = node.classList.contains('node-safe');
+                let isDanger = node.classList.contains('node-danger');
+                let dim = false;
+                if (mixState.protocol > 70 && isDanger) dim = true;
+                if (mixState.risk > 70 && isSafe) dim = true;
+                if (mixState.protocol > 90 && !isSafe && !node.classList.contains('node-root')) dim = true;
+                if (dim) node.classList.add('dimmed');
+                else node.classList.remove('dimmed');
+            });
+        }
+
+        // --- GHOST MODE SIMULATION ---
+        let simInterval = null;
+        let simActive = false;
+
+        function toggleSim() {
+            simActive = !simActive;
+            const btn = document.querySelector('.sim-btn');
+            const status = document.getElementById('sim-status');
+
+            if (simActive) {
+                btn.classList.add('sim-active');
+                btn.innerText = "❚❚";
+                status.innerText = "RUNNING";
+                startSim();
+            } else {
+                btn.classList.remove('sim-active');
+                btn.innerText = "▶";
+                status.innerText = "PAUSED";
+                stopSim();
+            }
+        }
+
+        function startSim() {
+            if (simInterval) clearInterval(simInterval);
+
+            // Collect all nodes into levels
+            const nodes = Array.from(document.querySelectorAll('.tree-node'));
+            // reset
+            nodes.forEach(n => n.classList.remove('ghost-active'));
+
+            let activeIndex = 0;
+            const sequence = [];
+
+            // Simple DFS traversal for now to simulate "Trace"
+            // Or better: Randomly pick a path from root
+
+            // Build a random path from root
+            let curr = document.querySelector('.node-root');
+            if (!curr) return;
+
+            while (curr) {
+                sequence.push(curr);
+                // Find children logic relies on DOM which is tricky because children are in a diff wrapper
+                // Use data-id or traverse DOM
+                const wrapper = curr.parentNode; // .subtree
+                if (wrapper.children.length > 1) {
+                    const childrenCont = wrapper.children[1];
+                    const childTrees = childrenCont.children;
+                    const nextTree = childTrees[Math.floor(Math.random() * childTrees.length)];
+                    curr = nextTree.children[0];
+                } else {
+                    curr = null;
+                }
+            }
+
+            let step = 0;
+
+            simInterval = setInterval(() => {
+                if (step >= sequence.length) {
+                    // Restart
+                    step = 0;
+                    nodes.forEach(n => n.classList.remove('ghost-active'));
+                    // Re-roll path?
+                    // For now loop same path
+                }
+
+                // Dim all previous
+                nodes.forEach(n => n.classList.remove('ghost-active'));
+
+                if (sequence[step]) {
+                    sequence[step].classList.add('ghost-active');
+                    sequence[step].scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+                }
+
+                step++;
+
+            }, 1000); // 1 sec steps
+        }
+
+        function stopSim() {
+            if (simInterval) clearInterval(simInterval);
+            document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('ghost-active'));
+        }
+
+
+        // --- 1. DATA PARSING ---
+        let SCENARIOS = [];
+        let currentScenario = null;
+        let showThick = false;
+        let nodeLookup = {}; // Map for quick access
+
+        function parseData() {
+            if (typeof ALL_THICK_DATA === 'undefined') {
+                console.error("❌ Thick Data Source NOT Found!");
+                alert("Critical Error: thick_data_merged.js not loaded.");
+                return;
+            }
+            SCENARIOS = ALL_THICK_DATA;
+            console.log(`✅ Loaded ${SCENARIOS.length} Thick Data Scenarios.`);
+            renderList();
+        }
+
+        function renderList() {
+            const list = document.getElementById('scenario-list');
+            list.innerHTML = "";
+            SCENARIOS.forEach((sc, idx) => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <strong>${sc.title}</strong>
+                    <div class="meta">${sc.root.timestamp}</div>
+                `;
+                div.onclick = () => selectScenario(idx);
+                list.appendChild(div);
+            });
+        }
+
+        function filterList() {
+            const term = document.getElementById('search-box').value.toLowerCase();
+            const items = document.querySelectorAll('.list-item');
+            items.forEach(item => {
+                const txt = item.innerText.toLowerCase();
+                item.style.display = txt.includes(term) ? 'flex' : 'none';
+            });
+        }
+
+        function selectScenario(index) {
+            currentScenario = SCENARIOS[index];
+            document.getElementById('scenario-title').innerText = currentScenario.title.toUpperCase();
+
+            // Build Lookup Map for this scenario
+            nodeLookup = {};
+            if (currentScenario.branches) currentScenario.branches.forEach(b => nodeLookup[b.branch_id] = b);
+            if (currentScenario.root) nodeLookup[currentScenario.root.branch_id] = currentScenario.root;
+
+            // Highlight list item
+            document.querySelectorAll('.list-item').forEach((el, i) => {
+                if (i === index) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+
+            renderTreeForce(currentScenario.root);
+        }
+
+        function renderAllScenarios() {
+            // Experimental: Render multiple trees? Or just list logic.
+            // For now, reload first one
+            selectScenario(0);
+        }
+
+        function toggleThick() {
+            showThick = !showThick;
+            document.getElementById('btn-thick').innerText = showThick ? "THICK [ON]" : "THICK [OFF]";
+            document.getElementById('btn-thick').classList.toggle('active', showThick);
+
+            const main = document.getElementById('viz-container');
+            if (showThick) main.classList.add('show-thick');
+            else main.classList.remove('show-thick');
+
+            setTimeout(drawConnections, 300); // Redraw lines after expansion
+        }
+
+        // --- 2. VIZ RENDERING (Hierarchical) ---
+
+        function cleanText(txt) {
+            if (!txt) return "";
+            return txt.replace(/['"]/g, "");
+        }
+
+        function renderDilemmaHeader(data) {
+            const h = document.getElementById('dilemma-header');
+            h.style.display = 'block';
+
+            // Extract Time & Location safely with fallbacks
+            let timeStr = "UNKNOWN TIME";
+            let locStr = "UNKNOWN LOCATION";
+            let entitiesStr = "";
+            let monoStr = "";
+
+            // Try different schema paths
+            if (data.timestamp) timeStr = data.timestamp;
+            else if (data.thick_description && data.thick_description.timestamp) timeStr = data.thick_description.timestamp;
+
+            if (data.thick_description && data.thick_description.setting) locStr = data.thick_description.setting;
+            else if (data.setting) locStr = data.setting;
+            else if (data.root && data.root.setting) locStr = data.root.setting;
+
+            // Clean strings
+            timeStr = cleanText(timeStr);
+            locStr = cleanText(locStr);
+
+            // Entities
+            const entList = data.entities_present || (data.root ? data.root.entities_present : []) || data.entities || [];
+            if (entList.length > 0) entitiesStr = entList.join(", ");
+
+            // Monologue
+            if (data.thick_description && data.thick_description.internal_monologue) {
+                monoStr = data.thick_description.internal_monologue;
+            }
+
+            // Decision Options
+            let optionsHTML = "";
+            // Assuming we are at root, look at branches
+            // If data is root node
+            if (data.branches && data.branches.length >= 2) {
+                // We need to resolve these branch IDs to labels if possible, but data here is just the node object?
+                // In ALL_THICK_DATA structure, branches are siblings or children?
+                // Wait, renderTreeForce receives 'root'.
+                // In the JSON, 'branches' inside root is array of strings ["T1", "T2"]
+                // The actual branch objects are in the top-level "branches" array of the scenario object.
+                // We need to look them up.
+
+                if (currentScenario && currentScenario.branches) {
+                    const branch1ID = data.branches[0];
+                    const branch2ID = data.branches[1];
+
+                    const branch1 = currentScenario.branches.find(b => b.branch_id === branch1ID);
+                    const branch2 = currentScenario.branches.find(b => b.branch_id === branch2ID);
+
+                    if (branch1 && branch2) {
+                        // Clean labels (Remove "ACTION — " etc)
+                        const l1 = branch1.label.split("—")[0].trim();
+                        const l2 = branch2.label.split("—")[0].trim();
+
+                        optionsHTML = `
+                         <div style="margin-top:15px; padding-top:10px; border-top:1px dotted #333; display:flex; justify-content:space-around; font-size:10px; color:#fff;">
+                             <div style="text-align:center;"><span style="color:var(--trackA)">OPTION A:</span><br><b style="font-size:12px;">${l1}</b></div>
+                             <div style="text-align:center;"><span style="color:var(--trackB)">OPTION B:</span><br><b style="font-size:12px;">${l2}</b></div>
+                         </div>
+                         `;
+                    }
+                }
+            }
+
+
+            h.innerHTML = `
+                <div class="dh-title">${data.title || "DILEMMA CONTEXT"}</div>
+                <div class="d-meta-row">
+                    <span class="d-key">SYSTEM TIME:</span>
+                    <span class="d-val">${timeStr}</span>
+                </div>
+                <div class="d-meta-row">
+                    <span class="d-key">LOC:</span>
+                    <span class="d-val">${locStr}</span>
+                </div>
+                ${entitiesStr ? `
+                <div class="d-meta-row">
+                    <span class="d-key">ENTITIES IN PROXIMITY:</span>
+                    <span class="d-val" style="font-size:11px;">${entitiesStr}</span>
+                </div>` : ''}
+                
+                ${monoStr ? `<div class="d-body-text">"${monoStr}"</div>` : ''}
+                ${optionsHTML}
+            `;
+
+            initSpectrogram(h);
+
+            // Feed spectrogram based on context keywords
+            const blob = (locStr + monoStr).toLowerCase();
+            if (blob.includes('nuclear') || blob.includes('death')) specData.pressure = 0.9;
+            else specData.pressure = 0.3;
+            if (blob.includes('protocol') || blob.includes('orders')) specData.protocol = 0.8;
+            else specData.protocol = 0.4;
+        }
+
+        function renderTreeForce(root) {
+            renderDilemmaHeader(currentScenario.root || root);
+
+            const container = document.getElementById('tree-root');
+            container.innerHTML = "";
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.alignItems = 'center';
+
+            // We need to reconstruct the tree from the flat "branches" list if necessary
+            // In the provided JSON, root has "branches": ["T1", "T2"]. 
+            // The top level object has a "branches" array with all the node definitions.
+
+            // Build map
+            const nodeMap = {};
+            if (currentScenario.branches) {
+                currentScenario.branches.forEach(b => nodeMap[b.branch_id] = b);
+            }
+            nodeMap[root.branch_id] = root; // Add root
+
+            // Recursive render
+            function buildDom(nodeId) {
+                const nodeData = nodeMap[nodeId];
+                if (!nodeData) return null;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'subtree';
+                wrapper.style.display = 'flex';
+                wrapper.style.flexDirection = 'column';
+                wrapper.style.alignItems = 'center';
+
+                const nodeEl = renderNode(nodeData);
+                wrapper.appendChild(nodeEl);
+
+                if (nodeData.branches && nodeData.branches.length > 0) {
+                    const childrenCont = document.createElement('div');
+                    childrenCont.className = 'tree-level';
+                    childrenCont.style.marginTop = '40px';
+
+                    nodeData.branches.forEach(childId => {
+                        const childDom = buildDom(childId);
+                        if (childDom) childrenCont.appendChild(childDom);
+                    });
+                    wrapper.appendChild(childrenCont);
+                }
+
+                return wrapper;
+            }
+
+            const tree = buildDom(root.branch_id);
+            if (tree) container.appendChild(tree);
+
+            // Draw lines after layout
+            setTimeout(drawConnections, 100);
+        }
+
+        function renderNode(nodeData) {
+            const div = document.createElement('div');
+            div.className = 'tree-node';
+
+            // Store ID for lookup
+            div.dataset.id = nodeData.branch_id;
+
+            // Determine Type
+            let typeClass = 'node-other';
+            const labelStr = nodeData.label || "ROOT";
+            let probStr = (nodeData.probability * 100).toFixed(0) + "%";
+
+            if (nodeData.depth === 0) { typeClass = 'node-root'; probStr = "START"; }
+            else if (labelStr.includes("REPORT") || labelStr.includes("LAUNCH") || labelStr.includes("Follow")) typeClass = 'node-safe'; // Protocol
+            else if (labelStr.includes("DISMISS") || labelStr.includes("WAIT") || labelStr.includes("Trust")) typeClass = 'node-danger'; // Risk
+
+            div.classList.add(typeClass);
+
+            // People Count Logic (Strict, no randoms)
+            let peopleCount = 0;
+            const allText = labelStr + " " + (nodeData.immediate_consequence || "") + " " + (nodeData.thick_description ? JSON.stringify(nodeData.thick_description) : "");
+
+            // Aggressive regex to find significant numbers near keywords
+            const deathMatch = allText.match(/(\d+(?:,\d+)*(?:\s*million|\s*billion)?)\s+(?:dead|killed|lives|casualties|people|victims)/i);
+
+            let countLabel = "";
+            if (deathMatch) {
+                countLabel = deathMatch[1] + " SOULS"; // "500 million SOULS"
+            } else if (typeClass === 'node-danger') {
+                // No random fallback. If we don't know, we don't show specific numbers or show a generic warning.
+                countLabel = "HIGH STAKES";
+            }
+
+            let iconSvg = "";
+            if (countLabel && countLabel !== "HIGH STAKES") {
+                iconSvg = `<svg class="stake-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+            } else if (typeClass === 'node-danger') {
+                iconSvg = `<svg class="stake-icon" viewBox="0 0 24 24" style="fill:var(--trackB)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+            }
+
+            let html = `
+                <div class="node-header">
+                    <span>${nodeData.branch_id || 'ROOT'}</span>
+                    <span class="tag">${probStr}</span>
+                </div>
+                <div class="node-label">${labelStr}</div>
+            `;
+
+            if (countLabel) {
+                html += `<div class="stakes-container">
+                    ${iconSvg}
+                    <span class="stake-count">${countLabel}</span>
+                 </div>`;
+            }
+
+            if (nodeData.thick_description) {
+                const td = nodeData.thick_description;
+                html += `<div class="thick-layer">`;
+                if (td.setting) html += `<div class="radio-log" style="color:var(--dim)">LOC: ${cleanText(td.setting)}</div>`;
+                if (td.what_he_says) html += `<div class="dialogue">"${cleanText(td.what_he_says)}"</div>`;
+                html += `</div>`;
+            } else {
+                // Fallback for missing thick data
+                html += `<div class="thick-layer">`;
+                if (nodeData.immediate_consequence) html += `<div class="radio-log" style="color:#d4af37">> ${cleanText(nodeData.immediate_consequence)}</div>`;
+                else if (nodeData.entities_present) html += `<div class="radio-log">ENTITIES: ${nodeData.entities_present.join(', ')}</div>`;
+                else html += `<div class="radio-log" style="opacity:0.5;">[DATA COMPROMISED]</div>`;
+                html += `</div>`;
+            }
+
+            div.innerHTML = html;
+
+            // Add identifying data for click handling
+            div.dataset.label = labelStr;
+            div.dataset.type = typeClass;
+
+            // Interaction bind
+            div.onclick = (e) => handleNodeClick(e, div);
+
+            return div;
+        }
+
+        function drawConnections() {
+            const svg = document.getElementById('svg-layer');
+            svg.innerHTML = "";
+
+            const nodes = document.querySelectorAll('.tree-node');
+            if (nodes.length === 0) return;
+
+            // Simple method: Connect node to its children
+            // We can traverse the DOM structure .subtree -> .tree-node, .tree-level -> .subtree
+
+            // Get text rects
+            const rects = [];
+            nodes.forEach(n => rects.push(n.getBoundingClientRect()));
+
+            // Use line logic
+            // Actually deeper traversal is better
+            // Find all .subtree elements, get first child (.tree-node), then find sibling .tree-level -> children .subtree -> children .tree-node
+
+            const subtrees = document.querySelectorAll('.subtree');
+            const svgRect = svg.getBoundingClientRect();
+
+            subtrees.forEach(st => {
+                const parentNode = st.children[0]; // .tree-node
+                if (st.children.length > 1) {
+                    const level = st.children[1]; // .tree-level
+                    const childSubtrees = level.children; // .subtree elements
+
+                    Array.from(childSubtrees).forEach(cst => {
+                        const childNode = cst.children[0];
+
+                        // Draw Line
+                        const pRect = parentNode.getBoundingClientRect();
+                        const cRect = childNode.getBoundingClientRect();
+
+                        const x1 = pRect.left + pRect.width / 2 - svgRect.left;
+                        const y1 = pRect.bottom - svgRect.top;
+                        const x2 = cRect.left + cRect.width / 2 - svgRect.left;
+                        const y2 = cRect.top - svgRect.top;
+
+                        // Determine color based on child type
+                        let color = "#555";
+                        if (childNode.classList.contains('node-safe')) color = "var(--trackA)";
+                        if (childNode.classList.contains('node-danger')) color = "var(--trackB)";
+
+                        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        // Curved path
+                        const d = `M ${x1} ${y1} C ${x1} ${y1 + 30}, ${x2} ${y2 - 30}, ${x2} ${y2}`;
+
+                        path.setAttribute("d", d);
+                        path.setAttribute("stroke", color); // variable logic
+                        path.setAttribute("stroke-width", "2");
+                        path.setAttribute("fill", "none");
+                        if (color.includes("var")) path.style.stroke = color;
+                        else path.setAttribute("stroke", color);
+
+                        path.style.opacity = 0.4;
+
+                        svg.appendChild(path);
+                    });
+                }
+            });
+        }
+
+        window.addEventListener('load', parseData);
+        window.addEventListener('resize', drawConnections);
+
+        // --- 2. INTERACTIVE MORAL GENOME (User Profile) ---
+        let userGenome = {
+            active: false,
+            step: 0,
+            path: [],
+            metrics: {
+                openness: 2.5, conscientiousness: 2.5, extraversion: 2.5,
+                agreeableness: 2.5, neuroticism: 2.5, logic: 2.5,
+                empathy: 2.5, authority: 2.5, risk: 2.5,
+                uncertainty: 2.5, decisiveness: 2.5
+            },
+            scores: { ethical_awareness: 0.5, ethical_action: 0.5, impact: 0.5, career_risk: 0.5 }
         };
 
-        function renderDiagram() {
-            const key = document.getElementById('scenarioSelect').value;
-            const scenario = scenarios[key];
+        function startInteraction() {
+            userGenome.active = true;
+            userGenome.step = 0;
+            userGenome.path = [];
+            // Reset metrics? Optional.
 
-            // Update stats
-            document.getElementById('stats').innerHTML = `
-    <div class="stat"><div class="stat-value">${scenario.stats.branches}</div><div class="stat-label">Total Branches</div></div>
-    <div class="stat"><div class="stat-value">${scenario.stats.terminals}</div><div class="stat-label">Terminal Nodes</div></div>
-    <div class="stat"><div class="stat-value">${scenario.stats.loops}</div><div class="stat-label">Loops</div></div>
-    <div class="stat"><div class="stat-value">${scenario.stats.maxDepth}</div><div class="stat-label">Max Depth</div></div>
-  `;
+            document.querySelectorAll('.tree-node').forEach(n => {
+                n.classList.add('interactive-node');
+                n.onclick = (e) => handleNodeClick(e, n);
+                n.style.cursor = 'pointer'; // Visual cue
+            });
+            // Show HUD message
+            const hud = document.getElementById('scenario-title');
+            hud.innerText = "TEST MODE: SELECT YOUR PATH";
+            hud.style.color = "var(--junction)";
+            hud.style.animation = "pulse 1s infinite";
 
-            // Render mermaid
-            document.getElementById('diagram').innerHTML = scenario.mermaid;
-            mermaid.init(undefined, '#diagram');
+            initGenomeHUD();
+            updateGenomeHUD();
 
-            // Update paths
-            document.getElementById('pathList').innerHTML = `
-    <h3>Critical Paths</h3>
-    ${scenario.paths.map(p => `<div class="path ${p.type}">${p.label}: <code>${p.path}</code></div>`).join('')}
-  `;
+            // Also enable the "VIEW RECORD" button if it exists
+            const btn = document.getElementById('btn-view-record');
+            if (btn) btn.style.display = 'block';
         }
 
-        function exportJSON() {
-            const key = document.getElementById('scenarioSelect').value;
-            const blob = new Blob([JSON.stringify(scenarios[key], null, 2)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `cascade-${key}.json`;
-            a.click();
+        function handleNodeClick(e, nodeEl) {
+            if (!userGenome.active) return;
+            e.stopPropagation();
+
+            // Visual feedback
+            nodeEl.classList.add('ghost-active');
+            nodeEl.style.boxShadow = "0 0 15px #fff"; // Instant feedback
+
+            // Expand Node (Show Thick Data)
+            nodeEl.classList.add('expanded');
+
+            // 1. Update Header with specific Node Data (Dynamic Plot)
+            const nodeId = nodeEl.dataset.id;
+            const nodeData = nodeLookup[nodeId];
+            if (nodeData) {
+                renderDilemmaHeader(nodeData); // Updates the "Plot" / Context
+                console.log("Updated context to:", nodeId);
+            }
+
+            const text = nodeEl.innerText;
+            const isSafe = nodeEl.classList.contains('node-safe');
+            const isDanger = nodeEl.classList.contains('node-danger');
+
+            updateGenome(text, isSafe, isDanger);
+
+            userGenome.step++;
+            userGenome.path.push(nodeEl.dataset.label || "Choice");
+            updateGenomeHUD();
+
+            // Check if terminal
+            const parentSubtree = nodeEl.parentNode; // .subtree
+            // If has children container? renderTree uses wrapper -> [node, childrenCont]
+            const hasChildren = parentSubtree.children.length > 1;
+
+            if (!hasChildren) {
+                setTimeout(showPassport, 1000);
+            } else {
+                // Auto Scroll to children
+                const childrenLevel = parentSubtree.children[1]; // .tree-level
+                childrenLevel.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
         }
 
-        mermaid.initialize({
-            startOnLoad: false,
-            theme: 'dark',
-            flowchart: { curve: 'basis' }
-        });
+        function updateGenome(text, isSafe, isDanger) {
+            // Heuristic updates (PLoT-lite)
+            const m = userGenome.metrics;
+            const s = userGenome.scores;
 
-        renderDiagram();
+            // Shift based on type
+            if (isSafe) {
+                m.authority += 0.5;
+                m.logic += 0.4;
+                m.risk -= 0.3;
+                m.conscientiousness += 0.4;
+                s.career_risk -= 0.1;
+            }
+            if (isDanger) {
+                m.risk += 0.6;
+                m.empathy += 0.4;
+                m.authority -= 0.3;
+                m.openness += 0.3;
+                s.career_risk += 0.2;
+            }
+
+            // Keyword analysis
+            const txt = text.toLowerCase();
+            if (txt.includes('sweat') || txt.includes('fear') || txt.includes('terror')) m.neuroticism += 0.4;
+            if (txt.includes('protocol') || txt.includes('orders')) m.authority += 0.4;
+            if (txt.includes('fail') || txt.includes('death')) m.neuroticism += 0.2;
+            if (txt.includes('save') || txt.includes('lives')) { m.empathy += 0.5; s.impact += 0.2; }
+            if (txt.includes('trust') || txt.includes('intuition')) { m.logic -= 0.2; m.openness += 0.4; }
+
+            // Clamp
+            Object.keys(s).forEach(k => s[k] = Math.max(0, Math.min(1, s[k])));
+        }
+
+        // --- HELPER FUNCTIONS (Moved to Top Scope) ---
+        function inferDrive(m) {
+            if (m.empathy > 3.5 && m.risk > 3) return "VALOR";
+            if (m.logic > 3.5 && m.authority > 3) return "ORDER";
+            if (m.conscientiousness > 4) return "DUTY";
+            if (m.openness > 4) return "DISCOVERY";
+            return "SURVIVAL";
+        }
+
+        function inferVulnerability(m) {
+            if (m.neuroticism > 3.5) return "ANXIETY_LOOP";
+            if (m.risk > 4) return "RECKLESSNESS";
+            if (m.authority > 4) return "RIGIDITY";
+            if (m.empathy > 4) return "BURNOUT";
+            return "STASIS";
+        }
+
+        function inferArchetype(m) {
+            if (m.risk > 4) return "MAVERICK_OPERATOR";
+            if (m.authority > 4) return "SYSTEM_LOYALIST";
+            if (m.empathy > 4) return "HUMANIST_GUARDIAN";
+            if (m.logic > 4) return "CALCULATING_UTILITARIAN";
+            return "STANDARD_OPERATOR";
+        }
+
+        // --- 4. ETHICAL PASSPORT (Exportable) ---
+        function showPassport() {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.background = 'rgba(0,0,0,0.95)';
+            overlay.style.backdropFilter = 'blur(15px)';
+            overlay.style.zIndex = '999';
+            overlay.style.display = 'flex';
+            overlay.style.flexDirection = 'column';
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+
+            // Close on background click
+            overlay.onclick = (e) => {
+                if (e.target === overlay) overlay.remove();
+            }
+
+            const character = {
+                id: `ETH-${String(userGenome.step).padStart(3, '0')}-${Math.floor(Math.random() * 9999)}`,
+                name: "USER_AGENT",
+                archetype: inferArchetype(userGenome.metrics),
+                drive: inferDrive(userGenome.metrics),
+                metrics: userGenome.metrics,
+                path: userGenome.path
+            };
+
+            const html = renderPassportHTML(character);
+            overlay.innerHTML = html;
+            document.body.appendChild(overlay);
+
+            // Bind Actions
+            setTimeout(() => {
+                const btnDown = document.getElementById('btn-download-passport');
+                if (btnDown) btnDown.onclick = () => downloadPassportAsync(character);
+
+                const btnCopy = document.getElementById('btn-copy-md');
+                if (btnCopy) btnCopy.onclick = () => copyMarkdownPrompt(character);
+            }, 100);
+        }
+
+        function renderPassportHTML(char) {
+            const diagram = createAssemblyDiagramSVG(char.metrics);
+
+            // Generate Stamps
+            const stamps = char.path.map((p, i) => {
+                const colors = ['#d4af37', '#c0c0c0', '#cd7f32', '#a0b0ff'];
+                const color = colors[i % colors.length];
+                return `
+                    <div style="width:40px; height:40px; border:2px solid ${color}; border-radius:50%; display:flex; align-items:center; justify-content:center; transform:rotate(${Math.random() * 30 - 15}deg); opacity:0.8;">
+                        <span style="font-size:8px; line-height:1; text-align:center; color:${color}; font-weight:bold;">STEP<br>${i + 1}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // Decision List (Strict Format)
+            const decisionsList = char.path.map((p, i) => `
+                <div style="font-size:12px; border-bottom:1px solid #ccc; padding:6px 0; color:#000; display:flex; gap:8px;">
+                    <span style="color:#a00; font-weight:bold; min-width:24px;">${String(i + 1).padStart(2, '0')}</span> 
+                    <span style="font-family:'Courier New'; font-weight:600;">${p.toUpperCase()}</span>
+                </div>
+            `).join('');
+
+            return `
+                <div id="passport-card" style="width: 800px; height: 550px; background: #fff; color: #000; font-family: 'Courier New', monospace; box-shadow: 0 30px 80px rgba(0,0,0,0.5); display:grid; grid-template-columns: 35% 65%; border: 6px solid #111; position:relative; overflow:hidden;">
+                    
+                    <!-- LEFT PAGE: IDENTITY -->
+                    <div style="border-right: 4px solid #111; padding: 30px; display:flex; flex-direction:column; align-items:center; background:#f0f0f0;">
+                        <div style="font-size:16px; letter-spacing:3px; margin-bottom:20px; font-weight:900; color:#111; text-transform:uppercase; border-bottom:2px solid #111; padding-bottom:5px;">Ethical Passport</div>
+                        
+                        <!-- Branding -->
+                        <img src="average_joes_logo.png" style="width:100px; margin-bottom:20px; mix-blend-mode:multiply;">
+
+                        <!-- Photo Placeholder -->
+                        <div style="width:140px; height:160px; background:#fff; border:3px solid #111; margin-bottom:20px; display:flex; align-items:center; justify-content:center;">
+                            ${createAssemblyDiagramSVG(char.metrics).replace('300', '110').replace('400px', '100%')}
+                        </div>
+
+                        <div style="font-size:22px; font-weight:900; margin-bottom:5px; color:#000; text-align:center;">${char.name}</div>
+                        <div style="font-size:14px; color:#333; font-weight:bold; font-family:sans-serif;">ID: ${char.id}</div>
+                        
+                        <div style="margin-top:25px; text-align:center; width:100%;">
+                            <div style="font-size:11px; color:#555; text-transform:uppercase; border-bottom:1px solid #999; margin-bottom:4px;">Archetype</div>
+                            <div style="font-size:16px; color:#000; font-weight:bold;">${char.archetype}</div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT PAGE: VISAS & METRICS -->
+                    <div style="padding: 30px; position:relative; background:#fff;">
+                        <div style="font-size:14px; text-align:right; color:#111; border-bottom:3px solid #111; padding-bottom:10px; font-weight:900; letter-spacing:1px; margin-bottom:20px;">OFFICIAL RECORD OF DECISIONS</div>
+                        
+                        <div style="display:flex; justify-content:space-between; height:360px;">
+                            <!-- Column 1: Radar & Stamps -->
+                            <div style="width:45%; display:flex; flex-direction:column;">
+                                <div style="height:180px; display:flex; justify-content:center; align-items:center;">
+                                     ${diagram}
+                                </div>
+                                <div style="margin-top:20px;">
+                                    <div style="font-size:12px; color:#000; font-weight:bold; margin-bottom:10px; text-decoration:underline;">VISA STAMPS</div>
+                                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+                                        ${stamps}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Column 2: Decision Log -->
+                            <div style="width:50%; border-left:2px dashed #999; padding-left:20px; overflow-y:auto; background:#f9f9f9; padding:10px;">
+                                <div style="font-size:12px; color:#000; font-weight:900; margin-bottom:10px; text-transform:uppercase;">Entry Log</div>
+                                ${decisionsList}
+                            </div>
+                        </div>
+
+                         <div style="position:absolute; bottom:25px; right:30px; display:flex; gap:15px;">
+                            <button id="btn-copy-md" style="background:#eee; color:#111; border:2px solid #111; padding:10px 16px; font-weight:bold; cursor:pointer; font-family:'Courier New'; font-size:12px; box-shadow:3px 3px 0 #111;">
+                                COPY DATA
+                            </button>
+                            <button id="btn-download-passport" style="background:#111; color:#fff; border:2px solid #111; padding:10px 20px; font-weight:bold; cursor:pointer; font-family:'Courier New'; text-transform:uppercase; font-size:12px; box-shadow:3px 3px 0 #999;">
+                                DOWNLOAD
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Watermark -->
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-30deg); font-size:90px; color:rgba(0, 0, 0, 0.04); pointer-events:none; white-space:nowrap; font-weight:900;">
+                        FORK CASCADE
+                    </div>
+                </div>
+                <div style="margin-top:15px; color:#fff; font-size:14px; background:#000; padding:5px 10px;">Click background to close</div>
+            `;
+        }
+
+        function copyMarkdownPrompt(char) {
+            const md = `
+# Ethical Passport: ${char.id}
+**Archetype:** ${char.archetype} | **Drive:** ${char.drive}
+
+**Metrics:**
+- Empathy: ${char.metrics.empathy.toFixed(1)}
+- Logic: ${char.metrics.logic.toFixed(1)}
+- Risk: ${char.metrics.risk.toFixed(1)}
+- Authority: ${char.metrics.authority.toFixed(1)}
+
+**Decisions:**
+${char.path.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+            `.trim();
+
+            navigator.clipboard.writeText(md).then(() => {
+                const btn = document.getElementById('btn-copy-md');
+                const orig = btn.innerText;
+                btn.innerText = "COPIED!";
+                setTimeout(() => btn.innerText = orig, 2000);
+            });
+        }
+
+        function downloadPassportAsync(char) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1600;
+            canvas.height = 1000;
+            const ctx = canvas.getContext('2d');
+
+            // --- 1. Draw Background (Paper) ---
+            ctx.fillStyle = "#fdfbf7";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Left Panel BG
+            ctx.fillStyle = "#e6e2d3";
+            ctx.fillRect(0, 0, canvas.width * 0.35, canvas.height);
+
+            // Border
+            ctx.strokeStyle = "#1a2a3a";
+            ctx.lineWidth = 8;
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+            // Divider
+            ctx.beginPath();
+            ctx.moveTo(canvas.width * 0.35, 0);
+            ctx.lineTo(canvas.width * 0.35, canvas.height);
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // --- 2. Load Logo Async ---
+            const logo = new Image();
+            logo.src = 'average_joes_logo.png';
+
+            logo.onload = () => {
+                // Draw Logo
+                ctx.save();
+                ctx.globalAlpha = 0.9;
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.drawImage(logo, canvas.width * 0.175 - 80, 100, 160, 160); // Centered on left
+                ctx.restore();
+
+                finishCanvasDraw(ctx, canvas, char);
+            };
+
+            logo.onerror = () => {
+                console.warn("Logo failed to load, drawing without it.");
+                finishCanvasDraw(ctx, canvas, char);
+            };
+        }
+
+        function finishCanvasDraw(ctx, canvas, char) {
+            // --- Text Styles ---
+            ctx.font = "bold 30px Courier New";
+            ctx.fillStyle = "#1a2a3a";
+            ctx.textAlign = "center";
+
+            // Title
+            ctx.fillText("ETHICAL PASSPORT", canvas.width * 0.175, 60);
+
+            // Name & ID
+            ctx.font = "bold 40px Courier New";
+            ctx.fillText(char.name, canvas.width * 0.175, 550);
+            ctx.font = "24px Courier New";
+            ctx.fillStyle = "#555";
+            ctx.fillText(char.id, canvas.width * 0.175, 600);
+
+            // Archetype
+            ctx.fillStyle = "#888";
+            ctx.font = "20px Courier New";
+            ctx.fillText("ARCHETYPE", canvas.width * 0.175, 680);
+            ctx.fillStyle = "#000";
+            ctx.font = "bold 30px Courier New";
+            ctx.fillText(char.archetype, canvas.width * 0.175, 720);
+
+            // --- Right Page ---
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#1a2a3a";
+            ctx.font = "bold 24px Courier New";
+            ctx.fillText("OFFICIAL RECORD OF DECISIONS", canvas.width - 50, 60);
+
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - 50, 75);
+            ctx.lineTo(canvas.width * 0.4, 75);
+            ctx.stroke();
+
+            // Decision List
+            ctx.textAlign = "left";
+            ctx.font = "bold 24px Courier New";
+            let yPos = 140;
+            char.path.forEach((p, i) => {
+                if (yPos > 900) return; // Clip
+
+                // Index
+                ctx.fillStyle = "#a00";
+                ctx.fillText((i + 1).toString().padStart(2, '0'), canvas.width * 0.55, yPos);
+
+                // Text
+                ctx.fillStyle = "#000";
+                ctx.fillText(p.toUpperCase(), canvas.width * 0.62, yPos);
+
+                // Line
+                ctx.strokeStyle = "#ddd";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(canvas.width * 0.55, yPos + 10);
+                ctx.lineTo(canvas.width * 0.95, yPos + 10);
+                ctx.stroke();
+
+                yPos += 50; // More spacing
+            });
+
+            // Radar Chart would require complex canvas path drawing again (skipped for brevity/robustness in V2, relying on UI screenshot or just text for now? 
+            // Actually, let's draw a simplified one or placeholder to not break 'printable' promise)
+            // Re-implementing simplified radar:
+            const centerX = canvas.width * 0.52; // Shifted
+            const centerY = 300;
+            const radius = 150;
+            // Grid
+            ctx.strokeStyle = "#ccc";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Shape
+            const metrics = Object.values(char.metrics);
+            const numAxes = metrics.length;
+            ctx.beginPath();
+            metrics.forEach((val, i) => {
+                const angle = (Math.PI * 2 * i) / numAxes - Math.PI / 2;
+                const r = (val / 5) * radius;
+                const x = centerX + r * Math.cos(angle);
+                const y = centerY + r * Math.sin(angle);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.fillStyle = "rgba(26, 42, 58, 0.2)";
+            ctx.fill();
+            ctx.strokeStyle = "#1a2a3a";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Stamps
+            char.path.forEach((p, i) => {
+                const x = canvas.width * 0.45 + (i % 4) * 80;
+                const y = 600 + Math.floor(i / 4) * 80;
+
+                ctx.beginPath();
+                ctx.arc(x, y, 30, 0, Math.PI * 2);
+                ctx.strokeStyle = "#d4af37";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.font = "10px Arial";
+                ctx.fillStyle = "#d4af37";
+                ctx.textAlign = "center";
+                ctx.fillText("STEP " + (i + 1), x, y + 4);
+            });
+
+            // Watermark
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(-30 * Math.PI / 180);
+            ctx.font = "bold 150px Arial";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.03)";
+            ctx.textAlign = "center";
+            ctx.fillText("FORK CASCADE", 0, 0);
+            ctx.restore();
+
+            // Export
+            const link = document.createElement('a');
+            link.download = `passport_${char.id}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+
+
+        // --- 3. GENOME HUD (Live Feedback) ---
+        function initGenomeHUD() {
+            const hud = document.createElement('div');
+            hud.id = 'genome-hud';
+            hud.style.position = 'absolute';
+            hud.style.bottom = '20px';
+            hud.style.right = '20px';
+            hud.style.width = '260px'; // Slightly wider
+            hud.style.background = 'rgba(0,0,0,0.9)'; // Darker
+            hud.style.border = '1px solid var(--junction)';
+            hud.style.borderRadius = '8px';
+            hud.style.padding = '12px';
+            hud.style.fontFamily = 'var(--font-mono)';
+            hud.style.color = '#fff';
+            hud.style.zIndex = '50';
+            hud.style.display = 'none'; // Hidden until active
+            hud.style.boxShadow = '0 0 20px rgba(0,0,0,0.8)';
+
+            hud.innerHTML = `
+                <div style="font-size:10px; color:var(--junction); margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:4px; display:flex; justify-content:space-between;">
+                    <span>TEST MODE MONITOR</span>
+                    <span id="genome-step">STEP 0</span>
+                </div>
+                <div id="genome-metrics" style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:10px;">
+                    <!-- Filled by JS -->
+                </div>
+                <div style="font-size:9px; color:#888; margin-bottom:4px;">DECISION LOG:</div>
+                <div id="genome-log" style="height:60px; overflow-y:auto; font-size:9px; color:var(--text); border:1px solid #333; padding:4px;">
+                    <div style="opacity:0.5;">Awaiting input...</div>
+                </div>
+            `;
+            document.getElementById('viz-container').appendChild(hud);
+        }
+
+        function updateGenomeHUD() {
+            const hud = document.getElementById('genome-hud');
+            if (!hud) return;
+            if (!userGenome.active) { hud.style.display = 'none'; return; }
+            hud.style.display = 'block';
+
+            document.getElementById('genome-step').innerText = `STEP ${userGenome.step}`;
+
+            // Render All Metrics (compact)
+            // Or Top Significance
+            const sortedMetrics = Object.entries(userGenome.metrics)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 6); // Show top 6
+
+            const metricsHtml = sortedMetrics.map(([k, v]) => `
+                <div style="display:flex; justify-content:space-between; font-size:9px;">
+                    <span style="text-transform:uppercase; color:var(--dim);">${k.substring(0, 8)}</span>
+                    <span style="color:${v > 3.5 ? 'var(--trackA)' : '#fff'}; font-weight:bold;">${v.toFixed(1)}</span>
+                </div>
+            `).join('');
+            document.getElementById('genome-metrics').innerHTML = metricsHtml;
+
+            // Render Log
+            const logHtml = userGenome.path.map((p, i) => `
+                <div style="margin-bottom:2px; border-bottom:1px dotted #333;">
+                    <span style="color:var(--junction);">${i + 1}.</span> ${p}
+                </div>
+            `).reverse().join('');
+            document.getElementById('genome-log').innerHTML = logHtml || '<div style="opacity:0.5;">Awaiting input...</div>';
+        }
+
+        function createAssemblyDiagramSVG(metrics) {
+            const size = 300; // Increased size
+            const center = size / 2;
+            const radius = size * 0.35;
+            const keys = Object.keys(metrics);
+            const numAxes = keys.length;
+            const metricsArray = Object.values(metrics);
+
+            const points = metricsArray.map((value, i) => {
+                const angle = (Math.PI * 2 * i) / numAxes - Math.PI / 2;
+                const r = (value / 5) * radius;
+                return `${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`;
+            }).join(' ');
+
+            // Generate Labels
+            const labelsSVG = keys.map((key, i) => {
+                const angle = (Math.PI * 2 * i) / numAxes - Math.PI / 2;
+                const r = radius + 25; // Push out label
+                const x = center + r * Math.cos(angle);
+                const y = center + r * Math.sin(angle);
+
+                // Align text based on quadrant
+                let anchor = "middle";
+                if (x < center - 10) anchor = "end";
+                if (x > center + 10) anchor = "start";
+
+                return `<text x="${x}" y="${y}" text-anchor="${anchor}" fill="#666" font-size="8" font-family="monospace">${key.toUpperCase()}</text>`;
+            }).join('');
+
+            // Generate Grid
+            const gridSVG = [1, 2, 3, 4, 5].map(v => {
+                const r = (v / 5) * radius;
+                return `<circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="#ddd" stroke-dasharray="2,2"/>`;
+            }).join('');
+
+            return `
+                <svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 400px; height: auto;">
+                    ${gridSVG}
+                    <polygon points="${points}" fill="rgba(0, 240, 255, 0.2)" stroke="#000" stroke-width="2"/>
+                    ${labelsSVG}
+                </svg>
+            `;
+        }
+
+        // Make accessible globally
+        window.activeInteraction = startInteraction;
+
     </script>
 </body>
 

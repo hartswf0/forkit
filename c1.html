@@ -585,6 +585,7 @@
                     <span>city minifigs · 40 tons · hamlet mode</span>
                 </div>
                 <div class="tool-btns">
+                    <button class="mini-btn" id="btn-tts">TTS</button>
                     <button class="mini-btn" id="btn-help">HELP</button>
                     <button class="mini-btn" id="btn-reset">RESET</button>
                 </div>
@@ -993,12 +994,13 @@ The lever is cold now. It was always too late.
             committed: null,
             tape: [],      // array of 'A','B','H'
             t: 0,          // normalized progress along shared+branch curve
-            speed: 0.045,  // world speed units per second (normalized)
+            speed: 0.030,  // SLOWER SPEED (was 0.045)
             decisionOpened: false,
             junctionT: 0.46,
             impactT: 0.95,
             cameraMode: "CHASE",
             lastTime: performance.now(),
+            tts: false,    // TTS state
         };
 
         // --- THREE GLOBALS ---
@@ -1012,6 +1014,28 @@ The lever is cold now. It was always too late.
         let ground;
 
         const el = (id) => document.getElementById(id);
+
+        // --- TTS ---
+        function speak(text) {
+            if (!STATE.tts) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.rate = 1.0;
+                u.pitch = 1.0;
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        function toggleTTS() {
+            STATE.tts = !STATE.tts;
+            const btn = el('btn-tts');
+            if (btn) {
+                btn.style.borderColor = STATE.tts ? "var(--accent)" : "rgba(255,255,255,0.16)";
+                btn.style.color = STATE.tts ? "var(--accent)" : "#cfd7e1";
+            }
+            log(STATE.tts ? "TTS Enabled." : "TTS Disabled.", "System");
+        }
 
         // --- AUDIO (tiny, non-intrusive) ---
         let audioCtx = null;
@@ -1045,6 +1069,11 @@ The lever is cold now. It was always too late.
             div.innerHTML = `<b style="color:${c}">${who}</b> ${msg}`;
             box.prepend(div);
             while (box.children.length > 6) box.lastChild.remove();
+
+            // Speak only significant messages or all? Let's speak all logged messages for accessibility/fun
+            if (who !== "System" || msg.includes("DECISION") || msg.includes("COMMIT")) {
+                speak(msg);
+            }
         }
 
         function showModal(id) { el(id).classList.add("visible"); }

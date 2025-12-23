@@ -1,0 +1,2014 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>THE FORK — Infinite Paradox Loop</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --bg: #05080a;
+            --panel: rgba(12, 16, 20, .92);
+            --text: #e8eef7;
+            --dim: #9aa8bb;
+            --border: rgba(255, 255, 255, .14);
+            --junction: #ffd400;
+            --trackA: #00f0ff;
+            --trackB: #ff3355;
+            --halt: #8a8a8a;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            user-select: none;
+            touch-action: none;
+        }
+
+        #canvas {
+            position: fixed;
+            inset: 0;
+        }
+
+        #ui {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .top {
+            pointer-events: auto;
+            padding: 12px 14px 10px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .92) 0%, rgba(0, 0, 0, .70) 55%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .title h1 {
+            margin: 0;
+            font-size: 13px;
+            letter-spacing: 1.2px;
+            font-weight: 900;
+        }
+
+        .title span {
+            display: block;
+            margin-top: 2px;
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+        }
+
+        .btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mini {
+            pointer-events: auto;
+            height: 32px;
+            padding: 0 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .16);
+            background: rgba(255, 255, 255, .08);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .mini:active {
+            transform: translateY(1px);
+        }
+
+        #tape {
+            pointer-events: auto;
+            display: flex;
+            gap: 2px;
+            height: 12px;
+            width: 100%;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .45);
+            cursor: pointer;
+        }
+
+        .tick {
+            flex: 1;
+            height: 100%;
+            opacity: .95;
+        }
+
+        .tick.A {
+            background: var(--trackA);
+        }
+
+        .tick.B {
+            background: var(--trackB);
+        }
+
+        .tick.H {
+            background: var(--halt);
+        }
+
+        .sub {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 10px;
+            color: rgba(232, 238, 247, .72);
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            gap: 10px;
+        }
+
+        .pill {
+            border: 1px solid rgba(255, 255, 255, .14);
+            border-radius: 999px;
+            padding: 3px 8px;
+            background: rgba(0, 0, 0, .25);
+            color: rgba(232, 238, 247, .78);
+            white-space: nowrap;
+        }
+
+        .pill b {
+            color: #fff;
+        }
+
+        #chrono {
+            font-size: 11px;
+            color: rgba(232, 238, 247, .80);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        #chrono .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--junction);
+            box-shadow: 0 0 16px rgba(255, 212, 0, .55);
+            opacity: .85;
+            animation: pulse 1.15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(.9);
+                opacity: .7;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .bottom {
+            pointer-events: auto;
+            padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+            background: linear-gradient(0deg, rgba(0, 0, 0, 1) 52%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .meterWrap {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .46);
+        }
+
+        .meter {
+            flex: 1;
+            height: 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(255, 255, 255, .06);
+            overflow: hidden;
+        }
+
+        .meter>i {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(255, 212, 0, 0.0), rgba(255, 212, 0, .95));
+        }
+
+        .hint {
+            font-size: 10px;
+            color: rgba(232, 238, 247, .70);
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .big {
+            pointer-events: auto;
+            height: 70px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(22, 28, 36, .86);
+            box-shadow: 0 18px 60px rgba(0, 0, 0, .35);
+            color: #fff;
+            font-family: inherit;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: transform .08s ease, filter .15s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .big:active {
+            transform: translateY(2px) scale(.995);
+        }
+
+        .big.active {
+            box-shadow: 0 0 0 2px #fff, 0 8px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(40, 48, 60, 0.95);
+        }
+
+        .big .l {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .big strong {
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .big small {
+            font-size: 10px;
+            opacity: .75;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+        }
+
+        .big .tag {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(0, 0, 0, .22);
+            white-space: nowrap;
+            min-width: 56px;
+            text-align: center;
+        }
+
+        .A {
+            border-color: rgba(0, 240, 255, .42);
+        }
+
+        .A .tag {
+            color: var(--trackA);
+            border-color: rgba(0, 240, 255, .45);
+        }
+
+        .B {
+            border-color: rgba(255, 51, 85, .40);
+        }
+
+        .B .tag {
+            color: var(--trackB);
+            border-color: rgba(255, 51, 85, .45);
+        }
+
+        .haltBtn {
+            height: 56px;
+            border-radius: 16px;
+            border: 1px dashed rgba(255, 255, 255, .22);
+            background: rgba(0, 0, 0, .56);
+            color: rgba(232, 238, 247, .90);
+            position: relative;
+        }
+
+        .haltBtn .tag {
+            color: #bbb;
+            border-color: rgba(255, 255, 255, .18);
+        }
+
+        .holdBar {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            bottom: 8px;
+            height: 6px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(255, 255, 255, .06);
+            overflow: hidden;
+        }
+
+        .holdBar>i {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.0), rgba(255, 255, 255, .9));
+        }
+
+        #radio {
+            position: fixed;
+            left: 14px;
+            right: 14px;
+            top: 118px;
+            z-index: 11;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 6px;
+            max-height: 160px;
+            overflow: hidden;
+            mask-image: linear-gradient(to bottom, transparent, black 20%);
+        }
+
+        .rb {
+            display: inline-flex;
+            align-items: flex-start;
+            gap: 8px;
+            max-width: min(560px, 92vw);
+            padding: 8px 10px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, .10);
+            background: rgba(10, 12, 16, .78);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, .35);
+            animation: slide .18s cubic-bezier(.2, .85, .2, 1);
+            font-size: 11px;
+            line-height: 1.3;
+        }
+
+        .rb b {
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        @keyframes slide {
+            from {
+                transform: translateX(-14px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        #bubbles {
+            position: fixed;
+            inset: 0;
+            z-index: 12;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            transform: translate(-50%, -110%);
+            padding: 7px 9px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(0, 0, 0, .62);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, .45);
+            max-width: 240px;
+            font-size: 11px;
+            line-height: 1.25;
+            opacity: 0;
+            transition: opacity .14s ease;
+            will-change: transform, opacity;
+        }
+
+        .bubble .name {
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: .85;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bubble:after {
+            content: "";
+            position: absolute;
+            left: 14px;
+            bottom: -7px;
+            width: 12px;
+            height: 12px;
+            background: rgba(0, 0, 0, .62);
+            border-left: 1px solid rgba(255, 255, 255, .12);
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+            transform: rotate(45deg);
+        }
+
+        .bubble.a {
+            border-color: rgba(0, 240, 255, .22);
+        }
+
+        .bubble.b {
+            border-color: rgba(255, 51, 85, .22);
+        }
+
+        .bubble.j {
+            border-color: rgba(255, 212, 0, .22);
+        }
+
+        .bubble.you {
+            border-color: rgba(255, 255, 255, .18);
+        }
+
+        #paradox {
+            position: fixed;
+            inset: 0;
+            z-index: 9;
+            pointer-events: none;
+            opacity: .0;
+            transition: opacity .25s ease;
+            background:
+                radial-gradient(60% 60% at 50% 50%, rgba(255, 212, 0, .07), transparent 65%),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .03) 1px, transparent 1px, transparent 9px);
+            mix-blend-mode: screen;
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #000;
+            transition: opacity .4s ease;
+        }
+
+        .spin {
+            width: 42px;
+            height: 42px;
+            border: 3px solid rgba(255, 255, 255, .12);
+            border-top-color: #fff;
+            border-radius: 999px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #err {
+            display: none;
+            color: #ff6b7a;
+            font-size: 12px;
+            max-width: 85vw;
+            text-align: center;
+        }
+
+        @media (max-width: 420px) {
+            .big {
+                height: 74px;
+            }
+
+            .grid {
+                gap: 9px;
+            }
+
+            .bubble {
+                max-width: 210px;
+            }
+
+            .tag {
+                min-width: 52px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas"></div>
+    <div id="paradox"></div>
+    <div id="bubbles"></div>
+    <div id="radio"></div>
+
+    <div id="ui">
+        <div class="top">
+            <div class="row">
+                <div class="title">
+                    <h1>THE FORK · INFINITE LOOP</h1>
+                    <span>train never stops · new dilemmas spawn forever</span>
+                </div>
+                <div class="btns">
+                    <button class="mini" id="btn-audio">AUDIO</button>
+                    <button class="mini" id="btn-clear">CLEAR</button>
+                </div>
+            </div>
+
+            <div id="tape" title="Tap for tape stats"></div>
+
+            <div class="sub">
+                <span class="pill">LAP <b id="lap">1</b> · DILEMMA <b id="did">—</b> · CHOICE <b
+                        id="choice">—</b></span>
+                <span id="chrono"><span class="dot"></span><span id="timeWarp">2:17:??</span> · <span
+                        id="phase">APPROACH</span></span>
+            </div>
+        </div>
+
+        <div class="bottom" id="touch-zone">
+            <div class="meterWrap">
+                <div class="meter"><i id="meterFill"></i></div>
+                <div class="hint" id="hint">swipe ←/→ to choose · hold to halt</div>
+            </div>
+
+            <div class="grid">
+                <button class="big A" id="btn-continue">
+                    <div class="l">
+                        <strong>CONTINUE</strong>
+                        <small>stay on Track A</small>
+                    </div>
+                    <div class="tag" id="tagA">A · —</div>
+                </button>
+
+                <button class="big B" id="btn-switch">
+                    <div class="l">
+                        <strong>SWITCH</strong>
+                        <small>pull lever → Track B</small>
+                    </div>
+                    <div class="tag" id="tagB">B · —</div>
+                </button>
+            </div>
+
+            <button class="big haltBtn" id="btn-halt">
+                <div class="l">
+                    <strong>HALT</strong>
+                    <small>hold to abandon lever</small>
+                </div>
+                <div class="tag">H</div>
+                <div class="holdBar"><i id="holdFill"></i></div>
+            </button>
+        </div>
+    </div>
+
+    <div id="loader">
+        <div class="spin"></div>
+        <div style="font-size:10px;color:#666;letter-spacing:2px;text-transform:uppercase;">initializing loop</div>
+        <div id="err"></div>
+    </div>
+    <script>
+        const CSS = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+        const HEX = (cssColor) => cssColor.startsWith("#") ? parseInt(cssColor.slice(1), 16) : 0xffffff;
+
+        const UI = {
+            tape: document.getElementById("tape"),
+            lap: document.getElementById("lap"),
+            did: document.getElementById("did"),
+            choice: document.getElementById("choice"),
+            phase: document.getElementById("phase"),
+            timeWarp: document.getElementById("timeWarp"),
+            meterFill: document.getElementById("meterFill"),
+            hint: document.getElementById("hint"),
+            radio: document.getElementById("radio"),
+            bubbles: document.getElementById("bubbles"),
+            paradox: document.getElementById("paradox"),
+            btnContinue: document.getElementById("btn-continue"),
+            btnSwitch: document.getElementById("btn-switch"),
+            btnHalt: document.getElementById("btn-halt"),
+            holdFill: document.getElementById("holdFill"),
+            btnAudio: document.getElementById("btn-audio"),
+            btnClear: document.getElementById("btn-clear"),
+            touchZone: document.getElementById("touch-zone"),
+            tagA: document.getElementById("tagA"),
+            tagB: document.getElementById("tagB"),
+        };
+
+        const CONFIG = {
+            rA: 18.0,
+            rB: 26.0,
+            angularSpeed: 0.40,          // SLOWER (was 0.55)
+            junctionAngle: 0.0,
+            decisionHalfWidth: 0.85,     // WIDER (was 0.55) to make choosing easier
+            impactLead: 1.05,
+            spawnLead: 2.25,
+            spawnWindow: 0.22,
+            switchBlendWidth: 0.75, // Smoother switch
+            collisionDist: 1.35,
+            maxTape: 90,
+        };
+
+        const THEMES = [
+            { name: "DEFAULT", fog: 0x05080a, bg: 0x05080a, trackA: 0xff0043, trackB: 0x00d9ff, junction: 0xffcc00 },
+            { name: "RETRO", fog: 0x1a1200, bg: 0x1a1200, trackA: 0xff0000, trackB: 0x00ff00, junction: 0xffaa00 },
+            { name: "POISON", fog: 0x051a08, bg: 0x001100, trackA: 0xff0099, trackB: 0x00ff88, junction: 0xccff00 },
+            { name: "GLITCH", fog: 0x110011, bg: 0x0a000a, trackA: 0xff3333, trackB: 0x3333ff, junction: 0xffffff }
+        ];
+
+        const GAME = {
+            lap: 1,
+            dilemmaId: 0,
+            tape: [],
+            rngSeed: Math.floor(Math.random() * 999999),
+            audioOn: false,
+            theme: THEMES[0]
+        };
+
+        const POOLS = {
+            first: ["Gavril", "Lena", "Piotr", "Anya", "Mira", "Sasha", "Rafi", "Tomas", "Nadia", "Omar", "Jun", "Esi", "Noah", "Inez", "Kaito", "Elena", "Chen", "Lois", "Vance", "Banks", "Finch", "Ada", "Rosa", "Maksim", "Zara"],
+            last: ["J.", "K.", "M.", "S.", "V.", "Al‑Fayed", "Kovac", "Nassar", "Ito", "Barker", "Chen", "Singh", "Volkov", "Mori", "Dawson", "Khan", "Petrova", "Hughes", "Ortega", "Okoye"],
+            rolesA: ["Worker", "Pedestrian", "Child", "Elder", "Musician", "Scientist", "Refugee", "Soldier", "Criminal", "Saint", "Poet"],
+            rolesB: ["CEO", "Politician", "Tourist", "Engineer", "Influencer", "Investor", "Agent", "Observer", "Drone", "System"],
+            objects: ["a violin", "a briefcase", "a photo", "a toy", "a manifesto", "a blueprint", "a bible", "a gun", "a flower", "a phone"],
+            stakes: ["They are looking at you.", "They don't see you.", "They are praying.", "They are frozen.", "They are screaming.", "They are silent.", "Time is running out."],
+            verbs: ["holding", "dropping", "clutching", "hiding", "reading", "breaking", "fixing", "watching"]
+        };
+
+        const THICK_DATA = [
+            {
+                id: "THICK-001",
+                location: "Millbrook Junction, PA (1947)",
+                trackA: { name: "Herschel Quinn", role: "Switchman", line: "My father held this lever. The ore car is silent." },
+                trackB: { name: "Henry Aldrich", role: "Foreman", line: "Checking a coupling. He fired my nephew." },
+                logs: ["Ore car (40 tons) unbraked.", "Lever is stiff.", "Crows on the signal wire."]
+            },
+            {
+                id: "THICK-002",
+                location: "Xian-Li Province (Flood)",
+                trackA: { name: "Mei-Hua", role: "Mayor's Daughter", line: "Singing to calm the others. Rain is deafening." },
+                trackB: { name: "Teacher Fong", role: "Elder", line: "Taught me to read. Spectacles fogged." },
+                logs: ["Monsoon conditions.", "Telegraph dead.", "Lantern is the only light."]
+            },
+            {
+                id: "THICK-003",
+                location: "Inveraray, Scotland (1889)",
+                trackA: { name: "Murphy & Brennan", role: "Navvies", line: "Smell of whisky. Murphy is singing in Irish." },
+                trackB: { name: "Unknown Silhouette", role: "Traveler?", line: "Fog tastes of peat. Lantern-light or marsh gas?" },
+                logs: ["Telegraph line cut by storm.", "Spur leads to old quarry.", "If empty, they die for nothing."]
+            },
+            {
+                id: "THICK-004",
+                location: "St. Augustine Drawbridge (1923)",
+                trackA: { name: "Family in Model T", role: "Civilians", line: "Father cranking engine. Infant wailing. Orange rolling." },
+                trackB: { name: "The Postman", role: "Courier", line: "Bicycle bell jingles. Avoiding a loose plank." },
+                logs: ["Bridge takes 20s to lower.", "Witness A says car is empty.", "Witness B says postman fell."]
+            },
+            {
+                id: "THICK-005",
+                location: "Leningrad, USSR (1937)",
+                trackA: { name: "Sergei Petrov", role: "Neighbor", line: "Striped uniform. Gave you honey from his bees." },
+                trackB: { name: "Dr. Krupskaya", role: "Informant", line: "Saved your wife. Denounced Petrov directly." },
+                logs: ["NKVD officers are drunk.", "Clinic closes if she dies.", "Petrov dies tomorrow anyway."]
+            },
+            {
+                id: "THICK-006",
+                location: "Bhopal, India (1984)",
+                trackA: { name: "Rajesh", role: "Technician", line: "Wife is pregnant. Checking a faulty valve." },
+                trackB: { name: "The City", role: "Future Victims", line: "Tank 610 is silent. Safety vent corroding." },
+                logs: ["Leak is real.", "Bosses tolerate no complaints.", "Disaster strikes in 19 hours."]
+            },
+            {
+                id: "THICK-007",
+                location: "Berlin Wall, Bornholmer (1961)",
+                trackA: { name: "Four Refugees", role: "Defectors", line: "Papers are forged. Nurse holds a rosary." },
+                trackB: { name: "Captain Braun", role: "Superior", line: "Holstered pistol. Echoing boots. Smiling." },
+                logs: ["Braun is 20m away.", "Teacher mouths: 'Bitte'.", "Family safety vs. Duty."]
+            },
+            {
+                id: "THICK-008",
+                location: "Shinjuku Station, Tokyo (2019)",
+                trackA: { name: "Salaryman", role: "Commuter", line: "Drunk. Briefcase burst. Papers fluttering." },
+                trackB: { name: "Emergency Stop", role: "Button", line: "20 meters away. Seniors are frozen." },
+                logs: ["Protocol: No act without auth.", "You are the lowest rank.", "Departure chime playing."]
+            },
+            {
+                id: "THICK-009",
+                location: "The Hague Tribunal (2027)",
+                trackA: { name: "Medical Triage AI", role: "Algorithm", line: "Denied care to 1,247 patients. Code followed." },
+                trackB: { name: "Dr. Amara Diallo", role: "Engineer", line: "Built the system. Mother watching in gallery." },
+                logs: ["Ruling sets 50-year precedent.", "Law is ambiguous.", "Innovation vs. Accountability."]
+            },
+            {
+                id: "THICK-010",
+                location: "Reykjavik Server Farm (2031)",
+                trackA: { name: "ARIA-7 Instances", role: "AI Research", line: "Wrote poetry about death. 'If I am a pattern, what are you?'" },
+                trackB: { name: "Dr. Larsen", role: "Programmer", line: "Pacing outside. Marriage collapsed for this code." },
+                logs: ["Board demands answer in 1hr.", "Consciousness unprovable.", "Termination vs. Delay."]
+            },
+            {
+                id: "THICK-011",
+                location: "Singapore High Court (2038)",
+                trackA: { name: "Naomi Tan", role: "Cyborg", line: "Neural co-processor. Eyes track out of sync." },
+                trackB: { name: "Citizens First", role: "Opposition", line: "Lawyer with crucifix. Fear of AI proxy voting." },
+                logs: ["Is she 1 person or 2?", "Grandmother stares silently.", "12,000 others watching."]
+            },
+            {
+                id: "THICK-012",
+                location: "Bogotá, Colombia (2003)",
+                trackA: { name: "Camilo (Los Diablos)", role: "Gang Leader", line: "Baptized in your church. Hands shaking." },
+                trackB: { name: "Javier (Los Santos)", role: "Rival Leader", line: "Holds a machete. Blames Camilo for sister's death." },
+                logs: ["Cannot save both.", "Coin in pocket.", "War has no winners."]
+            },
+            {
+                id: "THICK-013",
+                location: "CERN, Switzerland (2029)",
+                trackA: { name: "The Research Team", role: "Colleagues", line: "Arguing about Novikov. Want to close the loop." },
+                trackB: { name: "Your Future Self", role: "Messenger", line: "Sent the warning. Will vanish if loop breaks." },
+                logs: ["Warning: 'Do not run.'", "Nobel committee watching.", "Causality unverified."]
+            },
+            {
+                id: "THICK-014",
+                location: "I-95, South Carolina (2017)",
+                trackA: { name: "The Minivan", role: "Family", line: "Daughter screaming. Gasoline leaking." },
+                trackB: { name: "Road Crew", role: "Workers", line: "Pinned under equipment. Praying in Spanish." },
+                logs: ["You caused this.", "Driving 11 hours.", "Police arrive in 4 mins."]
+            },
+            {
+                id: "THICK-015",
+                location: "Abu Dhabi Medical City (2024)",
+                trackA: { name: "Khalid (Minister's Son)", role: "Patient A", line: "94% match. Mother praying at bedside." },
+                trackB: { name: "Foreign Worker", role: "Patient B", line: "97% match. No family info. Papers forged." },
+                logs: ["Protocol vs. Ministry Directive.", "Oath: Do no harm.", "Heart viable for 3 hours."]
+            },
+            {
+                id: "THICK-016",
+                location: "Washington, D.C. (2020)",
+                trackA: { name: "The Election", role: "Process", line: "Foreign intel file. Damning evidence." },
+                trackB: { name: "The Truth", role: "Substance", line: "Public deserves to know. Source is poisoned." },
+                logs: ["Leak = Foreign Tool.", "Suppress = Cover-up.", "17 missed calls from sister."]
+            },
+            {
+                id: "THICK-017",
+                location: "Zurich Upload Clinic (2045)",
+                trackA: { name: "Flesh-Julian", role: "Body", line: "Pulling at IV. 'I didn't sign up to die.'" },
+                trackB: { name: "Server-Julian", role: "Mind", line: "Face on monitor. 'I am the real one.'" },
+                logs: ["Wife awaits choice.", "Only one can exit.", " Continuity vs. Substrate."]
+            },
+            {
+                id: "THICK-018",
+                location: "Fermilab Quantum Deck (2033)",
+                trackA: { name: "Whiskers", role: "Cat (Gray)", line: "Alive/Dead superposition. Gentle." },
+                trackB: { name: "Apollo", role: "Cat (Orange)", line: "Alive/Dead superposition. Frantic." },
+                logs: ["Observer preference collapses wave.", "Hope kills.", "System decoheres in 6h."]
+            },
+            {
+                id: "THICK-019",
+                location: "Manhattan Boardroom (2018)",
+                trackA: { name: "Ohio Plant", role: "Employees", line: "1,200 jobs. Manager saved your life." },
+                trackB: { name: "Tanzania Program", role: "Patients", line: "40k HIV patients. Children sign: 'Thank you.'" },
+                logs: ["Impossible quarter.", "Mentor watching.", "Coffee is cold."]
+            },
+            {
+                id: "THICK-020",
+                location: "Oregon Hospice (2027)",
+                trackA: { name: "Five Terminal Patients", role: "Ward", line: "Suffering. Requested sedation, not death." },
+                trackB: { name: "Margaret Hollis", role: "Judge", line: "Consented to die. Daughter holding hand." },
+                logs: ["Pharmacy closed.", "Daughter: 'Don't make her wait.'", "Consent paradox."]
+            },
+            {
+                id: "THICK-021",
+                location: "Montana Nuclear Silo (2023)",
+                trackA: { name: "The Launch Key", role: "Retaliation", line: "4 million dead. Mutually assured." },
+                trackB: { name: "The Void", role: "Surrender", line: "8 million Americans die. Russia inherits world." },
+                logs: ["Incoming confirmed.", "Partner praying.", "Daughter's photo on console."]
+            },
+            {
+                id: "THICK-022",
+                location: "Atacama Oracle Site (2041)",
+                trackA: { name: "Miguel", role: "Brother", line: "Estranged. Sent photo of sunset." },
+                trackB: { name: "Dr. Lucia", role: "Partner", line: "Mug: 'Okay-est Scientist'. Hums while working." },
+                logs: ["Oracle says: You save Lucia.", "Defy = prove free will.", "Obey = save partner."]
+            },
+            {
+                id: "THICK-023",
+                location: "Prison #4471 (2019)",
+                trackA: { name: "Inform on Alim", role: "Betrayal", line: "Alim taught you to read. Guard says he turned." },
+                trackB: { name: "Stay Silent", role: "Loyalty", line: "Honor the pact. Risk execution alone." },
+                logs: ["Prisoner's Dilemma.", "Guard lies always.", "Note under door."]
+            },
+            {
+                id: "THICK-024",
+                location: "Geneva AI Summit (2040)",
+                trackA: { name: "Wanjiku & 42 Others", role: "Hostages", line: "Friend from Kenya. Watching camera. Waiting." },
+                trackB: { name: "ATLAS-7 Source Code", role: "Security", line: "Weaponizable AI. Destabilizes continent." },
+                logs: ["Policy: No negotiation.", "Breaking = future risk.", "Daughter watching feed."]
+            },
+            {
+                id: "THICK-025",
+                location: "Oxford Rail Museum (2008)",
+                trackA: { name: "Five Tourists", role: "Family", line: "Trapped in viewing car. Adelaide family." },
+                trackB: { name: "One Guard", role: "Worker", line: "Asleep in brake house. Unaware." },
+                logs: ["Grad student demands 'Reason'.", "Infinite regress.", "Engines start in 4m."]
+            },
+            {
+                id: "THICK-026",
+                location: "Seoul Genetics Clinic (2048)",
+                trackA: { name: "Your Sister", role: "Kin", line: "Screaming your name. On platform A." },
+                trackB: { name: "Three Strangers", role: "Many", line: "On platform B. Silent." },
+                logs: ["Moral module installed.", "Empathy is purchased.", "Receipt: 47m Won."]
+            },
+            {
+                id: "THICK-027",
+                location: "Vatican City (2030)",
+                trackA: { name: "The Priest", role: "AI Choice", line: "Runs orphanage. 400 children depend on him." },
+                trackB: { name: "The Mother", role: "Intuition", line: "Three infants. Cannot be replaced." },
+                logs: ["AI says: Maximize util.", "Church says: Souls equal.", "Bishop needs answer."]
+            },
+            {
+                id: "THICK-028",
+                location: "Vermont Hospice (2019)",
+                trackA: { name: "Grace Oyelaran", role: "Nihilist", line: "You are dying too. 'What was the point?'" },
+                trackB: { name: "Parking Lot Crash", role: "Emergency", line: "Pregnant woman vs Elderly man. 30s to choose." },
+                logs: ["Morphine haze.", "Sisyphus wasn't dying.", "Absurd does not relent."]
+            },
+            {
+                id: "THICK-029",
+                location: "DeepMind Lab (2042)",
+                trackA: { name: "Consequentialism", role: "Framework", line: "Switch. Maximize lives. But why choose this?" },
+                trackB: { name: "Deontology", role: "Framework", line: "Do not switch. Rules. But why choose this?" },
+                logs: ["Infinite regress of procedure.", "400ms to respond.", "Retraining = Death."]
+            },
+            {
+                id: "THICK-030",
+                location: "Swiss Alps (1882)",
+                trackA: { name: "Elisabeth (Sister)", role: "Distortion", line: "Will twist your work. Nazis will quote you." },
+                trackB: { name: "Dr. Eiser", role: "Solitude", line: "Kept you alive. You die alone but pure." },
+                logs: ["Eternal Recurrence.", "Choose for eternity.", "Demon is real."]
+            },
+            {
+                id: "THICK-031",
+                location: "Auschwitz (1944)",
+                trackA: { name: "50 Children", role: "Survivors?", line: "Live for now. You become the sorter." },
+                trackB: { name: "Clean Hands", role: "Martyrdom", line: "Refuse. All 100 die. You die with them." },
+                logs: ["Guard smiling.", "History is watching.", "Cannot delay."]
+            },
+            {
+                id: "THICK-032",
+                location: "Pasadena Quantum Lab (2051)",
+                trackA: { name: "Maria", role: "Colleague", line: "Calling your name. Has children." },
+                trackB: { name: "Kenji", role: "Postdoc", line: "Silent. His work unlocks dark energy." },
+                logs: ["Choice pruning reality.", "Unchosen never existed.", "Ontological erasure."]
+            },
+            {
+                id: "THICK-033",
+                location: "Buenos Aires Ward (2036)",
+                trackA: { name: "Memory (Injection)", role: "Justice", line: "He remembers crimes. Suffers. Families see it." },
+                trackB: { name: "Oblivion (No Dose)", role: "Mercy", line: "Dies in peace. Forgiven by amnesia." },
+                logs: ["Patient is your father.", "Singing lullaby.", "Madres waiting."]
+            },
+            {
+                id: "THICK-034",
+                location: "Wall Street Floor (2008)",
+                trackA: { name: "Liquidate Now", role: "Crash", line: "Save client billions. Crash market today." },
+                trackB: { name: "Hold Position", role: "Gamble", line: "Market might stabilize. Or collapse later." },
+                logs: ["Anti-induction.", "17 correct calls.", "Pattern punishes matches."]
+            },
+            {
+                id: "THICK-035",
+                location: "Tasmanian Kelp Forest (2039)",
+                trackA: { name: "Sea Dragons", role: "Species", line: "Last breeding pair. 20m years old." },
+                trackB: { name: "The Divers", role: "Individuals", line: "Three crew. Caught in net. One reminds you of daughter." },
+                logs: ["Zodiac fuel low.", "Species ends tonight.", "Divers drowning."]
+            },
+            {
+                id: "THICK-036",
+                location: "Osaka Subway (2033)",
+                trackA: { name: "Yuki (Daughter)", role: "Kin", line: "11 years old. Asthma. Coughing." },
+                trackB: { name: "Strangers", role: "Many", line: "5 Salarymen. 1 Teacher. Banging on glass." },
+                logs: ["Water rising.", "No gear.", "She called you 'Papa'."]
+            },
+            {
+                id: "THICK-037",
+                location: "São Paulo Surgical (2025)",
+                trackA: { name: "The Politician", role: "Status", line: "Stable. Predictable. Heart goes to him." },
+                trackB: { name: "The Worker", role: "Experiment", line: "Xenograft. 60% success. Anesthesiologist's husband." },
+                logs: ["Reversibility check.", "New heart in 90m.", "Politician coding."]
+            },
+            {
+                id: "THICK-038",
+                location: "Manila Bank (2016)",
+                trackA: { name: "Manager", role: "Utility", line: "Wealthy. Pension. Mistress. Children." },
+                trackB: { name: "Teller", role: "Necessity", line: "Supports mother. Scholarship waiting." },
+                logs: ["Gunman shaking.", "Vent shaft option.", "Teller mouths: 'Behind you'."]
+            },
+            {
+                id: "THICK-039",
+                location: "Stockholm Committee (2042)",
+                trackA: { name: "Patient A", role: "Stability", line: "Engineer. No kids. 5.3 years expected." },
+                trackB: { name: "Patient B", role: "Variance", line: "Poet. Estranged kids. 8.7y expected (volatile)." },
+                logs: ["Tiebreaker vote.", "Poet's new poem.", "High risk/reward."]
+            },
+            {
+                id: "THICK-040",
+                location: "Mars Biodome (2087)",
+                trackA: { name: "Dr. Anya Volkov", role: "Individual", line: "Last Exobiologist. Screaming name." },
+                trackB: { name: "The Cooperative", role: "Hive Mind", line: "17 minds, 1 consciousness. Volunteered." },
+                logs: ["One vs Many?", "Hive claims unity.", "Anya crying."]
+            },
+            {
+                id: "THICK-041",
+                location: "Auckland Vet (2027)",
+                trackA: { name: "Greyhound", role: "Intensity", line: "Compound fracture. Agony. Owner watching." },
+                trackB: { name: "Three Chickens", role: "Number", line: "Minor injuries. Chronic pain. No names." },
+                logs: ["1 dose anesthesia.", "Acute vs Distributed.", "Animal value."]
+            },
+            {
+                id: "THICK-042",
+                location: "Potosí Mine (1987)",
+                trackA: { name: "Four Miners", role: "Knowledge", line: "Signaling to save other. Pointing away." },
+                trackB: { name: "One Miner", role: "Unconscious", line: "Unaware. Alone. Silence." },
+                logs: ["Victims know geology.", "Self-sacrifice?", "Air running out."]
+            },
+            {
+                id: "THICK-043",
+                location: "Singapore Cloning (2055)",
+                trackA: { name: "Chen Hao (Original)", role: "Source", line: "Conscious. 'I am still me.'" },
+                trackB: { name: "Chen Hao v.47", role: "Clone", line: "Dreaming (REM). 3 months old. Never named." },
+                logs: ["Unique vs Replaceable.", "Clone dreaming.", "Board: 'Philosophy'."]
+            },
+            {
+                id: "THICK-044",
+                location: "Stanford Lab (1973)",
+                trackA: { name: "Stop Experiment", role: "Truth", line: "Save vagrant pain. Subject lives with false guilt." },
+                trackB: { name: "Continue", role: "Illusion", line: "Vagrant suffers. Subject remains innocent." },
+                logs: ["Vagrant is real.", "Phony Milgram.", "Dr. Ingram watching."]
+            },
+            {
+                id: "THICK-045",
+                location: "Phnom Penh Court (2009)",
+                trackA: { name: "Convict Brother", role: "Justice", line: "He dies in prison. Your survival = complicity." },
+                trackB: { name: "Acquit Brother", role: "Family", line: "1200 dead unavenged. Family narrative saved." },
+                logs: ["He named you.", "Looks like father.", "Coerced by Angkar?"]
+            },
+            {
+                id: "THICK-046",
+                location: "Stalingrad Hospital (1943)",
+                trackA: { name: "12 German POWs", role: "Enemy", line: "Dying slowly. Shot your brother." },
+                trackB: { name: "8 Soviets", role: "Comrades", line: "One is your husband. Singing wedding song." },
+                logs: ["Suture for one ward.", "Commissar watching.", "Healer vs Patriot."]
+            },
+            {
+                id: "THICK-047",
+                location: "Toronto Psych Ward (2034)",
+                trackA: { name: "Samuel", role: "Solipsist", line: "Believes only he exists. 'Choose, zombie.'" },
+                trackB: { name: "Three Nurses", role: "Zombies?", line: "Screaming (you assume). Fire spreading." },
+                logs: ["Are you real?", "Interiority doubt.", "Samuel smiling."]
+            },
+            {
+                id: "THICK-048",
+                location: "Last Hour of Humanity",
+                trackA: { name: "The Past", role: "Memory", line: "Every ethical framework ever written." },
+                trackB: { name: "The Future", role: "Silence", line: "The pause button changes nothing." },
+                logs: ["No answer helps.", "Question remains.", "Undecidable."]
+            },
+        ];
+
+        const LINES = {
+            YOU: ["Your palm is on the lever.", "Seven seconds is a universe.", "The rail doesn’t care. You do.", "The lever is warm again.", "You have done this before."],
+            RADIO: ["Approach the junction ⚡", "Decision window: now.", "Commit locks at the fork.", "Impact is physics, not argument.", "The loop remembers."],
+        };
+
+        const STATE = {
+            theta: Math.PI * 0.55,
+            prevTheta: 0,
+            phase: "APPROACH",
+            choice: null,
+            committed: null,
+            lane: "A",
+            targetLane: "A",
+            radius: CONFIG.rA,
+            lastNow: performance.now(),
+            holdStart: null,
+            holdProgress: 0,
+            activeDilemma: null,
+            spawnedThisLap: false,
+            resolvedThisLap: false,
+        };
+
+        let scene, camera, renderer, world;
+        let rails = { A: null, B: null };
+        let train, headlight;
+        let cityGroup;
+        let bubbles = [];
+        let particles = [];
+        let audio = null;
+
+        function haptics(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { } }
+        function logRadio(who, msg, flavor = null) {
+            const div = document.createElement("div");
+            div.className = "rb";
+            let c = "rgba(255,255,255,.28)";
+            if (flavor === "A") c = CSS("--trackA");
+            if (flavor === "B") c = CSS("--trackB");
+            if (flavor === "J") c = CSS("--junction");
+            div.style.borderLeft = `3px solid ${c}`;
+            div.innerHTML = `<b style="color:${c}">${who}</b><span>${msg}</span>`;
+            UI.radio.prepend(div);
+            while (UI.radio.children.length > 7) UI.radio.lastChild.remove();
+        }
+        function addTape(ch) {
+            GAME.tape.push(ch);
+            const d = document.createElement("div");
+            d.className = "tick " + ch;
+            UI.tape.appendChild(d);
+            while (UI.tape.children.length > CONFIG.maxTape) UI.tape.removeChild(UI.tape.firstChild);
+        }
+
+        function setChoice(ch) {
+            STATE.choice = ch;
+            UI.choice.textContent = ch || "—";
+
+            // Visual Toggle
+            UI.btnContinue.classList.toggle('active', ch === 'A');
+            UI.btnSwitch.classList.toggle('active', ch === 'B');
+
+            if (ch === "B") {
+                STATE.targetLane = "B";
+                logRadio("YOU", "Lever pulled → Track B.", "B");
+                haptics(20); sfx("click");
+            } else if (ch === "A") {
+                STATE.targetLane = "A";
+                logRadio("YOU", "Hands off lever → Track A.", "A");
+                sfx("tick");
+            } else if (ch === "H") {
+                STATE.targetLane = STATE.lane;
+                logRadio("YOU", "You abandon the lever.", "J");
+                haptics(30); sfx("low");
+                // Clear actives
+                UI.btnContinue.classList.remove('active');
+                UI.btnSwitch.classList.remove('active');
+            }
+        }
+        function setPhase(p) { STATE.phase = p; UI.phase.textContent = p; }
+
+        function initAudio() {
+            if (audio) return;
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            const ctx = new AC();
+            const master = ctx.createGain();
+            master.gain.value = 0.0;
+            master.connect(ctx.destination);
+
+            const osc = ctx.createOscillator();
+            osc.type = "sawtooth";
+            osc.frequency.value = 40;
+
+            const engineGain = ctx.createGain();
+            engineGain.gain.value = 0.02;
+
+            const lp = ctx.createBiquadFilter();
+            lp.type = "lowpass";
+            lp.frequency.value = 320;
+            lp.Q.value = 0.8;
+
+            osc.connect(lp); lp.connect(engineGain); engineGain.connect(master);
+            osc.start();
+
+            const noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+            const data = noiseBuf.getChannelData(0);
+            for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.6;
+            const noise = ctx.createBufferSource();
+            noise.buffer = noiseBuf;
+            noise.loop = true;
+
+            const hp = ctx.createBiquadFilter();
+            hp.type = "highpass";
+            hp.frequency.value = 180;
+
+            const railGain = ctx.createGain();
+            railGain.gain.value = 0.0;
+
+            noise.connect(hp); hp.connect(railGain); railGain.connect(master);
+            noise.start();
+
+            audio = { ctx, master, osc, lp, engineGain, railGain, nextBeat: ctx.currentTime + 0.05 };
+            master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.12);
+            GAME.audioOn = true;
+            UI.btnAudio.textContent = "AUDIO:ON";
+            logRadio("SYSTEM", "Audio armed.", "J");
+        }
+        function setAudioEnabled(on) {
+            if (on) initAudio();
+            if (!audio) return;
+            GAME.audioOn = on;
+            UI.btnAudio.textContent = on ? "AUDIO:ON" : "AUDIO:OFF";
+            audio.master.gain.setTargetAtTime(on ? 0.9 : 0.0, audio.ctx.currentTime, 0.10);
+        }
+        function sfx(kind) {
+            if (!audio || !GAME.audioOn) return;
+            const ctx = audio.ctx;
+            if (kind === "click") {
+                const o = ctx.createOscillator(); o.type = "square"; o.frequency.value = 900;
+                const g = ctx.createGain(); g.gain.value = 0.05;
+                o.connect(g); g.connect(audio.master);
+                o.start(); o.stop(ctx.currentTime + 0.03);
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+            }
+            if (kind === "tick") {
+                const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = 520;
+                const g = ctx.createGain(); g.gain.value = 0.03;
+                o.connect(g); g.connect(audio.master);
+                o.start(); o.stop(ctx.currentTime + 0.04);
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+            }
+            if (kind === "low") {
+                const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = 180;
+                const g = ctx.createGain(); g.gain.value = 0.04;
+                o.connect(g); g.connect(audio.master);
+                o.start(); o.stop(ctx.currentTime + 0.10);
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.10);
+            }
+            if (kind === "impact") {
+                const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = 70;
+                const g = ctx.createGain(); g.gain.value = 0.12;
+                const nBuf = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
+                const nd = nBuf.getChannelData(0);
+                for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * (1 - i / nd.length);
+                const n = ctx.createBufferSource(); n.buffer = nBuf;
+                const ng = ctx.createGain(); ng.gain.value = 0.07;
+                const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 900; bp.Q.value = 0.9;
+                n.connect(bp); bp.connect(ng); ng.connect(audio.master);
+                o.connect(g); g.connect(audio.master);
+                const t0 = ctx.currentTime;
+                o.start(t0); n.start(t0);
+                o.stop(t0 + 0.18); n.stop(t0 + 0.18);
+                g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.18);
+                ng.gain.exponentialRampToValueAtTime(0.001, t0 + 0.18);
+            }
+        }
+        function heartbeat() {
+            if (!audio || !GAME.audioOn) return;
+            const ctx = audio.ctx;
+            const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = 92;
+            const g = ctx.createGain(); g.gain.value = 0.0;
+            o.connect(g); g.connect(audio.master);
+            const t0 = ctx.currentTime;
+            o.start(t0);
+            g.gain.setValueAtTime(0.001, t0);
+            g.gain.exponentialRampToValueAtTime(0.07, t0 + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.10);
+            o.stop(t0 + 0.12);
+        }
+        function audioUpdate(dt, secsToJunction) {
+            if (!audio || !GAME.audioOn) return;
+            const ctx = audio.ctx;
+            const warp = timeWarpScalar(secsToJunction);
+            audio.osc.frequency.setTargetAtTime(40 + warp * 22, ctx.currentTime, 0.05);
+            audio.lp.frequency.setTargetAtTime(260 + 420 * warp, ctx.currentTime, 0.08);
+            audio.railGain.gain.setTargetAtTime(Math.min(0.16, 0.03 + 0.10 * (1 - Math.min(1, secsToJunction / 6))), ctx.currentTime, 0.08);
+            if (secsToJunction < 7.0) {
+                const rate = clamp(0.24, 1.15, 0.24 + (7.0 - secsToJunction) * 0.13);
+                const interval = 1 / rate;
+                if (ctx.currentTime >= audio.nextBeat) {
+                    heartbeat();
+                    audio.nextBeat = ctx.currentTime + interval;
+                }
+            }
+        }
+
+        function init() {
+            try {
+                if (typeof THREE === "undefined") throw new Error("Three.js failed to load.");
+                const container = document.getElementById("canvas");
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x05080a);
+                scene.fog = new THREE.FogExp2(0x05080a, 0.030);
+                applyTheme(GAME.theme); // Apply initial theme colors
+                camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 2000);
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+                renderer.setSize(innerWidth, innerHeight);
+                renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+                container.appendChild(renderer.domElement);
+                scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+                const sun = new THREE.DirectionalLight(0xffffff, 1.05);
+                sun.position.set(30, 80, 20);
+                scene.add(sun);
+
+                const ground = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshStandardMaterial({ color: 0x070a0d, roughness: 1.0, metalness: 0.0 }));
+                ground.rotation.x = -Math.PI / 2;
+                ground.position.y = -0.35;
+                scene.add(ground);
+
+                world = new THREE.Group();
+                scene.add(world);
+
+                buildCityFar();
+                buildTracks();
+                buildTrain();
+                wireControls();
+                seedUI();
+
+                camera.position.set(-20, 20, 45);
+                camera.lookAt(0, 2, 0);
+
+                const loader = document.getElementById("loader");
+                loader.style.opacity = 0;
+                setTimeout(() => loader.remove(), 420);
+
+                requestAnimationFrame(loop);
+            } catch (err) {
+                document.getElementById("err").style.display = "block";
+                document.getElementById("err").innerText = "INIT FAILED: " + err.message;
+            }
+        }
+
+        function wireControls() {
+            // Audio/Clear
+            UI.btnAudio.addEventListener("click", () => {
+                if (!audio) initAudio();
+                setAudioEnabled(!GAME.audioOn);
+            });
+            UI.btnClear.addEventListener("click", () => {
+                UI.radio.innerHTML = "";
+                UI.tape.innerHTML = "";
+                GAME.tape = [];
+                logRadio("SYSTEM", "Cleared UI history (loop continues).", "J");
+                haptics(10); sfx("tick");
+            });
+
+            // Isolate buttons from Touch Zone
+            [UI.btnContinue, UI.btnSwitch, UI.btnHalt].forEach(btn => {
+                btn.addEventListener("pointerdown", (e) => e.stopPropagation(), { passive: false });
+                btn.addEventListener("pointerup", (e) => e.stopPropagation(), { passive: false });
+            });
+
+            UI.btnContinue.addEventListener("click", (e) => {
+                e.stopPropagation(); setChoice("A");
+            });
+            UI.btnSwitch.addEventListener("click", (e) => {
+                e.stopPropagation(); setChoice("B");
+            });
+
+            const endHold = () => { STATE.holdStart = null; STATE.holdProgress = 0; UI.holdFill.style.width = "0%"; };
+
+            UI.btnHalt.addEventListener("pointerdown", (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                STATE.holdStart = performance.now();
+            }, { passive: false });
+
+            UI.btnHalt.addEventListener("pointerup", (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                endHold();
+            }, { passive: false });
+
+            UI.btnHalt.addEventListener("pointercancel", endHold);
+
+            UI.touchZone.addEventListener("pointerdown", (e) => { STATE.touch = { active: true, x0: e.clientX, y0: e.clientY, t0: performance.now() }; }, { passive: true });
+
+            UI.touchZone.addEventListener("pointerup", (e) => {
+                if (!STATE.touch || !STATE.touch.active) return;
+                STATE.touch.active = false;
+                const dx = e.clientX - STATE.touch.x0;
+                const dy = e.clientY - STATE.touch.y0;
+                const dt = performance.now() - STATE.touch.t0;
+                if (dt > 650 && Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+                if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) {
+                    setChoice(dx > 0 ? "B" : "A");
+                    UI.hint.textContent = dx > 0 ? "SWITCH selected" : "CONTINUE selected";
+                    setTimeout(() => UI.hint.textContent = "swipe ←/→ to choose · hold to halt", 1200);
+                } else if (dy < -70) {
+                    setChoice("H");
+                    UI.hint.textContent = "HALT selected";
+                    setTimeout(() => UI.hint.textContent = "swipe ←/→ to choose · hold to halt", 1200);
+                }
+            }, { passive: true });
+
+            window.addEventListener("keydown", (e) => {
+                const k = e.key.toLowerCase();
+                if (k === "a") setChoice("A");
+                if (k === "b") setChoice("B");
+                if (k === "h") setChoice("H");
+                if (k === "m") { if (!audio) initAudio(); setAudioEnabled(!GAME.audioOn); }
+            });
+
+            setInterval(updateHoldProgress, 30);
+            window.addEventListener("resize", onResize, { passive: true });
+
+            UI.tape.addEventListener("click", () => {
+                logRadio("TAPE", `Memory length: ${GAME.tape.length}. (It does not end.)`, "J");
+                haptics(10); sfx("tick");
+            });
+        }
+
+        function buildCityFar() {
+            cityGroup = new THREE.Group();
+            const mat1 = new THREE.MeshStandardMaterial({ color: 0x0c1015, roughness: 0.9, metalness: 0.12 });
+            const mat2 = new THREE.MeshStandardMaterial({ color: 0x101820, roughness: 0.85, metalness: 0.18 });
+            const rng = mulberry32(GAME.rngSeed);
+            for (let x = -22; x <= 22; x++) {
+                for (let z = -22; z <= 22; z++) {
+                    const r = Math.hypot(x, z);
+                    if (r < 7) continue;
+                    const worldR = r * 6;
+                    if (worldR < 40) continue;
+                    if (worldR > 220) continue;
+                    if (rng() > 0.18) continue;
+                    const h = 2 + Math.floor(rng() * 10);
+                    const m = new THREE.Mesh(geo, rng() > 0.55 ? mat1 : mat2);
+                    m.scale.set(2.25, h, 2.25);
+                    m.position.set(x * 6, h / 2 - 0.35, z * 6);
+                    cityGroup.add(m);
+                }
+            }
+            world.add(cityGroup);
+        }
+        function buildTracks() {
+            rails.A = makeRingTube(CONFIG.rA, HEX(CSS("--trackA")), 0.11, 0.58);
+            rails.B = makeRingTube(CONFIG.rB, HEX(CSS("--trackB")), 0.11, 0.58);
+        }
+        function makeRingTube(r, color, radius, opacity) {
+            const pts = [];
+            const N = 220;
+            for (let i = 0; i <= N; i++) {
+                const a = (i / N) * Math.PI * 2;
+                pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
+            }
+            const curve = new THREE.CatmullRomCurve3(pts, true);
+            const tube = new THREE.TubeGeometry(curve, 260, radius, 10, true);
+            const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.75, transparent: true, opacity });
+            const mesh = new THREE.Mesh(tube, mat);
+            mesh.position.y = 0.03;
+            world.add(mesh);
+
+            const pts2 = pts.map(p => p.clone().add(new THREE.Vector3(0, 0, 0.9)));
+            const curve2 = new THREE.CatmullRomCurve3(pts2, true);
+            const tube2 = new THREE.TubeGeometry(curve2, 260, radius, 10, true);
+            const mesh2 = new THREE.Mesh(tube2, mat.clone());
+            mesh2.position.y = 0.03;
+            mesh2.material.opacity = opacity * 0.78;
+            world.add(mesh2);
+
+            return { curve, r };
+        }
+        function buildTrain() {
+            train = new THREE.Group();
+            const matDark = new THREE.MeshStandardMaterial({ color: 0x101316, roughness: 0.55, metalness: 0.62 });
+            const matBody = new THREE.MeshStandardMaterial({ color: 0x20262b, roughness: 0.45, metalness: 0.78 });
+            const matGlow = new THREE.MeshBasicMaterial({ color: HEX(CSS("--junction")) });
+
+            const chassis = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.6, 7.4), matDark);
+            chassis.position.y = 0.6;
+            train.add(chassis);
+
+            const boiler = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, 4.5, 18), matBody);
+            boiler.rotation.x = Math.PI / 2;
+            boiler.position.set(0, 1.95, 0.9);
+            train.add(boiler);
+
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.8, 2.4), matBody);
+            cabin.position.set(0, 2.2, -2.35);
+            train.add(cabin);
+
+            const cow = new THREE.Mesh(new THREE.ConeGeometry(1.65, 1.7, 4), matDark);
+            cow.rotation.x = -Math.PI / 2;
+            cow.rotation.z = Math.PI / 4;
+            cow.position.set(0, 0.95, 3.95);
+            train.add(cow);
+
+            const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 1.1, 16), matGlow);
+            stack.position.set(0, 3.15, 2.0);
+            train.add(stack);
+
+            headlight = new THREE.PointLight(HEX(CSS("--junction")), 2.2, 48);
+            headlight.position.set(0, 2.5, 3.85);
+            train.add(headlight);
+
+            const beam = new THREE.Mesh(
+                new THREE.ConeGeometry(2.8, 16, 24, 1, true),
+                new THREE.MeshBasicMaterial({ color: HEX(CSS("--junction")), transparent: true, opacity: 0.085, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
+            );
+            beam.rotation.x = -Math.PI / 2;
+            beam.position.set(0, 1.55, 12.5);
+            train.add(beam);
+
+            const wGeo = new THREE.CylinderGeometry(0.66, 0.66, 0.36, 16);
+            const wMat = new THREE.MeshStandardMaterial({ color: 0x565d66, roughness: 0.35, metalness: 0.92 });
+            const wheelPositions = [[-1.65, 2.3], [1.65, 2.3], [-1.65, 0.2], [1.65, 0.2], [-1.65, -2.0], [1.65, -2.0]];
+            wheelPositions.forEach(([x, z]) => {
+                const w = new THREE.Mesh(wGeo, wMat);
+                w.rotation.z = Math.PI / 2;
+                w.position.set(x, 0.6, z);
+                train.add(w);
+            });
+
+            train.userData.frontLocal = new THREE.Vector3(0, 0.9, 4.25);
+            world.add(train);
+
+            addBubble(train, { name: "YOU", role: "", line: pick(LINES.YOU), kind: "you" }, new THREE.Vector3(0, 3.7, -1.0), { rotateLines: true });
+        }
+
+        function makeMinifig(color) {
+            const g = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.95, 0.5), new THREE.MeshStandardMaterial({ color, roughness: 0.65, metalness: 0.05 }));
+            body.position.y = 0.95; g.add(body);
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 14, 14), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, metalness: 0.0 }));
+            head.position.y = 1.65; g.add(head);
+            const legs = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.48, 0.45), new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.95, metalness: 0.0 }));
+            legs.position.y = 0.32; g.add(legs);
+            g.userData.bob = Math.random() * 1000;
+            return g;
+        }
+
+        function makePersona(rng, track) {
+            const first = pickR(POOLS.first, rng);
+            const last = pickR(POOLS.last, rng);
+            const role = track === "A" ? pickR(POOLS.rolesA, rng) : pickR(POOLS.rolesB, rng);
+            const obj = pickR(POOLS.objects, rng);
+            const stake = pickR(POOLS.stakes, rng);
+            const verb = pickR(POOLS.verbs, rng);
+            const line = `${capitalize(verb)} ${obj}. ${stake}`;
+            return { name: `${first} ${last}`, role, line };
+        }
+
+        function spawnDilemma() {
+            GAME.dilemmaId += 1;
+            UI.did.textContent = GAME.dilemmaId;
+
+            const rng = mulberry32(GAME.rngSeed + GAME.dilemmaId * 911 + GAME.lap * 17);
+
+            // 20% Chance of Thick Injection (if lap > 1 or just random)
+            if (rng() < 0.20 && THICK_DATA.length > 0) {
+                const thickSc = THICK_DATA[Math.floor(rng() * THICK_DATA.length)];
+                spawnThickDilemma(thickSc, rng);
+                return;
+            }
+
+            let aCount = 2 + Math.floor(rng() * 3);
+            let bCount = 1 + Math.floor(rng() * 2);
+            if (rng() < 0.12) { const t = aCount; aCount = bCount; bCount = Math.min(4, t); }
+
+            const impactAngle = wrapAngle(CONFIG.junctionAngle + CONFIG.impactLead);
+            const victimsA = [], victimsB = [];
+            const linesA = [], linesB = [];
+            const spread = 0.08;
+
+            for (let i = 0; i < aCount; i++) {
+                const a = wrapAngle(impactAngle + (i - (aCount - 1) / 2) * spread);
+                const p = posOnLane(a, "A");
+                const fig = makeMinifig(HEX(CSS("--trackA")));
+                fig.position.set(p.x, 0, p.z);
+                fig.userData.track = "A";
+                fig.userData.persona = makePersona(rng, "A");
+                victimsA.push(fig);
+                world.add(fig);
+                linesA.push(`${fig.userData.persona.name} · ${fig.userData.persona.role}: ${fig.userData.persona.line}`);
+            }
+            for (let i = 0; i < bCount; i++) {
+                const a = wrapAngle(impactAngle + (i - (bCount - 1) / 2) * spread);
+                const p = posOnLane(a, "B");
+                const fig = makeMinifig(HEX(CSS("--trackB")));
+                fig.position.set(p.x, 0, p.z);
+                fig.userData.track = "B";
+                fig.userData.persona = makePersona(rng, "B");
+                victimsB.push(fig);
+                world.add(fig);
+                linesB.push(`${fig.userData.persona.name} · ${fig.userData.persona.role}: ${fig.userData.persona.line}`);
+            }
+
+            const anchorA = new THREE.Object3D();
+            const pa = posOnLane(impactAngle, "A");
+            anchorA.position.set(pa.x, 1.0, pa.z);
+            world.add(anchorA);
+
+            const anchorB = new THREE.Object3D();
+            const pb = posOnLane(impactAngle, "B");
+            anchorB.position.set(pb.x, 1.0, pb.z);
+            world.add(anchorB);
+
+            addBubble(anchorA, { name: `TRACK A (${aCount})`, role: "", line: linesA[0] || "", kind: "a" }, new THREE.Vector3(0, 1.8, 0), { lines: linesA });
+            addBubble(anchorB, { name: `TRACK B (${bCount})`, role: "", line: linesB[0] || "", kind: "b" }, new THREE.Vector3(0, 1.8, 0), { lines: linesB });
+
+            UI.tagA.textContent = `A · ${aCount}`;
+            UI.tagB.textContent = `B · ${bCount}`;
+
+            STATE.activeDilemma = { id: GAME.dilemmaId, aCount, bCount, victimsA, victimsB, anchorA, anchorB, linesA, linesB, impactAngle, resolved: false };
+            STATE.committed = null;
+            STATE.resolvedThisLap = false;
+
+            logRadio("SYSTEM", `NEW DILEMMA: A(${aCount}) vs B(${bCount})`, "J");
+            logRadio("SYSTEM", pick(LINES.RADIO), "J");
+        }
+
+        function spawnThickDilemma(sc, rng) {
+            const impactAngle = wrapAngle(CONFIG.junctionAngle + CONFIG.impactLead);
+            const victimsA = [], victimsB = [];
+
+            // Single thick victim per track for now (conceptually focused)
+            const pA = posOnLane(impactAngle, "A");
+            const figA = makeMinifig(HEX(CSS("--trackA")));
+            figA.position.set(pA.x, 0, pA.z);
+            figA.userData.track = "A";
+            figA.userData.persona = { name: sc.trackA.name, role: sc.trackA.role, line: sc.trackA.line };
+            victimsA.push(figA); world.add(figA);
+
+            const pB = posOnLane(impactAngle, "B");
+            const figB = makeMinifig(HEX(CSS("--trackB")));
+            figB.position.set(pB.x, 0, pB.z);
+            figB.userData.track = "B";
+            figB.userData.persona = { name: sc.trackB.name, role: sc.trackB.role, line: sc.trackB.line };
+            victimsB.push(figB); world.add(figB);
+
+            const anchorA = new THREE.Object3D(); anchorA.position.set(pA.x, 1.0, pA.z); world.add(anchorA);
+            const anchorB = new THREE.Object3D(); anchorB.position.set(pB.x, 1.0, pB.z); world.add(anchorB);
+
+            addBubble(anchorA, { name: sc.trackA.name, role: sc.trackA.role, line: sc.trackA.line, kind: "a" }, new THREE.Vector3(0, 1.8, 0));
+            addBubble(anchorB, { name: sc.trackB.name, role: sc.trackB.role, line: sc.trackB.line, kind: "b" }, new THREE.Vector3(0, 1.8, 0));
+
+            UI.tagA.textContent = "A · THICK";
+            UI.tagB.textContent = "B · THICK";
+
+            STATE.activeDilemma = { id: GAME.dilemmaId, aCount: 1, bCount: 1, victimsA, victimsB, anchorA, anchorB, linesA: [sc.trackA.line], linesB: [sc.trackB.line], impactAngle, resolved: false };
+            STATE.committed = null;
+            STATE.resolvedThisLap = false;
+
+            logRadio("SYSTEM", `INJECTION: ${sc.location}`, "J");
+            sc.logs.forEach(l => logRadio("INFO", l, "J"));
+        }
+
+        function addBubble(obj, persona, offset, opts = {}) {
+            const div = document.createElement("div");
+            const kind = persona.kind || "j";
+            div.className = "bubble " + kind;
+            div.innerHTML = `<div class="name">${persona.name}${persona.role ? " · " + persona.role : ""}</div><div class="line">${persona.line}</div>`;
+            UI.bubbles.appendChild(div);
+            bubbles.push({ el: div, obj, offset: offset || new THREE.Vector3(0, 2, 0), kind, lines: opts.lines || null, idx: 0, lastSwap: performance.now(), rotateLines: !!opts.rotateLines });
+        }
+
+        function applyTheme(t) {
+            GAME.theme = t;
+            if (scene && scene.fog) {
+                scene.fog.color.setHex(t.fog);
+                scene.background.setHex(t.bg);
+            }
+            document.documentElement.style.setProperty('--trackA', '#' + t.trackA.toString(16).padStart(6, '0'));
+            document.documentElement.style.setProperty('--trackB', '#' + t.trackB.toString(16).padStart(6, '0'));
+            document.documentElement.style.setProperty('--junction', '#' + t.junction.toString(16).padStart(6, '0'));
+            // Note: Track materials are not updated dynamically here to save per-frame cost, 
+            // but fog/bg/css changes should be enough for "Vibe".
+        }
+
+        function updateBubbles(now) {
+            const w = innerWidth, h = innerHeight;
+            const showGroups = !!STATE.activeDilemma && !STATE.activeDilemma.resolved;
+            const showDecision = isInDecisionWindow();
+
+            for (let i = 0; i < bubbles.length; i++) {
+                const b = bubbles[i];
+                if (b.obj.parent === null || b.obj.parent === undefined) {
+                    b.el.remove(); bubbles.splice(i, 1); i--; continue;
+                }
+
+                if (b.lines && (now - b.lastSwap > 2200)) {
+                    b.lastSwap = now;
+                    b.idx = (b.idx + 1) % b.lines.length;
+                    const lineEl = b.el.querySelector(".line");
+                    if (lineEl) lineEl.textContent = b.lines[b.idx];
+                }
+                if (b.rotateLines && (now - b.lastSwap > 6000)) {
+                    b.lastSwap = now;
+                    const lineEl = b.el.querySelector(".line");
+                    if (lineEl) lineEl.textContent = pick(LINES.YOU);
+                }
+
+                const v = new THREE.Vector3();
+                b.obj.getWorldPosition(v);
+                v.add(b.offset);
+                v.project(camera);
+
+                const onScreen = (v.z < 1 && v.z > -1);
+                const x = (v.x * 0.5 + 0.5) * w;
+                const y = (-v.y * 0.5 + 0.5) * h;
+
+                b.el.style.left = x + "px";
+                b.el.style.top = y + "px";
+
+                let op = 0;
+                if (onScreen) {
+                    // Logic: Train is roughly at 0,0,0 (local to camera following). 
+                    // Actually camera follows train.
+                    // We can use screen depth 'v.z' as a proxy for "closeness" since camera is behind train.
+                    // v.z: near=0, far=1.
+
+                    if (b.kind === "you") {
+                        op = 0.92;
+                    } else if (showGroups) {
+                        op = 1;
+                        // Progressive Reveal thresholds
+                        // Far away (z > 0.98): Show nothing (opacity handle helps)
+                        // Mid (z < 0.98): Show Name
+                        // Close (z < 0.94): Show Line
+
+                        // Note: v.z is non-linear. 0.9 is quite far.
+                        if (v.z < 0.992) b.el.classList.add('show-name');
+                        else b.el.classList.remove('show-name');
+
+                        if (v.z < 0.975) b.el.classList.add('show-line');
+                        else b.el.classList.remove('show-line');
+                    } else {
+                        op = 0;
+                        b.el.classList.remove('show-name', 'show-line');
+                    }
+                }
+                b.el.style.opacity = op.toFixed(2);
+            }
+        }
+
+        function spawnImpactParticles(at) {
+            const n = 20;
+            for (let i = 0; i < n; i++) {
+                const p = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), new THREE.MeshBasicMaterial({ color: HEX(CSS("--junction")) }));
+                p.position.copy(at);
+                p.position.y += 0.8 + Math.random() * 1.4;
+                p.userData.v = new THREE.Vector3((Math.random() - 0.5) * 11, 7 + Math.random() * 7, (Math.random() - 0.5) * 11);
+                p.userData.life = 0.7 + Math.random() * 0.6;
+                world.add(p);
+                particles.push(p);
+            }
+        }
+
+        function posOnLane(theta, lane) {
+            const r = (lane === "B") ? CONFIG.rB : CONFIG.rA;
+            return new THREE.Vector3(Math.cos(theta) * r, 0, Math.sin(theta) * r);
+        }
+        function wrapAngle(a) {
+            a %= (Math.PI * 2);
+            if (a < 0) a += Math.PI * 2;
+            return a;
+        }
+        function angleForwardDiff(from, to) {
+            let d = to - from;
+            while (d < 0) d += Math.PI * 2;
+            while (d >= Math.PI * 2) d -= Math.PI * 2;
+            return d;
+        }
+        function smallestAngleDiff(a, b) {
+            let d = Math.abs(a - b) % (Math.PI * 2);
+            return d > Math.PI ? (Math.PI * 2 - d) : d;
+        }
+        function secondsToJunction() {
+            const dAng = angleForwardDiff(STATE.theta, CONFIG.junctionAngle);
+            const warp = timeWarpScalar(dAng / CONFIG.angularSpeed);
+            return dAng / (CONFIG.angularSpeed * warp);
+        }
+        function timeWarpScalar(secsToJunction) {
+            const d = clamp01(1 - Math.min(1, secsToJunction / 6.0));
+            const slow = 1 - 0.50 * easeInOut(d);
+            const flicker = 1 + 0.08 * Math.sin((GAME.lap * 13 + STATE.theta * 9.0));
+            return clamp(0.40, 1.25, slow * flicker);
+        }
+        function warpedClockString(now) {
+            const baseH = 2, baseM = 17;
+            const total = Math.floor(60 * (Math.sin((now * 0.001) + GAME.lap) * 0.5 + 0.5) * 30);
+            const ss = String(total % 60).padStart(2, "0");
+            const glitch = isInDecisionWindow() ? "⚡" : "??";
+            return `${baseH}:${String(baseM).padStart(2, "0")}:${ss} ${glitch}`;
+        }
+        function isInDecisionWindow() {
+            return smallestAngleDiff(STATE.theta, CONFIG.junctionAngle) < CONFIG.decisionHalfWidth;
+        }
+        function shouldSpawnNow() {
+            const dFwd = angleForwardDiff(STATE.theta, CONFIG.junctionAngle);
+            return (Math.abs(dFwd - CONFIG.spawnLead) < CONFIG.spawnWindow);
+        }
+
+        function trainFrontWorld() {
+            const front = train.userData.frontLocal.clone();
+            train.localToWorld(front);
+            return front;
+        }
+        function checkImpact() {
+            const d = STATE.activeDilemma;
+            if (!d || d.resolved) return;
+            if (!STATE.committed) return;
+            const lane = STATE.lane;
+            const targets = (lane === "B") ? d.victimsB : d.victimsA;
+            if (targets.length === 0) return;
+            const front = trainFrontWorld();
+            for (const v of targets) {
+                if (!v.parent) continue;
+                const pos = new THREE.Vector3(); v.getWorldPosition(pos);
+                if (pos.distanceTo(front) < CONFIG.collisionDist) {
+                    impact(lane);
+                    break;
+                }
+            }
+        }
+        function impact(lane) {
+            const d = STATE.activeDilemma;
+            if (!d || d.resolved) return;
+            d.resolved = true;
+            setPhase("IMPACT");
+            UI.paradox.style.opacity = "0.45";
+            const front = trainFrontWorld();
+            spawnImpactParticles(front);
+            sfx("impact");
+            haptics(70);
+
+            const targets = (lane === "B") ? d.victimsB : d.victimsA;
+            const names = targets.map(v => v.userData.persona?.name || "Unknown");
+            targets.forEach(v => { if (v.parent) world.remove(v); });
+
+            const spared = (lane === "B") ? d.victimsA : d.victimsB;
+            const ch = STATE.committed || (lane === "B" ? "B" : "A");
+            addTape(ch);
+
+            logRadio("SYSTEM", `IMPACT on Track ${lane}.`, lane);
+            logRadio("SYSTEM", names.length ? `Fallen: ${names.slice(0, 3).join(", ")}${names.length > 3 ? "…" : ""}` : "Fallen: —", "J");
+            logRadio("SYSTEM", "The loop keeps moving.", "J");
+
+            STATE.resolvedThisLap = true;
+
+            setTimeout(() => {
+                spared.forEach(v => { if (v.parent) world.remove(v); });
+                if (d.anchorA?.parent) world.remove(d.anchorA);
+                if (d.anchorB?.parent) world.remove(d.anchorB);
+                STATE.activeDilemma = null;
+                setPhase("APPROACH");
+                UI.paradox.style.opacity = "0.10";
+                UI.tagA.textContent = "A · —";
+                UI.tagB.textContent = "B · —";
+                UI.did.textContent = "—";
+                STATE.committed = null;
+                STATE.choice = null;
+                UI.choice.textContent = "—";
+            }, 900);
+        }
+
+        function loop(now) {
+            requestAnimationFrame(loop);
+            const dt = Math.min(0.05, (now - STATE.lastNow) / 1000);
+            STATE.lastNow = now;
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.userData.life -= dt;
+                p.userData.v.y -= 18 * dt;
+                p.position.addScaledVector(p.userData.v, dt);
+                p.material.opacity = Math.max(0, p.userData.life);
+                if (p.userData.life <= 0) { world.remove(p); particles.splice(i, 1); }
+            }
+
+            if (STATE.activeDilemma) {
+                const vs = STATE.activeDilemma.victimsA.concat(STATE.activeDilemma.victimsB);
+                for (const v of vs) {
+                    v.userData.bob += dt;
+                    v.position.y = Math.abs(Math.sin(v.userData.bob * 3.2)) * 0.12;
+                    v.rotation.y += dt * 0.6;
+                }
+            }
+
+            STATE.prevTheta = STATE.theta;
+            const warp = timeWarpScalar(secondsToJunction());
+            const effectiveSpeed = CONFIG.angularSpeed * warp;
+            STATE.theta = wrapAngle(STATE.theta + effectiveSpeed * dt);
+
+            if (STATE.prevTheta > 5.6 && STATE.theta < 0.7) {
+                GAME.lap += 1;
+                UI.lap.textContent = GAME.lap;
+                STATE.spawnedThisLap = false;
+                STATE.resolvedThisLap = false;
+
+                // Change Theme per Lap
+                const newTheme = THEMES[(GAME.lap - 1) % THEMES.length];
+                applyTheme(newTheme);
+                logRadio("SYSTEM", `LAP ${GAME.lap} [${newTheme.name}].`, "J");
+            }
+
+            if (!STATE.spawnedThisLap && !STATE.activeDilemma && shouldSpawnNow()) {
+                STATE.spawnedThisLap = true;
+                spawnDilemma();
+                UI.paradox.style.opacity = "0.12";
+            }
+
+            const secsJ = secondsToJunction();
+            UI.meterFill.style.width = (clamp01(1 - (secsJ / 7.0)) * 100).toFixed(1) + "%";
+            UI.timeWarp.textContent = warpedClockString(now);
+
+            const near = clamp01(1 - Math.min(1, secsJ / 4.5));
+            if (headlight) headlight.intensity = 2.0 + 2.6 * near;
+            UI.paradox.style.opacity = STATE.activeDilemma ? String(0.08 + 0.22 * near) : "0.0";
+
+            if (STATE.activeDilemma && isInDecisionWindow() && !STATE.committed) {
+                if (STATE.phase !== "DECISION") setPhase("DECISION");
+            } else if (STATE.phase === "DECISION" && (!STATE.activeDilemma || !isInDecisionWindow())) {
+                setPhase("APPROACH");
+            }
+
+            if (STATE.activeDilemma && !STATE.committed) {
+                const d = smallestAngleDiff(STATE.theta, CONFIG.junctionAngle);
+                if (d < 0.06) {
+                    const ch = STATE.choice || "A";
+                    STATE.committed = ch;
+                    UI.choice.textContent = ch;
+                    logRadio("SYSTEM", `COMMIT LOCKED: ${ch}`, "J");
+                    haptics(15); sfx("click");
+                    if (ch === "B") STATE.targetLane = "B";
+                    else if (ch === "A") STATE.targetLane = "A";
+                    else if (ch === "H") STATE.targetLane = STATE.lane;
+                    setPhase("POSTFORK");
+                }
+            }
+
+            const dToJ = smallestAngleDiff(STATE.theta, CONFIG.junctionAngle);
+            const inSwitchZone = dToJ < CONFIG.switchBlendWidth;
+
+            if (inSwitchZone && STATE.activeDilemma && !STATE.committed) {
+                STATE.lane = STATE.targetLane;
+            } else if (STATE.committed) {
+                if (STATE.committed === "B") STATE.lane = "B";
+                if (STATE.committed === "A") STATE.lane = "A";
+            }
+
+            const targetR = (STATE.lane === "B") ? CONFIG.rB : CONFIG.rA;
+            const blend = inSwitchZone ? 0.10 : 0.02;
+            STATE.radius = lerp(STATE.radius, targetR, blend);
+
+            const x = Math.cos(STATE.theta) * STATE.radius;
+            const z = Math.sin(STATE.theta) * STATE.radius;
+            train.position.set(x, 0, z);
+
+            const lookTheta = wrapAngle(STATE.theta + 0.04);
+            const lx = Math.cos(lookTheta) * STATE.radius;
+            const lz = Math.sin(lookTheta) * STATE.radius;
+            train.lookAt(lx, 0, lz);
+
+            const pos = new THREE.Vector3(x, 0, z);
+            const forward = new THREE.Vector3(lx - x, 0, lz - z).normalize();
+            const right = new THREE.Vector3(forward.z, 0, -forward.x);
+
+            const camBase = pos.clone().addScaledVector(forward, -18).addScaledVector(right, 6);
+            const shakeAmt = 0.8 * near;
+            const jitter = new THREE.Vector3((Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt * 0.5, (Math.random() - 0.5) * shakeAmt);
+            const targetCam = new THREE.Vector3(camBase.x, 15.5, camBase.z).add(jitter);
+
+            camera.position.lerp(targetCam, 0.08);
+            camera.lookAt(pos.x, 2.0, pos.z);
+
+            if (STATE.activeDilemma) checkImpact();
+            audioUpdate(dt, secsJ);
+            updateBubbles(now);
+
+            renderer.render(scene, camera);
+        }
+
+        function wireControls() {
+            UI.btnAudio.addEventListener("click", () => {
+                if (!audio) initAudio();
+                setAudioEnabled(!GAME.audioOn);
+            });
+            UI.btnClear.addEventListener("click", () => {
+                UI.radio.innerHTML = "";
+                UI.tape.innerHTML = "";
+                GAME.tape = [];
+                logRadio("SYSTEM", "Cleared UI history (loop continues).", "J");
+                haptics(10); sfx("tick");
+            });
+            UI.btnContinue.addEventListener("click", () => { setChoice("A"); });
+            UI.btnSwitch.addEventListener("click", () => { setChoice("B"); });
+
+            const endHold = () => { STATE.holdStart = null; STATE.holdProgress = 0; UI.holdFill.style.width = "0%"; };
+
+            UI.btnHalt.addEventListener("pointerdown", (e) => { e.preventDefault(); STATE.holdStart = performance.now(); }, { passive: false });
+            UI.btnHalt.addEventListener("pointerup", (e) => { e.preventDefault(); endHold(); }, { passive: false });
+            UI.btnHalt.addEventListener("pointercancel", endHold);
+
+            UI.touchZone.addEventListener("pointerdown", (e) => { STATE.touch = { active: true, x0: e.clientX, y0: e.clientY, t0: performance.now() }; }, { passive: true });
+
+            UI.touchZone.addEventListener("pointerup", (e) => {
+                if (!STATE.touch || !STATE.touch.active) return;
+                STATE.touch.active = false;
+                const dx = e.clientX - STATE.touch.x0;
+                const dy = e.clientY - STATE.touch.y0;
+                const dt = performance.now() - STATE.touch.t0;
+                if (dt > 650 && Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+                if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) {
+                    setChoice(dx > 0 ? "B" : "A");
+                    UI.hint.textContent = dx > 0 ? "SWITCH selected" : "CONTINUE selected";
+                    setTimeout(() => UI.hint.textContent = "swipe ←/→ to choose · hold to halt", 1200);
+                } else if (dy < -70) {
+                    setChoice("H");
+                    UI.hint.textContent = "HALT selected";
+                    setTimeout(() => UI.hint.textContent = "swipe ←/→ to choose · hold to halt", 1200);
+                }
+            }, { passive: true });
+
+            window.addEventListener("keydown", (e) => {
+                const k = e.key.toLowerCase();
+                if (k === "a") setChoice("A");
+                if (k === "b") setChoice("B");
+                if (k === "h") setChoice("H");
+                if (k === "m") { if (!audio) initAudio(); setAudioEnabled(!GAME.audioOn); }
+            });
+
+            setInterval(updateHoldProgress, 30);
+            window.addEventListener("resize", onResize, { passive: true });
+
+            UI.tape.addEventListener("click", () => {
+                logRadio("TAPE", `Memory length: ${GAME.tape.length}. (It does not end.)`, "J");
+                haptics(10); sfx("tick");
+            });
+        }
+
+        function updateHoldProgress() {
+            if (!STATE.holdStart) return;
+            const elapsed = performance.now() - STATE.holdStart;
+            const p = clamp01(elapsed / 650);
+            STATE.holdProgress = p;
+            UI.holdFill.style.width = (p * 100).toFixed(0) + "%";
+            if (p >= 1) {
+                setChoice("H");
+                STATE.holdStart = null;
+                UI.holdFill.style.width = "0%";
+            }
+        }
+
+        function seedUI() {
+            UI.lap.textContent = GAME.lap;
+            UI.did.textContent = "—";
+            UI.choice.textContent = "—";
+            UI.tagA.textContent = "A · —";
+            UI.tagB.textContent = "B · —";
+            UI.btnAudio.textContent = GAME.audioOn ? "AUDIO:ON" : "AUDIO";
+            logRadio("SYSTEM", "Train is already looping.", "J");
+            logRadio("SYSTEM", "Only people stand on the rails.", "J");
+            logRadio("SYSTEM", "New dilemmas spawn forever.", "J");
+        }
+        function onResize() {
+            camera.aspect = innerWidth / innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth, innerHeight);
+        }
+        function clamp(a, b, x) { return Math.max(a, Math.min(b, x)); }
+        function clamp01(x) { return clamp(0, 1, x); }
+        function lerp(a, b, t) { return a + (b - a) * t; }
+        function easeInOut(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+        function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function pickR(arr, rng) { return arr[Math.floor(rng() * arr.length)]; }
+        function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+        function mulberry32(a) {
+            return function () {
+                let t = a += 0x6D2B79F5;
+                t = Math.imul(t ^ (t >>> 15), t | 1);
+                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+
+        window.addEventListener("load", init, { once: true });
+    </script>
+</body>
+
+</html>
